@@ -62,10 +62,10 @@ using std::map;
 #include <SDL/SDL.h>
 
 #ifdef _WINDOWS
-#include <SDL_ttf.h>
+//#include <SDL_ttf.h>
 #include <SDL_net.h>
 #else
-#include <SDL/SDL_ttf.h>
+//#include <SDL/SDL_ttf.h>
 #include <SDL/SDL_net.h>
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
