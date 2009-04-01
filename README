@@ -1,0 +1,119 @@
+********************************************************************************
+						TODO
+********************************************************************************
+
+- Instruction size
+	- Simplest: size byte in packet header
+	- Better: Lookup table of sizes
+- Variable number of buffers per instruction
+- Check malloc/free of buffers
+- libjpeg of images
+- Make the gigapixel image viewer work properly
+- Multiple renderer windows with offsets as necessary
+
+
+********************************************************************************
+			Modules and pipelines and such
+********************************************************************************
+
+
+- Modules
+- Pipeline of modules
+
+Possible Modules:
+- Insert commands from network
+- Insert commands from intercepted GL API
+- Insert commands read from file
+- Insert commands programatically (add a FPS meter, perhaps)
+- Modify commands (invert colours etc)
+- Optimize module to replace commands
+- Stats (count instruction types, % of instruction types)
+- Output to actual GL api
+- Output to stdout in human readable
+- Output to file in computer readable
+- Output to network
+
+So the pipeline could look like this for the display wall:
+
+[ application ] 	> 	[ intercept from GL API ]
+						[ stats ]
+	client				[ optimize module ]
+						[ output to broadcast ]
+						
+							  (network)
+								
+						[ input from network ]
+	server				[ insert fps, network stats to 2D ]
+						[ output to GL window ]
+						
+Or, on a local machine for debugging why your GL app isn't working:
+
+	[ intercept ]
+	[ stats ]
+	[ output to stdout ]
+	[ output to GL ]
+	
+Or, to play back stuff on the display wall
+
+	[ intercept ]
+	[ optimize ]
+	[ output to file ]
+	
+		then
+	
+	[ input from file ]
+	[ output to GL ]
+	
+		or
+		
+	[ input from file ]
+	[ output to broadcast ]
+		(network)
+	[ input from network ]
+	[ output to GL window ]
+	
+And so on.
+
+********************************************************************************
+			More thoughts on modules and problems
+********************************************************************************
+				
+Modules take as input a list of commands for the current frame and can modify
+this list as they see fit. Probably want it as a linked list of commands as
+we'll be inserting in the middle quite a lot. 
+
+How do we solve the problem of requiring GL to return stuff? we either need
+to block the client app until we get a reply, or we give it a fake value and
+translate it on the fly. How does this fit into the pipeline model?
+
+OK. so:
+- Client app calls glGenTexture, which returns a uint32_t.
+- We push this command on to the command list as normal to be sent off
+- return getNextHandle(glGenTexture)
+- this returns the next free handle for this instruction type
+- Later on we use this lookup to do translation between the client and server 
+handles. 
+
+That works for simple glGen things. But it won't work for complicated things. 
+We probably need a real way of returning stuff from the server...
+
+How about:
+- Client app calls glGenTex
+- Push it on the instruction list. It's marked as needing a reply
+- Force a frame end and block the thread. 
+- It goes through the pipeline until it gets to the actual GL stage
+- glGenTexture is executed and the return value is saved in the instruction obj
+- At the end of the pipeline, the instructions that were marked as needing
+replies are sent back. How does it know how to send it back?
+- returnToSender(instruction.creationmoduleid, instruction.replyval)
+- So, each instruction has a link to the module that created it. Hey, RAM is
+cheap :)
+- So when the input from network module gets the reply, it sends it back over 
+the network to the client app. Client app reads the replies, copies the reply
+data into the appropriate buffer, and unblocks the application thread. yay. 
+
+
+Client as a seperate program
+- Loads the modules
+- 
+
