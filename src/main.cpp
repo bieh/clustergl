@@ -26,6 +26,8 @@ int App::run(int argc, char **argv){
 
 int App::run_shared(){
 	
+	//This is needed to ensure that multiple calls to SDL_Init() don't cause
+	//us to do the wrong thing.
 	if(bHasInit){
 		return 1;
 	}
