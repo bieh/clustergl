@@ -81,7 +81,7 @@ bool ExecModule::process(list<Instruction> &list){
 	    	}
 	    	
 	    	mCurrentInstruction = &(*iter);
-	    	
+	    	//LOG("curIn%d\n",mCurrentInstruction->id);
 	    	mFunctions[iter->id](iter->args);
 	}
 	

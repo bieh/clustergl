@@ -6,10 +6,9 @@ clean:
 	
 		
 run-app:
-	#./runtime/cgl &
+	#./runtime/cgl 640 480 0 0 &
 	cd runtime && LD_PRELOAD=./libcgl.so ./lesson05/lesson05
 
 
-run-q3:
-	cd runtime && LD_PRELOAD=./libcgl.so openarena
-	#./runtime/cgl &
+run-svr:
+	./runtime/cgl 640 480 0 0 
