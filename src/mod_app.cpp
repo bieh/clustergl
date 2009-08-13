@@ -42,7 +42,9 @@ bool AppModule::process(list<Instruction> &list){
 	return true;
 }
 
-
+bool AppModule::sync(){
+	return true;
+}
 
 /**************************************
 	Interception global funcs

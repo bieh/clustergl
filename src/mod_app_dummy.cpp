@@ -20,3 +20,9 @@ bool AppModule::process(list<Instruction> &list){
 	return false;
 }
 
+bool AppModule::sync(){
+
+	LOG("Dummy AppModule can't do stuff\n");
+	return true;
+}
+

@@ -14,6 +14,7 @@ public:
 
 	virtual bool process(list<Instruction> &i)=0;
 	virtual void reply(Instruction *instr, int i){}
+	virtual bool sync()=0;
 };
 
 
@@ -27,6 +28,7 @@ public:
 
 	bool init(string command);	
 	bool process(list<Instruction> &i);
+	bool sync();
 };
 
 
@@ -39,6 +41,7 @@ public:
 
 	bool init();	
 	bool process(list<Instruction> &i);
+	bool sync();
 };
 
 
@@ -50,11 +53,14 @@ class ExecModule : public Module{
 	
 	int iScreenX;
 	int iScreenY;
+	int iOffsetX;
+	int iOffsetY;
 public:
 	ExecModule(int sizeX, int sizeY, int offsetX, int offsetY);
 
 	bool init();	
 	bool process(list<Instruction> &i);
+	bool sync();
 };
 
 
@@ -75,6 +81,7 @@ public:
 	
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);
+	bool sync();
 };
 
 /*********************************************
@@ -95,4 +102,5 @@ public:
 	NetClientModule(string address, int port);
 	
 	bool process(list<Instruction> &i);
+	bool sync();
 };

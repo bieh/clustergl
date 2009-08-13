@@ -15,6 +15,9 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){
 	
 	iScreenX = sizeX;
 	iScreenY = sizeY;
+
+	iOffsetX = offsetX;
+	iOffsetY = offsetY;
 	
 	if(!makeWindow()){
 		exit(1);
@@ -61,7 +64,7 @@ bool ExecModule::makeWindow(){
 	
 	//get a SDL surface
 	SDL_Surface *surface = SDL_SetVideoMode( iScreenX, iScreenY, 32, videoFlags );
-
+ 
 	if ( !surface ){
 		LOG( "Video mode set failed: %s\n", SDL_GetError());
 		return false;
@@ -69,7 +72,6 @@ bool ExecModule::makeWindow(){
 	
 	return true;
 }
-
 
 bool ExecModule::process(list<Instruction> &list){
 
@@ -82,10 +84,17 @@ bool ExecModule::process(list<Instruction> &list){
 	    	
 	    	mCurrentInstruction = &(*iter);
 	    	//LOG("curIn%d\n",mCurrentInstruction->id);
-	    	mFunctions[iter->id](iter->args);
+		if (iter->id== 305) // hack to make the correct view port instead of following the orignal program
+		   	glViewport(iOffsetX,  iOffsetY, iScreenX, iScreenY);  
+		else
+		    	mFunctions[iter->id](iter->args);
 	}
 	
 	   
+	return true;
+}
+
+bool ExecModule::sync(){
 	return true;
 }
 
@@ -2522,7 +2531,7 @@ void EXEC_glViewport(byte *commandbuf){
 	GLsizei *width = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLsizei *height = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 
-	glViewport(*x, *y, *width, *height);
+	glViewport(*x, *y, *width, *height);	
 }
 
 //306

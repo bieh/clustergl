@@ -25,6 +25,10 @@ bool TextModule::process(list<Instruction> &list){
 	return false;
 }
 
+bool TextModule::sync(){
+	return true;
+}
+
 //0
 static void EXEC_glNewList(byte *commandbuf){
 	GLuint *list = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);

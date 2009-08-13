@@ -125,7 +125,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
 		if (skip == 0){
 			LOG("ERROR: Out of memory\n");
-			exit;	
+			exit(-1);	
 		}
 		skip->id = CGL_REPEAT_INSTRUCTION;
 		skip->args[0] = (uint32_t) sameCount;
@@ -168,5 +168,22 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 		if (pIter != (*prevFrame).end()) pIter++;
 	}
+	return true;
+}
+
+bool NetClientModule::sync(){
+	int * a = (int *)malloc(sizeof(int));
+	*a = 987654;
+	if(write(mSocket, a, sizeof(int)) != sizeof(int)){
+		LOG("Connection problem (didn't send sync)!\n");
+		return false;
+	}
+	if(read(mSocket, a, sizeof(int)) != sizeof(int)){
+		LOG("Connection problem (didn't recv sync)!\n");
+		return false;
+	}	
+	if (*a!=987654)
+		return false;
+	free(a);
 	return true;
 }

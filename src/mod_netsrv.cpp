@@ -155,4 +155,17 @@ void NetSrvModule::reply(Instruction *instr, int i){
 	mClientSocket->write(instr->buffers[i].buffer, instr->buffers[i].len);
 }
 
+bool NetSrvModule::sync(){
+	int a;
+	if(mClientSocket->read((byte *)&a, sizeof(int)) != sizeof(int)){
+		LOG("Connection problem (didn't recv sync)!\n");
+		return false;
+	}
+	if(mClientSocket->write((byte *)&a, sizeof(int)) != sizeof(int)){
+		LOG("Connection problem (didn't send sync)!\n");
+		return false;
+	}	
+	return true;
+}
+
 

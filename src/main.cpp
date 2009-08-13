@@ -43,7 +43,13 @@ int App::run_shared(){
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
 	mModules.push_back(new NetClientModule("127.0.0.1", 12345));
-	//mModules.push_back(new NetClientModule("130.217.244.59", 12345));
+	//mModules.push_back(new NetClientModule("10.10.3.138", 12345));
+	// Syphony ip addys (if this is run from dn1 then we use local host)
+	//mModules.push_back(new NetClientModule("192.168.22.101", 12345));//dn1
+	//mModules.push_back(new NetClientModule("192.168.22.102", 12345));//dn2
+	//mModules.push_back(new NetClientModule("192.168.22.103", 12345));//dn3
+	//mModules.push_back(new NetClientModule("192.168.22.104", 12345));//dn4
+	//mModules.push_back(new NetClientModule("192.168.22.105", 12345));//dn5
 	
 	//Return control to the parent process.
 	
@@ -65,7 +71,7 @@ void App::debug(){
 } 
 
 list<Instruction> *thisFrame = NULL;
-	int frames = 0, totFrames = 0;
+	int frames = 0, totFrames = 0, fps = 100;
 	time_t totalTime = 0, prevTime = 0;
 
 bool App::tick(){
@@ -79,11 +85,23 @@ bool App::tick(){
 	time(&curTime);
 	if (curTime - prevTime>= 5){ //maybe ned more precision
 		// send it to stderr so we can redirect away from app output 
-		fprintf(stderr,"CGL2 AVG FPS so far:%ld AVG FPS last 5secs:%ld\n", 
+		fprintf(stderr,"CGL2 AVG FPS so far:%ld AVG FPS last %ld secs:%ld\n", 
 			totFrames/(curTime - totalTime),
+			curTime - prevTime,
 			frames/(curTime - prevTime));
 		frames = 0;
 	        time(&prevTime);		
+	}
+
+	//Sync every 100 frames
+	if (totFrames%100 == 0){
+		for(int i=0;i<(int)mModules.size();i++){
+			Module *m = mModules[i];		
+			if( !m->sync() ){
+				LOG("Failed to sync frame (in %d), bailing out%d\n", i,totFrames);
+				return false;
+			}
+		}
 	}
 
 	if (thisFrame ==NULL){
