@@ -5237,7 +5237,11 @@ extern "C" void glBindBufferARB(GLenum target, GLuint buffer){
 extern "C" void glBufferDataARB(GLenum target, GLsizeiptrARB size, const GLvoid * data, GLenum usage){
 	pushOp(725);
 	pushParam(target);
+#ifdef SYMPHONY
+	pushParam((GLuint)size);
+#else
 	pushParam(size);
+#endif
 	pushBuf(data, size);
 	pushParam(usage);
 }
@@ -5246,8 +5250,13 @@ extern "C" void glBufferDataARB(GLenum target, GLsizeiptrARB size, const GLvoid 
 extern "C" void glBufferSubDataARB(GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid * data){
 	pushOp(726);
 	pushParam(target);
+#ifdef SYMPHONY
+	pushParam((GLuint)offset);
+	pushParam((GLuint)size);
+#else
 	pushParam(offset);
 	pushParam(size);
+#endif
 	pushBuf(data, size);
 }
 
@@ -5279,8 +5288,13 @@ extern "C" void glGetBufferPointervARB(GLenum target, GLenum pname, GLvoid ** pa
 extern "C" void glGetBufferSubDataARB(GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid * data){
 	pushOp(731);
 	pushParam(target);
+#ifdef SYMPHONY
+	pushParam((GLuint)offset);
+	pushParam((GLuint)size);
+#else
 	pushParam(offset);
 	pushParam(size);
+#endif
 	pushBuf(data, size);
 }
 

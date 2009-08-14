@@ -44,12 +44,14 @@ int App::run_shared(){
 	//mModules.push_back(new TextModule());
 	mModules.push_back(new NetClientModule("127.0.0.1", 12345));
 	//mModules.push_back(new NetClientModule("10.10.3.138", 12345));
-	// Syphony ip addys (if this is run from dn1 then we use local host)
+#ifdef SYMPHONY
+	// Symphony ip addys (if this is run from dn1 then we use local host above)
 	//mModules.push_back(new NetClientModule("192.168.22.101", 12345));//dn1
-	//mModules.push_back(new NetClientModule("192.168.22.102", 12345));//dn2
-	//mModules.push_back(new NetClientModule("192.168.22.103", 12345));//dn3
-	//mModules.push_back(new NetClientModule("192.168.22.104", 12345));//dn4
-	//mModules.push_back(new NetClientModule("192.168.22.105", 12345));//dn5
+	mModules.push_back(new NetClientModule("192.168.22.102", 12345));//dn2
+	mModules.push_back(new NetClientModule("192.168.22.103", 12345));//dn3
+	mModules.push_back(new NetClientModule("192.168.22.104", 12345));//dn4
+	mModules.push_back(new NetClientModule("192.168.22.105", 12345));//dn5
+#endif
 	
 	//Return control to the parent process.
 	

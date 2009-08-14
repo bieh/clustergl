@@ -72,35 +72,33 @@ bool NetClientModule::process(list<Instruction> &list){
 		return false;
 	}
 
-	//Variables for use in calclating deltas
-	uint32_t count = -1, sameCount = 0;
+	//Count of duplicate instructions
+	uint32_t sameCount = 0;
 
 	//Now send the instructions
 	for(std::list<Instruction>::iterator iter = list.begin(), pIter = (*prevFrame).begin(); 
 	    iter != list.end(); iter++){
 	    
-	    count++; //keep track of which Instruction we are on
 	    Instruction *i = &(*iter); //yuck 
-	    Instruction *p = NULL;
-	    bool look4deltas = true, mustSend = false;
+	    bool mustSend = false;
 
 	    for(int n=0;n<3;n++){		
 		if(i->buffers[n].len > 0){
-			LOG("MustSend:%d\n",i->id);
+		  	//LOG("MustSend:%d\n",i->id);
 			//If we expect a buffer back then we must send Instruction
 			if(i->buffers[n].needReply) mustSend = true;
 		}
 	    }
 
-	    if (pIter != (*prevFrame).end() && i->id == pIter->id && !mustSend
-		&& i->id != 1499
+	    if (i->id == pIter->id 
+		&& pIter != (*prevFrame).end()		
+		&& !mustSend
+		&& i->id != 1499 // must send swap buffer command
 		) {
 			bool same = true;
 			for (int a=0;a<MAX_ARG_LEN;a++){
 				if (i->args[a]!=pIter->args[a])
 					same = false;	
-				//if(i->args[a]!=NULL)
-				//	LOG("    a:%di>%d<p>%d<\n",a,i->args[a],pIter->args[a]);
 			}
 			if (same){
 				for (int a=0;a<3;a++)

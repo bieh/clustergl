@@ -60,10 +60,22 @@ bool ExecModule::makeWindow(){
 	//Autodetect res?	
 	//if(iScreenX == -1 && iScreenY == -1)
 	//	getScreenRes(iScreenX, iScreenY);
+	int width = 1, height = 1;
+	const SDL_VideoInfo *dpy = SDL_GetVideoInfo();
 	
+	if (!dpy){
+		LOG("Could not detect resolution!\n");
+		exit(-9);
+	}
+	//LOG("x:%d y:%d\n",dpy->current_w, dpy->current_h);
+	width = dpy->current_w;
+	height = dpy->current_h;
+	// if the app res is less than the current screen
+	if (iScreenX < width && iScreenY<height)
+		width = iScreenX, height = iScreenY;	
 	
 	//get a SDL surface
-	SDL_Surface *surface = SDL_SetVideoMode( iScreenX, iScreenY, 32, videoFlags );
+	SDL_Surface *surface = SDL_SetVideoMode(width, height/* iScreenX, iScreenY*/, 32, videoFlags );
  
 	if ( !surface ){
 		LOG( "Video mode set failed: %s\n", SDL_GetError());
@@ -85,7 +97,7 @@ bool ExecModule::process(list<Instruction> &list){
 	    	mCurrentInstruction = &(*iter);
 	    	//LOG("curIn%d\n",mCurrentInstruction->id);
 		if (iter->id== 305) // hack to make the correct view port instead of following the orignal program
-		   	glViewport(iOffsetX,  iOffsetY, iScreenX, iScreenY);  
+		   	glViewport(iOffsetX,  iOffsetY, iScreenX-iOffsetX, iScreenY-iOffsetY);  
 		else
 		    	mFunctions[iter->id](iter->args);
 	}
@@ -3647,14 +3659,18 @@ void EXEC_glPointParameteri(byte *commandbuf){
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 
+#ifndef SYMPHONY
 	glPointParameteri(*pname, *param);
+#endif
 }
 
 //431
 void EXEC_glPointParameteriv(byte *commandbuf){
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
+#ifndef SYMPHONY
 	glPointParameteriv(*pname, (GLint *)popBuf());
+#endif
 }
 
 //432
@@ -3979,7 +3995,11 @@ void EXEC_glMapBuffer(byte *commandbuf){
 	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLenum *access = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
+#ifdef SYMPHONY
+	pushRet((const GLubyte*)glMapBuffer(*target, *access));
+#else
 	pushRet((GLuint)glMapBuffer(*target, *access));
+#endif
 }
 
 //475
@@ -4805,7 +4825,9 @@ void EXEC_glUniformMatrix2x3fv(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *transpose = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLboolean);
 
+#ifndef SYMPHONY
 	glUniformMatrix2x3fv(*location, *count, *transpose, (const GLfloat *)popBuf());
+#endif
 }
 
 //578
@@ -4814,7 +4836,9 @@ void EXEC_glUniformMatrix3x2fv(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *transpose = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLboolean);
 
+#ifndef SYMPHONY
 	glUniformMatrix3x2fv(*location, *count, *transpose, (const GLfloat *)popBuf());
+#endif
 }
 
 //579
@@ -4823,7 +4847,9 @@ void EXEC_glUniformMatrix2x4fv(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *transpose = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLboolean);
 
+#ifndef SYMPHONY
 	glUniformMatrix2x4fv(*location, *count, *transpose, (const GLfloat *)popBuf());
+#endif
 }
 
 //580
@@ -4832,7 +4858,9 @@ void EXEC_glUniformMatrix4x2fv(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *transpose = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLboolean);
 
+#ifndef SYMPHONY
 	glUniformMatrix4x2fv(*location, *count, *transpose, (const GLfloat *)popBuf());
+#endif
 }
 
 //581
@@ -4841,7 +4869,9 @@ void EXEC_glUniformMatrix3x4fv(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *transpose = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLboolean);
 
+#ifndef SYMPHONY
 	glUniformMatrix3x4fv(*location, *count, *transpose, (const GLfloat *)popBuf());
+#endif
 }
 
 //582
@@ -4850,7 +4880,9 @@ void EXEC_glUniformMatrix4x3fv(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *transpose = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLboolean);
 
+#ifndef SYMPHONY
 	glUniformMatrix4x3fv(*location, *count, *transpose, (const GLfloat *)popBuf());
+#endif
 }
 
 //374
@@ -6078,7 +6110,11 @@ void EXEC_glMapBufferARB(byte *commandbuf){
 	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLenum *access = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
+#ifdef SYMPHONY
+	pushRet((const GLubyte*) glMapBufferARB(*target, *access));
+#else
 	pushRet((GLuint)glMapBufferARB(*target, *access));
+#endif
 }
 
 //734
@@ -10151,7 +10187,9 @@ void EXEC_glProgramEnvParameters4fvEXT(byte *commandbuf){
 	GLuint *index = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 
+#ifndef SYMPHONY
 	glProgramEnvParameters4fvEXT(*target, *index, *count, (const GLfloat *)popBuf());
+#endif
 }
 
 //1214
@@ -10160,7 +10198,9 @@ void EXEC_glProgramLocalParameters4fvEXT(byte *commandbuf){
 	GLuint *index = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 
+#ifndef SYMPHONY
 	glProgramLocalParameters4fvEXT(*target, *index, *count, (const GLfloat *)popBuf());
+#endif
 }
 
 //1215
@@ -10168,7 +10208,9 @@ void EXEC_glGetQueryObjecti64vEXT(byte *commandbuf){
 	GLuint *id = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
+#ifndef SYMPHONY
 	glGetQueryObjecti64vEXT(*id, *pname, (GLint64EXT *)popBuf());
+#endif
 }
 
 //1216
@@ -10176,7 +10218,9 @@ void EXEC_glGetQueryObjectui64vEXT(byte *commandbuf){
 	GLuint *id = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
+#ifndef SYMPHONY
 	glGetQueryObjectui64vEXT(*id, *pname, (GLuint64EXT *)popBuf());
+#endif
 }
 
 //1217
