@@ -44,6 +44,7 @@ int App::run_shared(){
 	//mModules.push_back(new TextModule());
 	mModules.push_back(new NetClientModule("127.0.0.1", 12345));
 	//mModules.push_back(new NetClientModule("10.10.3.138", 12345));
+
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
 	//mModules.push_back(new NetClientModule("192.168.22.101", 12345));//dn1
@@ -52,6 +53,7 @@ int App::run_shared(){
 	mModules.push_back(new NetClientModule("192.168.22.104", 12345));//dn4
 	mModules.push_back(new NetClientModule("192.168.22.105", 12345));//dn5
 #endif
+
 	
 	//Return control to the parent process.
 	
@@ -73,25 +75,43 @@ void App::debug(){
 } 
 
 list<Instruction> *thisFrame = NULL;
-	int frames = 0, totFrames = 0, fps = 100;
+	int frames = 0, totFrames = 0, totBytes = 0;
 	time_t totalTime = 0, prevTime = 0;
 
 bool App::tick(){
 	frames++;
-	totFrames++;
-	if (totalTime == 0){		
+	totFrames++; //used to calculate when to SYNC
+
+	if (totalTime == 0){ // initlise time for calculating stuff
 	   time(&totalTime);	
 	   time(&prevTime);
 	}
+
 	time_t curTime;
 	time(&curTime);
-	if (curTime - prevTime>= 5){ //maybe ned more precision
-		// send it to stderr so we can redirect away from app output 
-		fprintf(stderr,"CGL2 AVG FPS so far:%ld AVG FPS last %ld secs:%ld\n", 
+	// Output FPS and BPS to stderr
+	if (curTime - prevTime>= 5){ //maybe need more precision		
+		// First calculat FPS
+		LOG("CGL2 AVG FPS so far:%ld AVG FPS last %ld secs:%ld\n", 
 			totFrames/(curTime - totalTime),
 			curTime - prevTime,
 			frames/(curTime - prevTime));
 		frames = 0;
+
+		// Now Calculate BPS (bytes per second)
+		int bytes = 0;
+		for(int i=0;i<(int)mModules.size();i++){
+			Module *m = mModules[i];	
+			bytes += m->netBytes;
+			totBytes += bytes;	
+			m->netBytes = 0;
+			if(i == (int)mModules.size() - 1){
+				LOG("CGL2 AVG BPS(bytes per second) so far:%ld AVG BPS last %ld secs:%ld\n", 
+					totBytes/(curTime - totalTime),
+					curTime - prevTime,
+					bytes/(curTime - prevTime));
+			}
+		}
 	        time(&prevTime);		
 	}
 
@@ -100,13 +120,13 @@ bool App::tick(){
 		for(int i=0;i<(int)mModules.size();i++){
 			Module *m = mModules[i];		
 			if( !m->sync() ){
-				LOG("Failed to sync frame (in %d), bailing out%d\n", i,totFrames);
+				LOG("Failed to sync frame (in %d), bailing out\n", i);
 				return false;
 			}
 		}
 	}
 
-	if (thisFrame ==NULL){
+	if (thisFrame == NULL){
 		thisFrame = &oneFrame;
 		for(int i=0;i<(int)mModules.size();i++)
 			mModules[i]->prevFrame = &twoFrame;

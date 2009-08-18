@@ -70,17 +70,20 @@ bool ExecModule::makeWindow(){
 	//LOG("x:%d y:%d\n",dpy->current_w, dpy->current_h);
 	width = dpy->current_w;
 	height = dpy->current_h;
-	// if the app res is less than the current screen
+	// if the app res is less than the current screen size
 	if (iScreenX < width && iScreenY<height)
 		width = iScreenX, height = iScreenY;	
 	
 	//get a SDL surface
-	SDL_Surface *surface = SDL_SetVideoMode(width, height/* iScreenX, iScreenY*/, 32, videoFlags );
+	SDL_Surface *surface = SDL_SetVideoMode(width, height, 32, videoFlags );
  
 	if ( !surface ){
 		LOG( "Video mode set failed: %s\n", SDL_GetError());
 		return false;
 	}
+	
+	//Disable mouse pointer
+	SDL_ShowCursor(SDL_DISABLE);
 	
 	return true;
 }

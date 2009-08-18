@@ -1255,7 +1255,10 @@ extern "C" void glFogf(GLenum pname, GLfloat param){
 
 //154
 extern "C" void glFogfv(GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub Fogfv!\n");
+	pushOp(154);
+	pushParam(pname);
+	pushBuf(params, 8); //hack (should calc value)
+	//LOG("Called unimplemted stub Fogfv!\n");
 }
 
 //155
@@ -1507,7 +1510,11 @@ extern "C" void glTexGenf(GLenum coord, GLenum pname, GLfloat param){
 
 //191
 extern "C" void glTexGenfv(GLenum coord, GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub TexGenfv!\n");
+	pushOp(191);
+	pushParam(coord);
+	pushParam(pname);
+	pushBuf(params, 12); //hack (should calc value)
+	//LOG("Called unimplemted stub TexGenfv!\n");
 }
 
 //192
@@ -2360,12 +2367,22 @@ extern "C" void glNormalPointer(GLenum type, GLsizei stride, const GLvoid * poin
 
 //320
 extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub TexCoordPointer!\n");
+	pushOp(320);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushBuf(pointer, 16); //hack  (should calc number)
+	//LOG("Called unimplemted stub TexCoordPointer!\n");
 }
 
 //321
 extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub VertexPointer!\n");
+	pushOp(321);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushBuf(pointer, 16); //hack (should calc number)
+	//LOG("Called unimplemted stub VertexPointer!\n");
 }
 
 //319

@@ -1,35 +1,10 @@
 #include "main.h"
 
 NetClientModule::NetClientModule(string address, int port){
-#ifdef MULTICAST
-	/////////////////////////////////////////////////
-	// SET up multicast
-	//////////////////////////
-   // open a UDP socket
-   sendSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
-   if ( sendSocket < 0 ) {
-	LOG("Error creating Multicast socket");
-	return;
-   }
-   
-   struct in_addr iaddr;
-   iaddr.s_addr = INADDR_ANY; // use DEFAULT interface
-
-   // Set the outgoing interface to DEFAULT
-   setsockopt(sendSocket, IPPROTO_IP, IP_MULTICAST_IF, &iaddr,
-	      sizeof(struct in_addr));
-
-   // set destination multicast address
-   saddr.sin_family = PF_INET;
-   saddr.sin_addr.s_addr = inet_addr("224.0.0.1");
-   saddr.sin_port = htons(4096);
-
-#endif
         //Make the socket and connect
 	mSocket = socket(PF_INET, SOCK_STREAM, 0); 
 	
 	//setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-	
 
 	if(mSocket == 0){
 		LOG("Couldn't make socket!\n");
@@ -51,7 +26,9 @@ NetClientModule::NetClientModule(string address, int port){
 		mSocket = 0;
 		return;
     }
-    
+	
+	netBytes = 0;    
+
     LOG("Connected to remote pipeline on %s:%d\n", address.c_str(), port);
 }
 
@@ -67,6 +44,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	//First send the total number
 	uint32_t num = list.size();
 
+	netBytes += sizeof(uint32_t);
 	if(!write(mSocket, &num, sizeof(uint32_t))){
 		LOG("Connection problem!\n");
 		return false;
@@ -94,6 +72,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		&& pIter != (*prevFrame).end()		
 		&& !mustSend
 		&& i->id != 1499 // must send swap buffer command
+		&& false
 		) {
 			bool same = true;
 			for (int a=0;a<MAX_ARG_LEN;a++){
@@ -132,6 +111,7 @@ bool NetClientModule::process(list<Instruction> &list){
 			skip->buffers[i].len = 0;
 			skip->buffers[i].needClear = false;
 		}
+		netBytes += sizeof(Instruction);
 		if(write(mSocket, skip, sizeof(Instruction))!= sizeof(Instruction)){
 		    	LOG("Connection problem (didn't send instruction)!\n");
 		    	return false;
@@ -141,6 +121,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	    }
 	   
 	    // now send the new instruction
+		netBytes += sizeof(Instruction);
 	    if(write(mSocket, i, sizeof(Instruction)) != sizeof(Instruction)){
 	    	LOG("Connection problem (didn't send instruction)!\n");
 	    	return false;
@@ -151,6 +132,7 @@ bool NetClientModule::process(list<Instruction> &list){
 			int l = i->buffers[n].len;
 						
 			if(l > 0){
+				netBytes += l;
 				if(write(mSocket, i->buffers[n].buffer, l) != l){
 					LOG("Connection problem (didn't write buffer %d)!\n", l);
 					return false;

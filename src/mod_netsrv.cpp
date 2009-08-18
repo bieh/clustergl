@@ -1,32 +1,6 @@
 #include "main.h"
 
 NetSrvModule::NetSrvModule(int port){
-#ifdef MULTICAST
-	/////////////////////////////////////////////////
-	// SET up multicast
-	//////////////////////////
-	
-   // open a UDP socket
-   recvSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
-   if ( recvSocket < 0 ) LOG("Error creating socket"), exit(recvSocket);
-
-   saddr.sin_family = PF_INET;
-   saddr.sin_port = htons(4096); // listen on port 4096
-   saddr.sin_addr.s_addr = htonl(INADDR_ANY); // bind socket to any interface
-
-   if ( bind(recvSocket, (struct sockaddr *)&saddr, sizeof(struct sockaddr_in)) < 0 )
-     LOG("Error binding socket to interface"), exit(-1);
-
-   struct ip_mreq imreq;
-   imreq.imr_multiaddr.s_addr = inet_addr("224.0.0.1");
-   imreq.imr_interface.s_addr = INADDR_ANY; // use DEFAULT interface
-
-   // JOIN multicast group on default interface
-   if ( setsockopt(recvSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, 
-	      (const void *)&imreq, sizeof(struct ip_mreq)) < 0 )
-     LOG("Error joining multicast group"), exit(-1);
-#endif
-
 	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
 		LOG("Failed to create socket\n");
 		exit(1);
@@ -63,14 +37,7 @@ NetSrvModule::NetSrvModule(int port){
 		LOG("Failed to accept client connection\n");
 		exit(1);
 	}
-//LOG("b4, m:%d c:%d",mSocket,client);
-#ifdef MULTICAST	
-	mSocket = client;
-	mClientSocket = new BufferedFd(recvSocket,saddr);
-#else
 	mClientSocket = new BufferedFd(client);
-#endif
-//LOG("b4, m:%d c:%d",mSocket,client);
 		
 	LOG("%s connected\n", string(inet_ntoa(clientaddr.sin_addr)).c_str() );
 }

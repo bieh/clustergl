@@ -11,6 +11,7 @@ public:
 	Module(){}
 
 	list<Instruction> *prevFrame;	//used for comparing deltas (only used in NetClient and NetSrv)
+	int netBytes;			// variable to calculate network usage
 
 	virtual bool process(list<Instruction> &i)=0;
 	virtual void reply(Instruction *instr, int i){}
@@ -70,10 +71,6 @@ public:
  pipe. Blocks till a client connects. 
 **********************************************/
 class NetSrvModule : public Module{
-#ifdef MULTICAST
-int recvSocket; // used for recving multicast packets when enabled
-   struct sockaddr_in saddr;
-#endif
   int mSocket;//used for send/recv using TCP but only sending when using multicast
 BufferedFd *mClientSocket;
 public:
@@ -90,13 +87,6 @@ public:
  pipe (probably on the app side). 
 **********************************************/
 class NetClientModule : public Module{
-#ifdef MULTICAST
-int sendSocket; // used for multicasting when enabled
-   struct sockaddr_in saddr;
-
-  char buffer[1024*1024*8];
-  int bufferLength;
-#endif
   int mSocket; //used for send/recv using TCP but only recieving when using multicast
 public:
 	NetClientModule(string address, int port);
