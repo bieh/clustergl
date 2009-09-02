@@ -165,7 +165,10 @@ extern "C" int SDL_Init(unsigned int flags){
 extern "C" void SDL_GL_SwapBuffers( ){
 
 	if(!bHasMinimized){
-		SDL_WM_IconifyWindow();
+	  if (SDL_WM_IconifyWindow()==0)//if there is no window manager
+	    SDL_SetVideoMode(1,1,32,0);//make window barly visible
+	  //use 1x1 window becasue SDL uses default values if set to 0x0,
+	  // also dont worry bout videoFlags(0) as this surface is not used.
 		bHasMinimized = true;
 	}
 	
@@ -1257,8 +1260,10 @@ extern "C" void glFogf(GLenum pname, GLfloat param){
 extern "C" void glFogfv(GLenum pname, const GLfloat * params){
 	pushOp(154);
 	pushParam(pname);
-	pushBuf(params, 8); //hack (should calc value)
-	//LOG("Called unimplemted stub Fogfv!\n");
+	int size = sizeof(const GLfloat);
+	if (pname == 2918) //if its GL_FOG_COLOR
+		size *= 4; //Colour takes an array of 4 values, the rest are just 1 value
+	pushBuf(params, size); 
 }
 
 //155
@@ -1513,8 +1518,10 @@ extern "C" void glTexGenfv(GLenum coord, GLenum pname, const GLfloat * params){
 	pushOp(191);
 	pushParam(coord);
 	pushParam(pname);
-	pushBuf(params, 12); //hack (should calc value)
-	//LOG("Called unimplemted stub TexGenfv!\n");
+	int size = sizeof(const GLfloat);
+	if (pname == 9473 || pname == 9474) //GL_EYE_PLANE or GL_OBJECT_PLANE
+		size *= 4; 
+	pushBuf(params, size); 
 }
 
 //192
@@ -2221,7 +2228,7 @@ extern "C" void glMultMatrixf(const GLfloat * m){
 //295
 extern "C" void glMultMatrixd(const GLdouble * m){
 	pushOp(295);
-	pushBuf(m, sizeof(const GLdouble) * 16);
+	pushBuf(m, sizeof(const GLdouble) * 16); 
 }
 
 //296
@@ -2371,8 +2378,7 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	pushBuf(pointer, 16); //hack  (should calc number)
-	//LOG("Called unimplemted stub TexCoordPointer!\n");
+	pushBuf(pointer, size * sizeof(type)  + stride * size); 
 }
 
 //321
@@ -2381,8 +2387,7 @@ extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const G
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	pushBuf(pointer, 16); //hack (should calc number)
-	//LOG("Called unimplemted stub VertexPointer!\n");
+	pushBuf(pointer, size * sizeof(type)  + stride * size);
 }
 
 //319

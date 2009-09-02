@@ -58,6 +58,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	    iter != list.end(); iter++){
 	    
 	    Instruction *i = &(*iter); //yuck 
+		//LOG("ID:%d\n",i->id);
 	    bool mustSend = false;
 
 	    for(int n=0;n<3;n++){		
@@ -68,11 +69,9 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 	    }
 
-	    if (i->id == pIter->id 
-		&& pIter != (*prevFrame).end()		
+	    if (i->id == pIter->id 		
 		&& !mustSend
-		&& i->id != 1499 // must send swap buffer command
-		&& false
+		//&& false //uncomment to disable deltas
 		) {
 			bool same = true;
 			for (int a=0;a<MAX_ARG_LEN;a++){
@@ -148,6 +147,28 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 		if (pIter != (*prevFrame).end()) pIter++;
 	}
+
+	    if (sameCount> 0){ // send a count of the duplicates before this instruction
+		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
+		if (skip == 0){
+			LOG("ERROR: Out of memory\n");
+			exit(-1);	
+		}
+		skip->id = CGL_REPEAT_INSTRUCTION;
+		skip->args[0] = (uint32_t) sameCount;
+		for(int i=0;i<3;i++){
+			skip->buffers[i].buffer = NULL;
+			skip->buffers[i].len = 0;
+			skip->buffers[i].needClear = false;
+		}
+		netBytes += sizeof(Instruction);
+		if(write(mSocket, skip, sizeof(Instruction))!= sizeof(Instruction)){
+		    	LOG("Connection problem (didn't send instruction)!\n");
+		    	return false;
+		}
+		sameCount = 0; // reset the count and free the memory
+		free(skip);
+	    }
 	return true;
 }
 
