@@ -27,8 +27,6 @@ NetSrvModule::NetSrvModule(int port){
 		exit(1);
 	}
 		
-	//LOG("Waiting\n");
-
 	unsigned int clientlen = sizeof(clientaddr);
 	int client = 0;
 	
@@ -79,7 +77,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 			if(l > 0){
 				//LOG("Reading buffer of size %d (%d)\n", l, i.id);
 				i.buffers[n].buffer = new byte[l];
-				i.buffers[n].needClear = true;				
+				i.buffers[n].needClear = true;	
 				mClientSocket->read(i.buffers[n].buffer, l);
 			}			
 		}

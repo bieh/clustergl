@@ -136,6 +136,8 @@ PUSHPARAM(GLdouble);
 **************************************/
 //Pointer to SDL_INIT
 static int (*_SDL_Init)(unsigned int flags) = NULL;
+//Pointer to SDL_SetVideoMode
+static SDL_Surface* (*_SDL_SetVideoMode)(int ,int ,int ,unsigned int) = NULL;
 
 bool bHasMinimized = false;
 
@@ -161,15 +163,24 @@ extern "C" int SDL_Init(unsigned int flags){
 	return r;
 }
 
+extern "C" SDL_Surface* SDL_SetVideoMode(int width,int height,int bpp,unsigned int  videoFlags ){
+	
+	if (_SDL_SetVideoMode == NULL) {
+		_SDL_SetVideoMode = (SDL_Surface* (*)(int,int,int,unsigned int)) dlsym(RTLD_NEXT, "SDL_SetVideoMode");
+	}
+	if(!_SDL_SetVideoMode){
+		printf("Couldn't find SDL_SetVideoMode: %s\n", dlerror());
+		exit(0);
+	}
+	return (*_SDL_SetVideoMode)(1,1, bpp, videoFlags );
+}
 
 extern "C" void SDL_GL_SwapBuffers( ){
 
 	if(!bHasMinimized){
-	  if (SDL_WM_IconifyWindow()==0)//if there is no window manager
-	    SDL_SetVideoMode(1,1,32,0);//make window barly visible
-	  //use 1x1 window becasue SDL uses default values if set to 0x0,
-	  // also dont worry bout videoFlags(0) as this surface is not used.
-		bHasMinimized = true;
+	  if (SDL_WM_IconifyWindow()==0)
+		LOG("Could not minimize Window\n");
+	  bHasMinimized = true;
 	}
 	
 	pushOp(1499); //Swap buffers

@@ -56,6 +56,8 @@ class ExecModule : public Module{
 	int iScreenY;
 	int iOffsetX;
 	int iOffsetY;
+	int origWidth;
+	int origHeight;
 public:
 	ExecModule(int sizeX, int sizeY, int offsetX, int offsetY);
 
@@ -71,7 +73,7 @@ public:
  pipe. Blocks till a client connects. 
 **********************************************/
 class NetSrvModule : public Module{
-  int mSocket;//used for send/recv using TCP but only sending when using multicast
+  int mSocket;
 BufferedFd *mClientSocket;
 public:
 	NetSrvModule(int port);
@@ -87,7 +89,7 @@ public:
  pipe (probably on the app side). 
 **********************************************/
 class NetClientModule : public Module{
-  int mSocket; //used for send/recv using TCP but only recieving when using multicast
+  int mSocket;
 public:
 	NetClientModule(string address, int port);
 	

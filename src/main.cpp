@@ -21,7 +21,7 @@ int App::run(int argc, char **argv){
 	
 	mModules.push_back(new NetSrvModule(12345));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new ExecModule(atoi(argv[1]), atoi(argv[2]), atoi(argv[3]), atoi(argv[4])));
+	mModules.push_back(new ExecModule(atoi(argv[1]), atoi(argv[2]), - atoi(argv[3]), - atoi(argv[4])));
 	
 	while( tick() ){ }
 
@@ -73,26 +73,25 @@ void App::debug(){
 	LOG("******************* %d modules ********************\n", mModules.size());
 } 
 
-list<Instruction> *thisFrame = NULL;
-	uint32_t frames = 0, totFrames = 0;
-	time_t totalTime = 0, prevTime = 0;
+list<Instruction> *thisFrame = NULL; // pointer to the current frame
+uint32_t frames = 0, totFrames = 0; //used for Calculations
+time_t totalTime = 0, prevTime = 0;
 
 bool App::tick(){
 	frames++;
 	totFrames++; //used to calculate when to SYNC
 
-	if (totalTime == 0){ // initlise time for calculating stuff
+	if (totalTime == 0){ // initlise time for calculating statistics
 	   time(&totalTime);	
 	   time(&prevTime);
 	}
 
 	time_t curTime;
 	time(&curTime);
-	// Output FPS and BPS to stderr
+	// Output FPS and BPS
 	if (curTime - prevTime>= 5){ //maybe need more precision		
 		// First calculat FPS
-		LOG("CGL2 AVG FPS so far:%ld AVG FPS last %ld secs:%ld\n", 
-			totFrames/(curTime - totalTime),
+		LOG("CGL2 AVG FPS last %ld secs:%ld\n", 
 			curTime - prevTime,
 			frames/(curTime - prevTime));
 		frames = 0;
@@ -103,7 +102,7 @@ bool App::tick(){
 			Module *m = mModules[i];	
 			bytes += m->netBytes;
 			m->netBytes = 0;
-			if(i == (int)mModules.size() - 1){
+			if(i == (int)mModules.size() - 1 && bytes > 0){
 				LOG("CGL2 AVG BPS(bytes per second) last %ld secs:%ld\n", 
 					curTime - prevTime,
 					bytes/(curTime - prevTime));
@@ -112,8 +111,8 @@ bool App::tick(){
 	        time(&prevTime);		
 	}
 
-	//Sync every 100 frames
-	if (totFrames%100 == 0){
+	//Sync every 20 frames
+	if (totFrames%20 == 0){
 		for(int i=0;i<(int)mModules.size();i++){
 			Module *m = mModules[i];		
 			if( !m->sync() ){
@@ -123,7 +122,7 @@ bool App::tick(){
 		}
 	}
 
-	if (thisFrame == NULL){
+	if (thisFrame == NULL){//initlize frames
 		thisFrame = &oneFrame;
 		for(int i=0;i<(int)mModules.size();i++)
 			mModules[i]->prevFrame = &twoFrame;
@@ -154,13 +153,11 @@ bool App::tick(){
 	// swap frames
 	for(int i=0;i<(int)mModules.size();i++)
 		mModules[i]->prevFrame = thisFrame;
-	if (thisFrame == &oneFrame){
+	if (thisFrame == &oneFrame)
 		thisFrame = &twoFrame;
-	}
-	else{
+	else
 		thisFrame = &oneFrame;
-	}
-	thisFrame->clear();
+	thisFrame->clear();// clear previous frame so this frame can be drawn
 	
 	return true;
 }

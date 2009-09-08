@@ -22,8 +22,6 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){
 	if(!makeWindow()){
 		exit(1);
 	}
-	
-	//glewInit();
 }
 
 bool ExecModule::makeWindow(){
@@ -44,22 +42,13 @@ bool ExecModule::makeWindow(){
 	videoFlags |= SDL_GL_DOUBLEBUFFER; 
 	videoFlags |= SDL_HWPALETTE;      
 
-	if ( videoInfo->hw_available )	videoFlags |= SDL_HWSURFACE;
-	else							videoFlags |= SDL_SWSURFACE;
+	if ( videoInfo->hw_available )	videoFlags |= SDL_HWSURFACE; //use hardwareSurface
+	else				videoFlags |= SDL_SWSURFACE; //use softwareSurface
+	if ( videoInfo->blit_hw )	videoFlags |= SDL_HWACCEL;   //use HardwareAcceleration
 
-	if ( videoInfo->blit_hw )		videoFlags |= SDL_HWACCEL;
-
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
-	// videoFlags |= SDL_NOFRAME;
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );               //enable doubleBuffering
 	
-	//if(bFullscreen){
-	//	videoFlags |= SDL_FULLSCREEN;
-	//}
-	
-	//Autodetect res?	
-	//if(iScreenX == -1 && iScreenY == -1)
-	//	getScreenRes(iScreenX, iScreenY);
+	//Autodetect res	
 	int width = 1, height = 1;
 	const SDL_VideoInfo *dpy = SDL_GetVideoInfo();
 	
@@ -67,9 +56,8 @@ bool ExecModule::makeWindow(){
 		LOG("Could not detect resolution!\n");
 		exit(-9);
 	}
-	//LOG("x:%d y:%d\n",dpy->current_w, dpy->current_h);
-	width = dpy->current_w;
-	height = dpy->current_h;
+	width = dpy->current_w;  //get screen width
+	height = dpy->current_h; //get screen height
 	// if the app res is less than the current screen size
 	if (iScreenX < width && iScreenY<height)
 		width = iScreenX, height = iScreenY;	
@@ -99,9 +87,28 @@ bool ExecModule::process(list<Instruction> &list){
 	    	
 	    	mCurrentInstruction = &(*iter);
 	    	//LOG("curIn%d\n",mCurrentInstruction->id);
-		if (iter->id== 305) // hack to make the correct view port instead of following the orignal program
-		   	glViewport(iOffsetX,  iOffsetY, iScreenX-iOffsetX, iScreenY-iOffsetY);  
-		else
+
+		// Set our own glViewPort/glScissor
+		// We scale this to try to keep as much of the orignal settings as possible
+		if (iter->id== 305) {//glViewPort
+			int x = *((GLint*)iter->args);
+			int y = *((GLint*)(iter->args+ sizeof(GLint)));
+			origWidth = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
+			origHeight = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
+		   	glViewport(x*((float)(iScreenX-iOffsetX)/(float)origWidth),  
+				   y*((float)(iScreenY-iOffsetY)/(float)origHeight),
+				   iScreenX-iOffsetX,  
+				   iScreenY-iOffsetY); 
+		} else if (iter->id== 176) { //glScissor
+			int x = *((GLint*)iter->args);
+			int y = *((GLint*)(iter->args+ sizeof(GLint)));
+			int w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
+			int h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
+		   	glScissor(x*((float)(iScreenX-iOffsetX)/(float)origWidth),  
+				  y*((float)(iScreenY-iOffsetY)/(float)origHeight),
+				  w*((float)(iScreenX-iOffsetX)/(float)origWidth),  
+				  h*((float)(iScreenY-iOffsetY)/(float)origHeight));  
+		} else
 		    	mFunctions[iter->id](iter->args);
 	}
 	
@@ -2545,7 +2552,7 @@ void EXEC_glViewport(byte *commandbuf){
 	GLint *y = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLsizei *width = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLsizei *height = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
+	
 	glViewport(*x, *y, *width, *height);	
 }
 
