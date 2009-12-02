@@ -158,36 +158,36 @@ int LoadGLTextures( )
 	/* if successful, put them to use*/
 	if (compiled && compiled2)
 	{
-	printf("compiled\n");
-	GLuint p = glCreateProgram();
-	glAttachShader(p,v);
-	glAttachShader(p,f);
+		printf("compiled\n");
+		GLuint p = glCreateProgram();
+		glAttachShader(p,v);
+		glAttachShader(p,f);
 	
-	glLinkProgram(p);
-	glUseProgram(p);
+		glLinkProgram(p);
+		glUseProgram(p);
 	}
 	else
 	{
-	printf("not compiled\n");
-	GLint infoLen = 1024;
-	glGetShaderiv(f, GL_INFO_LOG_LENGTH, &infoLen);
-	if(infoLen > 1)
-	{
-		printf("FAILED TO COMPILE: FRAGMENT SHADER\n");
-		GLchar* infoLog = (GLchar *) malloc(sizeof(GLchar) * infoLen);
-		glGetShaderInfoLog(f, infoLen, 1024, infoLog);
-		printf("%s\n",infoLog);
-		free(infoLog);
-	}
-	glGetShaderiv(v, GL_INFO_LOG_LENGTH, &infoLen);
-	if(infoLen > 1)
-	{
-		printf("FAILED TO COMPILE: VERTEX SHADER\n");
-		GLchar * infoLog = (GLchar *) malloc(sizeof(GLchar) * infoLen);
-		glGetShaderInfoLog(v, infoLen, NULL, infoLog);
-		printf("%s\n",infoLog);
-		free(infoLog);
-	}
+		printf("not compiled\n");
+		GLint infoLen = 1024;
+		glGetShaderiv(f, GL_INFO_LOG_LENGTH, &infoLen);
+		if(infoLen > 1)
+		{
+			printf("FAILED TO COMPILE: FRAGMENT SHADER (%d)\n", f);
+			GLchar* infoLog = (GLchar *) malloc(sizeof(GLchar) * infoLen);
+			glGetShaderInfoLog(f, 1024, NULL, infoLog);		
+			printf("%s\n",infoLog);
+			free(infoLog);
+		}
+		glGetShaderiv(v, GL_INFO_LOG_LENGTH, &infoLen);
+		if(infoLen > 1)
+		{
+			printf("FAILED TO COMPILE: VERTEX SHADER\n");
+			GLchar * infoLog = (GLchar *) malloc(sizeof(GLchar) * infoLen);
+			glGetShaderInfoLog(v, infoLen, NULL, infoLog);
+			printf("%s\n",infoLog);
+			free(infoLog);
+		}
 	} 
 
     return Status;
