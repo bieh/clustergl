@@ -32,7 +32,6 @@ bool AppModule::init(string command){
 }
 
 bool AppModule::process(list<Instruction> &list){
-		
 	for(int i=0;i<iInstructionCount;i++){
 		list.push_back(mInstructions[i]);
 	}
@@ -76,7 +75,7 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, bool needReply = false){
-
+	int saved = len;
 	if(iCurrentBuffer >= 3){
 		LOG("Out of buffer space!\n");
 		return;
@@ -87,18 +86,23 @@ void pushBuf(const void *buffer, int len, bool needReply = false){
 	//If we don't need a reply, this buffer cannot be relied upon (probably on
 	//the stack), so we need to copy it
 	//If we *do* need a reply, we're going to block, so it's OK not to copy
-	if(!needReply){	
-		copy = new byte[len];	
+	if(!needReply){
+		copy = new byte[len];
+		if(buffer == NULL)
+			len = 0;
 		memcpy(copy, buffer, len);
+		len = saved;
 	}
 
 	//hrm. How many times can we use the word 'buffer' in one line?
 	InstructionBuffer *buf = &mCurrentInstruction->buffers[iCurrentBuffer];
-	buf->buffer = copy;
+	if(buffer == NULL)
+		buf->buffer = NULL;
+	else
+		buf->buffer = copy;
 	buf->len = len;
-	buf->needClear = !needReply; //as we new'd it above
+	buf->needClear = !needReply;
 	buf->needReply = needReply;
-	
 	//LOG("PushBuf %d, size %d (return = %d)\n", mCurrentInstruction->id, len, needReply);
 }
 
@@ -129,6 +133,46 @@ PUSHPARAM(GLbyte);
 //PUSHPARAM(GLboolean);
 PUSHPARAM(GLdouble);
 
+int getTypeSize(GLenum type)
+{
+	switch (type) 
+	{
+	case GL_BYTE: 		return sizeof(GLbyte);
+	case GL_UNSIGNED_BYTE:  return sizeof(GLubyte);
+	case GL_SHORT: 		return sizeof(GLshort);
+	case GL_UNSIGNED_SHORT: return sizeof(GLushort);
+	case GL_INT: 		return sizeof(GLint);
+	case GL_UNSIGNED_INT: 	return sizeof(GLuint);
+	case GL_FLOAT: 		return sizeof(GLfloat);
+	case GL_DOUBLE:		return sizeof(GLdouble);
+	}
+}
+
+size_t getLightParamSize(GLenum type)
+{
+	switch (type) 
+	{
+	case GL_AMBIENT: 			return 4;
+	case GL_DIFFUSE:  			return 4;
+	case GL_SPECULAR: 			return 4;
+	case GL_POSITION: 			return 4;
+	case GL_SPOT_DIRECTION: 		return 3;
+	case GL_SPOT_EXPONENT: 			return 1;
+	case GL_SPOT_CUTOFF: 			return 1;
+	case GL_CONSTANT_ATTENUATION:		return 1;
+	case GL_LINEAR_ATTENUATION:		return 1;
+	case GL_QUADRATIC_ATTENUATION:		return 1;
+
+	case GL_LIGHT_MODEL_AMBIENT:		return 4;
+	case GL_LIGHT_MODEL_COLOR_CONTROL:	return 1;
+	case GL_LIGHT_MODEL_LOCAL_VIEWER:	return 1;
+	case GL_LIGHT_MODEL_TWO_SIDE:		return 1;
+
+	case GL_EMISSION:			return 4;
+	case GL_SHININESS:			return 1;
+	case GL_COLOR_INDEXES:			return 3;
+	}
+}
 
 
 /**************************************
@@ -254,7 +298,15 @@ extern "C" void glBegin(GLenum mode){
 
 //8
 extern "C" void glBitmap(GLsizei width, GLsizei height, GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove, const GLubyte * bitmap){
-	LOG("Called unimplemted stub Bitmap!\n");
+	LOG("Called untested stub Bitmap!\n");
+	pushOp(8);
+	pushParam(width);
+	pushParam(height);
+	pushParam(xorig);
+	pushParam(yorig);
+	pushParam(xmove);
+	pushParam(ymove);
+	pushBuf(bitmap, sizeof(GLubyte) * width * height);
 }
 
 //9
@@ -1272,7 +1324,7 @@ extern "C" void glFogfv(GLenum pname, const GLfloat * params){
 	pushOp(154);
 	pushParam(pname);
 	int size = sizeof(const GLfloat);
-	if (pname == 2918) //if its GL_FOG_COLOR
+	if (pname == GL_FOG_COLOR) //if its GL_FOG_COLOR
 		size *= 4; //Colour takes an array of 4 values, the rest are just 1 value
 	pushBuf(params, size); 
 }
@@ -1286,7 +1338,14 @@ extern "C" void glFogi(GLenum pname, GLint param){
 
 //156
 extern "C" void glFogiv(GLenum pname, const GLint * params){
-	LOG("Called unimplemted stub Fogiv!\n");
+	LOG("Called untested stub Fogiv!\n");
+        pushOp(156);
+	pushParam(pname);
+	int size = sizeof(const GLint);
+	if(pname == GL_FOG_COLOR)
+		size *= 4;  
+		pushBuf(params, size);  
+         
 }
 
 //157
@@ -1312,7 +1371,12 @@ extern "C" void glLightf(GLenum light, GLenum pname, GLfloat param){
 
 //160
 extern "C" void glLightfv(GLenum light, GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub Lightfv!\n");
+	LOG("Called untested stub Lightfv!\n");
+	pushOp(160);
+	pushParam(light);
+	pushParam(pname);
+	pushBuf(params, sizeof(const GLfloat) * getLightParamSize(pname));
+	
 }
 
 //161
@@ -1325,7 +1389,11 @@ extern "C" void glLighti(GLenum light, GLenum pname, GLint param){
 
 //162
 extern "C" void glLightiv(GLenum light, GLenum pname, const GLint * params){
-	LOG("Called unimplemted stub Lightiv!\n");
+	LOG("Called untested stub Lightiv!\n");
+	pushOp(162);
+	pushParam(light);
+	pushParam(pname);
+	pushBuf(params, sizeof(const GLint) * getLightParamSize(pname));
 }
 
 //163
@@ -1337,7 +1405,10 @@ extern "C" void glLightModelf(GLenum pname, GLfloat param){
 
 //164
 extern "C" void glLightModelfv(GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub LightModelfv!\n");
+	LOG("Called untested stub LightModelfv!\n");
+	pushOp(164);
+	pushParam(pname);
+	pushBuf(params, sizeof(const GLfloat) * getLightParamSize(pname));
 }
 
 //165
@@ -1349,7 +1420,10 @@ extern "C" void glLightModeli(GLenum pname, GLint param){
 
 //166
 extern "C" void glLightModeliv(GLenum pname, const GLint * params){
-	LOG("Called unimplemted stub LightModeliv!\n");
+	LOG("Called untested stub LightModeliv!\n");
+	pushOp(166);
+	pushParam(pname);
+	pushBuf(params, sizeof(const GLint) * getLightParamSize(pname));
 }
 
 //167
@@ -1375,7 +1449,12 @@ extern "C" void glMaterialf(GLenum face, GLenum pname, GLfloat param){
 
 //170
 extern "C" void glMaterialfv(GLenum face, GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub Materialfv!\n");
+	LOG("Called untested stub Materialfv!\n");
+	pushOp(170);
+	pushParam(face);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) * getLightParamSize(pname));
+
 }
 
 //171
@@ -1388,7 +1467,11 @@ extern "C" void glMateriali(GLenum face, GLenum pname, GLint param){
 
 //172
 extern "C" void glMaterialiv(GLenum face, GLenum pname, const GLint * params){
-	LOG("Called unimplemted stub Materialiv!\n");
+	LOG("Called untested stub Materialiv!\n");
+	pushOp(172);
+	pushParam(face);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint) * getLightParamSize(pname));
 }
 
 //173
@@ -1406,7 +1489,8 @@ extern "C" void glPolygonMode(GLenum face, GLenum mode){
 
 //175
 extern "C" void glPolygonStipple(const GLubyte * mask){
-	LOG("Called unimplemted stub PolygonStipple!\n");
+	LOG("Called untested stub PolygonStipple!\n");
+	pushBuf(mask, sizeof(GLubyte) * 32 * 32);	//stipple = 32 x 32
 }
 
 //176
@@ -1452,12 +1536,26 @@ extern "C" void glTexParameteriv(GLenum target, GLenum pname, const GLint * para
 
 //182
 extern "C" void glTexImage1D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexImage1D!\n");
+	LOG("Called untested stub TexImage1D!\n");
+	pushOp(182);
+	pushParam(target);
+	pushParam(level);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(border);
+	pushParam(format);
+	pushParam(type);
+    	int bpp = 1;
+    
+    if(format == GL_BGR || format == GL_RGB) bpp = 3;
+    else if(format == GL_RGBA || format == GL_BGRA) bpp = 4;
+
+	pushBuf(pixels, getTypeSize(type) * width * bpp);
+
 }
 
 //183
 extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid * pixels){
-
     pushOp(183);
     pushParam(target);
     pushParam(level);
@@ -1488,6 +1586,7 @@ extern "C" void glTexEnvf(GLenum target, GLenum pname, GLfloat param){
 //185
 extern "C" void glTexEnvfv(GLenum target, GLenum pname, const GLfloat * params){
 	LOG("Called unimplemted stub TexEnvfv!\n");
+	//1 float or 4 floats, huge list
 }
 
 //186
@@ -1550,12 +1649,18 @@ extern "C" void glTexGeniv(GLenum coord, GLenum pname, const GLint * params){
 
 //194
 extern "C" void glFeedbackBuffer(GLsizei size, GLenum type, GLfloat * buffer){
-	LOG("Called unimplemted stub FeedbackBuffer!\n");
+	LOG("Called untested stub FeedbackBuffer!\n");
+	pushOp(194);
+	pushParam(size);
+	pushParam(type);
+	pushBuf(buffer, sizeof(GLfloat) * size);
 }
 
 //195
 extern "C" void glSelectBuffer(GLsizei size, GLuint * buffer){
-	LOG("Called unimplemted stub SelectBuffer!\n");
+	LOG("Called untested stub SelectBuffer!\n");
+	pushParam(size);
+	pushBuf(buffer, sizeof(GLuint) * size);
 }
 
 //196
@@ -1715,22 +1820,58 @@ extern "C" void glPushAttrib(GLbitfield mask){
 
 //220
 extern "C" void glMap1d(GLenum target, GLdouble u1, GLdouble u2, GLint stride, GLint order, const GLdouble * points){
-	LOG("Called unimplemted stub Map1d!\n");
+	LOG("Called untested stub Map1d!\n");
+	pushOp(220);
+	pushParam(target);
+	pushParam(u1);
+	pushParam(u2);
+	pushParam(stride);
+	pushParam(order);
+	pushBuf(points, sizeof(GLdouble) * (order + stride));
 }
 
 //221
 extern "C" void glMap1f(GLenum target, GLfloat u1, GLfloat u2, GLint stride, GLint order, const GLfloat * points){
-	LOG("Called unimplemted stub Map1f!\n");
+	LOG("Called untested stub Map1f!\n");
+	pushOp(221);
+	pushParam(target);
+	pushParam(u1);
+	pushParam(u2);
+	pushParam(stride);
+	pushParam(order);
+	pushBuf(points, sizeof(GLfloat) * (order + stride));
 }
 
 //222
 extern "C" void glMap2d(GLenum target, GLdouble u1, GLdouble u2, GLint ustride, GLint uorder, GLdouble v1, GLdouble v2, GLint vstride, GLint vorder, const GLdouble * points){
-	LOG("Called unimplemted stub Map2d!\n");
+	LOG("Called untested stub Map2d!\n");
+	pushOp(222);
+	pushParam(target);
+	pushParam(u1);
+	pushParam(u2);
+	pushParam(ustride);
+	pushParam(uorder);
+	pushParam(v1);
+	pushParam(v2);
+	pushParam(vstride);
+	pushParam(vorder);
+	pushBuf(points, sizeof(GLdouble) * (uorder + ustride) * (vorder + vstride));
 }
 
 //223
 extern "C" void glMap2f(GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder, GLfloat v1, GLfloat v2, GLint vstride, GLint vorder, const GLfloat * points){
-	LOG("Called unimplemted stub Map2f!\n");
+	LOG("Called untested stub Map2f!\n");
+	pushOp(223);
+	pushParam(target);
+	pushParam(u1);
+	pushParam(u2);
+	pushParam(ustride);
+	pushParam(uorder);
+	pushParam(v1);
+	pushParam(v2);
+	pushParam(vstride);
+	pushParam(vorder);
+	pushBuf(points, sizeof(GLfloat) * (uorder + ustride) * (vorder + vstride));
 }
 
 //224
@@ -1993,12 +2134,20 @@ extern "C" void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GL
 
 //257
 extern "C" void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * pixels){
-	LOG("Called unimplemted stub DrawPixels!\n");
+	LOG("Called untested stub DrawPixels!\n");
+	pushOp(257);
+	pushParam(width);
+	pushParam(height);
+	pushParam(format);
+	//more types need defining in my method above
+	pushParam(type);
+	pushBuf(pixels, getTypeSize(type) * width * height);
 }
 
 //258
 extern "C" void glGetBooleanv(GLenum pname, GLboolean * params){
 	LOG("Called unimplemted stub GetBooleanv!\n");
+	//huge number of constants
 }
 
 //259
@@ -2039,12 +2188,21 @@ extern "C" GLenum glGetError(){
 
 //264
 extern "C" void glGetLightfv(GLenum light, GLenum pname, GLfloat * params){
-	LOG("Called unimplemted stub GetLightfv!\n");
+	LOG("Called untested stub GetLightfv!\n");
+	pushOp(264);
+	pushParam(light);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) * getLightParamSize(pname));
+
 }
 
 //265
 extern "C" void glGetLightiv(GLenum light, GLenum pname, GLint * params){
-	LOG("Called unimplemted stub GetLightiv!\n");
+	LOG("Called untested stub GetLightiv!\n");
+	pushOp(265);
+	pushParam(light);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) * getLightParamSize(pname));
 }
 
 //266
@@ -2084,6 +2242,7 @@ extern "C" void glGetMaterialiv(GLenum face, GLenum pname, GLint * params){
 //271
 extern "C" void glGetPixelMapfv(GLenum map, GLfloat * values){
 	LOG("Called unimplemted stub GetPixelMapfv!\n");
+	//To determine the required size of map,call glGet()
 }
 
 //272
@@ -2098,7 +2257,8 @@ extern "C" void glGetPixelMapusv(GLenum map, GLushort * values){
 
 //274
 extern "C" void glGetPolygonStipple(GLubyte * mask){
-	LOG("Called unimplemted stub GetPolygonStipple!\n");
+	LOG("Called untested stub GetPolygonStipple!\n");
+	pushBuf(mask, sizeof(GLubyte) * 32 * 32, true); //32 x 32 stipple
 }
 
 //275
@@ -2330,7 +2490,12 @@ extern "C" void glArrayElement(GLint i){
 
 //308
 extern "C" void glColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub ColorPointer!\n");
+	LOG("Called untested stub ColorPointer!\n");
+	pushOp(308);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushBuf(pointer, getTypeSize(type) * size);
 }
 
 //309
@@ -2349,7 +2514,13 @@ extern "C" void glDrawArrays(GLenum mode, GLint first, GLsizei count){
 
 //311
 extern "C" void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid * indices){
-	LOG("Called unimplemted stub DrawElements!\n");
+	LOG("Called untested stub DrawElements!\n");
+	pushOp(311);
+	pushParam(mode);
+	pushParam(count);
+	pushParam(type);
+	//most likely null and will crash
+	//pushParam(*indices);	
 }
 
 //312
@@ -2371,6 +2542,10 @@ extern "C" void glGetPointerv(GLenum pname, GLvoid ** params){
 //314
 extern "C" void glIndexPointer(GLenum type, GLsizei stride, const GLvoid * pointer){
 	LOG("Called unimplemted stub IndexPointer!\n");
+	//pushOp(314);
+	//pushParam(type);
+	//pushParam(stride);
+	//pushBuf(pointer, getTypeSize(type) * (/*size of array*/ + stride));
 }
 
 //317
@@ -2389,7 +2564,7 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	pushBuf(pointer, size * sizeof(type)  + stride * size); 
+	pushBuf(pointer, getTypeSize(type)  * (stride + size)); 
 }
 
 //321
@@ -2398,7 +2573,8 @@ extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const G
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	pushBuf(pointer, size * sizeof(type)  + stride * size);
+	int mySize = (getTypeSize(type)  * (stride + size)) * 24;
+	pushBuf(pointer, mySize);
 }
 
 //319
@@ -2459,7 +2635,15 @@ extern "C" void glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, G
 
 //332
 extern "C" void glTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexSubImage1D!\n");
+	LOG("Called untested stub TexSubImage1D!\n");
+	pushOp(332);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(width);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(pixels, (width + xoffset) * getTypeSize(type));
 }
 
 //333
@@ -2473,7 +2657,7 @@ extern "C" void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint
 	pushParam(height);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(pixels, width * height * 4);
+	pushBuf(pixels, width * height * getTypeSize(type));
 }
 
 //322
@@ -2573,22 +2757,44 @@ extern "C" void glBlendEquation(GLenum mode){
 
 //338
 extern "C" void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices){
-	LOG("Called unimplemted stub DrawRangeElements!\n");
+	LOG("Called untested stub DrawRangeElements!\n");
+	pushOp(338);
+	pushParam(mode);
+	pushParam(start);
+	pushParam(end);
+	pushParam(count);
+	pushParam(type);
+	pushBuf(indices, getTypeSize(type) * end);
 }
 
 //339
 extern "C" void glColorTable(GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum type, const GLvoid * table){
-	LOG("Called unimplemted stub ColorTable!\n");
+	LOG("Called untested stub ColorTable!\n");
+	pushOp(339);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(table, getTypeSize(type) * width);
 }
 
 //340
 extern "C" void glColorTableParameterfv(GLenum target, GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub ColorTableParameterfv!\n");
+	LOG("Called untested stub ColorTableParameterfv!\n");
+	pushOp(340);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) * 4);
 }
 
 //341
 extern "C" void glColorTableParameteriv(GLenum target, GLenum pname, const GLint * params){
-	LOG("Called unimplemted stub ColorTableParameteriv!\n");
+	LOG("Called untested stub ColorTableParameteriv!\n");
+	pushOp(341);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint) * 4);
 }
 
 //342
@@ -2618,7 +2824,14 @@ extern "C" void glGetColorTableParameteriv(GLenum target, GLenum pname, GLint * 
 
 //346
 extern "C" void glColorSubTable(GLenum target, GLsizei start, GLsizei count, GLenum format, GLenum type, const GLvoid * data){
-	LOG("Called unimplemted stub ColorSubTable!\n");
+	LOG("Called untested stub ColorSubTable!\n");
+	pushOp(346);
+	pushParam(target);
+	pushParam(start);
+	pushParam(count);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(data, getTypeSize(type) * (start + count));	
 }
 
 //347
@@ -2633,12 +2846,27 @@ extern "C" void glCopyColorSubTable(GLenum target, GLsizei start, GLint x, GLint
 
 //348
 extern "C" void glConvolutionFilter1D(GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum type, const GLvoid * image){
-	LOG("Called unimplemted stub ConvolutionFilter1D!\n");
+	LOG("Called untested stub ConvolutionFilter1D!\n");
+	pushOp(348);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(image, getTypeSize(type) * width);
 }
 
 //349
 extern "C" void glConvolutionFilter2D(GLenum target, GLenum internalformat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * image){
-	LOG("Called unimplemted stub ConvolutionFilter2D!\n");
+	LOG("Called untested stub ConvolutionFilter2D!\n");
+	pushOp(349);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(image, getTypeSize(type) * width * height);
 }
 
 //350
@@ -2651,7 +2879,15 @@ extern "C" void glConvolutionParameterf(GLenum target, GLenum pname, GLfloat par
 
 //351
 extern "C" void glConvolutionParameterfv(GLenum target, GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub ConvolutionParameterfv!\n");
+	LOG("Called untested stub ConvolutionParameterfv!\n");
+	pushOp(351);
+	pushParam(target);
+	pushParam(pname);
+	int size = sizeof(GLfloat);
+	if(pname != GL_CONVOLUTION_BORDER_MODE)
+		size *= 4;
+	pushBuf(params, size);
+
 }
 
 //352
@@ -2664,7 +2900,15 @@ extern "C" void glConvolutionParameteri(GLenum target, GLenum pname, GLint param
 
 //353
 extern "C" void glConvolutionParameteriv(GLenum target, GLenum pname, const GLint * params){
-	LOG("Called unimplemted stub ConvolutionParameteriv!\n");
+	LOG("Called untested stub ConvolutionParameteriv!\n");
+	pushOp(353);
+	pushParam(target);
+	pushParam(pname);
+	int size = sizeof(GLint);
+	if(pname != GL_CONVOLUTION_BORDER_MODE)
+		size *= 4;
+	pushBuf(params, size);
+	
 }
 
 //354
@@ -2710,7 +2954,16 @@ extern "C" void glGetSeparableFilter(GLenum target, GLenum format, GLenum type, 
 
 //360
 extern "C" void glSeparableFilter2D(GLenum target, GLenum internalformat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * row, const GLvoid * column){
-	LOG("Called unimplemted stub SeparableFilter2D!\n");
+	LOG("Called untested stub SeparableFilter2D!\n");
+	pushOp(360);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(row, getTypeSize(type) * width);
+	pushBuf(column, getTypeSize(type) * height);
 }
 
 //361
@@ -2730,17 +2983,31 @@ extern "C" void glGetHistogramParameteriv(GLenum target, GLenum pname, GLint * p
 
 //364
 extern "C" void glGetMinmax(GLenum target, GLboolean reset, GLenum format, GLenum type, GLvoid * values){
-	LOG("Called unimplemted stub GetMinmax!\n");
+	LOG("Called untested stub GetMinmax!\n");
+	pushOp(364);
+	pushParam(target);
+	pushParam(reset);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(values, getTypeSize(type) * 2, true); //returns 2 values (min, max)
 }
 
 //365
 extern "C" void glGetMinmaxParameterfv(GLenum target, GLenum pname, GLfloat * params){
-	LOG("Called unimplemted stub GetMinmaxParameterfv!\n");
+	LOG("Called untested stub GetMinmaxParameterfv!\n");
+	pushOp(365);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) * 2, true); //returns 2 values (min, max)
 }
 
 //366
 extern "C" void glGetMinmaxParameteriv(GLenum target, GLenum pname, GLint * params){
-	LOG("Called unimplemted stub GetMinmaxParameteriv!\n");
+	LOG("Called untested stub GetMinmaxParameteriv!\n");
+	pushOp(366);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint) * 2, true); //returns 2 values (min, max)
 }
 
 //367
@@ -2774,12 +3041,35 @@ extern "C" void glResetMinmax(GLenum target){
 
 //371
 extern "C" void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexImage3D!\n");
+	LOG("Called untested stub TexImage3D!\n");
+	pushOp(371);
+	pushParam(target);
+	pushParam(level);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(depth);
+	pushParam(border);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(pixels, getTypeSize(type) * width * height * depth);
 }
 
 //372
 extern "C" void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexSubImage3D!\n");
+	LOG("Called untested stub TexSubImage3D!\n");
+	pushOp(372);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(yoffset);
+	pushParam(zoffset);
+	pushParam(width);
+	pushParam(height);
+	pushParam(depth);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(pixels, getTypeSize(type) * width * height * depth);
 }
 
 //373
@@ -3058,22 +3348,32 @@ extern "C" void glMultiTexCoord4sv(GLenum target, const GLshort * v){
 
 //408
 extern "C" void glLoadTransposeMatrixf(const GLfloat * m){
-	LOG("Called unimplemted stub LoadTransposeMatrixf!\n");
+	LOG("Called untested stub LoadTransposeMatrixf!\n");
+	pushOp(408);
+	pushBuf(m, sizeof(const GLfloat) * 16, true);		//4x4 matrix
+	waitForReturn();
 }
 
 //409
 extern "C" void glLoadTransposeMatrixd(const GLdouble * m){
-	LOG("Called unimplemted stub LoadTransposeMatrixd!\n");
+	LOG("Called untested stub LoadTransposeMatrixd!\n");
+	pushOp(409);
+	pushBuf(m, sizeof(const GLdouble) * 16, true);		//4x4 matrix
+	waitForReturn();
 }
 
 //410
 extern "C" void glMultTransposeMatrixf(const GLfloat * m){
-	LOG("Called unimplemted stub MultTransposeMatrixf!\n");
+	LOG("Called untested stub MultTransposeMatrixf!\n");
+	pushOp(410);
+	pushBuf(m, sizeof(const GLfloat) * 16, true);		//4x4 matrix
 }
 
 //411
 extern "C" void glMultTransposeMatrixd(const GLdouble * m){
-	LOG("Called unimplemted stub MultTransposeMatrixd!\n");
+	LOG("Called untested stub MultTransposeMatrixd!\n");
+	pushOp(411);
+	pushBuf(m, sizeof(const GLdouble) * 16, true);		//4x4 matrix
 }
 
 //412
@@ -3085,37 +3385,98 @@ extern "C" void glSampleCoverage(GLclampf value, GLboolean invert){
 
 //413
 extern "C" void glCompressedTexImage3D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid * data){
-	LOG("Called unimplemted stub CompressedTexImage3D!\n");
+	LOG("Called untested stub CompressedTexImage3D!\n");
+	pushOp(413);
+	pushParam(target);
+	pushParam(level);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(depth);
+	pushParam(border);
+	pushParam(imageSize);
+	pushBuf(data, sizeof(const GLubyte) * imageSize);
 }
 
 //414
 extern "C" void glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid * data){
-	LOG("Called unimplemted stub CompressedTexImage2D!\n");
+	LOG("Called untested stub CompressedTexImage2D!\n");
+	pushOp(414);
+	pushParam(target);
+	pushParam(level);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(border);
+	pushParam(imageSize);
+	pushBuf(data, sizeof(const GLubyte) * imageSize);
 }
 
 //415
 extern "C" void glCompressedTexImage1D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid * data){
-	LOG("Called unimplemted stub CompressedTexImage1D!\n");
+	LOG("Called untested stub CompressedTexImage1D!\n");
+	pushOp(415);
+	pushParam(target);
+	pushParam(level);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(border);
+	pushParam(imageSize);
+	pushBuf(data, sizeof(const GLubyte) * imageSize);
 }
 
 //416
 extern "C" void glCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid * data){
-	LOG("Called unimplemted stub CompressedTexSubImage3D!\n");
+	LOG("Called untested stub CompressedTexSubImage3D!\n");
+	pushOp(416);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(yoffset);
+	pushParam(zoffset);
+	pushParam(width);
+	pushParam(height);
+	pushParam(depth);
+	pushParam(format);
+	pushParam(imageSize);
+	pushBuf(data, sizeof(const GLubyte) * imageSize);
 }
 
 //417
 extern "C" void glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid * data){
-	LOG("Called unimplemted stub CompressedTexSubImage2D!\n");
+	LOG("Called untested stub CompressedTexSubImage2D!\n");
+	pushOp(417);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(yoffset);
+	pushParam(width);
+	pushParam(height);
+	pushParam(format);
+	pushParam(imageSize);
+	pushBuf(data, sizeof(const GLubyte) * imageSize);
 }
 
 //418
 extern "C" void glCompressedTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid * data){
-	LOG("Called unimplemted stub CompressedTexSubImage1D!\n");
+	LOG("Called untested stub CompressedTexSubImage1D!\n");
+	pushOp(418);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(width);
+	pushParam(format);
+	pushParam(imageSize);
+	pushBuf(data, sizeof(const GLubyte) * imageSize);
 }
 
 //419
 extern "C" void glGetCompressedTexImage(GLenum target, GLint level, GLvoid * img){
 	LOG("Called unimplemted stub GetCompressedTexImage!\n");
+	//pushOp(419);
+	//pushParam(target);
+	//pushParam(level);
+	//pushBuf(img, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, true);
 }
 
 //420
@@ -3135,7 +3496,9 @@ extern "C" void glFogCoordf(GLfloat coord){
 
 //422
 extern "C" void glFogCoordfv(const GLfloat * coord){
-	LOG("Called unimplemted stub FogCoordfv!\n");
+	LOG("Called untested stub FogCoordfv!\n");
+	pushOp(421);
+	pushBuf(coord, sizeof(GLfloat));
 }
 
 //423
@@ -3146,7 +3509,9 @@ extern "C" void glFogCoordd(GLdouble coord){
 
 //424
 extern "C" void glFogCoorddv(const GLdouble * coord){
-	LOG("Called unimplemted stub FogCoorddv!\n");
+	LOG("Called untested stub FogCoorddv!\n");
+	pushOp(424);
+	pushBuf(coord, sizeof(GLdouble));
 }
 
 //425
@@ -3156,12 +3521,23 @@ extern "C" void glFogCoordPointer(GLenum type, GLsizei stride, const GLvoid * po
 
 //426
 extern "C" void glMultiDrawArrays(GLenum mode, GLint * first, GLsizei * count, GLsizei primcount){
-	LOG("Called unimplemted stub MultiDrawArrays!\n");
+	LOG("Called untested stub MultiDrawArrays!\n");
+	pushOp(426);
+	pushParam(mode);
+	pushBuf(first, sizeof(GLint) * primcount);
+	pushBuf(count, sizeof(GLsizei) * primcount);
+	pushParam(primcount);
 }
 
 //427
 extern "C" void glMultiDrawElements(GLenum mode, const GLsizei * count, GLenum type, const GLvoid ** indices, GLsizei primcount){
 	LOG("Called unimplemted stub MultiDrawElements!\n");
+	//pushOp(427);
+	//pushParam(mode);
+	//pushBuf(count, sizeof(GLint) * primcount);
+	//pushParam(type);
+	//pushBuf(indices, /*each value of count * type size*/); 
+	//pushParam(primcount);
 }
 
 //428
@@ -3302,7 +3678,12 @@ extern "C" void glSecondaryColor3usv(const GLushort * v){
 
 //448
 extern "C" void glSecondaryColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub SecondaryColorPointer!\n");
+	LOG("Called untested stub SecondaryColorPointer!\n");
+	pushOp(448);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushBuf(pointer, getTypeSize(type) * (size + stride));
 }
 
 //449
@@ -3420,19 +3801,32 @@ extern "C" void glBindBuffer(GLenum target, GLuint buffer){
 	pushParam(buffer);
 }
 
-//466
+//466 BRADEN
 extern "C" void glBufferData(GLenum target, GLsizeiptr size, const GLvoid * data, GLenum usage){
-	LOG("Called unimplemted stub BufferData!\n");
+	LOG("Called untested stub BufferData!\n");
+	pushOp(466);
+	pushParam(target);
+	pushParam((GLsizei) size);
+	pushBuf(data, size);
+	pushParam(usage);
 }
 
 //467
 extern "C" void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid * data){
-	LOG("Called unimplemted stub BufferSubData!\n");
+	LOG("Called untested stub BufferSubData!\n");
+	pushOp(466);
+	pushParam(target);
+	pushParam((GLint) offset);
+	pushParam((GLsizei) size);
+	pushBuf(data, size);
 }
 
 //468
 extern "C" void glDeleteBuffers(GLsizei n, const GLuint * buffer){
-	LOG("Called unimplemted stub DeleteBuffers!\n");
+	LOG("Called untested stub DeleteBuffers!\n");
+	pushOp(468);
+	pushParam(n);
+	pushBuf(buffer, sizeof(const GLuint) * n);
 }
 
 //469
@@ -3454,7 +3848,12 @@ extern "C" void glGetBufferPointerv(GLenum target, GLenum pname, GLvoid ** param
 
 //472
 extern "C" void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid * data){
-	LOG("Called unimplemted stub GetBufferSubData!\n");
+	LOG("Called untested stub GetBufferSubData!\n");
+	pushOp(472);
+	pushParam(target);
+	pushParam((GLint) offset);		//dont think thats right
+	pushParam((GLint) size);
+	pushBuf(data, sizeof(GLbyte) * size);
 }
 
 //473
@@ -3503,7 +3902,10 @@ extern "C" void glGenQueries(GLsizei n, GLuint * ids){
 
 //477
 extern "C" void glDeleteQueries(GLsizei n, const GLuint * ids){
-	LOG("Called unimplemted stub DeleteQueries!\n");
+	LOG("Called untested stub DeleteQueries!\n");
+	pushOp(477);
+	pushParam(n);
+	pushBuf(ids, sizeof(GLuint) * n);
 }
 
 //478
@@ -3594,7 +3996,11 @@ extern "C" void glAttachShader(GLuint program, GLuint shader){
 
 //490
 extern "C" void glBindAttribLocation(GLuint program, GLuint index, const GLchar * name){
-	LOG("Called unimplemted stub BindAttribLocation!\n");
+	LOG("Called untested stub BindAttribLocation!\n");
+	pushOp(490);
+	pushParam(program);
+	pushParam(index);
+	pushBuf(name, sizeof(GLchar) * strlen(name));
 }
 
 //491
@@ -3606,7 +4012,6 @@ extern "C" void glCompileShader(GLuint shader){
 //492
 extern "C" GLuint glCreateProgram(){
 	pushOp(492);
-
 	GLuint ret;
 	pushBuf(&ret, sizeof(GLuint), true);
 	waitForReturn();
@@ -3624,6 +4029,7 @@ extern "C" GLuint glCreateShader(GLenum type){
 	waitForReturn();
 
 	return ret;
+
 }
 
 //494
@@ -3689,17 +4095,48 @@ extern "C" void glGetProgramInfoLog(GLuint program, GLsizei bufSize, GLsizei * l
 
 //505
 extern "C" void glGetShaderiv(GLuint shader, GLenum pname, GLint * params){
-	LOG("Called unimplemted stub GetShaderiv!\n");
+	pushOp(505);
+	pushParam(shader);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLuint), true);
+	waitForReturn();
 }
 
 //506
 extern "C" void glGetShaderInfoLog(GLuint shader, GLsizei bufSize, GLsizei * length, GLchar * infoLog){
-	LOG("Called unimplemted stub GetShaderInfoLog!\n");
+	pushOp(506);
+	pushParam(shader);
+	pushParam(bufSize);
+	if(!length)
+	{
+	//push a -1 length, rather than a NULL object that crashes
+	pushParam((GLint) -1);
+	}
+	else
+	{
+	pushParam(*length);
+	}
+	pushBuf(infoLog, sizeof(GLchar) * bufSize, true);
+	waitForReturn();
 }
 
 //507
 extern "C" void glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei * length, GLchar * source){
-	LOG("Called unimplemted stub GetShaderSource!\n");
+	LOG("Called untested stub GetShaderSource!\n");
+	pushOp(507);
+	pushParam(shader);
+	pushParam(bufSize);
+	if(!length)
+	{
+	//push a -1 length, rather than a NULL object that crashes
+	pushParam((GLint) -1);
+	}
+	else
+	{
+	pushParam(*length);
+	}
+	pushBuf(source, sizeof(GLchar) * bufSize, true);
+	waitForReturn();
 }
 
 //508
@@ -3769,7 +4206,32 @@ extern "C" void glLinkProgram(GLuint program){
 
 //518
 extern "C" void glShaderSource(GLuint shader, GLsizei count, const GLchar ** string, const GLint * length){
-	LOG("Called unimplemted stub ShaderSource!\n");
+	pushOp(518);
+	pushParam(shader);
+	pushParam(count);
+	int size = 0;
+	for(int i =0; i < count; i++)
+	{
+	size += strlen((const GLchar *)string[i]);
+	}
+	GLchar * stringBuf = (GLchar *) malloc(sizeof(const GLchar *) * size);
+	stringBuf = strcpy(stringBuf, string[0]);
+	stringBuf = strcat(stringBuf, "\n");
+	for(int i =1; i < count; i++)
+	{
+	stringBuf = strcat(stringBuf, string[i]);
+	stringBuf = strcat(stringBuf, "\n");
+	}
+	pushBuf(stringBuf, sizeof(const GLchar *) * size);
+	if(!length)
+	{
+	//push a -1 length, rather than a NULL object that crashes
+	pushParam((GLint) -1);
+	}
+	else
+	{
+	pushParam(*length);
+	}
 }
 
 //519
@@ -3848,57 +4310,104 @@ extern "C" void glUniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint 
 
 //528
 extern "C" void glUniform1fv(GLint location, GLsizei count, const GLfloat * value){
-	LOG("Called unimplemted stub Uniform1fv!\n");
+	LOG("Called untested stub Uniform1fv!\n");
+	pushOp(528);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLfloat) * count);
 }
 
 //529
 extern "C" void glUniform2fv(GLint location, GLsizei count, const GLfloat * value){
-	LOG("Called unimplemted stub Uniform2fv!\n");
+	LOG("Called untested stub Uniform2fv!\n");
+	pushOp(529);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLfloat) * count * 2);
 }
 
 //530
 extern "C" void glUniform3fv(GLint location, GLsizei count, const GLfloat * value){
-	LOG("Called unimplemted stub Uniform3fv!\n");
+	LOG("Called untested stub Uniform3fv!\n");
+	pushOp(530);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLfloat) * count * 3);
 }
 
 //531
 extern "C" void glUniform4fv(GLint location, GLsizei count, const GLfloat * value){
-	LOG("Called unimplemted stub Uniform4fv!\n");
+	LOG("Called untested stub Uniform4fv!\n");
+	pushOp(531);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLfloat) * count * 4);
 }
 
 //532
 extern "C" void glUniform1iv(GLint location, GLsizei count, const GLint * value){
-	LOG("Called unimplemted stub Uniform1iv!\n");
+	LOG("Called untested stub Uniform1iv!\n");
+	pushOp(532);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLint) * count);
 }
 
 //533
 extern "C" void glUniform2iv(GLint location, GLsizei count, const GLint * value){
-	LOG("Called unimplemted stub Uniform2iv!\n");
+	LOG("Called untested stub Uniform2iv!\n");
+	pushOp(533);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLint) * count * 2);
 }
 
 //534
 extern "C" void glUniform3iv(GLint location, GLsizei count, const GLint * value){
-	LOG("Called unimplemted stub Uniform3iv!\n");
+	LOG("Called untested stub Uniform3iv!\n");
+	pushOp(534);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLint) * count * 3);
 }
 
 //535
 extern "C" void glUniform4iv(GLint location, GLsizei count, const GLint * value){
-	LOG("Called unimplemted stub Uniform4iv!\n");
+	LOG("Called untested stub Uniform4iv!\n");
+	pushOp(532);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLint) * count * 4);
 }
 
 //536
 extern "C" void glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix2fv!\n");
+	LOG("Called untested stub UniformMatrix2fv!\n");
+	pushOp(536);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 2);
 }
 
 //537
 extern "C" void glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix3fv!\n");
+	LOG("Called untested stub UniformMatrix3fv!\n");
+	pushOp(537);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 3);
 }
 
 //538
 extern "C" void glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix4fv!\n");
+	LOG("Called untested stub UniformMatrix4fv!\n");
+	pushOp(538);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 4);
 }
 
 //539
@@ -4182,37 +4691,74 @@ extern "C" void glVertexAttrib4usv(GLuint index, const GLushort * v){
 
 //576
 extern "C" void glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub VertexAttribPointer!\n");
+	LOG("Called untested stub VertexAttribPointer!\n");
+	pushOp(575);
+	pushParam(index);
+	pushParam(size);
+	pushParam(type);
+	pushParam(normalized);
+	pushParam(stride);
+	pushBuf(pointer, getTypeSize(type) * size * (index + stride));
 }
 
 //577
 extern "C" void glUniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix2x3fv!\n");
+	LOG("Called untested stub UniformMatrix2x3fv!\n");
+	pushOp(577);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 6); //2x3
 }
 
 //578
 extern "C" void glUniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix3x2fv!\n");
+	LOG("Called untested stub UniformMatrix3x2fv!\n");
+	pushOp(578);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 6); //3x2
 }
 
 //579
 extern "C" void glUniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix2x4fv!\n");
+	LOG("Called untested stub UniformMatrix2x4fv!\n");
+	pushOp(579);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 8); //2x4
 }
 
 //580
 extern "C" void glUniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix4x2fv!\n");
+	LOG("Called untested stub UniformMatrix4x2fv!\n");
+	pushOp(580);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 8); //4x2
 }
 
 //581
 extern "C" void glUniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix3x4fv!\n");
+	LOG("Called untested stub UniformMatrix3x4fv!\n");
+	pushOp(581);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 12); //3x4
 }
 
 //582
 extern "C" void glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix4x3fv!\n");
+	LOG("Called untested stub UniformMatrix4x3fv!\n");
+	pushOp(582);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 12); //4x3
 }
 
 //374
@@ -4477,22 +5023,34 @@ extern "C" void glMultiTexCoord4svARB(GLenum target, const GLshort * v){
 
 //617
 extern "C" void glLoadTransposeMatrixfARB(const GLfloat * m){
-	LOG("Called unimplemted stub LoadTransposeMatrixfARB!\n");
+	LOG("Called untested stub LoadTransposeMatrixfARB!\n");
+	pushOp(617);
+	pushBuf(m, sizeof(const GLfloat) * 16, true);		//4x4 matrix
+	waitForReturn();
 }
 
 //618
 extern "C" void glLoadTransposeMatrixdARB(const GLdouble * m){
-	LOG("Called unimplemted stub LoadTransposeMatrixdARB!\n");
+	LOG("Called untested stub LoadTransposeMatrixdARB!\n");
+	pushOp(618);
+	pushBuf(m, sizeof(const GLdouble) * 16, true);		//4x4 matrix
+	waitForReturn();
 }
 
 //619
 extern "C" void glMultTransposeMatrixfARB(const GLfloat * m){
-	LOG("Called unimplemted stub MultTransposeMatrixfARB!\n");
+	LOG("Called untested stub MultTransposeMatrixfARB!\n");
+	pushOp(619);
+	pushBuf(m, sizeof(const GLfloat) * 16, true);		//4x4 matrix
+	waitForReturn();
 }
 
 //620
 extern "C" void glMultTransposeMatrixdARB(const GLdouble * m){
-	LOG("Called unimplemted stub MultTransposeMatrixdARB!\n");
+	LOG("Called untested stub MultTransposeMatrixdARB!\n");
+	pushOp(620);
+	pushBuf(m, sizeof(const GLdouble) * 16, true);		//4x4 matrix
+	waitForReturn();
 }
 
 //621
@@ -4602,47 +5160,76 @@ extern "C" void glPointParameterfvARB(GLenum pname, const GLfloat * params){
 
 //631
 extern "C" void glWeightbvARB(GLint size, const GLbyte * weights){
-	LOG("Called unimplemted stub WeightbvARB!\n");
+	LOG("Called untested stub WeightbvARB!\n");
+	pushOp(631);
+	pushParam(size);
+	pushBuf(weights, sizeof(GLbyte) * size);
 }
 
 //632
 extern "C" void glWeightsvARB(GLint size, const GLshort * weights){
-	LOG("Called unimplemted stub WeightsvARB!\n");
+	LOG("Called untested stub WeightsvARB!\n");
+	pushOp(632);
+	pushParam(size);
+	pushBuf(weights, sizeof(GLshort) * size);
 }
 
 //633
 extern "C" void glWeightivARB(GLint size, const GLint * weights){
-	LOG("Called unimplemted stub WeightivARB!\n");
+	LOG("Called untested stub WeightivARB!\n");
+	pushOp(633);
+	pushParam(size);
+	pushBuf(weights, sizeof(GLint) * size);
 }
 
 //634
 extern "C" void glWeightfvARB(GLint size, const GLfloat * weights){
-	LOG("Called unimplemted stub WeightfvARB!\n");
+	LOG("Called untested stub WeightfvARB!\n");
+	pushOp(634);
+	pushParam(size);
+	pushBuf(weights, sizeof(GLfloat) * size);
 }
 
 //635
 extern "C" void glWeightdvARB(GLint size, const GLdouble * weights){
-	LOG("Called unimplemted stub WeightdvARB!\n");
+	LOG("Called untested stub WeightdvARB!\n");
+	pushOp(635);
+	pushParam(size);
+	pushBuf(weights, sizeof(GLdouble) * size);
 }
 
 //636
 extern "C" void glWeightubvARB(GLint size, const GLubyte * weights){
-	LOG("Called unimplemted stub WeightubvARB!\n");
+	LOG("Called untested stub WeightubvARB!\n");
+	pushOp(636);
+	pushParam(size);
+	pushBuf(weights, sizeof(GLubyte) * size);
 }
 
 //637
 extern "C" void glWeightusvARB(GLint size, const GLushort * weights){
-	LOG("Called unimplemted stub WeightusvARB!\n");
+	LOG("Called untested stub WeightusvARB!\n");
+	pushOp(637);
+	pushParam(size);
+	pushBuf(weights, sizeof(GLushort) * size);
 }
 
 //638
 extern "C" void glWeightuivARB(GLint size, const GLuint * weights){
-	LOG("Called unimplemted stub WeightuivARB!\n");
+	LOG("Called untested stub WeightuivARB!\n");
+	pushOp(638);
+	pushParam(size);
+	pushBuf(weights, sizeof(GLuint) * size);
 }
 
 //639
 extern "C" void glWeightPointerARB(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub WeightPointerARB!\n");
+	LOG("Called untested stub WeightPointerARB!\n");
+	pushOp(639);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushBuf(pointer, getTypeSize(type) * (size + stride));
 }
 
 //640
@@ -4680,7 +5267,12 @@ extern "C" void glMatrixIndexuivARB(GLint size, const GLuint * indices){
 
 //645
 extern "C" void glMatrixIndexPointerARB(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub MatrixIndexPointerARB!\n");
+	LOG("Called untested stub MatrixIndexPointerARB!\n");
+	pushOp(645);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushBuf(pointer, getTypeSize(type) * (size + stride));
 }
 
 //646
@@ -5081,7 +5673,15 @@ extern "C" void glVertexAttrib4NuivARB(GLuint index, const GLuint * v){
 
 //701
 extern "C" void glVertexAttribPointerARB(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub VertexAttribPointerARB!\n");
+	LOG("Called untested stub VertexAttribPointerARB!\n");
+	pushOp(701);
+	pushParam(index);
+	pushParam(size);
+	pushParam(type);
+	pushParam(normalized);
+	pushParam(stride);
+	pushBuf(pointer, getTypeSize(type) * (size + stride));
+
 }
 
 //702
@@ -5114,7 +5714,10 @@ extern "C" void glBindProgramARB(GLenum target, GLuint program){
 
 //706
 extern "C" void glDeleteProgramsARB(GLsizei n, const GLuint * programs){
-	LOG("Called unimplemted stub DeleteProgramsARB!\n");
+	LOG("Called untested stub DeleteProgramsARB!\n");
+	pushOp(706);
+	pushParam(n);
+	pushBuf(programs, sizeof(const GLuint) * n);
 }
 
 //707
@@ -5273,7 +5876,7 @@ extern "C" void glBufferDataARB(GLenum target, GLsizeiptrARB size, const GLvoid 
 #ifdef SYMPHONY
 	pushParam((GLuint)size);
 #else
-	pushParam(size);
+	pushParam((GLuint)size);		/*compiler error */
 #endif
 	pushBuf(data, size);
 	pushParam(usage);
@@ -5287,8 +5890,8 @@ extern "C" void glBufferSubDataARB(GLenum target, GLintptrARB offset, GLsizeiptr
 	pushParam((GLuint)offset);
 	pushParam((GLuint)size);
 #else
-	pushParam(offset);
-	pushParam(size);
+	pushParam((GLuint)offset);		/*compiler error */
+	pushParam((GLuint)size);		/*compiler error */
 #endif
 	pushBuf(data, size);
 }
@@ -5325,8 +5928,8 @@ extern "C" void glGetBufferSubDataARB(GLenum target, GLintptrARB offset, GLsizei
 	pushParam((GLuint)offset);
 	pushParam((GLuint)size);
 #else
-	pushParam(offset);
-	pushParam(size);
+	pushParam((GLuint)offset);		/*compiler error */
+	pushParam((GLuint)size);		/*compiler error */
 #endif
 	pushBuf(data, size);
 }
@@ -5461,7 +6064,33 @@ extern "C" GLhandleARB glCreateShaderObjectARB(GLenum shaderType){
 
 //747
 extern "C" void glShaderSourceARB(GLhandleARB shader, GLsizei count, const GLcharARB ** string, const GLint * length){
-	LOG("Called unimplemted stub ShaderSourceARB!\n");
+	LOG("Called untested stub ShaderSourceARB!\n");
+	pushOp(747);
+	pushParam(shader);
+	pushParam(count);
+	int size = 0;
+	for(int i =0; i < count; i++)
+	{
+	size += strlen((const GLchar *)string[i]);
+	}
+	GLchar * stringBuf = (GLchar *) malloc(sizeof(const GLchar *) * size);
+	stringBuf = strcpy(stringBuf, string[0]);
+	stringBuf = strcat(stringBuf, "\n");
+	for(int i =1; i < count; i++)
+	{
+	stringBuf = strcat(stringBuf, string[i]);
+	stringBuf = strcat(stringBuf, "\n");
+	}
+	pushBuf(stringBuf, sizeof(const GLchar *) * size);
+	if(!length)
+	{
+	//push a -1 length, rather than a NULL object that crashes
+	pushParam((GLint) -1);
+	}
+	else
+	{
+	pushParam(*length);
+	}
 }
 
 //748
@@ -5576,57 +6205,104 @@ extern "C" void glUniform4iARB(GLint location, GLint v0, GLint v1, GLint v2, GLi
 
 //762
 extern "C" void glUniform1fvARB(GLint location, GLsizei count, const GLfloat * value){
-	LOG("Called unimplemted stub Uniform1fvARB!\n");
+	LOG("Called untested stub Uniform1fvARB!\n");
+	pushOp(762);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLfloat) * count);
 }
 
 //763
 extern "C" void glUniform2fvARB(GLint location, GLsizei count, const GLfloat * value){
-	LOG("Called unimplemted stub Uniform2fvARB!\n");
+	LOG("Called untested stub Uniform2fvARB!\n");
+	pushOp(763);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLfloat) * count * 2);
 }
 
 //764
 extern "C" void glUniform3fvARB(GLint location, GLsizei count, const GLfloat * value){
-	LOG("Called unimplemted stub Uniform3fvARB!\n");
+	LOG("Called untested stub Uniform3fvARB!\n");
+	pushOp(764);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLfloat) * count * 3);
 }
 
 //765
 extern "C" void glUniform4fvARB(GLint location, GLsizei count, const GLfloat * value){
-	LOG("Called unimplemted stub Uniform4fvARB!\n");
+	LOG("Called untested stub Uniform4fvARB!\n");
+	pushOp(765);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLfloat) * count * 4);
 }
 
 //766
 extern "C" void glUniform1ivARB(GLint location, GLsizei count, const GLint * value){
-	LOG("Called unimplemted stub Uniform1ivARB!\n");
+	LOG("Called untested stub Uniform1ivARB!\n");
+	pushOp(766);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLint) * count);
 }
 
 //767
 extern "C" void glUniform2ivARB(GLint location, GLsizei count, const GLint * value){
-	LOG("Called unimplemted stub Uniform2ivARB!\n");
+	LOG("Called untested stub Uniform2ivARB!\n");
+	pushOp(767);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLint) * count * 2);
 }
 
 //768
 extern "C" void glUniform3ivARB(GLint location, GLsizei count, const GLint * value){
-	LOG("Called unimplemted stub Uniform3ivARB!\n");
+	LOG("Called untested stub Uniform3ivARB!\n");
+	pushOp(768);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLint) * count * 3);
 }
 
 //769
 extern "C" void glUniform4ivARB(GLint location, GLsizei count, const GLint * value){
-	LOG("Called unimplemted stub Uniform4ivARB!\n");
+	LOG("Called untested stub Uniform4ivARB!\n");
+	pushOp(769);
+	pushParam(location);
+	pushParam(count);
+	pushBuf(value, sizeof(GLint) * count * 4);
 }
 
 //770
 extern "C" void glUniformMatrix2fvARB(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix2fvARB!\n");
+	LOG("Called untested stub UniformMatrix2fvARB!\n");
+	pushOp(770);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 2);
 }
 
 //771
 extern "C" void glUniformMatrix3fvARB(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix3fvARB!\n");
+	LOG("Called untested stub UniformMatrix3fvARB!\n");
+	pushOp(771);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 3);
 }
 
 //772
 extern "C" void glUniformMatrix4fvARB(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value){
-	LOG("Called unimplemted stub UniformMatrix4fvARB!\n");
+	LOG("Called untested stub UniformMatrix4fvARB!\n");
+	pushOp(772);
+	pushParam(location);
+	pushParam(count);
+	pushParam(transpose);
+	pushBuf(value, sizeof(GLint) * count * 4);
 }
 
 //773
@@ -5671,12 +6347,30 @@ extern "C" void glGetUniformivARB(GLhandleARB program, GLint location, GLint * p
 
 //781
 extern "C" void glGetShaderSourceARB(GLhandleARB shader, GLsizei bufSize, GLsizei * length, GLcharARB * source){
-	LOG("Called unimplemted stub GetShaderSourceARB!\n");
+	LOG("Called untested stub GetShaderSourceARB!\n");
+	pushOp(781);
+	pushParam(shader);
+	pushParam(bufSize);
+	if(!length)
+	{
+	//push a -1 length, rather than a NULL object that crashes
+	pushParam((GLint) -1);
+	}
+	else
+	{
+	pushParam(*length);
+	}
+	pushBuf(source, sizeof(GLchar) * bufSize, true);
+	waitForReturn();
 }
 
 //782
 extern "C" void glBindAttribLocationARB(GLhandleARB program, GLuint index, const GLcharARB * name){
-	LOG("Called unimplemted stub BindAttribLocationARB!\n");
+	LOG("Called untested stub BindAttribLocationARB!\n");
+	pushOp(782);
+	pushParam(program);
+	pushParam(index);
+	pushBuf(name, strlen(name));
 }
 
 //783
@@ -5714,12 +6408,36 @@ extern "C" void glPolygonOffsetEXT(GLfloat factor, GLfloat bias){
 
 //788
 extern "C" void glTexImage3DEXT(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexImage3DEXT!\n");
+	LOG("Called untested stub TexImage3DEXT!\n");
+	pushOp(788);
+	pushParam(target);
+	pushParam(level);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(depth);
+	pushParam(border);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(pixels, getTypeSize(type) * width * height * depth);
 }
 
 //789
 extern "C" void glTexSubImage3DEXT(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLuint UNUSED, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexSubImage3DEXT!\n");
+	LOG("Called untested stub TexSubImage3DEXT!\n");
+	pushOp(789);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(yoffset);
+	pushParam(zoffset);
+	pushParam(width);
+	pushParam(height);
+	pushParam(depth);
+	pushParam(format);
+	pushParam(type);
+	pushParam(UNUSED);
+	pushBuf(pixels, getTypeSize(type) * width * height * depth);
 }
 
 //790
@@ -5738,12 +6456,32 @@ extern "C" void glTexFilterFuncSGIS(GLenum target, GLenum filter, GLsizei n, con
 
 //792
 extern "C" void glTexSubImage1DEXT(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, GLuint UNUSED, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexSubImage1DEXT!\n");
+	LOG("Called untested stub TexSubImage1DEXT!\n");
+	pushOp(792);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(width);
+	pushParam(format);
+	pushParam(type);
+	pushParam(UNUSED);
+	pushBuf(pixels, getTypeSize(type) * width);
 }
 
 //793
 extern "C" void glTexSubImage2DEXT(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint UNUSED, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexSubImage2DEXT!\n");
+	LOG("Called untested stub TexSubImage2DEXT!\n");
+	pushOp(793);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(yoffset);
+	pushParam(width);
+	pushParam(height);
+	pushParam(format);
+	pushParam(type);
+	pushParam(UNUSED);
+	pushBuf(pixels, getTypeSize(type) * width * height);
 }
 
 //794
@@ -5870,12 +6608,27 @@ extern "C" void glResetMinmaxEXT(GLenum target){
 
 //809
 extern "C" void glConvolutionFilter1DEXT(GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum type, const GLvoid * image){
-	LOG("Called unimplemted stub ConvolutionFilter1DEXT!\n");
+	LOG("Called untested stub ConvolutionFilter1DEXT!\n");
+	pushOp(809);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(image, getTypeSize(type) * width);
 }
 
 //810
 extern "C" void glConvolutionFilter2DEXT(GLenum target, GLenum internalformat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * image){
-	LOG("Called unimplemted stub ConvolutionFilter2DEXT!\n");
+	LOG("Called untested stub ConvolutionFilter2DEXT!\n");
+	pushOp(810);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(image, getTypeSize(type) * width * height);
 }
 
 //811
@@ -5888,7 +6641,15 @@ extern "C" void glConvolutionParameterfEXT(GLenum target, GLenum pname, GLfloat 
 
 //812
 extern "C" void glConvolutionParameterfvEXT(GLenum target, GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub ConvolutionParameterfvEXT!\n");
+	LOG("Called untested stub ConvolutionParameterfvEXT!\n");
+	pushOp(812);
+	pushParam(target);
+	pushParam(pname);
+	int size = sizeof(GLfloat);
+	if(pname != GL_CONVOLUTION_BORDER_MODE)
+		size *= 4;
+	pushBuf(params, size);
+
 }
 
 //813
@@ -5901,7 +6662,14 @@ extern "C" void glConvolutionParameteriEXT(GLenum target, GLenum pname, GLint pa
 
 //814
 extern "C" void glConvolutionParameterivEXT(GLenum target, GLenum pname, const GLint * params){
-	LOG("Called unimplemted stub ConvolutionParameterivEXT!\n");
+	LOG("Called untested stub ConvolutionParameterivEXT!\n");
+	pushOp(814);
+	pushParam(target);
+	pushParam(pname);
+	int size = sizeof(GLint);
+	if(pname != GL_CONVOLUTION_BORDER_MODE)
+		size *= 4;
+	pushBuf(params, size);
 }
 
 //815
@@ -5947,12 +6715,28 @@ extern "C" void glGetSeparableFilterEXT(GLenum target, GLenum format, GLenum typ
 
 //821
 extern "C" void glSeparableFilter2DEXT(GLenum target, GLenum internalformat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * row, const GLvoid * column){
-	LOG("Called unimplemted stub SeparableFilter2DEXT!\n");
+	LOG("Called untested stub SeparableFilter2DEXT!\n");
+	pushOp(821);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(row, getTypeSize(type) * width);
+	pushBuf(column, getTypeSize(type) * height);
 }
 
 //822
 extern "C" void glColorTableSGI(GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum type, const GLvoid * table){
-	LOG("Called unimplemted stub ColorTableSGI!\n");
+	LOG("Called untested stub ColorTableSGI!\n");
+	pushOp(822);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(table, getTypeSize(type) * width);
 }
 
 //823
@@ -6026,12 +6810,39 @@ extern "C" void glGetPixelTexGenParameterfvSGIS(GLenum pname, GLfloat * params){
 
 //835
 extern "C" void glTexImage4DSGIS(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLsizei size4d, GLint border, GLenum format, GLenum type, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexImage4DSGIS!\n");
+	LOG("Called untested stub TexImage4DSGIS!\n");
+	pushOp(837);
+	pushParam(target);
+	pushParam(level);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(height);
+	pushParam(depth);
+	pushParam(size4d);
+	pushParam(border);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(pixels, getTypeSize(type) * width * height * depth * size4d);
 }
 
 //836
 extern "C" void glTexSubImage4DSGIS(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint woffset, GLsizei width, GLsizei height, GLsizei depth, GLsizei size4d, GLenum format, GLenum type, GLuint UNUSED, const GLvoid * pixels){
-	LOG("Called unimplemted stub TexSubImage4DSGIS!\n");
+	LOG("Called untested stub TexSubImage4DSGIS!\n");
+	pushOp(837);
+	pushParam(target);
+	pushParam(level);
+	pushParam(xoffset);
+	pushParam(yoffset);
+	pushParam(zoffset);
+	pushParam(woffset);
+	pushParam(width);
+	pushParam(height);
+	pushParam(depth);
+	pushParam(size4d);
+	pushParam(format);
+	pushParam(type);
+	pushParam(UNUSED);
+	pushBuf(pixels, getTypeSize(type) * (width + xoffset) * (height + yoffset) * (depth + zoffset) * (size4d + woffset));
 }
 
 //837
@@ -6083,7 +6894,11 @@ extern "C" GLboolean glIsTextureEXT(GLuint texture){
 
 //842
 extern "C" void glPrioritizeTexturesEXT(GLsizei n, const GLuint * textures, const GLclampf * priorities){
-	LOG("Called unimplemted stub PrioritizeTexturesEXT!\n");
+	LOG("Called untested stub PrioritizeTexturesEXT!\n");
+	pushOp(842);
+	pushParam(n);
+	pushBuf(textures, sizeof(GLuint) * n);
+	pushBuf(priorities, sizeof(GLclampf) * n);
 }
 
 //843
@@ -6133,7 +6948,13 @@ extern "C" void glArrayElementEXT(GLint i){
 
 //850
 extern "C" void glColorPointerEXT(GLint size, GLenum type, GLsizei stride, GLsizei count, const GLvoid * pointer){
-	LOG("Called unimplemted stub ColorPointerEXT!\n");
+	LOG("Called untested stub ColorPointerEXT!\n");
+	pushOp(850);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushParam(count);
+	pushBuf(pointer, getTypeSize(type) * (stride + size));
 }
 
 //851
@@ -6146,7 +6967,11 @@ extern "C" void glDrawArraysEXT(GLenum mode, GLint first, GLsizei count){
 
 //852
 extern "C" void glEdgeFlagPointerEXT(GLsizei stride, GLsizei count, const GLboolean * pointer){
-	LOG("Called unimplemted stub EdgeFlagPointerEXT!\n");
+	LOG("Called untested stub EdgeFlagPointerEXT!\n");
+	pushOp(852);
+	pushParam(stride);
+	pushParam(count);
+	pushBuf(pointer, sizeof(GLboolean) * (count + stride));
 }
 
 //853
@@ -6156,22 +6981,45 @@ extern "C" void glGetPointervEXT(GLenum pname, GLvoid ** params){
 
 //854
 extern "C" void glIndexPointerEXT(GLenum type, GLsizei stride, GLsizei count, const GLvoid * pointer){
-	LOG("Called unimplemted stub IndexPointerEXT!\n");
+	LOG("Called untested stub IndexPointerEXT!\n");
+	pushOp(854);
+	pushParam(type);
+	pushParam(stride);
+	pushParam(count);
+	pushBuf(pointer, getTypeSize(type) * (count + stride));
 }
 
 //855
 extern "C" void glNormalPointerEXT(GLenum type, GLsizei stride, GLsizei count, const GLvoid * pointer){
-	LOG("Called unimplemted stub NormalPointerEXT!\n");
+	LOG("Called untested stub NormalPointerEXT!\n");
+	pushOp(855);
+	pushParam(type);
+	pushParam(stride);
+	pushParam(count);
+	pushBuf(pointer, getTypeSize(type) * (count + stride));
 }
 
 //856
 extern "C" void glTexCoordPointerEXT(GLint size, GLenum type, GLsizei stride, GLsizei count, const GLvoid * pointer){
-	LOG("Called unimplemted stub TexCoordPointerEXT!\n");
+	LOG("Called untested stub TexCoordPointerEXT!\n");
+	pushOp(856);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushParam(count);
+	pushBuf(pointer, size * getTypeSize(type) * (count + stride));
+
 }
 
 //857
 extern "C" void glVertexPointerEXT(GLint size, GLenum type, GLsizei stride, GLsizei count, const GLvoid * pointer){
-	LOG("Called unimplemted stub VertexPointerEXT!\n");
+	LOG("Called untested stub VertexPointerEXT!\n");
+	pushOp(857);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushParam(count);
+	pushBuf(pointer, size * getTypeSize(type) * (count + stride));
 }
 
 //858
@@ -6229,7 +7077,10 @@ extern "C" GLint glGetInstrumentsSGIX(){
 
 //866
 extern "C" void glInstrumentsBufferSGIX(GLsizei size, GLint * buffer){
-	LOG("Called unimplemted stub InstrumentsBufferSGIX!\n");
+	LOG("Called untested stub InstrumentsBufferSGIX!\n");
+	pushOp(866);
+	pushParam(size);
+	pushBuf(buffer, size);
 }
 
 //867
@@ -6326,7 +7177,14 @@ extern "C" void glGetImageTransformParameterfvHP(GLenum target, GLenum pname, GL
 
 //883
 extern "C" void glColorSubTableEXT(GLenum target, GLsizei start, GLsizei count, GLenum format, GLenum type, const GLvoid * data){
-	LOG("Called unimplemted stub ColorSubTableEXT!\n");
+	LOG("Called untested stub ColorSubTableEXT!\n");
+	pushOp(883);
+	pushParam(target);
+	pushParam(start);
+	pushParam(count);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(data, getTypeSize(type) * (start + count));
 }
 
 //884
@@ -6348,7 +7206,14 @@ extern "C" void glHintPGI(GLenum target, GLint mode){
 
 //886
 extern "C" void glColorTableEXT(GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum type, const GLvoid * table){
-	LOG("Called unimplemted stub ColorTableEXT!\n");
+	LOG("Called untested stub ColorTableEXT!\n");
+	pushOp(886);
+	pushParam(target);
+	pushParam(internalformat);
+	pushParam(width);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(table, getTypeSize(type) * width);
 }
 
 //887
@@ -6550,7 +7415,14 @@ extern "C" void glLightEnviSGIX(GLenum pname, GLint param){
 
 //920
 extern "C" void glDrawRangeElementsEXT(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices){
-	LOG("Called unimplemted stub DrawRangeElementsEXT!\n");
+	LOG("Called untested stub DrawRangeElementsEXT!\n");
+	pushOp(920);
+	pushParam(mode);
+	pushParam(start);
+	pushParam(end);
+	pushParam(count);
+	pushParam(type);
+	pushBuf(indices, getTypeSize(type) * end);
 }
 
 //921
@@ -6622,6 +7494,11 @@ extern "C" GLboolean glIsAsyncMarkerSGIX(GLuint marker){
 //930
 extern "C" void glVertexPointervINTEL(GLint size, GLenum type, const GLvoid ** pointer){
 	LOG("Called unimplemted stub VertexPointervINTEL!\n");
+	//pushOp(930);
+	//pushParam(size);
+	//pushParam(type);
+	//pushBuf(pointer, size * getTypeSize(type));
+
 }
 
 //931
@@ -6779,7 +7656,12 @@ extern "C" void glSecondaryColor3usvEXT(const GLushort * v){
 
 //954
 extern "C" void glSecondaryColorPointerEXT(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub SecondaryColorPointerEXT!\n");
+	LOG("Called untested stub SecondaryColorPointerEXT!\n");
+	pushOp(954);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushBuf(pointer, getTypeSize(type) * (size + stride));
 }
 
 //955
@@ -6790,7 +7672,13 @@ extern "C" void glTextureNormalEXT(GLenum mode){
 
 //956
 extern "C" void glMultiDrawArraysEXT(GLenum mode, GLint * first, GLsizei * count, GLsizei primcount){
-	LOG("Called unimplemted stub MultiDrawArraysEXT!\n");
+	LOG("Called untested stub MultiDrawArraysEXT!\n");
+	pushOp(956);
+	pushParam(mode);
+	pushBuf(first, primcount);	
+	pushBuf(count, primcount) ;	
+	pushParam(primcount);
+	
 }
 
 //957
@@ -7462,7 +8350,12 @@ extern "C" void glVertexWeightfvEXT(const GLfloat * weight){
 
 //1045
 extern "C" void glVertexWeightPointerEXT(GLsizei size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub VertexWeightPointerEXT!\n");
+	LOG("Called untested stub VertexWeightPointerEXT!\n");
+	pushOp(1045);
+	pushParam(size);
+	pushParam(type);
+	pushParam(stride);
+	pushBuf(pointer, getTypeSize(type) * (size + stride));
 }
 
 //1046
@@ -7472,7 +8365,10 @@ extern "C" void glFlushVertexArrayRangeNV(){
 
 //1047
 extern "C" void glVertexArrayRangeNV(GLsizei length, const GLvoid * pointer){
-	LOG("Called unimplemted stub VertexArrayRangeNV!\n");
+	LOG("Called untested stub VertexArrayRangeNV!\n");
+	pushOp(1047);
+	pushParam(length);
+	pushBuf(pointer, length);
 }
 
 //1048
@@ -7739,7 +8635,13 @@ extern "C" void glWindowPos4svMESA(const GLshort * v){
 
 //1086
 extern "C" void glMultiModeDrawArraysIBM(const GLenum * mode, const GLint * first, const GLsizei * count, GLsizei primcount, GLint modestride){
-	LOG("Called unimplemted stub MultiModeDrawArraysIBM!\n");
+	LOG("Called untested stub MultiModeDrawArraysIBM!\n");
+	pushOp(1086);
+	pushBuf(mode, sizeof(GLenum) * (primcount + modestride));
+	pushBuf(first, sizeof(GLenum) * primcount);
+	pushBuf(count, sizeof(GLenum) * primcount);
+	pushParam(primcount);
+	pushParam(modestride);
 }
 
 //1087
@@ -7817,7 +8719,10 @@ extern "C" void glTextureColorMaskSGIS(GLboolean red, GLboolean green, GLboolean
 
 //1100
 extern "C" void glDeleteFencesNV(GLsizei n, const GLuint * fences){
-	LOG("Called unimplemted stub DeleteFencesNV!\n");
+	LOG("Called untested stub DeleteFencesNV!\n");
+	pushOp(1100);
+	pushParam(n);
+	pushBuf(fences, sizeof(GLuint) * n);
 }
 
 //1101
@@ -7871,7 +8776,18 @@ extern "C" void glSetFenceNV(GLuint fence, GLenum condition){
 
 //1107
 extern "C" void glMapControlPointsNV(GLenum target, GLuint index, GLenum type, GLsizei ustride, GLsizei vstride, GLint uorder, GLint vorder, GLboolean packed, const GLvoid * points){
-	LOG("Called unimplemted stub MapControlPointsNV!\n");
+	LOG("Called untested stub MapControlPointsNV!\n");
+	pushOp(1107);
+	pushParam(target);
+	pushParam(index);
+	pushParam(type);
+	pushParam(ustride);
+	pushParam(vstride);
+	pushParam(uorder);
+	pushParam(vorder);
+	pushParam(packed);
+	pushBuf(points, getTypeSize(type) * (uorder + ustride) * (vorder + vstride));
+
 }
 
 //1108
@@ -7887,6 +8803,14 @@ extern "C" void glMapParameterfvNV(GLenum target, GLenum pname, const GLfloat * 
 //1110
 extern "C" void glGetMapControlPointsNV(GLenum target, GLuint index, GLenum type, GLsizei ustride, GLsizei vstride, GLboolean packed, GLvoid * points){
 	LOG("Called unimplemted stub GetMapControlPointsNV!\n");
+	//pushOp(1107);
+	//pushParam(target);
+	//pushParam(index);
+	//pushParam(type);
+	//pushParam(ustride);
+	//pushParam(vstride);
+	//pushParam(packed);
+	//pushBuf(points, getTypeSize(type) * (/*size*/ + ustride) * ((/*size*/ + vstride), true);
 }
 
 //1111
@@ -8801,12 +9725,42 @@ extern "C" void glIglooInterfaceSGIX(GLenum pname, const GLvoid * params){
 
 //1225
 extern "C" void glDeformationMap3dSGIX(GLenum target, GLdouble u1, GLdouble u2, GLint ustride, GLint uorder, GLdouble v1, GLdouble v2, GLint vstride, GLint vorder, GLdouble w1, GLdouble w2, GLint wstride, GLint worder, const GLdouble * points){
-	LOG("Called unimplemted stub DeformationMap3dSGIX!\n");
+	LOG("Called untested stub DeformationMap3dSGIX!\n");
+	pushOp(1225);
+	pushParam(target);
+	pushParam(u1);
+	pushParam(u2);
+	pushParam(ustride);
+	pushParam(uorder);
+	pushParam(v1);
+	pushParam(v2);
+	pushParam(vstride);
+	pushParam(vorder);
+	pushParam(w1);
+	pushParam(w2);
+	pushParam(wstride);
+	pushParam(worder);
+	pushBuf(points, sizeof(GLdouble) * (uorder + ustride) * (vorder + vstride) * (worder + wstride));
 }
 
 //1226
 extern "C" void glDeformationMap3fSGIX(GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder, GLfloat v1, GLfloat v2, GLint vstride, GLint vorder, GLfloat w1, GLfloat w2, GLint wstride, GLint worder, const GLfloat * points){
-	LOG("Called unimplemted stub DeformationMap3fSGIX!\n");
+	LOG("Called untested stub DeformationMap3fSGIX!\n");
+	pushOp(1226);
+	pushParam(target);
+	pushParam(u1);
+	pushParam(u2);
+	pushParam(ustride);
+	pushParam(uorder);
+	pushParam(v1);
+	pushParam(v2);
+	pushParam(vstride);
+	pushParam(vorder);
+	pushParam(w1);
+	pushParam(w2);
+	pushParam(wstride);
+	pushParam(worder);
+	pushBuf(points, sizeof(GLfloat) * (uorder + ustride) * (vorder + vstride) * (worder + wstride));
 }
 
 //1227

@@ -12,6 +12,7 @@ public:
 
 	list<Instruction> *prevFrame;	//used for comparing deltas (only used in NetClient and NetSrv)
 	int netBytes;			// variable to calculate network usage
+	int netBytes2;			// variable to calculate compressed network usage
 
 	virtual bool process(list<Instruction> &i)=0;
 	virtual void reply(Instruction *instr, int i){}
@@ -39,7 +40,6 @@ public:
 class TextModule : public Module{
 public:
 	TextModule();
-
 	bool init();	
 	bool process(list<Instruction> &i);
 	bool sync();
@@ -74,13 +74,15 @@ public:
 **********************************************/
 class NetSrvModule : public Module{
   int mSocket;
-BufferedFd *mClientSocket;
+  BufferedFd *mClientSocket;
 public:
 	NetSrvModule(int port);
 	
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);
 	bool sync();
+	int myRead(byte *input, int nByte);
+	int myWrite(byte *input, int nByte);
 };
 
 /*********************************************
@@ -95,4 +97,24 @@ public:
 	
 	bool process(list<Instruction> &i);
 	bool sync();
+	int myWrite(int fd, void* buf, int nByte);
+	int myWrite(int fd, void* buf, unsigned nByte);
+	int myWrite(int fd, void* buf, long unsigned nByte);
+	int myRead(int fd, void *buf, size_t count);
+};
+
+/*********************************************
+ Network client module. This sends commands,
+ and thus should go at the *end* of the local
+ pipe (probably on the app side). 
+**********************************************/
+class NetCompressModule : public Module{
+public:
+	NetCompressModule();
+	
+	bool process(list<Instruction> &i);
+	void reply(Instruction *instr, int i);
+	bool sync();
+	int myCompress(void *input, int nByte, void *output);
+	int myDecompress(void *dest, int destLen, void *source, int sourceLen);
 };

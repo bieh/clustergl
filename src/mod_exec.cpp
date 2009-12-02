@@ -12,7 +12,6 @@ static Instruction *mCurrentInstruction = NULL;
 
 ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){
 	init();
-	
 	iScreenX = sizeX;
 	iScreenY = sizeY;
 
@@ -20,6 +19,7 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){
 	iOffsetY = offsetY;
 	
 	if(!makeWindow()){
+		LOG("failed to make window!\n");
 		exit(1);
 	}
 }
@@ -72,6 +72,12 @@ bool ExecModule::makeWindow(){
 	
 	//Disable mouse pointer
 	SDL_ShowCursor(SDL_DISABLE);
+
+	if (GLEW_OK != glewInit()){
+		LOG("GLEW failed to start up for some reason\n");
+		return false;
+	}
+
 	
 	return true;
 }
@@ -80,13 +86,15 @@ bool ExecModule::process(list<Instruction> &list){
 
 	for(std::list<Instruction>::iterator iter = list.begin(); 
 	    iter != list.end(); iter++){
+		//LOG("ID: %d\n", iter->id);
+		fflush(stdout);
 	    	if(iter->id >= 1500 || !mFunctions[iter->id]){
 	    		LOG("Unimplemented %d\n", iter->id);
 	    		continue;
 	    	}
 	    	
 	    	mCurrentInstruction = &(*iter);
-	    	//LOG("curIn%d\n",mCurrentInstruction->id);
+	    	//LOG("current In %d\n",mCurrentInstruction->id);
 
 		// Set our own glViewPort/glScissor
 		// We scale this to try to keep as much of the orignal settings as possible
@@ -108,8 +116,9 @@ bool ExecModule::process(list<Instruction> &list){
 				  y*((float)(iScreenY-iOffsetY)/(float)origHeight),
 				  w*((float)(iScreenX-iOffsetX)/(float)origWidth),  
 				  h*((float)(iScreenY-iOffsetY)/(float)origHeight));  
-		} else
+		} else {
 		    	mFunctions[iter->id](iter->args);
+		}
 	}
 	
 	   
@@ -144,6 +153,16 @@ PUSHRET(const GLbyte);
 PUSHRET(const GLubyte);
 
 void pushRet(const GLubyte *val){
+	int i = 0;
+	int len = strlen((char *)val);
+	byte *b = new byte[len];
+	memcpy(b, val, len);
+	mCurrentInstruction->buffers[i].buffer = b;
+	mCurrentInstruction->buffers[i].needClear = true;
+	mCurrentInstruction->buffers[i].needReply = true;
+}
+
+void pushRet(const GLchar * val){
 	int i = 0;
 	int len = strlen((char *)val);
 	byte *b = new byte[len];
@@ -1339,7 +1358,6 @@ void EXEC_glFogi(byte *commandbuf){
 //156
 void EXEC_glFogiv(byte *commandbuf){
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
 	glFogiv(*pname, (const GLint *)popBuf());
 }
 
@@ -1531,7 +1549,6 @@ void EXEC_glTexParameteri(byte *commandbuf){
 	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
-
 	glTexParameteri(*target, *pname, *param);
 }
 
@@ -3607,7 +3624,6 @@ void EXEC_glFogCoordf(byte *commandbuf){
 
 //422
 void EXEC_glFogCoordfv(byte *commandbuf){
-
 	glFogCoordfv((const GLfloat *)popBuf());
 }
 
@@ -4008,7 +4024,7 @@ void EXEC_glMapBuffer(byte *commandbuf){
 #ifdef SYMPHONY
 	pushRet((const GLubyte*)glMapBuffer(*target, *access));
 #else
-	pushRet((GLuint)glMapBuffer(*target, *access));
+	pushRet((const GLubyte*)glMapBuffer(*target, *access));		/*compiler error*/
 #endif
 }
 
@@ -4154,7 +4170,6 @@ void EXEC_glCreateProgram(byte *commandbuf){
 //493
 void EXEC_glCreateShader(byte *commandbuf){
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
 	pushRet(glCreateShader(*type));
 }
 
@@ -4247,24 +4262,36 @@ void EXEC_glGetProgramInfoLog(byte *commandbuf){
 void EXEC_glGetShaderiv(byte *commandbuf){
 	GLuint *shader = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
-	glGetShaderiv(*shader, *pname, (GLint *)popBuf());
+	GLint	*params = (GLint *)popBuf();
+	glGetShaderiv(*shader, *pname, params);
+	pushRet(*params);
 }
 
 //506
 void EXEC_glGetShaderInfoLog(byte *commandbuf){
-	GLuint *shader = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
-	GLsizei *bufSize = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glGetShaderInfoLog(*shader, *bufSize, (GLsizei *)popBuf(), (GLchar *)popBuf());
+	GLuint  *shader  = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
+	GLsizei *bufSize = (GLsizei*)commandbuf; commandbuf += sizeof(GLsizei);
+	GLint	*length  = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	GLchar	*infolog = (GLchar *)popBuf();	
+	if(*length == -1)
+	{
+	length = NULL;
+	}
+	glGetShaderInfoLog(*shader, *bufSize, length, infolog);
+	pushRet(infolog);
 }
 
 //507
 void EXEC_glGetShaderSource(byte *commandbuf){
 	GLuint *shader = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLsizei *bufSize = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glGetShaderSource(*shader, *bufSize, (GLsizei *)popBuf(), (GLchar *)popBuf());
+	GLint	*length  = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	GLchar	*source = (GLchar *)popBuf();	
+	if(*length == -1)
+	{
+	length = NULL;
+	}
+	glGetShaderSource(*shader, *bufSize, length, source);
 }
 
 //508
@@ -4347,8 +4374,13 @@ void EXEC_glLinkProgram(byte *commandbuf){
 void EXEC_glShaderSource(byte *commandbuf){
 	GLuint *shader = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glShaderSource(*shader, *count, (const GLchar **)popBuf(), (const GLint *)popBuf());
+	const GLchar * string = (const GLchar *)popBuf();
+	GLint	*length = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	if(*length == -1)
+	{
+	length = NULL;
+	}
+	glShaderSource(*shader, *count, &string, length);
 }
 
 //519
@@ -6123,7 +6155,7 @@ void EXEC_glMapBufferARB(byte *commandbuf){
 #ifdef SYMPHONY
 	pushRet((const GLubyte*) glMapBufferARB(*target, *access));
 #else
-	pushRet((GLuint)glMapBufferARB(*target, *access));
+	pushRet((const GLubyte*) glMapBufferARB(*target, *access));
 #endif
 }
 
@@ -6219,16 +6251,20 @@ void EXEC_glDetachObjectARB(byte *commandbuf){
 //746
 void EXEC_glCreateShaderObjectARB(byte *commandbuf){
 	GLenum *shaderType = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
 	pushRet(glCreateShaderObjectARB(*shaderType));
 }
 
 //747
 void EXEC_glShaderSourceARB(byte *commandbuf){
-	GLhandleARB *shader = (GLhandleARB*)commandbuf;	 commandbuf += sizeof(GLhandleARB);
+	GLuint *shader = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glShaderSourceARB(*shader, *count, (const GLcharARB **)popBuf(), (const GLint *)popBuf());
+	const GLchar * string = (const GLchar *)popBuf();
+	GLint	*length = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	if(*length == -1)
+	{
+	length = NULL;
+	}
+	glShaderSourceARB(*shader, *count,  &string, length);
 }
 
 //748
@@ -6506,10 +6542,16 @@ void EXEC_glGetUniformivARB(byte *commandbuf){
 
 //781
 void EXEC_glGetShaderSourceARB(byte *commandbuf){
-	GLhandleARB *shader = (GLhandleARB*)commandbuf;	 commandbuf += sizeof(GLhandleARB);
+	GLuint *shader = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 	GLsizei *bufSize = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLint	*length  = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	GLchar	*source = (GLchar *)popBuf();	
+	if(*length == -1)
+	{
+	length = NULL;
+	}
 
-	glGetShaderSourceARB(*shader, *bufSize, (GLsizei *)popBuf(), (GLcharARB *)popBuf());
+	glGetShaderSourceARB(*shader, *bufSize, length, source);
 }
 
 //782
@@ -10361,7 +10403,7 @@ bool ExecModule::init(){
 		mFunctions[i] = NULL;
 	}
 
-		mFunctions[0] = EXEC_glNewList;
+	mFunctions[0] = EXEC_glNewList;
 	mFunctions[1] = EXEC_glEndList;
 	mFunctions[2] = EXEC_glCallList;
 	mFunctions[3] = EXEC_glCallLists;

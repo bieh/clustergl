@@ -1,35 +1,37 @@
 #include "main.h"
 
 bool bHasInit = false;
+/* default values */
+int sizeX = 100;
+int sizeY = 100;
+int offsetX = 1;
+int offsetY = 1;
+int port;
 
 /*******************************************************************************
-							Application object
+				Application object
 *******************************************************************************/
 int App::run(int argc, char **argv){
-    	if (argc != 5) {
-       		fprintf(stderr,"usage: cgl <sizeX> <sizeY> <offsetX> <offsetY>\n");
+    	if (argc != 1) {
+       		fprintf(stderr,"usage: cgl <no arguments>\n");
 	       exit(0);
 	}
 
 	if(bHasInit){
 		return 1;
 	}
-
 	init();
 	
 	LOG("Loading modules for network server and renderer output\n");
-	
-	mModules.push_back(new NetSrvModule(12345));
+	mModules.push_back(new NetSrvModule(port));
+	mModules.push_back(new ExecModule(sizeX, sizeY, -offsetX, -offsetY));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new ExecModule(atoi(argv[1]), atoi(argv[2]), - atoi(argv[3]), - atoi(argv[4])));
 	
 	while( tick() ){ }
-
 	return 0;
 }
 
 int App::run_shared(){
-	
 	//This is needed to ensure that multiple calls to SDL_Init() don't cause
 	//us to do the wrong thing.
 	if(bHasInit){
@@ -42,7 +44,7 @@ int App::run_shared(){
 	
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new NetClientModule("127.0.0.1", 12345));
+	mModules.push_back(new NetClientModule("127.0.0.1", port));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
@@ -60,6 +62,21 @@ int App::run_shared(){
 }
 
 void App::init(){
+
+    cfg_opt_t opts[] = {
+	CFG_SIMPLE_INT((char *)"sizeX", &sizeX),
+	CFG_SIMPLE_INT((char *)"sizeY", &sizeY),
+	CFG_SIMPLE_INT((char *)"offsetX", &offsetX),
+        CFG_SIMPLE_INT((char *)"offsetY", &offsetY),
+        CFG_SIMPLE_INT((char *)"port", &port),
+        CFG_END()
+    };
+	
+    cfg_t *cfg;
+
+    cfg = cfg_init(opts, 0);
+    cfg_parse(cfg, "config.conf");
+    cfg_free(cfg);
 	LOG("\n");
 	
 	LOG("**********************************************\n");
@@ -89,26 +106,30 @@ bool App::tick(){
 	time_t curTime;
 	time(&curTime);
 	// Output FPS and BPS
-	if (curTime - prevTime>= 5){ //maybe need more precision		
+	if (curTime - prevTime>= 5){ //maybe need more precision	
+		LOG("Last %ld Seconds:\n", curTime - prevTime);	
 		// First calculat FPS
-		LOG("CGL2 AVG FPS last %ld secs:%ld\n", 
-			curTime - prevTime,
+		LOG("ClusterGL2 Average FPS:\t\t\t%ld\n",
 			frames/(curTime - prevTime));
 		frames = 0;
 
 		// Now Calculate BPS (bytes per second)
 		int bytes = 0;
+		int bytes2 = 0;
 		for(int i=0;i<(int)mModules.size();i++){
 			Module *m = mModules[i];	
 			bytes += m->netBytes;
+			bytes2 += m->netBytes2;
 			m->netBytes = 0;
+			m->netBytes2 = 0;
 			if(i == (int)mModules.size() - 1 && bytes > 0){
-				LOG("CGL2 AVG BPS(bytes per second) last %ld secs:%ld\n", 
-					curTime - prevTime,
-					bytes/(curTime - prevTime));
+				LOG("ClusterGL2 Average KBPS:\t\t%lf\n",
+					(bytes/(curTime - prevTime))/1024.0);
+				LOG("ClusterGL2 Average compressed KBPS:\t%lf\n\n",
+					(bytes2/(curTime - prevTime))/1024.0);
 			}
 		}
-	        time(&prevTime);		
+	        time(&prevTime);	
 	}
 
 	//Sync every 20 frames
@@ -163,14 +184,8 @@ bool App::tick(){
 }
 
 
-
-
-
-
-
-
 /*******************************************************************************
-							Entry points
+				Entry points
 *******************************************************************************/
 App *theApp = NULL;
 

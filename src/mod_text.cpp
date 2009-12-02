@@ -1,6 +1,8 @@
 #include "main.h"
 
+#include <GL/glew.h>
 #include <GL/gl.h>
+
 
 typedef void (*TextFunc)(byte *buf);
 
@@ -20,7 +22,6 @@ bool TextModule::process(list<Instruction> &list){
 	}
 	
 	LOG("*** End of frame\n\n");
-
 	   
 	return false;
 }
