@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 #include <GL/gl.h>
@@ -206,19 +207,24 @@ int resizeWindow( int width, int height )
     ratio = ( GLfloat )width / ( GLfloat )height;
 
     /* Setup our viewport. */
-    glViewport( 0, 0, ( GLint )width, ( GLint )height);
 
-   
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity( );
+    float myHeight = 1.0f/2;
+    float myWidth = myHeight * 4/3;
+    glFrustum(-myWidth, myWidth, -myHeight, myHeight, 1.0f, 100.0f);
+    //glFrustum (-0.5, 0.5, -1.0, 1.0, 1.5, 100.0);
+       glViewport(0, 0, ( GLint )width, ( GLint )height);
     /*
      * change to the projection matrix and set
      * our viewing volume.
      */
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity( );
+    //glMatrixMode( GL_PROJECTION );
+    //glLoadIdentity( );
     
     
     /* Set our perspective */
-    gluPerspective( 60.0f, ratio, 2.0f, 100.0f );
+    //gluPerspective( 60.0f, ratio, 2.0f, 100.0f );
     /* Make sure we're changing the model view and not the projection */
     glMatrixMode( GL_MODELVIEW );
 
@@ -297,6 +303,8 @@ int drawGLScene( GLvoid )
     
     glLoadIdentity( );
     
+    /* Enables Depth Testing */
+    glEnable( GL_DEPTH_TEST );
 
     /* Move Into The Screen 5 Units */
     glTranslatef( 0.0f, 0.0f, -5.0f );
@@ -377,7 +385,7 @@ int drawGLScene( GLvoid )
     glEnd( );
 
     /* Draw it to the screen */
-    SDL_GL_SwapBuffers( );
+    SDL_GL_SwapBuffers();
 
     /* Gather our frames per second */
     Frames++;
@@ -392,9 +400,9 @@ int drawGLScene( GLvoid )
 	}
     }
 
-    xrot += 0.3f; /* X Axis Rotation */
-    yrot += 0.2f; /* Y Axis Rotation */
-    zrot += 0.4f; /* Z Axis Rotation */
+    xrot += 0.03f; /* X Axis Rotation */
+    yrot += 0.02f; /* Y Axis Rotation */
+    zrot += 0.04f; /* Z Axis Rotation */
 
     return( TRUE );
 }

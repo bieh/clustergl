@@ -4,7 +4,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-
 typedef void (*ExecFunc)(byte *buf);
 
 static ExecFunc mFunctions[1500];
@@ -40,7 +39,8 @@ bool ExecModule::makeWindow(){
 	//the flags to pass to SDL_SetVideoMode
 	videoFlags  = SDL_OPENGL;         
 	videoFlags |= SDL_GL_DOUBLEBUFFER; 
-	videoFlags |= SDL_HWPALETTE;      
+	videoFlags |= SDL_HWPALETTE;
+	videoFlags |= SDL_NOFRAME;     //nice way of drawing segmented screens
 
 	if ( videoInfo->hw_available )	videoFlags |= SDL_HWSURFACE; //use hardwareSurface
 	else				videoFlags |= SDL_SWSURFACE; //use softwareSurface
@@ -56,15 +56,19 @@ bool ExecModule::makeWindow(){
 		LOG("Could not detect resolution!\n");
 		exit(-9);
 	}
+
 	width = dpy->current_w;  //get screen width
 	height = dpy->current_h; //get screen height
+
+	width = 400;  //get screen width
+	height = 300; //get screen height
 	// if the app res is less than the current screen size
 	if (iScreenX < width && iScreenY<height)
 		width = iScreenX, height = iScreenY;	
 	
 	//get a SDL surface
 	SDL_Surface *surface = SDL_SetVideoMode(width, height, 32, videoFlags );
- 
+
 	if ( !surface ){
 		LOG( "Video mode set failed: %s\n", SDL_GetError());
 		return false;
@@ -78,7 +82,6 @@ bool ExecModule::makeWindow(){
 		return false;
 	}
 
-	
 	return true;
 }
 
@@ -98,24 +101,45 @@ bool ExecModule::process(list<Instruction> &list){
 
 		// Set our own glViewPort/glScissor
 		// We scale this to try to keep as much of the orignal settings as possible
-		if (iter->id== 305) {//glViewPort
-			int x = *((GLint*)iter->args);
-			int y = *((GLint*)(iter->args+ sizeof(GLint)));
-			origWidth = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
-			origHeight = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
-		   	glViewport(x*((float)(iScreenX-iOffsetX)/(float)origWidth),  
-				   y*((float)(iScreenY-iOffsetY)/(float)origHeight),
-				   iScreenX-iOffsetX,  
-				   iScreenY-iOffsetY); 
+		if (iter->id== 305) {//glViewPort, which now runs glFrustum
+			
+			//old one liner with 8192 pixel limitation
+			//glViewport(-iOffsetX, -iOffsetY, iScreenX, iScreenY);
+
+			//new frustum claculation that in theory, has no limitation
+			int width = 1, height = 1;
+			
+			const SDL_VideoInfo *dpy = SDL_GetVideoInfo();
+			width = dpy->current_w;  //get screen width
+			height = dpy->current_h; //get screen height
+
+			width = 400;  //get screen width hack
+			height = 300; //get screen height hack
+
+		        glMatrixMode( GL_PROJECTION );
+		        glLoadIdentity( );
+
+			//values for 4 screens only
+		        float myHeight = 1.0f/6;	//4 = zoom factor fix
+		        float myWidth = myHeight * iScreenX/iScreenY;	//height * aspect ratio
+			float myOffsetX = myWidth;
+			if(iOffsetX > 0)
+				myOffsetX *= -1;
+			float myOffsetY = myHeight;
+			if(iOffsetY > 0)
+				myOffsetY *= -1;
+			LOG("frustum values: %f, %f, %f, %f\n", myHeight, myWidth, myOffsetX, myOffsetY);
+		        glFrustum(-myWidth+myOffsetX, myWidth+myOffsetX, -myHeight+myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
+
 		} else if (iter->id== 176) { //glScissor
 			int x = *((GLint*)iter->args);
 			int y = *((GLint*)(iter->args+ sizeof(GLint)));
 			int w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
 			int h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
-		   	glScissor(x*((float)(iScreenX-iOffsetX)/(float)origWidth),  
-				  y*((float)(iScreenY-iOffsetY)/(float)origHeight),
-				  w*((float)(iScreenX-iOffsetX)/(float)origWidth),  
-				  h*((float)(iScreenY-iOffsetY)/(float)origHeight));  
+		   	glScissor(x*((float)(iScreenX+iOffsetX)/(float)origWidth),  
+				  y*((float)(iScreenY+iOffsetY)/(float)origHeight),
+				  w*((float)(iScreenX+iOffsetX)/(float)origWidth),  
+				  h*((float)(iScreenY+iOffsetY)/(float)origHeight));  
 		} else {
 		    	mFunctions[iter->id](iter->args);
 		}
@@ -2777,7 +2801,6 @@ void EXEC_glAreTexturesResident(byte *commandbuf){
 void EXEC_glBindTexture(byte *commandbuf){
 	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLuint *texture = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
-
 	glBindTexture(*target, *texture);
 }
 
@@ -2791,8 +2814,7 @@ void EXEC_glDeleteTextures(byte *commandbuf){
 //328
 void EXEC_glGenTextures(byte *commandbuf){
 	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glGenTextures(*n, (GLuint *)popBuf());	
+	glGenTextures(*n, (GLuint *)popBuf());
 }
 
 //330

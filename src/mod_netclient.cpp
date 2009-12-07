@@ -1,6 +1,7 @@
 #include "main.h"
 #include <zconf.h>
 #include <zlib.h>
+#include <netinet/tcp.h>
 
 int incomingSize = 0;
 int outgoingSize = 0;
@@ -13,7 +14,8 @@ NetClientModule::NetClientModule(string address, int port){
 	//make a compressor object
 	compressor2 = new NetCompressModule();
 
-	//setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+	int one = 1;
+	setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 
 	if(mSocket == 0){
 		LOG("Couldn't make socket!\n");
@@ -45,7 +47,7 @@ NetClientModule::NetClientModule(string address, int port){
 bool NetClientModule::process(list<Instruction> &list){
 	//Send all the commands in the list down the socket
 	//TODO: Don't do so many send() calls!
-
+	//LOG("processing:\n");
 	if(mSocket == 0){
 		return false;
 	}
@@ -53,6 +55,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	//First send the total number
 	uint32_t num = list.size();
 	//LOG("num of instructions: %d\n", num);
+	fflush(stdout);
 	netBytes += sizeof(uint32_t);
 	if(!myWrite(mSocket, &num, sizeof(uint32_t))){
 		LOG("Connection problem!\n");
@@ -67,7 +70,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	    iter != list.end(); iter++){
 	    
 	    Instruction *i = &(*iter); //yuck 
-		//LOG("ID:%d\n",i->id);
+            //LOG("ID:%d\n",i->id);
 	    bool mustSend = false;
 
 	    for(int n=0;n<3;n++){		
@@ -138,9 +141,9 @@ bool NetClientModule::process(list<Instruction> &list){
 	    //Now see if we need to send any buffers
 		for(int n=0;n<3;n++){
 			int l = i->buffers[n].len;
-						
+		
 			if(l > 0){
-				netBytes += l;
+				netBytes += l;	
 				if(myWrite(mSocket, i->buffers[n].buffer, l) != l){
 					LOG("Connection problem (didn't write buffer %d)!\n", l);
 					return false;
@@ -182,6 +185,7 @@ bool NetClientModule::process(list<Instruction> &list){
 }
 
 bool NetClientModule::sync(){
+	//LOG("SYNC\n");
 	int * a = (int *)malloc(sizeof(int));
 	*a = 987654;
 	if(myWrite(mSocket, a, sizeof(int)) != sizeof(int)){
@@ -250,7 +254,7 @@ int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
 	return ret;
 }
 
-int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
+int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){	
 	//create room for new compressed buffer
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	Bytef *out = (Bytef*) malloc(CompBuffSize);
@@ -277,15 +281,15 @@ int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
 }
 
 int NetClientModule::myRead(int fd, void *buf, size_t count){
-//LOG("READING:\n");
+	//LOG("READING:\n");
 	size_t *a = &count;
 	//read the size of the compressed packet
 	int compressedSize = 0;
-	read(fd, &compressedSize, sizeof(int));
+	int c = read(fd, &compressedSize, sizeof(int));
 
 	//read the size of the original packet
 	int origSize = 0;
-	read(fd, &origSize, sizeof(int));
+	int d = read(fd, &origSize, sizeof(int));
 
 	//read the size of the incoming packet
 	//then read the compressed packet data and uncompress
@@ -295,6 +299,7 @@ int NetClientModule::myRead(int fd, void *buf, size_t count){
 		ret = origSize;
 	compressor2->myDecompress(buf, count, in, compressedSize);
 	free(in);
+	//LOG("READ:\n");
 	return ret;
 }
 

@@ -2,29 +2,30 @@
 
 bool bHasInit = false;
 /* default values */
-int sizeX = 100;
-int sizeY = 100;
-int offsetX = 1;
-int offsetY = 1;
+int sizeX = 800;
+int sizeY = 600;
+int offsetX = 0;
+int offsetY = 0;
+string dnNumber = "0";
 int port;
 
 /*******************************************************************************
 				Application object
 *******************************************************************************/
 int App::run(int argc, char **argv){
-    	if (argc != 1) {
-       		fprintf(stderr,"usage: cgl <no arguments>\n");
+    	if (argc != 2) {
+       		fprintf(stderr,"usage: cgl <SYMPHONY number. Use 0 for testing>\n");
 	       exit(0);
 	}
-
+	dnNumber = argv[1];
 	if(bHasInit){
 		return 1;
 	}
 	init();
 	
-	LOG("Loading modules for network server and renderer output\n");
+	LOG("Loading modules for network server and renderer output on port: %d\n", port);
 	mModules.push_back(new NetSrvModule(port));
-	mModules.push_back(new ExecModule(sizeX, sizeY, -offsetX, -offsetY));
+	mModules.push_back(new ExecModule(sizeX, sizeY, offsetX, offsetY));
 	//mModules.push_back(new TextModule());
 	
 	while( tick() ){ }
@@ -37,14 +38,15 @@ int App::run_shared(){
 	if(bHasInit){
 		return 1;
 	}
-
 	init();
 	
 	LOG("Loading modules for application intercept\n");
-	
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new NetClientModule("127.0.0.1", port));
+	mModules.push_back(new NetClientModule("127.0.0.1", port+11));
+	mModules.push_back(new NetClientModule("127.0.0.1", port+12));
+	mModules.push_back(new NetClientModule("127.0.0.1", port+13));
+	mModules.push_back(new NetClientModule("127.0.0.1", port+14));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
@@ -62,27 +64,44 @@ int App::run_shared(){
 }
 
 void App::init(){
-
     cfg_opt_t opts[] = {
-	CFG_SIMPLE_INT((char *)"sizeX", &sizeX),
-	CFG_SIMPLE_INT((char *)"sizeY", &sizeY),
-	CFG_SIMPLE_INT((char *)"offsetX", &offsetX),
-        CFG_SIMPLE_INT((char *)"offsetY", &offsetY),
-        CFG_SIMPLE_INT((char *)"port", &port),
+	CFG_SIMPLE_INT((char *)("sizeX"), &sizeX),
+	CFG_SIMPLE_INT((char *)("sizeY"), &sizeY),
+	CFG_SIMPLE_INT((char *)("offsetX"), &offsetX),
+        CFG_SIMPLE_INT((char *)("offsetY"), &offsetY),
+        CFG_SIMPLE_INT((char *)("port"), &port),
         CFG_END()
     };
-	
     cfg_t *cfg;
 
     cfg = cfg_init(opts, 0);
     cfg_parse(cfg, "config.conf");
     cfg_free(cfg);
+
+	LOG("values read: %d, %d, %d, %d\n", sizeX, sizeY, offsetX, offsetY);
+	#ifdef SYMPHONY
+		int dn = atoi(dnNumber.c_str());
+		offsetX = offsetX * ((1680 + 120) * (dn - 1));
+	#else
+		//ugly horrible way of setting up 4 windows
+		port = port + atoi(dnNumber.c_str())-10;
+		if(atoi(dnNumber.c_str()) == 12 || atoi(dnNumber.c_str()) == 13)
+		{
+		offsetX = (atoi(dnNumber.c_str())%2) * 400;
+		offsetY = ((1+atoi(dnNumber.c_str()))%2) * 300;
+		}
+		else
+		{
+		offsetX = (atoi(dnNumber.c_str())%2) * 400;
+		offsetY = (atoi(dnNumber.c_str())%2) * 300;
+		}
+	#endif
+	LOG("values used: %d, %d, %d, %d\n", sizeX, sizeY, offsetX, offsetY);
+
 	LOG("\n");
-	
 	LOG("**********************************************\n");
 	LOG("               ClusterGL\n");
 	LOG("**********************************************\n");
-
 	bHasInit = true;
 }
 

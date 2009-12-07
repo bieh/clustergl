@@ -69,6 +69,7 @@ using std::map;
 #include <SDL/SDL_net.h>
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
+#include <SDL/SDL_syswm.h>
 #endif
 
 typedef unsigned char byte;

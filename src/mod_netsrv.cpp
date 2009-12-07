@@ -61,7 +61,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 		return false;
 	}
 	
-	//LOG("Reading %d instructions!\n", num);
+	//LOG("Reading %d instructions!\n\n", num);
 
 	// Variables for processing Deltas
 	uint32_t count = -1;
@@ -72,13 +72,11 @@ bool NetSrvModule::process(list<Instruction> &list){
 		count++;
 		
 		int r = myRead((byte *)&i, sizeof(Instruction));
-
 		if(r != sizeof(Instruction)){
 			LOG("Read error (%d)\n", r);
 			perror("NetSrvMod Instruction");
 			return false;
 		}
-		
 		//Now see if we're expecting any buffers
 		for(int n=0;n<3;n++){
 			int l = i.buffers[n].len;
@@ -118,6 +116,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 			num++;
 		}
 		else{
+			//LOG("READ INSTRUCTION: %d on stack\n", i.id);
 			list.push_back(i);
 			if (pIter != (*prevFrame).end()) pIter++;
 		}
@@ -126,11 +125,12 @@ bool NetSrvModule::process(list<Instruction> &list){
 }
 
 void NetSrvModule::reply(Instruction *instr, int i){
-	LOG("reply size: %d\n", instr->buffers[i].len);
+	LOG("reply size: %d, for instruction: %d\n", instr->buffers[i].len, instr->id);
 	myWrite(instr->buffers[i].buffer, instr->buffers[i].len);
 }
 
 bool NetSrvModule::sync(){
+	//LOG("SYNC\n");
 	int a;
 	if(myRead((byte *)&a, sizeof(int)) != sizeof(int)){
 		LOG("Connection problem (didn't recv sync)!\n");
@@ -144,6 +144,7 @@ bool NetSrvModule::sync(){
 }
 
 int NetSrvModule::myRead(byte *input, int nByte){
+	//LOG("READING:\n");
 	//read the size of the compressed packet
 	int compressedSize = 0;
 	mClientSocket->read((byte *)&compressedSize, sizeof(int));
@@ -151,7 +152,8 @@ int NetSrvModule::myRead(byte *input, int nByte){
 	//read the size of the original packet
 	int origSize = 0;
 	mClientSocket->read((byte *)&origSize, sizeof(int));
-
+	if(origSize < 4)
+		LOG("READING: %d\n", origSize);
 	//then read the compressed packet data and uncompress
 	Bytef *in = (Bytef*) malloc(compressedSize);
 	int ret = mClientSocket->read(in, compressedSize);
@@ -159,11 +161,12 @@ int NetSrvModule::myRead(byte *input, int nByte){
 		ret = origSize;
 	compressor->myDecompress(input, nByte, in, compressedSize);
 	free(in);
+	//LOG("READ:\n");
 	return ret;
 }
 
 int NetSrvModule::myWrite(byte *input, int nByte){
-	//LOG("WRITING:\n");
+	//LOG("WRITING: %d\n", nByte);
 	//create room for new compressed buffer
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	Bytef *out = (Bytef*) malloc(CompBuffSize);

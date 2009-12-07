@@ -49,7 +49,7 @@ bool AppModule::sync(){
 	Interception global funcs
 **************************************/
 void pushOp(uint16_t opID){
-
+	//LOG("pushed op: %d\n", opID);
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
 		
@@ -80,6 +80,10 @@ void pushBuf(const void *buffer, int len, bool needReply = false){
 		LOG("Out of buffer space!\n");
 		return;
 	}
+	if(needReply)
+	{
+	LOG("expecting reply\n");
+	}
 	
 	byte *copy = (byte *)buffer;
 	
@@ -101,7 +105,7 @@ void pushBuf(const void *buffer, int len, bool needReply = false){
 	else
 		buf->buffer = copy;
 	buf->len = len;
-	buf->needClear = !needReply;
+	buf->needClear = false;// !needReply;
 	buf->needReply = needReply;
 	//LOG("PushBuf %d, size %d (return = %d)\n", mCurrentInstruction->id, len, needReply);
 }
@@ -216,20 +220,19 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width,int height,int bpp,unsigned i
 		printf("Couldn't find SDL_SetVideoMode: %s\n", dlerror());
 		exit(0);
 	}
-	return (*_SDL_SetVideoMode)(1,1, bpp, videoFlags );
+	return (*_SDL_SetVideoMode)(100,100, bpp, videoFlags );
 }
 
 extern "C" void SDL_GL_SwapBuffers( ){
-
 	if(!bHasMinimized){
-	  if (SDL_WM_IconifyWindow()==0)
+	 if (SDL_WM_IconifyWindow()==0)
 		LOG("Could not minimize Window\n");
 	  bHasMinimized = true;
 	}
 	
 	pushOp(1499); //Swap buffers
-
 	if(!theApp->tick()){
+		LOG("end swapping\n");
 		exit(1);
 	}
 }
@@ -276,11 +279,11 @@ extern "C" void glDeleteLists(GLuint list, GLsizei range){
 extern "C" GLuint glGenLists(GLsizei range){
 	pushOp(5);
 	pushParam(range);
-
 	GLuint ret;
 	pushBuf(&ret, sizeof(GLuint), true);
+	LOG("before: %d\n", ret);
 	waitForReturn();
-
+	LOG("after: %d\n", ret);
 	return ret;
 }
 
@@ -1371,11 +1374,11 @@ extern "C" void glLightf(GLenum light, GLenum pname, GLfloat param){
 
 //160
 extern "C" void glLightfv(GLenum light, GLenum pname, const GLfloat * params){
-	LOG("Called untested stub Lightfv!\n");
 	pushOp(160);
 	pushParam(light);
 	pushParam(pname);
 	pushBuf(params, sizeof(const GLfloat) * getLightParamSize(pname));
+	
 	
 }
 
@@ -2358,13 +2361,13 @@ extern "C" void glDepthRange(GLclampd zNear, GLclampd zFar){
 
 //289
 extern "C" void glFrustum(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar){
-	pushOp(289);
+	/*pushOp(289);			disabled, for now
 	pushParam(left);
 	pushParam(right);
 	pushParam(bottom);
 	pushParam(top);
 	pushParam(zNear);
-	pushParam(zFar);
+	pushParam(zFar);*/
 }
 
 //290
@@ -2449,7 +2452,7 @@ extern "C" void glScaled(GLdouble x, GLdouble y, GLdouble z){
 	pushParam(z);
 }
 
-//302
+//302//
 extern "C" void glScalef(GLfloat x, GLfloat y, GLfloat z){
 	pushOp(302);
 	pushParam(x);
@@ -2564,7 +2567,15 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	pushBuf(pointer, getTypeSize(type)  * (stride + size)); 
+	GLuint mynull = 0;
+	if(!pointer)
+	{
+	pushBuf(&mynull, sizeof(GLuint));
+	}
+	else
+	{
+		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * 1);//need to know size of array to replace 1
+	}
 }
 
 //321
@@ -2573,8 +2584,15 @@ extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const G
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	int mySize = (getTypeSize(type)  * (stride + size)) * 24;
-	pushBuf(pointer, mySize);
+	GLuint mynull = 0;
+	if(!pointer)
+	{
+	pushBuf(&mynull, sizeof(GLuint));
+	}
+	else
+	{
+		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * 1);//need to know size of array to replace 1
+	}
 }
 
 //319
@@ -2685,15 +2703,15 @@ extern "C" void glBindTexture(GLenum target, GLuint texture){
 extern "C" void glDeleteTextures(GLsizei n, const GLuint * textures){
 	pushOp(327);
 	pushParam(n);
-	pushBuf(textures, sizeof(const GLuint) * n);
+	pushBuf(textures, sizeof(const GLuint *) * n, true);
+	waitForReturn();
 }
 
 //328
 extern "C" void glGenTextures(GLsizei n, GLuint * textures){
 	pushOp(328);
 	pushParam(n);
-	pushBuf(textures, sizeof(GLuint) * n, true);
-		
+	pushBuf(textures, sizeof(const GLuint *) * n, true);
 	waitForReturn();
 }
 

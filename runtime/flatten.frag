@@ -5,5 +5,5 @@ varying float myVal;
 
 void main(void)
 {
-	gl_FragColor = vec3(xpos, ypos, zpos);
+	gl_FragColor = vec4(xpos, ypos, zpos, 1.0);
 }

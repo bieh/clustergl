@@ -50,15 +50,16 @@ int resizeWindow( int width, int height )
 
     ratio = ( GLfloat )width / ( GLfloat )height;
 
-    /* Setup our viewport. */
-    glViewport( 0, 0, ( GLsizei )width, ( GLsizei )height );
-
     /* change to the projection matrix and set our viewing volume. */
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity( );
 
     /* Set our perspective */
     gluPerspective( 45.0f, ratio, 0.1f, 100.0f );
+
+    /* Setup our viewport. */
+    glViewport( 0, 0, ( GLsizei )width, ( GLsizei )height );
+
 
     /* Make sure we're chaning the model view and not the projection */
     glMatrixMode( GL_MODELVIEW );

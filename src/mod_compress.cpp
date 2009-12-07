@@ -33,9 +33,10 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 	}
 	else
 	{
-	memcpy(output, input, 4);
+	memcpy(output, input, nByte);
 	CompBuffSize = nByte;
 	}
+	//if(CompBuffSize < 10)
 	//LOG("incoming: %d bytes, outgoing %d bytes\n", nByte, CompBuffSize);
 	return CompBuffSize;
 }
@@ -54,12 +55,14 @@ int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int s
 			else if(ret == Z_BUF_ERROR)
 				LOG("error decompressing: buffer\n");
 			else if(ret == Z_DATA_ERROR)
-				LOG("error decompressing: data\n");
+				LOG("error decompressing: data, %d, %d\n", destLen, sourceLen);
 		}
 	}
 	else
 	{
-		memcpy(dest, source, 4);
+		memcpy(dest, source, sourceLen);
 	}
+	//if(sourceLen < 10)
+	//LOG("incoming: %d bytes, outgoing %d bytes\n", sourceLen, destLen);
 	return ret;
 }
