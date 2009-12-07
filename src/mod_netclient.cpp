@@ -16,6 +16,8 @@ NetClientModule::NetClientModule(string address, int port){
 
 	int one = 1;
 	setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+	setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+
 
 	if(mSocket == 0){
 		LOG("Couldn't make socket!\n");

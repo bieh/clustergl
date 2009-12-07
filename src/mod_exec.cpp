@@ -60,8 +60,9 @@ bool ExecModule::makeWindow(){
 	width = dpy->current_w;  //get screen width
 	height = dpy->current_h; //get screen height
 
-	width = 400;  //get screen width
-	height = 300; //get screen height
+	//width = 160;  //get screen width hack
+	//height = 600; //get screen height hack
+
 	// if the app res is less than the current screen size
 	if (iScreenX < width && iScreenY<height)
 		width = iScreenX, height = iScreenY;	
@@ -113,23 +114,18 @@ bool ExecModule::process(list<Instruction> &list){
 			width = dpy->current_w;  //get screen width
 			height = dpy->current_h; //get screen height
 
-			width = 400;  //get screen width hack
-			height = 300; //get screen height hack
+			//width = 160;  //get screen width hack
+			//height = 600; //get screen height hack
 
 		        glMatrixMode( GL_PROJECTION );
 		        glLoadIdentity( );
 
-			//values for 4 screens only
-		        float myHeight = 1.0f/6;	//4 = zoom factor fix
-		        float myWidth = myHeight * iScreenX/iScreenY;	//height * aspect ratio
-			float myOffsetX = myWidth;
-			if(iOffsetX > 0)
-				myOffsetX *= -1;
-			float myOffsetY = myHeight;
-			if(iOffsetY > 0)
-				myOffsetY *= -1;
-			LOG("frustum values: %f, %f, %f, %f\n", myHeight, myWidth, myOffsetX, myOffsetY);
-		        glFrustum(-myWidth+myOffsetX, myWidth+myOffsetX, -myHeight+myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
+			float myWidth = 0.2;
+			float myHeight = 0;
+			float myOffsetX = ((iOffsetX/1800.0 * 0.2) - 0.5);	
+			float myOffsetY = 0.5;
+
+		        glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
 
 		} else if (iter->id== 176) { //glScissor
 			int x = *((GLint*)iter->args);

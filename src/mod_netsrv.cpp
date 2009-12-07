@@ -1,6 +1,7 @@
 #include "main.h"
 #include <zconf.h>
 #include <zlib.h>
+#include <netinet/tcp.h>
 
   NetCompressModule *compressor;
 
@@ -24,6 +25,10 @@ NetSrvModule::NetSrvModule(int port){
 	netBytes2 = 0; 
 
 	compressor = new NetCompressModule();
+
+	int one = 1;
+	setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+	setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
 
 	//Bind the server socket
 	if (bind(mSocket, (struct sockaddr *) &addr,

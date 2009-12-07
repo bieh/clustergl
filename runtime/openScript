@@ -2,5 +2,6 @@ gnome-terminal --command="./cgl 11";
 gnome-terminal --command="./cgl 12";
 gnome-terminal --command="./cgl 13";
 gnome-terminal --command="./cgl 14";
+gnome-terminal --command="./cgl 15";
 echo "$1";
 LD_PRELOAD=./libcgl.so "$1";
