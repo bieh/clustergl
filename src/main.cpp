@@ -44,11 +44,6 @@ int App::run_shared(){
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
 	mModules.push_back(new NetClientModule("127.0.0.1", port));
-	//mModules.push_back(new NetClientModule("127.0.0.1", port+12));
-	//mModules.push_back(new NetClientModule("127.0.0.1", port+13));
-	//mModules.push_back(new NetClientModule("127.0.0.1", port+14));
-	//mModules.push_back(new NetClientModule("127.0.0.1", port+15));
-	//mModules.push_back(new NetClientModule("127.0.0.1", port+16));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
@@ -83,36 +78,6 @@ void App::init(){
 	#ifdef SYMPHONY
 		int dn = atoi(dnNumber.c_str());
 		offsetX = (1680 + 120) * (dn - 1);
-	#else
-		//ugly horrible way of setting up windows
-		/*int num = atoi(dnNumber.c_str());
-		port = port + num-10;
-		if(num == 11)
-		{
-		offsetX = 0;
-		offsetY = 0;
-		}
-		else if(num == 12)
-		{
-		offsetX = 160;
-		offsetY = 0;
-		}
-		else if(num == 13)
-		{
-		offsetX = 320;
-		offsetY = 0;
-		}
-		else if(num == 14)
-		{
-		offsetX = 480;
-		offsetY = 0;
-		}
-		else if(num == 15)
-		{
-		offsetX = 640;
-		offsetY = 0;
-		}*/
-
 	#endif
 
 	LOG("\n");

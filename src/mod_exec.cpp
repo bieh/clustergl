@@ -40,7 +40,7 @@ bool ExecModule::makeWindow(){
 	videoFlags  = SDL_OPENGL;         
 	videoFlags |= SDL_GL_DOUBLEBUFFER; 
 	videoFlags |= SDL_HWPALETTE;
-	videoFlags |= SDL_NOFRAME;     //nice way of drawing segmented screens
+	//videoFlags |= SDL_NOFRAME;     //nice way of drawing segmented screens
 
 	if ( videoInfo->hw_available )	videoFlags |= SDL_HWSURFACE; //use hardwareSurface
 	else				videoFlags |= SDL_SWSURFACE; //use softwareSurface
@@ -59,9 +59,6 @@ bool ExecModule::makeWindow(){
 
 	width = dpy->current_w;  //get screen width
 	height = dpy->current_h; //get screen height
-
-	//width = 160;  //get screen width hack
-	//height = 600; //get screen height hack
 
 	// if the app res is less than the current screen size
 	if (iScreenX < width && iScreenY<height)
@@ -108,30 +105,25 @@ bool ExecModule::process(list<Instruction> &list){
 			//glViewport(-iOffsetX, -iOffsetY, iScreenX, iScreenY);
 
 			//new frustum claculation that in theory, has no limitation
-			int width = 1, height = 1;
-			
-			const SDL_VideoInfo *dpy = SDL_GetVideoInfo();
-			width = dpy->current_w;  //get screen width
-			height = dpy->current_h; //get screen height
-
-			//width = 160;  //get screen width hack
-			//height = 600; //get screen height hack
-
 		        glMatrixMode( GL_PROJECTION );
 		        glLoadIdentity( );
-			float scale = 1.0;
-			float myWidth = 1680.0*scale/8880.0;
-			float myHeight = 0;
-			LOG("iOffsetX: %d\n", iOffsetX);
-			float myOffsetX = ((iOffsetX/1800.0 * 0.2*scale) - (0.5*scale));
-			//int x = *((GLint*)iter->args);
-			//int y = *((GLint*)iter->args);
-			//float w = *((GLfloat*)iter->args);
-			//float h = *((GLfloat*)iter->args);
-
-			float myOffsetY = (1680.0*scale/8880.0)*4/3;
-
-		        glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
+			#ifdef SYMPHONY
+				//work out the proportion of screen that this will be displaying in the x direction
+				float scale = 1.0;
+				float myWidth = 1680.0*scale/8880.0;
+				float myHeight = 0;
+				//use the aspect ratio (4/3 for now) to work out the height value
+				float myOffsetX = ((iOffsetX/1800.0 * 0.2*scale) - (0.5*scale));
+				float myOffsetY = (1680.0*scale/8880.0)*4/3;
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f)
+			#else
+				//if not running on symphony, use 'standard' values
+				float myWidth = 1.0;
+				float myHeight = 0;
+				float myOffsetX = -0.5;
+				float myOffsetY = 0.5 * 3/4;
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
+			#endif
 
 		} else if (iter->id== 176) { //glScissor
 			int x = *((GLint*)iter->args);
