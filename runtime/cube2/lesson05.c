@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-
+#define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glu.h>
 
@@ -163,7 +163,6 @@ int LoadGLTextures( )
 		GLuint p = glCreateProgram();
 		glAttachShader(p,v);
 		glAttachShader(p,f);
-	
 		glLinkProgram(p);
 		glUseProgram(p);
 	}
