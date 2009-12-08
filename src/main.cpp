@@ -43,20 +43,20 @@ int App::run_shared(){
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new NetClientModule("127.0.0.1", port+11));
-	mModules.push_back(new NetClientModule("127.0.0.1", port+12));
-	mModules.push_back(new NetClientModule("127.0.0.1", port+13));
-	mModules.push_back(new NetClientModule("127.0.0.1", port+14));
-	mModules.push_back(new NetClientModule("127.0.0.1", port+15));
+	mModules.push_back(new NetClientModule("127.0.0.1", port));
+	//mModules.push_back(new NetClientModule("127.0.0.1", port+12));
+	//mModules.push_back(new NetClientModule("127.0.0.1", port+13));
+	//mModules.push_back(new NetClientModule("127.0.0.1", port+14));
+	//mModules.push_back(new NetClientModule("127.0.0.1", port+15));
 	//mModules.push_back(new NetClientModule("127.0.0.1", port+16));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
-	//mModules.push_back(new NetClientModule("192.168.22.101", 12345));//dn1
-	mModules.push_back(new NetClientModule("192.168.22.102", 12345));//dn2
-	mModules.push_back(new NetClientModule("192.168.22.103", 12345));//dn3
-	mModules.push_back(new NetClientModule("192.168.22.104", 12345));//dn4
-	mModules.push_back(new NetClientModule("192.168.22.105", 12345));//dn5
+	//mModules.push_back(new NetClientModule("192.168.22.101", port));//dn1
+	mModules.push_back(new NetClientModule("192.168.22.102", port));//dn2
+	mModules.push_back(new NetClientModule("192.168.22.103", port));//dn3
+	mModules.push_back(new NetClientModule("192.168.22.104", port));//dn4
+	mModules.push_back(new NetClientModule("192.168.22.105", port));//dn5
 #endif
 
 	
@@ -82,7 +82,7 @@ void App::init(){
 
 	#ifdef SYMPHONY
 		int dn = atoi(dnNumber.c_str());
-		offsetX = offsetX * ((1680 + 120) * (dn - 1));
+		offsetX = (1680 + 120) * (dn - 1);
 	#else
 		//ugly horrible way of setting up windows
 		/*int num = atoi(dnNumber.c_str());

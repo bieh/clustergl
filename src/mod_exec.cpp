@@ -119,11 +119,17 @@ bool ExecModule::process(list<Instruction> &list){
 
 		        glMatrixMode( GL_PROJECTION );
 		        glLoadIdentity( );
-
-			float myWidth = 0.2;
+			float scale = 1.0;
+			float myWidth = 1680.0*scale/8880.0;
 			float myHeight = 0;
-			float myOffsetX = ((iOffsetX/1800.0 * 0.2) - 0.5);	
-			float myOffsetY = 0.5;
+			LOG("iOffsetX: %d\n", iOffsetX);
+			float myOffsetX = ((iOffsetX/1800.0 * 0.2*scale) - (0.5*scale));
+			//int x = *((GLint*)iter->args);
+			//int y = *((GLint*)iter->args);
+			//float w = *((GLfloat*)iter->args);
+			//float h = *((GLfloat*)iter->args);
+
+			float myOffsetY = (1680.0*scale/8880.0)*4/3;
 
 		        glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
 

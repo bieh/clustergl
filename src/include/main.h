@@ -14,7 +14,7 @@
 #define LOG printf
 
 // used because SYMPHONY does not support all OpenGL commands (only version 1.4)
-//#define  SYMPHONY true
+#define  SYMPHONY true
 
 #define CGL_REPEAT_INSTRUCTION 1498
 //#define MAX_INSTRUCTIONS 500000
