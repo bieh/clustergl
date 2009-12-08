@@ -75,14 +75,11 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, bool needReply = false){
+	//LOG("bufSize: %d %d\n", len, mCurrentInstruction->id);
 	int saved = len;
 	if(iCurrentBuffer >= 3){
 		LOG("Out of buffer space!\n");
 		return;
-	}
-	if(needReply)
-	{
-	LOG("expecting reply\n");
 	}
 	
 	byte *copy = (byte *)buffer;
@@ -105,12 +102,13 @@ void pushBuf(const void *buffer, int len, bool needReply = false){
 	else
 		buf->buffer = copy;
 	buf->len = len;
-	buf->needClear = false;// !needReply;
+	buf->needClear = !needReply;
 	buf->needReply = needReply;
 	//LOG("PushBuf %d, size %d (return = %d)\n", mCurrentInstruction->id, len, needReply);
 }
 
 void waitForReturn(){
+	//LOG("Waiting for a return\n");
 	//This is annoying. We need to force a frame end here so that the other end
 	//of the pipeline can get back to us with whatever it is they're going to
 	//do with the return buffer or value
@@ -281,9 +279,7 @@ extern "C" GLuint glGenLists(GLsizei range){
 	pushParam(range);
 	GLuint ret;
 	pushBuf(&ret, sizeof(GLuint), true);
-	LOG("before: %d\n", ret);
 	waitForReturn();
-	LOG("after: %d\n", ret);
 	return ret;
 }
 
@@ -2567,14 +2563,14 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	GLuint mynull = 0;
+	GLint mynull = -1;
 	if(!pointer)
 	{
-	pushBuf(&mynull, sizeof(GLuint));
+	pushBuf(&mynull, sizeof(GLint));
 	}
 	else
 	{
-		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * 1);//need to know size of array to replace 1
+		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * 98304);//need to know size of array to replace 1
 	}
 }
 
@@ -2584,14 +2580,14 @@ extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const G
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	GLuint mynull = 0;
+	GLint mynull = -1;
 	if(!pointer)
 	{
-	pushBuf(&mynull, sizeof(GLuint));
+	pushBuf(&mynull, sizeof(GLint));
 	}
 	else
 	{
-		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * 1);//need to know size of array to replace 1
+		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * 98304);//need to know size of array to replace 1, numTriangles * Num of Vertices * (x,y,z)
 	}
 }
 
@@ -3819,9 +3815,8 @@ extern "C" void glBindBuffer(GLenum target, GLuint buffer){
 	pushParam(buffer);
 }
 
-//466 BRADEN
+//466
 extern "C" void glBufferData(GLenum target, GLsizeiptr size, const GLvoid * data, GLenum usage){
-	LOG("Called untested stub BufferData!\n");
 	pushOp(466);
 	pushParam(target);
 	pushParam((GLsizei) size);
@@ -3851,7 +3846,8 @@ extern "C" void glDeleteBuffers(GLsizei n, const GLuint * buffer){
 extern "C" void glGenBuffers(GLsizei n, GLuint * buffer){
 	pushOp(469);
 	pushParam(n);
-	pushBuf(buffer, sizeof(GLuint) * n);
+	pushBuf(buffer, sizeof(GLuint) * n, true);
+	waitForReturn();
 }
 
 //470

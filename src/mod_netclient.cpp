@@ -83,7 +83,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 	    }
 
-	    if (i->id == pIter->id 		
+	    /*if (i->id == pIter->id 		
 		&& !mustSend
 		//&& false //uncomment to disable deltas
 		) {
@@ -131,7 +131,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 		sameCount = 0; // reset the count and free the memory
 		free(skip);
-	    }
+	    }*/
 	   
 	    // now send the new instruction
 		netBytes += sizeof(Instruction);
@@ -162,7 +162,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		if (pIter != (*prevFrame).end()) pIter++;
 	}
 
-	    if (sameCount> 0){ // send a count of the duplicates before this instruction
+	    /*if (sameCount> 0){ // send a count of the duplicates before this instruction
 		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
 		if (skip == 0){
 			LOG("ERROR: Out of memory\n");
@@ -182,7 +182,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 		sameCount = 0; // reset the count and free the memory
 		free(skip);
-	    }
+	    }*/
 	return true;
 }
 
@@ -226,6 +226,7 @@ int NetClientModule::myWrite(int fd, void* buf, int nByte){
 		ret = nByte;
 	netBytes2 += sizeof(int) * 2;
 	netBytes2 += newSize;
+	//LOG("WRITING: %d bytes\n", newSize);
 	free(out);
 	return ret;
 }
@@ -253,6 +254,7 @@ int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
 	netBytes2 += sizeof(int) * 2;
 	netBytes2 += newSize;
 	free(out);
+	//LOG("WRITING: %d bytes\n", newSize);
 	return ret;
 }
 
@@ -278,6 +280,7 @@ int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
 		ret = nByte;
 	netBytes2 += sizeof(int) * 2;
 	netBytes2 += newSize;
+	//LOG("WRITING: %d bytes\n", newSize);
 	free(out);
 	return ret;
 }

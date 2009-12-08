@@ -53,6 +53,8 @@ NetSrvModule::NetSrvModule(int port){
 	LOG("%s connected\n", string(inet_ntoa(clientaddr.sin_addr)).c_str() );
 }
 
+int prevInstruction = 0;
+
 bool NetSrvModule::process(list<Instruction> &list){
 
 	//Read instructions off the network and insert them into the list
@@ -72,15 +74,21 @@ bool NetSrvModule::process(list<Instruction> &list){
 	uint32_t count = -1;
 	std::list<Instruction>::iterator pIter = (*prevFrame).begin();
 	
-	for(uint32_t i=0;i<num;i++){
+	for(uint32_t x=0;x<num;x++){
 		Instruction i;		
 		count++;
 		
 		int r = myRead((byte *)&i, sizeof(Instruction));
 		if(r != sizeof(Instruction)){
 			LOG("Read error (%d)\n", r);
+			LOG("Last Instruction %d, %d, \n", prevInstruction, x);
 			perror("NetSrvMod Instruction");
 			return false;
+		}
+		else
+		{
+		prevInstruction = i.id;
+		//LOG("Instruction %d\n", i.id);
 		}
 		//Now see if we're expecting any buffers
 		for(int n=0;n<3;n++){
@@ -94,7 +102,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 			}			
 		}
 		
-		if(i.id == CGL_REPEAT_INSTRUCTION){
+		/*if(i.id == CGL_REPEAT_INSTRUCTION){
 			for (uint32_t a = count;count<a+(uint32_t)i.args[0];count++){
 				Instruction p;
 				
@@ -119,12 +127,12 @@ bool NetSrvModule::process(list<Instruction> &list){
 			}
 			count--;
 			num++;
-		}
-		else{
+		}*/
+		//else{
 			//LOG("READ INSTRUCTION: %d on stack\n", i.id);
 			list.push_back(i);
 			if (pIter != (*prevFrame).end()) pIter++;
-		}
+		//}
 	}
 	return true;
 }

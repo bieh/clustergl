@@ -2682,8 +2682,12 @@ void EXEC_glTexCoordPointer(byte *commandbuf){
 	GLint *size = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glTexCoordPointer(*size, *type, *stride, (const GLvoid *)popBuf());
+	const GLvoid * buf =  (const GLvoid *)popBuf();
+	GLint * num = (GLint *) buf;
+	if(*num == -1)
+		glTexCoordPointer(*size, *type, *stride, (char *) NULL);
+	else
+		glTexCoordPointer(*size, *type, *stride, buf);
 }
 
 //321
@@ -2691,8 +2695,12 @@ void EXEC_glVertexPointer(byte *commandbuf){
 	GLint *size = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glVertexPointer(*size, *type, *stride, (const GLvoid *)popBuf());
+	const GLvoid * buf =  (const GLvoid *)popBuf();
+	GLint * num = (GLint *) buf;
+	if(*num == -1)
+		glVertexPointer(*size, *type, *stride, (char *) NULL);
+	else
+		glVertexPointer(*size, *type, *stride, buf);
 }
 
 //319
