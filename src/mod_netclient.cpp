@@ -83,9 +83,9 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 	    }
 
-	    /*if (i->id == pIter->id 		
-		&& !mustSend
-		//&& false //uncomment to disable deltas
+	    if (i->id == pIter->id 		
+		&& !mustSend && i->id 			//!= 321 && i->id != 320	//temp stop crash solution
+		&& false //uncomment to disable deltas
 		) {
 			bool same = true;
 			for (int a=0;a<MAX_ARG_LEN;a++){
@@ -106,6 +106,7 @@ bool NetClientModule::process(list<Instruction> &list){
 			}
 			if (same) {
 				sameCount++;
+				//LOG("same count: %d %d\n", sameCount, i->id);
 				if (pIter != (*prevFrame).end()) pIter++;
 				continue; 
 			}	
@@ -131,13 +132,13 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 		sameCount = 0; // reset the count and free the memory
 		free(skip);
-	    }*/
+	    }
 	   
 	    // now send the new instruction
 		netBytes += sizeof(Instruction);
 	    if(myWrite(mSocket, i, sizeof(Instruction)) != sizeof(Instruction)){
-	    	LOG("Connection problem (didn't send instruction)!\n");
-	    	return false;
+	    		LOG("Connection problem (didn't send instruction)!\n");
+	    		return false;
 	    }
 	    
 	    //Now see if we need to send any buffers
@@ -145,6 +146,7 @@ bool NetClientModule::process(list<Instruction> &list){
 			int l = i->buffers[n].len;
 		
 			if(l > 0){
+				//LOG("buffer: %d\n", l);
 				netBytes += l;	
 				if(myWrite(mSocket, i->buffers[n].buffer, l) != l){
 					LOG("Connection problem (didn't write buffer %d)!\n", l);
@@ -162,7 +164,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		if (pIter != (*prevFrame).end()) pIter++;
 	}
 
-	    /*if (sameCount> 0){ // send a count of the duplicates before this instruction
+	    if (sameCount> 0){ // send a count of the duplicates before this instruction
 		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
 		if (skip == 0){
 			LOG("ERROR: Out of memory\n");
@@ -182,7 +184,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 		sameCount = 0; // reset the count and free the memory
 		free(skip);
-	    }*/
+	    }
 	return true;
 }
 
@@ -221,12 +223,11 @@ int NetClientModule::myWrite(int fd, void* buf, int nByte){
 	
 	//write the compressed instruction
 	int ret = write(fd, out, newSize);
-	//cheack and set return value to keep caller happy
+	//check and set return value to keep caller happy
 	if(ret == newSize)
 		ret = nByte;
 	netBytes2 += sizeof(int) * 2;
 	netBytes2 += newSize;
-	//LOG("WRITING: %d bytes\n", newSize);
 	free(out);
 	return ret;
 }
@@ -248,13 +249,12 @@ int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
 	
 	//write the compressed instruction
 	int ret = write(fd, out, newSize);
-	//cheack and set return value to keep caller happy
+	//check and set return value to keep caller happy
 	if(ret == newSize)
 		ret = nByte;
 	netBytes2 += sizeof(int) * 2;
 	netBytes2 += newSize;
 	free(out);
-	//LOG("WRITING: %d bytes\n", newSize);
 	return ret;
 }
 
@@ -275,12 +275,11 @@ int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
 	
 	//write the compressed instruction
 	int ret = write(fd, out, newSize);
-	//cheack and set return value to keep caller happy
+	//check and set return value to keep caller happy
 	if(ret == newSize)
 		ret = nByte;
 	netBytes2 += sizeof(int) * 2;
 	netBytes2 += newSize;
-	//LOG("WRITING: %d bytes\n", newSize);
 	free(out);
 	return ret;
 }

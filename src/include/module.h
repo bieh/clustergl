@@ -11,8 +11,8 @@ public:
 	Module(){}
 
 	list<Instruction> *prevFrame;	//used for comparing deltas (only used in NetClient and NetSrv)
-	int netBytes;			// variable to calculate network usage
-	int netBytes2;			// variable to calculate compressed network usage
+	ulong netBytes;			// variable to calculate network usage
+	ulong netBytes2;			// variable to calculate compressed network usage
 
 	virtual bool process(list<Instruction> &i)=0;
 	virtual void reply(Instruction *instr, int i){}

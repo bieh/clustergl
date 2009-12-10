@@ -9,7 +9,9 @@ typedef void (*ExecFunc)(byte *buf);
 static ExecFunc mFunctions[1500];
 static Instruction *mCurrentInstruction = NULL;
 
-ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){
+ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){\
+	netBytes= 0;
+	netBytes2 = 0;
 	init();
 	iScreenX = sizeX;
 	iScreenY = sizeY;
@@ -110,7 +112,7 @@ bool ExecModule::process(list<Instruction> &list){
 			//new frustum claculation that in theory, has no limitation
 		        glMatrixMode( GL_PROJECTION );
 		        glLoadIdentity( );
-			//#ifdef SYMPHONY
+			#ifdef SYMPHONY
 				//work out the proportion of screen that this will be displaying in the x direction
 				float scale = 1.0;
 				float myWidth = SYMPHONY_SCREEN_WIDTH* scale / SYMPHONY_SCREEN_TOTAL_WIDTH;
@@ -119,7 +121,7 @@ bool ExecModule::process(list<Instruction> &list){
 				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * scale) - (0.5 * scale));
 				float myOffsetY = (SYMPHONY_SCREEN_WIDTH*scale/SYMPHONY_SCREEN_TOTAL_WIDTH) * 4/3 ;
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
-			/*#else
+			#else
 				//glViewport(iOffsetX, iOffsetY, iScreenX, iScreenY);
 				//if not running on symphony, use 'standard' values
 				float myWidth = 0.5;
@@ -131,7 +133,7 @@ bool ExecModule::process(list<Instruction> &list){
 				if(iOffsetY > 0)
 					myHeight = 0.0;
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 100.0f);
-			#endif*/
+			#endif
 
 		} else if (iter->id== 176) { //glScissor
 			int x = *((GLint*)iter->args);

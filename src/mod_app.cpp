@@ -23,6 +23,8 @@ byte *mCurrentArgs = NULL;
 	Interception module stuff
 **************************************/
 AppModule::AppModule(string command){
+	netBytes = 0;
+	netBytes2 = 0;
 	init(command);
 }
 
@@ -3827,6 +3829,7 @@ extern "C" void glBufferData(GLenum target, GLsizeiptr size, const GLvoid * data
 	pushParam((GLsizei) size);
 	pushBuf(data, size);
 	pushParam(usage);
+	//waitForReturn();
 }
 
 //467

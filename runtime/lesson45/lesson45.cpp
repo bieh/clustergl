@@ -258,7 +258,7 @@ void Draw (void)
 	glDisableClientState( GL_VERTEX_ARRAY );					// Disable Vertex Arrays
 	glDisableClientState( GL_TEXTURE_COORD_ARRAY );				// Disable Texture Coord Arrays
 
-	//SDL_GL_SwapBuffers();
+	SDL_GL_SwapBuffers();
 }
 
 CMesh :: CMesh()

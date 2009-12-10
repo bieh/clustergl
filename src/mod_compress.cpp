@@ -36,8 +36,6 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 	memcpy(output, input, nByte);
 	CompBuffSize = nByte;
 	}
-	//if(CompBuffSize < 10)
-	//LOG("incoming: %d bytes, outgoing %d bytes\n", nByte, CompBuffSize);
 	return CompBuffSize;
 }
 

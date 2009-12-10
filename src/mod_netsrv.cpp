@@ -102,7 +102,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 			}			
 		}
 		
-		/*if(i.id == CGL_REPEAT_INSTRUCTION){
+		if(i.id == CGL_REPEAT_INSTRUCTION){
 			for (uint32_t a = count;count<a+(uint32_t)i.args[0];count++){
 				Instruction p;
 				
@@ -126,13 +126,14 @@ bool NetSrvModule::process(list<Instruction> &list){
 				
 			}
 			count--;
+			count = 0;
 			num++;
-		}*/
-		//else{
+		}
+		else{
 			//LOG("READ INSTRUCTION: %d on stack\n", i.id);
 			list.push_back(i);
 			if (pIter != (*prevFrame).end()) pIter++;
-		//}
+		}
 	}
 	return true;
 }
@@ -203,7 +204,6 @@ int NetSrvModule::myWrite(byte *input, int nByte){
 	netBytes2 += sizeof(int) * 2;  
 	netBytes2 += newSize; 
 	free(out);
-	//LOG("size: %d, size2: %d\n", nByte, newSize + 8);
 	return ret;
 }
 
