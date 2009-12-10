@@ -2540,11 +2540,12 @@ extern "C" void glGetPointerv(GLenum pname, GLvoid ** params){
 
 //314
 extern "C" void glIndexPointer(GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub IndexPointer!\n");
-	//pushOp(314);
-	//pushParam(type);
-	//pushParam(stride);
-	//pushBuf(pointer, getTypeSize(type) * (/*size of array*/ + stride));
+	LOG("Called untested stub IndexPointer!\n");
+	pushOp(314);
+	pushParam(type);
+	pushParam(stride);
+	int arraySize = 1; //TODO find size of Array
+	pushBuf(pointer, arraySize * (getTypeSize(type) + stride));
 }
 
 //317
@@ -2570,7 +2571,9 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 	}
 	else
 	{
-		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * 98304);//need to know size of array to replace 1
+		LOG("Called unimplemted version of stub glTexCoordPointer!\n");
+		int arraySize = 1; //TODO find size of Array
+		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * arraySize);
 	}
 }
 
@@ -2587,7 +2590,9 @@ extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const G
 	}
 	else
 	{
-		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * 98304);//need to know size of array to replace 1, numTriangles * Num of Vertices * (x,y,z)
+		LOG("Called unimplemted version of stub glVertexPointer!\n");
+		int arraySize = 1; //TODO find size of Array
+		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * arraySize);
 	}
 }
 

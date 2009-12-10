@@ -241,11 +241,12 @@ void Draw (void)
 	if( g_fVBOSupported )
 	{
 		glBindBuffer( GL_ARRAY_BUFFER, g_pMesh->m_nVBOVertices );
-		glVertexPointer( 3, GL_FLOAT, 0, g_pMesh->m_pVertices ); // Set The Vertex Pointer To Our Vertex Data
+		glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL ); // Set The Vertex Pointer To Our Vertex Data
 		glBindBuffer( GL_ARRAY_BUFFER, g_pMesh->m_nVBOTexCoords );
-		glTexCoordPointer( 2, GL_FLOAT, 0, g_pMesh->m_pTexCoords ); // Set The Vertex Pointer To Our TexCoord Data
+		glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL ); // Set The Vertex Pointer To Our TexCoord Data
 	} else
 	{
+		//printf("size = %d\n", sizeof(&g_pMesh->m_pVertices));
 		glVertexPointer( 3, GL_FLOAT, 0, g_pMesh->m_pVertices ); // Set The Vertex Pointer To Our Vertex Data
 		glTexCoordPointer( 2, GL_FLOAT, 0, g_pMesh->m_pTexCoords ); // Set The Vertex Pointer To Our TexCoord Data
 	}

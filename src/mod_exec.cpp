@@ -60,6 +60,9 @@ bool ExecModule::makeWindow(){
 	width = dpy->current_w;  //get screen width
 	height = dpy->current_h; //get screen height
 
+	width = 400;	//temp
+	height = 300;
+
 	// if the app res is less than the current screen size
 	if (iScreenX < width && iScreenY<height)
 		width = iScreenX, height = iScreenY;	
@@ -110,19 +113,24 @@ bool ExecModule::process(list<Instruction> &list){
 			#ifdef SYMPHONY
 				//work out the proportion of screen that this will be displaying in the x direction
 				float scale = 1.0;
-				float myWidth = 1680.0*scale/8880.0;
+				float myWidth = SYMPHONY_SCREEN_WIDTH* scale / SYMPHONY_SCREEN_TOTAL_WIDTH;
 				float myHeight = 0;
 				//use the aspect ratio (4/3 for now) to work out the height value
-				float myOffsetX = ((iOffsetX/1800.0 * 0.2*scale) - (0.5*scale));
-				float myOffsetY = (1680.0*scale/8880.0)*4/3;
+				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * scale) - (0.5 * scale));
+				float myOffsetY = (SYMPHONY_SCREEN_WIDTH*scale/SYMPHONY_SCREEN_TOTAL_WIDTH) * 4/3 ;
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f)
 			#else
+				//glViewport(iOffsetX, iOffsetY, iScreenX, iScreenY);
 				//if not running on symphony, use 'standard' values
-				float myWidth = 1.0;
-				float myHeight = 0;
+				float myWidth = 0.5;
+				float myHeight = -(0.5 * 3/4);
 				float myOffsetX = -0.5;
-				float myOffsetY = 0.5 * 3/4;
-				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
+				float myOffsetY = (0.5 * 3/4);
+				if(iOffsetX > 0)
+					myOffsetX = 0.0;
+				if(iOffsetY > 0)
+					myHeight = 0.0;
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 100.0f);
 			#endif
 
 		} else if (iter->id== 176) { //glScissor

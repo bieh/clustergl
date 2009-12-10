@@ -87,14 +87,14 @@ void ToggleFullscreen(void)													// Toggle Fullscreen/Windowed (Works On 
 
 void ReshapeGL(int width, int height)										// Reshape The Window When It's Moved Or Resized
 {
-	
-	glViewport(0,0,(GLsizei)(width),(GLsizei)(height));						// Reset The Current Viewport
 	glMatrixMode(GL_PROJECTION);											// Select The Projection Matrix
 	glLoadIdentity();														// Reset The Projection Matrix */
 
-	gluPerspective(45.0f,(GLfloat)width/height,1.0f,1000.0f);	// Calculate The Aspect Ratio Of The Window
+	gluPerspective(60.0f,(GLfloat)width/height,1.0f,1000.0f);	// Calculate The Aspect Ratio Of The Window
+	
+	glViewport(0,0,(GLsizei)(width),(GLsizei)(height));						// Reset The Current Viewport
 	glMatrixMode(GL_MODELVIEW);												// Select The Modelview Matrix
-	glLoadIdentity();														// Reset The Modelview Matrix
+	glLoadIdentity();										// Reset The Modelview Matrix
 
 	return;																	// Always Return, We're Standard :)
 }
@@ -191,6 +191,19 @@ int main(int argc, char **argv)												// Our Main Funcion!
 					break;													// And Break
 				}
 
+			}
+			if(!AppStatus.Visible)											// If The Application Is Not Visible
+			{
+				SDL_WaitEvent(NULL);										// Leave The CPU Alone, Don't Waste Time, Simply Wait For An Event
+				LastCount = SDL_GetTicks();
+			}
+			else															// Otherwhise
+			{
+				TickCount = SDL_GetTicks();									// Get Present Ticks
+				Update(TickCount-LastCount, Keys);							// And Update The Motions And Data
+				LastCount = TickCount;										// Save The Present Tick Probing
+				Draw();														// Do The Drawings!
+				SDL_GL_SwapBuffers();										// And Swap The Buffers (We're Double-Buffering, Remember?)
 			}
 		}
 		else																// No Events To Poll? (SDL_PollEvent()==0?)
