@@ -23,8 +23,6 @@ class BufferedFd {
 	/* Read in that many bytes */
 	ret=::read(fd,&buffer[bufferLength],sizeof(buffer)-bufferLength);
 	
-	//decompress here
-	
 	/* Deal with errors prematurely */
 	if (ret == -1)
 	  return -1;

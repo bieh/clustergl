@@ -4,6 +4,50 @@
 
 extern App *theApp;
 
+/**************************************
+  Coloured Console Output (not used)
+**************************************/
+
+#define RESET		0
+#define BRIGHT 		1
+#define DIM		2
+#define UNDERLINE 	3
+#define BLINK		4
+#define REVERSE		7
+#define HIDDEN		8
+
+#define BLACK 		0
+#define RED		1
+#define GREEN		2
+#define YELLOW		3
+#define BLUE		4
+#define MAGENTA		5
+#define CYAN		6
+#define	WHITE		7
+
+void textcolor(int attr, int fg, int bg)
+{	char command[13];
+
+	/* Command is the control command to the terminal */
+	sprintf(command, "%c[%d;%d;%dm", 0x1B, attr, fg + 30, bg + 40);
+	printf("%s", command);
+}
+
+/**************************************
+	Pointer Structures
+**************************************/
+
+struct replacementPointer {
+bool sent;
+GLint size;
+GLenum type;
+GLsizei stride;
+const GLvoid * pointer;
+};
+
+replacementPointer rpTex;
+replacementPointer rpVert;
+replacementPointer rpCol;
 
 /**************************************
 	Interception globals
@@ -17,19 +61,20 @@ int iCurrentBuffer = 0;
 Instruction *mCurrentInstruction = NULL;
 byte *mCurrentArgs = NULL;
 
-
-
 /**************************************
 	Interception module stuff
 **************************************/
 AppModule::AppModule(string command){
+	//initialize values and structures
 	netBytes = 0;
 	netBytes2 = 0;
+	rpTex.size = NULL;
+	rpVert.size = NULL;
+	rpCol.size = NULL;
 	init(command);
 }
 
 bool AppModule::init(string command){
-	
 	return true;
 }
 
@@ -51,7 +96,8 @@ bool AppModule::sync(){
 	Interception global funcs
 **************************************/
 void pushOp(uint16_t opID){
-	//LOG("pushed op: %d\n", opID);
+	//if(opID > 500)
+	//	LOG("op: %d\n", opID);
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
 		
@@ -77,7 +123,7 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, bool needReply = false){
-	//LOG("bufSize: %d %d\n", len, mCurrentInstruction->id);
+	LOG("bufSize: %d %d\n", len, mCurrentInstruction->id);
 	int saved = len;
 	if(iCurrentBuffer >= 3){
 		LOG("Out of buffer space!\n");
@@ -114,7 +160,6 @@ void waitForReturn(){
 	//This is annoying. We need to force a frame end here so that the other end
 	//of the pipeline can get back to us with whatever it is they're going to
 	//do with the return buffer or value
-	
 	//force the frame
 	if(!theApp->tick()){
 		exit(1);
@@ -149,6 +194,7 @@ int getTypeSize(GLenum type)
 	case GL_UNSIGNED_INT: 	return sizeof(GLuint);
 	case GL_FLOAT: 		return sizeof(GLfloat);
 	case GL_DOUBLE:		return sizeof(GLdouble);
+	default:		LOG("DEFAULTED!\n"); return 4;
 	}
 }
 
@@ -175,6 +221,43 @@ size_t getLightParamSize(GLenum type)
 	case GL_EMISSION:			return 4;
 	case GL_SHININESS:			return 1;
 	case GL_COLOR_INDEXES:			return 3;
+
+	default:				LOG("DEFAULTED!\n"); return 4;
+	}
+}
+
+void sendPointers(int length) {
+	//tex pointer
+	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
+	{
+	pushOp(320);
+	pushParam(rpTex.size);
+	pushParam(rpTex.type);
+	pushParam(rpTex.stride);
+	pushBuf(rpTex.pointer, (getTypeSize(rpTex.type)  * (rpTex.stride + rpTex.size)) * length);
+	rpTex.sent = true;
+	}
+
+	//vert pointer
+	if(!rpVert.sent && rpVert.size)	//check if sent already, and not null
+	{
+	pushOp(321);
+	pushParam(rpVert.size);
+	pushParam(rpVert.type);
+	pushParam(rpVert.stride);
+	pushBuf(rpVert.pointer, (getTypeSize(rpVert.type)  * (rpVert.stride + rpVert.size)) * length);
+	rpVert.sent = true;
+	}
+
+	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
+	{
+	//col pointer
+	pushOp(308);
+	pushParam(rpCol.size);
+	pushParam(rpCol.type);
+	pushParam(rpCol.stride);
+	pushBuf(rpCol.pointer, (getTypeSize(rpCol.type)  * (rpCol.stride + rpCol.size)) * length);
+	rpCol.sent = true;
 	}
 }
 
@@ -1519,7 +1602,13 @@ extern "C" void glTexParameterf(GLenum target, GLenum pname, GLfloat param){
 
 //179
 extern "C" void glTexParameterfv(GLenum target, GLenum pname, const GLfloat * params){
-	LOG("Called unimplemted stub TexParameterfv!\n");
+	LOG("Called untested stub TexParameterfv!\n");
+	pushOp(179);
+	pushParam(target);
+	pushParam(pname);
+	int arraySize = sizeof(params)/sizeof(params[0]);
+	LOG("arraySize: %d\n", arraySize);
+	pushBuf(params, sizeof(GLfloat) * arraySize);
 }
 
 //180
@@ -1532,7 +1621,13 @@ extern "C" void glTexParameteri(GLenum target, GLenum pname, GLint param){
 
 //181
 extern "C" void glTexParameteriv(GLenum target, GLenum pname, const GLint * params){
-	LOG("Called unimplemted stub TexParameteriv!\n");
+	LOG("Called untested stub TexParameteriv!\n");
+	pushOp(181);
+	pushParam(target);
+	pushParam(pname);
+	int arraySize = sizeof(params)/sizeof(params[0]);
+	LOG("arraySize: %d\n", arraySize);
+	pushBuf(params, sizeof(GLint) * arraySize);
 }
 
 //182
@@ -1801,11 +1896,13 @@ extern "C" void glEnable(GLenum cap){
 //216
 extern "C" void glFinish(){
 	pushOp(216);
+	waitForReturn();
 }
 
 //217
 extern "C" void glFlush(){
 	pushOp(217);
+	waitForReturn();
 }
 
 //218
@@ -2172,7 +2269,20 @@ extern "C" GLenum glGetError(){
 	GLenum ret;
 	pushBuf(&ret, sizeof(GLenum), true);
 	waitForReturn();
-
+	if(ret == GL_NO_ERROR)	
+		LOG("GL_NO_ERROR\n");
+	else if(ret == GL_INVALID_ENUM)
+		LOG("GL_INVALID_ENUM\n");
+	else if(ret == GL_INVALID_VALUE)
+		LOG("GL_INVALID_VALUE\n");
+	else if(ret == GL_INVALID_OPERATION)
+		LOG("GL_INVALID_OPERATION\n");
+	else if(ret == GL_STACK_OVERFLOW)
+		LOG("GL_STACK_OVERFLOW\n");
+	else if(ret == GL_STACK_UNDERFLOW)
+		LOG("GL_STACK_UNDERFLOW\n");
+	else if(ret == GL_OUT_OF_MEMORY)
+		LOG("GL_OUT_OF_MEMORY\n");
 	return ret;
 }
 
@@ -2203,7 +2313,7 @@ extern "C" void glGetLightiv(GLenum light, GLenum pname, GLint * params){
 	pushOp(265);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * getLightParamSize(pname));
+	pushBuf(params, sizeof(GLint) * getLightParamSize(pname));
 }
 
 //266
@@ -2491,12 +2601,26 @@ extern "C" void glArrayElement(GLint i){
 
 //308
 extern "C" void glColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called untested stub ColorPointer!\n");
+	LOG("glColorPointer\n");
+	//LOG("Called untested stub ColorPointer!\n");
+	if(!pointer)
+	{
 	pushOp(308);
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
-	pushBuf(pointer, getTypeSize(type) * size);
+	GLint mynull = -1;
+	pushBuf(&mynull, sizeof(GLint));
+	}
+	else
+	{
+		//LOG("Called unimplemted version of stub glColorPointer!\n");
+		rpCol.size = size;
+		rpCol.type = type;
+		rpCol.stride = stride;
+		rpCol.pointer = pointer;
+		rpCol.sent = false;
+	}
 }
 
 //309
@@ -2507,21 +2631,30 @@ extern "C" void glDisableClientState(GLenum array){
 
 //310
 extern "C" void glDrawArrays(GLenum mode, GLint first, GLsizei count){
+	sendPointers(count + first);
+
+	//draw arrays
 	pushOp(310);
 	pushParam(mode);
 	pushParam(first);
 	pushParam(count);
+	//LOG("glDrawArrays size: %d\n", count);
 }
 
 //311
 extern "C" void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid * indices){
 	LOG("Called untested stub DrawElements!\n");
+	sendPointers(count);
+
 	pushOp(311);
 	pushParam(mode);
 	pushParam(count);
 	pushParam(type);
-	//most likely null and will crash
-	//pushParam(*indices);	
+	if(!indices)
+	{
+	LOG("NULL\n");
+	}
+	pushBuf(indices, count * getTypeSize(type));
 }
 
 //312
@@ -2562,39 +2695,51 @@ extern "C" void glNormalPointer(GLenum type, GLsizei stride, const GLvoid * poin
 
 //320
 extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
+	LOG("glTexCoordPointer\n");
+	if(!pointer)
+	{
 	pushOp(320);
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
 	GLint mynull = -1;
-	if(!pointer)
-	{
 	pushBuf(&mynull, sizeof(GLint));
 	}
 	else
 	{
-		LOG("Called unimplemted version of stub glTexCoordPointer!\n");
-		int arraySize = 1; //TODO find size of Array
-		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * arraySize);
+		//LOG("Called unimplemted version of stub glTexCoordPointer!\n");
+		//int arraySize = 98304; //TODO find size of Array
+		//pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * arraySize);
+		rpTex.size = size;
+		rpTex.type = type;
+		rpTex.stride = stride;
+		rpTex.pointer = pointer;
+		rpTex.sent = false;
 	}
 }
 
 //321
 extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
+	LOG("glVertexPointer\n");
+	if(!pointer)
+	{
 	pushOp(321);
 	pushParam(size);
 	pushParam(type);
 	pushParam(stride);
 	GLint mynull = -1;
-	if(!pointer)
-	{
 	pushBuf(&mynull, sizeof(GLint));
 	}
 	else
 	{
-		LOG("Called unimplemted version of stub glVertexPointer!\n");
-		int arraySize = 1; //TODO find size of Array
-		pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * arraySize);
+		//LOG("Called unimplemted version of stub glVertexPointer!\n");
+		//int arraySize = 98304; //TODO find size of Array
+		//pushBuf(pointer, (getTypeSize(type)  * (stride + size)) * arraySize);
+		rpVert.size = size;
+		rpVert.type = type;
+		rpVert.stride = stride;
+		rpVert.pointer = pointer;
+		rpVert.sent = false;
 	}
 }
 
@@ -2664,7 +2809,7 @@ extern "C" void glTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsiz
 	pushParam(width);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(pixels, (width + xoffset) * getTypeSize(type));
+	pushBuf(pixels, width * getTypeSize(type));
 }
 
 //333

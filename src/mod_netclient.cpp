@@ -84,7 +84,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	    }
 
 	    if (i->id == pIter->id 		
-		&& !mustSend && i->id 			//!= 321 && i->id != 320	//temp stop crash solution
+		&& !mustSend && i->id 			
 		&& false //uncomment to disable deltas
 		) {
 			bool same = true;

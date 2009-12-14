@@ -62,8 +62,8 @@ bool ExecModule::makeWindow(){
 	width = dpy->current_w;  //get screen width
 	height = dpy->current_h; //get screen height
 
-	width = 400;	//temp
-	height = 300;
+	//width = 400;	//temp
+	//height = 300;
 
 	// if the app res is less than the current screen size
 	if (iScreenX < width && iScreenY<height)
@@ -122,30 +122,40 @@ bool ExecModule::process(list<Instruction> &list){
 				float myOffsetY = (SYMPHONY_SCREEN_WIDTH*scale/SYMPHONY_SCREEN_TOTAL_WIDTH) * 4/3 ;
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
 			#else
-				//glViewport(iOffsetX, iOffsetY, iScreenX, iScreenY);
+				//LOG("VIEWPORT!\n");
+				//glViewport(0, 0, iScreenX, iScreenY);
 				//if not running on symphony, use 'standard' values
-				float myWidth = 0.5;
-				float myHeight = -(0.5 * 3/4);
-				float myOffsetX = -0.5;
-				float myOffsetY = (0.5 * 3/4);
-				if(iOffsetX > 0)
-					myOffsetX = 0.0;
-				if(iOffsetY > 0)
-					myHeight = 0.0;
-				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 100.0f);
+				float myWidth = 2.0/2;
+				float myHeight = -(1.0 * 3/4)/2;
+				float myOffsetX = -1.0/2;
+				float myOffsetY = (1.0 * 3/4);
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 1000.0f);
 			#endif
 
 		} else if (iter->id== 176) { //glScissor
+				//LOG("SCISSOR!\n");
 			int x = *((GLint*)iter->args);
 			int y = *((GLint*)(iter->args+ sizeof(GLint)));
 			int w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
 			int h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
-		   	glScissor(x*((float)(iScreenX+iOffsetX)/(float)origWidth),  
+		   	glScissor(x, y, iScreenX, iScreenY);
+				/*glScissor(x*((float)(iScreenX+iOffsetX)/(float)origWidth),  
 				  y*((float)(iScreenY+iOffsetY)/(float)origHeight),
 				  w*((float)(iScreenX+iOffsetX)/(float)origWidth),  
-				  h*((float)(iScreenY+iOffsetY)/(float)origHeight));  
+				  h*((float)(iScreenY+iOffsetY)/(float)origHeight));  */
+		} else if (iter->id == 296) { //glOrtho
+				//LOG("glOrtho!\n");
+			GLdouble left = *((GLdouble*)iter->args);
+			GLdouble right = *((GLdouble*)(iter->args+ sizeof(GLdouble)));
+			GLdouble bottom = *((GLdouble*)(iter->args+ sizeof(GLdouble)*2));
+			GLdouble top = *((GLdouble*)(iter->args+ sizeof(GLdouble)*3));
+			GLdouble nearVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*4));
+			GLdouble farVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*5));
+			//LOG("Ortho: %lf, %lf, %lf, %lf, %lf, %lf\n", left, right, bottom, top, nearVal, farVal);
+		   	glOrtho(0.0, iScreenX, iScreenY, 0.0, nearVal, farVal);
 		} else {
 		    	mFunctions[iter->id](iter->args);
+			//LOG("ID: %d\n", iter->id); 
 		}
 	}
 	
@@ -2613,8 +2623,12 @@ void EXEC_glColorPointer(byte *commandbuf){
 	GLint *size = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glColorPointer(*size, *type, *stride, (const GLvoid *)popBuf());
+	const GLvoid * buf =  (const GLvoid *)popBuf();
+	GLint * num = (GLint *) buf;
+	if(*num == -1)
+		glColorPointer(*size, *type, *stride, (char *) NULL);
+	else
+		glColorPointer(*size, *type, *stride, buf);
 }
 
 //309
@@ -2694,7 +2708,7 @@ void EXEC_glTexCoordPointer(byte *commandbuf){
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	const GLvoid * buf =  (const GLvoid *)popBuf();
 	GLint * num = (GLint *) buf;
-	if(*num == -1)
+	if(!num || *num == -1)
 		glTexCoordPointer(*size, *type, *stride, (char *) NULL);
 	else
 		glTexCoordPointer(*size, *type, *stride, buf);
@@ -2707,7 +2721,7 @@ void EXEC_glVertexPointer(byte *commandbuf){
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	const GLvoid * buf =  (const GLvoid *)popBuf();
 	GLint * num = (GLint *) buf;
-	if(*num == -1)
+	if(!num || *num == -1)
 		glVertexPointer(*size, *type, *stride, (char *) NULL);
 	else
 		glVertexPointer(*size, *type, *stride, buf);

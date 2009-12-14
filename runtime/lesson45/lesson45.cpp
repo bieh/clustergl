@@ -61,10 +61,10 @@ class CMesh
 {
 public:
 	// Mesh Data
-	GLuint				m_nVertexCount;								// Vertex Count
+	GLuint			m_nVertexCount;								// Vertex Count
 	CVert*			m_pVertices;								// Vertex Data
 	CTexCoord*		m_pTexCoords;								// Texture Coordinates
-	unsigned int	m_nTextureId;								// Texture ID
+	unsigned int		m_nTextureId;								// Texture ID
 
 	// Vertex Buffer Object Names
 	unsigned int	m_nVBOVertices;								// Vertex VBO Name

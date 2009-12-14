@@ -23,11 +23,15 @@ bool TextModule::process(list<Instruction> &list){
 	
 	LOG("*** End of frame\n\n");
 	   
-	return false;
+	return true;
 }
 
 bool TextModule::sync(){
 	return true;
+}
+
+static void EXEC_CGLSwapBuffers(byte *commandbuf){	
+	LOG("SDL_GL_SwapBuffers()\n");
 }
 
 //0
@@ -10896,6 +10900,8 @@ bool TextModule::init(){
 	mFunctions[1226] = EXEC_glDeformationMap3fSGIX;
 	mFunctions[1227] = EXEC_glDeformSGIX;
 	mFunctions[1228] = EXEC_glLoadIdentityDeformationMapSGIX;
+
+	mFunctions[1499] = EXEC_CGLSwapBuffers;
 	
 	LOG("Loaded!\n");
 		

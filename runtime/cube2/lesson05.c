@@ -207,23 +207,23 @@ int resizeWindow( int width, int height )
 
     /* Setup our viewport. */
 
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity( );
-    float myHeight = 1.0f/2;
-    float myWidth = myHeight * 4/3;
-    glFrustum(-myWidth, myWidth, -myHeight, myHeight, 1.0f, 100.0f);
+    //glMatrixMode( GL_PROJECTION );
+    //glLoadIdentity( );
+    //float myHeight = 1.0f/2;
+    //float myWidth = myHeight * 4/3;
+    //glFrustum(-myWidth, myWidth, -myHeight, myHeight, 1.0f, 100.0f);
     //glFrustum (-0.5, 0.5, -1.0, 1.0, 1.5, 100.0);
        glViewport(0, 0, ( GLint )width, ( GLint )height);
     /*
      * change to the projection matrix and set
      * our viewing volume.
      */
-    //glMatrixMode( GL_PROJECTION );
-    //glLoadIdentity( );
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity( );
     
     
     /* Set our perspective */
-    //gluPerspective( 60.0f, ratio, 2.0f, 100.0f );
+    gluPerspective( 60.0f, ratio, 2.0f, 100.0f );
     /* Make sure we're changing the model view and not the projection */
     glMatrixMode( GL_MODELVIEW );
 

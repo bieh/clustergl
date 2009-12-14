@@ -104,9 +104,8 @@ public:
 };
 
 /*********************************************
- Network client module. This sends commands,
- and thus should go at the *end* of the local
- pipe (probably on the app side). 
+ Network compress module. This compresses each
+ instruction/buffer to send over the network.
 **********************************************/
 class NetCompressModule : public Module{
 public:
@@ -117,4 +116,17 @@ public:
 	bool sync();
 	int myCompress(void *input, int nByte, void *output);
 	int myDecompress(void *dest, int destLen, void *source, int sourceLen);
+};
+
+/*********************************************
+Network keyboard module. Sends keyboard 
+instuctions to each screen.
+**********************************************/
+class NetKeyboardModule : public Module{
+public:
+	NetKeyboardModule();
+	
+	bool process(list<Instruction> &i);
+	void reply(Instruction *instr, int i);
+	bool sync();
 };

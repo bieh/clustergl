@@ -42,11 +42,9 @@ int App::run_shared(){
 	
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
+	//mModules.push_back(new NetKeyboardModule());
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new NetClientModule("127.0.0.1", port+10));
-	mModules.push_back(new NetClientModule("127.0.0.1", port+11));
-	mModules.push_back(new NetClientModule("127.0.0.1", port+12));
-	mModules.push_back(new NetClientModule("127.0.0.1", port+13));
+	mModules.push_back(new NetClientModule("127.0.0.1", port));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
@@ -81,38 +79,7 @@ void App::init(){
 	#ifdef SYMPHONY
 		int dn = atoi(dnNumber.c_str());
 		offsetX = (SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * (dn - 1);
-	#else
-		//ignore this, testing only
-		sizeX = 800;
-		sizeY = 600;
-		int dn = atoi(dnNumber.c_str());
-		if(dn == 11)
-		{
-		LOG("here\n");
-		offsetX = 0;
-		offsetY = 0;
-		port = port+10;
-		}
-		else if(dn == 12)
-		{
-		offsetX = 400;
-		offsetY = 0;
-		port = port+11;
-		}
-		else if(dn == 13)
-		{
-		offsetX = 0;
-		offsetY = 300;
-		port = port+12;
-		}
-		else if(dn == 14)
-		{
-		offsetX = 400;
-		offsetY = 300;
-		port = port+13;
-		}
 	#endif
-
 	LOG("\n");
 	LOG("**********************************************\n");
 	LOG("               ClusterGL\n");

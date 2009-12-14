@@ -139,7 +139,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 }
 
 void NetSrvModule::reply(Instruction *instr, int i){
-	LOG("reply size: %d, for instruction: %d\n", instr->buffers[i].len, instr->id);
+	//LOG("reply size: %d, for instruction: %d\n", instr->buffers[i].len, instr->id);
 	myWrite(instr->buffers[i].buffer, instr->buffers[i].len);
 }
 
