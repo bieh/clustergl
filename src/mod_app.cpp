@@ -2823,7 +2823,10 @@ extern "C" void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint
 	pushParam(height);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(pixels, width * height * getTypeSize(type));
+	
+	LOG("*********** %d, %d, %d\n", width, height, type);
+		
+	pushBuf(pixels, width * height * getTypeSize(type) * 4);
 }
 
 //322
