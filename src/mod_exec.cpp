@@ -154,8 +154,8 @@ bool ExecModule::process(list<Instruction> &list){
 			//LOG("Ortho: %lf, %lf, %lf, %lf, %lf, %lf\n", left, right, bottom, top, nearVal, farVal);
 		   	glOrtho(0.0, iScreenX, iScreenY, 0.0, nearVal, farVal);
 		} else {
+			LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
-			//LOG("ID: %d\n", iter->id); 
 		}
 	}
 	
@@ -168,7 +168,7 @@ bool ExecModule::sync(){
 }
 
 byte *popBuf(){
-	//LOG("Popping buf\n");
+	LOG("Popping buf %d\n", mCurrentInstruction->buffers[0].len);
 	return mCurrentInstruction->buffers[0].buffer;
 }
 
@@ -2652,8 +2652,14 @@ void EXEC_glDrawElements(byte *commandbuf){
 	GLenum *mode = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
-	glDrawElements(*mode, *count, *type, (const GLvoid *)popBuf());
+LOG("a\n");
+	const GLvoid * buf = (const GLvoid *)popBuf();
+	if(!buf)
+		LOG("NULL!\n");
+	else
+		LOG("NOT NULL!\n");
+	glDrawElements(*mode, *count, *type, buf);
+LOG("b\n");
 }
 
 //312

@@ -1,4 +1,5 @@
 #include "main.h"
+#include <iostream>
 
 #include <GL/gl.h>
 
@@ -96,8 +97,8 @@ bool AppModule::sync(){
 	Interception global funcs
 **************************************/
 void pushOp(uint16_t opID){
-	//if(opID > 500)
-	//	LOG("op: %d\n", opID);
+	//if(opID > 325)
+	//	LOG("OP: %d\n", opID);
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
 		
@@ -123,7 +124,9 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, bool needReply = false){
-	LOG("bufSize: %d %d\n", len, mCurrentInstruction->id);
+
+	//if(mCurrentInstruction->id != 183 && mCurrentInstruction->id != 333)
+	//	LOG("bufSize: %d %d\n", len, mCurrentInstruction->id);
 	int saved = len;
 	if(iCurrentBuffer >= 3){
 		LOG("Out of buffer space!\n");
@@ -186,19 +189,19 @@ int getTypeSize(GLenum type)
 {
 	switch (type) 
 	{
-	case GL_BYTE: 		return sizeof(GLbyte);
-	case GL_UNSIGNED_BYTE:  return sizeof(GLubyte);
-	case GL_SHORT: 		return sizeof(GLshort);
-	case GL_UNSIGNED_SHORT: return sizeof(GLushort);
-	case GL_INT: 		return sizeof(GLint);
-	case GL_UNSIGNED_INT: 	return sizeof(GLuint);
-	case GL_FLOAT: 		return sizeof(GLfloat);
-	case GL_DOUBLE:		return sizeof(GLdouble);
+	case GL_BYTE: 		LOG("BYTE!\n"); return sizeof(GLbyte);
+	case GL_UNSIGNED_BYTE:  LOG("GL_UNSIGNED_BYTE!\n");return sizeof(GLubyte);
+	case GL_SHORT: 		LOG("SHORT!\n"); return sizeof(GLshort);
+	case GL_UNSIGNED_SHORT: LOG("UNSIGNED SHORT!\n");return sizeof(GLushort);
+	case GL_INT: 		LOG("INT!\n"); return sizeof(GLint);
+	case GL_UNSIGNED_INT: 	LOG("UNSIGNED_INT!\n");return sizeof(GLuint);
+	case GL_FLOAT: 		LOG("FLOAT!\n"); return sizeof(GLfloat);
+	case GL_DOUBLE:		LOG("DOUBLE!\n");return sizeof(GLdouble);
 	default:		LOG("DEFAULTED!\n"); return 4;
 	}
 }
 
-size_t getLightParamSize(GLenum type)
+int getLightParamSize(GLenum type)
 {
 	switch (type) 
 	{
@@ -226,7 +229,24 @@ size_t getLightParamSize(GLenum type)
 	}
 }
 
+int getFormatSize(GLenum format)
+{
+    int bpp = 1;
+    
+    if(format == GL_BGR || format == GL_RGB) 
+	bpp = 3;
+    else if(format == GL_RGBA || format == GL_BGRA) 
+	bpp = 4;
+    return bpp;
+}
+
 void sendPointers(int length) {
+	glEnable(3042.0);	//no idea what the numbers stand for
+	glDisable(2929.0);
+	//glEnableClientState(GL_VERTEX_ARRAY);   //We want a vertex array
+	glDisableClientState(GL_COLOR_ARRAY);    //and a color array
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);    //and a color array
+
 	//tex pointer
 	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
 	{
@@ -234,7 +254,7 @@ void sendPointers(int length) {
 	pushParam(rpTex.size);
 	pushParam(rpTex.type);
 	pushParam(rpTex.stride);
-	pushBuf(rpTex.pointer, (getTypeSize(rpTex.type)  * (rpTex.stride + rpTex.size)) * length);
+	pushBuf(rpTex.pointer, (getTypeSize(rpTex.type) * rpTex.size * (length + rpTex.stride)));
 	rpTex.sent = true;
 	}
 
@@ -245,20 +265,26 @@ void sendPointers(int length) {
 	pushParam(rpVert.size);
 	pushParam(rpVert.type);
 	pushParam(rpVert.stride);
-	pushBuf(rpVert.pointer, (getTypeSize(rpVert.type)  * (rpVert.stride + rpVert.size)) * length);
+	pushBuf(rpVert.pointer, (getTypeSize(rpVert.type)  * rpVert.size * (length + rpVert.stride)));
 	rpVert.sent = true;
 	}
-
+	
+	LOG("rpCol.stride %d\n", rpCol.stride);
 	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
 	{
+	const GLfloat * pointing = reinterpret_cast<const float *> (rpCol.pointer);
 	//col pointer
 	pushOp(308);
 	pushParam(rpCol.size);
-	pushParam(rpCol.type);
+	pushParam(rpVert.type);
 	pushParam(rpCol.stride);
-	pushBuf(rpCol.pointer, (getTypeSize(rpCol.type)  * (rpCol.stride + rpCol.size)) * length);
+	pushBuf(rpCol.pointer, (getTypeSize(rpCol.type) * rpCol.size * (length + rpCol.stride)));
 	rpCol.sent = true;
+	
 	}
+
+	glEnable(2929.0);		//undo what was done earlier
+	glDisable(3042.0);
 }
 
 
@@ -1606,9 +1632,7 @@ extern "C" void glTexParameterfv(GLenum target, GLenum pname, const GLfloat * pa
 	pushOp(179);
 	pushParam(target);
 	pushParam(pname);
-	int arraySize = sizeof(params)/sizeof(params[0]);
-	LOG("arraySize: %d\n", arraySize);
-	pushBuf(params, sizeof(GLfloat) * arraySize);
+	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
 }
 
 //180
@@ -1625,9 +1649,7 @@ extern "C" void glTexParameteriv(GLenum target, GLenum pname, const GLint * para
 	pushOp(181);
 	pushParam(target);
 	pushParam(pname);
-	int arraySize = sizeof(params)/sizeof(params[0]);
-	LOG("arraySize: %d\n", arraySize);
-	pushBuf(params, sizeof(GLint) * arraySize);
+	pushBuf(params, sizeof(*params));
 }
 
 //182
@@ -1662,13 +1684,8 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
     pushParam(format);
     pushParam(type);
     
-    int bpp = 1;
-    
-    if(format == GL_BGR || format == GL_RGB) bpp = 3;
-    else if(format == GL_RGBA || format == GL_BGRA) bpp = 4;
-    
     if(pixels)
-	    pushBuf(pixels, width * height * bpp);
+	    pushBuf(pixels, getFormatSize(format) *  width * height);
 }
 
 //184
@@ -1855,11 +1872,12 @@ extern "C" void glStencilMask(GLuint mask){
 
 //210
 extern "C" void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha){
-	pushOp(210);
+	LOG("210\n");	
+	/*pushOp(210);		hmmmm
 	pushParam(red);
 	pushParam(green);
 	pushParam(blue);
-	pushParam(alpha);
+	pushParam(alpha);*/
 }
 
 //211
@@ -2239,7 +2257,7 @@ extern "C" void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenu
 	pushParam(format);
 	//more types need defining in my method above
 	pushParam(type);
-	pushBuf(pixels, getTypeSize(type) * width * height);
+	pushBuf(pixels, getFormatSize(format) * getTypeSize(type) * width * height);
 }
 
 //258
@@ -2274,7 +2292,7 @@ extern "C" GLenum glGetError(){
 	else if(ret == GL_INVALID_ENUM)
 		LOG("GL_INVALID_ENUM\n");
 	else if(ret == GL_INVALID_VALUE)
-		LOG("GL_INVALID_VALUE\n");
+		LOG("\t\t\t\t***********GL_INVALID_VALUE\n");
 	else if(ret == GL_INVALID_OPERATION)
 		LOG("GL_INVALID_OPERATION\n");
 	else if(ret == GL_STACK_OVERFLOW)
@@ -2601,8 +2619,8 @@ extern "C" void glArrayElement(GLint i){
 
 //308
 extern "C" void glColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("glColorPointer\n");
-	//LOG("Called untested stub ColorPointer!\n");
+	//LOG("glColorPointer\n");
+	//LOG("Called untested stub C	olorPointer!\n");
 	if(!pointer)
 	{
 	pushOp(308);
@@ -2643,18 +2661,50 @@ extern "C" void glDrawArrays(GLenum mode, GLint first, GLsizei count){
 
 //311
 extern "C" void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid * indices){
-	LOG("Called untested stub DrawElements!\n");
+	//LOG("Called untested stub DrawElements!\n");
+	int i;
+	const GLfloat * pointing = reinterpret_cast<const float *> (indices);
+	int max = 0;
+	//LOG("count = %d\n", count);
+	for (i = 0; i < count; i++)
+	{
+		//LOG("pointing[i] = %d\n", pointing[i]);
+		if(max < pointing[i])
+			max = pointing[i];
+	}
+	//LOG("max: %d\n", max);
 	sendPointers(count);
 
 	pushOp(311);
 	pushParam(mode);
 	pushParam(count);
 	pushParam(type);
+	
+         if (mode == GL_POINTS)
+		LOG("GL_POINTS = %d\n", GL_POINTS);
+         else if (mode == GL_LINE_STRIP)
+        	LOG("GL_LINE_STRIP = %d\n", GL_LINE_STRIP);
+         else if (mode == GL_LINE_LOOP)
+        	LOG("GL_LINE_LOOP = %d\n", mode);
+         else if (mode == GL_LINES)
+        	LOG("GL_LINES = %d\n", mode);
+         else if (mode == GL_TRIANGLE_STRIP)
+        	LOG("GL_TRIANGLE_STRIP = %d\n", mode);
+         else if (mode == GL_TRIANGLE_FAN)
+        	LOG("GL_TRIANGLE_FAN = %d\n", mode);
+         else if (mode == GL_TRIANGLES)
+        	LOG("GL_TRIANGLES = %d\n", mode);
+         else if (mode == GL_QUAD_STRIP)
+        	LOG("GL_QUAD_STRIP = %d\n", mode);
+         else if (mode == GL_QUADS)
+        	LOG("GL_QUADS = %d\n", mode);
+         else if (mode == GL_POLYGON)
+        	LOG("GL_POLYGON = %d\n", mode);
 	if(!indices)
-	{
-	LOG("NULL\n");
-	}
-	pushBuf(indices, count * getTypeSize(type));
+		LOG("NULL!\n");
+	else
+		LOG("NOT NULL! %d\n", count * getTypeSize(type));
+	pushBuf(indices, count * getTypeSize(type));	//count * typesize
 }
 
 //312
@@ -2695,7 +2745,7 @@ extern "C" void glNormalPointer(GLenum type, GLsizei stride, const GLvoid * poin
 
 //320
 extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("glTexCoordPointer\n");
+	//LOG("glTexCoordPointer\n");
 	if(!pointer)
 	{
 	pushOp(320);
@@ -2720,7 +2770,7 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 
 //321
 extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("glVertexPointer\n");
+	//LOG("glVertexPointer\n");
 	if(!pointer)
 	{
 	pushOp(321);
@@ -2809,7 +2859,7 @@ extern "C" void glTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsiz
 	pushParam(width);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(pixels, width * getTypeSize(type));
+	pushBuf(pixels, getFormatSize(format) *  width * getTypeSize(type));
 }
 
 //333
@@ -2823,10 +2873,8 @@ extern "C" void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint
 	pushParam(height);
 	pushParam(format);
 	pushParam(type);
-	
-	LOG("*********** %d, %d, %d\n", width, height, type);
-		
-	pushBuf(pixels, width * height * getTypeSize(type) * 4);
+	//std::cin.get();
+	pushBuf(pixels, getFormatSize(format) * width * height * getTypeSize(type));
 }
 
 //322
@@ -2945,7 +2993,7 @@ extern "C" void glColorTable(GLenum target, GLenum internalformat, GLsizei width
 	pushParam(width);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(table, getTypeSize(type) * width);
+	pushBuf(table, getFormatSize(format) * getTypeSize(type) * width);
 }
 
 //340
@@ -3000,7 +3048,7 @@ extern "C" void glColorSubTable(GLenum target, GLsizei start, GLsizei count, GLe
 	pushParam(count);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(data, getTypeSize(type) * (start + count));	
+	pushBuf(data, getFormatSize(format) * getTypeSize(type) * (start + count));	
 }
 
 //347
@@ -3022,7 +3070,7 @@ extern "C" void glConvolutionFilter1D(GLenum target, GLenum internalformat, GLsi
 	pushParam(width);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(image, getTypeSize(type) * width);
+	pushBuf(image, getFormatSize(format) * getTypeSize(type) * width);
 }
 
 //349
@@ -3035,7 +3083,7 @@ extern "C" void glConvolutionFilter2D(GLenum target, GLenum internalformat, GLsi
 	pushParam(height);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(image, getTypeSize(type) * width * height);
+	pushBuf(image, getFormatSize(format) * getTypeSize(type) * width * height);
 }
 
 //350
@@ -3132,7 +3180,7 @@ extern "C" void glSeparableFilter2D(GLenum target, GLenum internalformat, GLsize
 	pushParam(format);
 	pushParam(type);
 	pushBuf(row, getTypeSize(type) * width);
-	pushBuf(column, getTypeSize(type) * height);
+	pushBuf(column, getFormatSize(format) * getTypeSize(type) * height);
 }
 
 //361
@@ -3158,7 +3206,7 @@ extern "C" void glGetMinmax(GLenum target, GLboolean reset, GLenum format, GLenu
 	pushParam(reset);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(values, getTypeSize(type) * 2, true); //returns 2 values (min, max)
+	pushBuf(values, getFormatSize(format) * getTypeSize(type) * 2, true); //returns 2 values (min, max)
 }
 
 //365
@@ -3221,7 +3269,7 @@ extern "C" void glTexImage3D(GLenum target, GLint level, GLint internalformat, G
 	pushParam(border);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(pixels, getTypeSize(type) * width * height * depth);
+	pushBuf(pixels, getFormatSize(format) * getTypeSize(type) * width * height * depth);
 }
 
 //372
@@ -3238,7 +3286,7 @@ extern "C" void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint
 	pushParam(depth);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(pixels, getTypeSize(type) * width * height * depth);
+	pushBuf(pixels, getFormatSize(format) * getTypeSize(type) * width * height * depth);
 }
 
 //373
@@ -3977,7 +4025,6 @@ extern "C" void glBufferData(GLenum target, GLsizeiptr size, const GLvoid * data
 	pushParam((GLsizei) size);
 	pushBuf(data, size);
 	pushParam(usage);
-	//waitForReturn();
 }
 
 //467
@@ -6589,7 +6636,7 @@ extern "C" void glTexImage3DEXT(GLenum target, GLint level, GLenum internalforma
 	pushParam(border);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(pixels, getTypeSize(type) * width * height * depth);
+	pushBuf(pixels, getFormatSize(format) *  getTypeSize(type) * width * height * depth);
 }
 
 //789
@@ -6607,7 +6654,7 @@ extern "C" void glTexSubImage3DEXT(GLenum target, GLint level, GLint xoffset, GL
 	pushParam(format);
 	pushParam(type);
 	pushParam(UNUSED);
-	pushBuf(pixels, getTypeSize(type) * width * height * depth);
+	pushBuf(pixels, getFormatSize(format) * getTypeSize(type) * width * height * depth);
 }
 
 //790
@@ -6635,7 +6682,7 @@ extern "C" void glTexSubImage1DEXT(GLenum target, GLint level, GLint xoffset, GL
 	pushParam(format);
 	pushParam(type);
 	pushParam(UNUSED);
-	pushBuf(pixels, getTypeSize(type) * width);
+	pushBuf(pixels, getFormatSize(format) * getTypeSize(type) * width);
 }
 
 //793
@@ -6651,7 +6698,7 @@ extern "C" void glTexSubImage2DEXT(GLenum target, GLint level, GLint xoffset, GL
 	pushParam(format);
 	pushParam(type);
 	pushParam(UNUSED);
-	pushBuf(pixels, getTypeSize(type) * width * height);
+	pushBuf(pixels, getFormatSize(format) * getTypeSize(type) * width * height);
 }
 
 //794
@@ -6785,7 +6832,7 @@ extern "C" void glConvolutionFilter1DEXT(GLenum target, GLenum internalformat, G
 	pushParam(width);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(image, getTypeSize(type) * width);
+	pushBuf(image, getFormatSize(format) * getTypeSize(type) * width);
 }
 
 //810
@@ -6798,7 +6845,7 @@ extern "C" void glConvolutionFilter2DEXT(GLenum target, GLenum internalformat, G
 	pushParam(height);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(image, getTypeSize(type) * width * height);
+	pushBuf(image, getFormatSize(format) * getTypeSize(type) * width * height);
 }
 
 //811
@@ -6894,7 +6941,7 @@ extern "C" void glSeparableFilter2DEXT(GLenum target, GLenum internalformat, GLs
 	pushParam(format);
 	pushParam(type);
 	pushBuf(row, getTypeSize(type) * width);
-	pushBuf(column, getTypeSize(type) * height);
+	pushBuf(column, getFormatSize(format) * getTypeSize(type) * height);
 }
 
 //822
@@ -6906,7 +6953,7 @@ extern "C" void glColorTableSGI(GLenum target, GLenum internalformat, GLsizei wi
 	pushParam(width);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(table, getTypeSize(type) * width);
+	pushBuf(table, getFormatSize(format) * getTypeSize(type) * width);
 }
 
 //823
@@ -6992,7 +7039,7 @@ extern "C" void glTexImage4DSGIS(GLenum target, GLint level, GLenum internalform
 	pushParam(border);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(pixels, getTypeSize(type) * width * height * depth * size4d);
+	pushBuf(pixels, getFormatSize(format) * getTypeSize(type) * width * height * depth * size4d);
 }
 
 //836
@@ -7012,7 +7059,7 @@ extern "C" void glTexSubImage4DSGIS(GLenum target, GLint level, GLint xoffset, G
 	pushParam(format);
 	pushParam(type);
 	pushParam(UNUSED);
-	pushBuf(pixels, getTypeSize(type) * (width + xoffset) * (height + yoffset) * (depth + zoffset) * (size4d + woffset));
+	pushBuf(pixels, getFormatSize(format) * getTypeSize(type) * (width + xoffset) * (height + yoffset) * (depth + zoffset) * (size4d + woffset));
 }
 
 //837
@@ -7047,7 +7094,8 @@ extern "C" void glDeleteTexturesEXT(GLsizei n, const GLuint * textures){
 extern "C" void glGenTexturesEXT(GLsizei n, GLuint * textures){
 	pushOp(840);
 	pushParam(n);
-	pushBuf(textures, sizeof(GLuint) * n);
+	pushBuf(textures, sizeof(GLuint) * n, true);
+	waitForReturn();
 }
 
 //841
@@ -7354,7 +7402,7 @@ extern "C" void glColorSubTableEXT(GLenum target, GLsizei start, GLsizei count, 
 	pushParam(count);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(data, getTypeSize(type) * (start + count));
+	pushBuf(data, getFormatSize(format) * getTypeSize(type) * (start + count));
 }
 
 //884
@@ -7383,7 +7431,7 @@ extern "C" void glColorTableEXT(GLenum target, GLenum internalformat, GLsizei wi
 	pushParam(width);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(table, getTypeSize(type) * width);
+	pushBuf(table, getFormatSize(format) * getTypeSize(type) * width);
 }
 
 //887

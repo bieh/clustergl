@@ -146,7 +146,7 @@ bool Initialize (void)					                     // Any GL Init Code & User Initi
 	// Check For VBOs Supported
 	Log("Checking for extensions.....");
 #ifndef NO_VBOS
-	g_fVBOSupported = IsExtensionSupported( "GL_ARB_vertex_buffer_object" );
+	g_fVBOSupported = false;//IsExtensionSupported( "GL_ARB_vertex_buffer_object" );
 	if( g_fVBOSupported )
 	{
 		Log("VBOs supported, great!\n");

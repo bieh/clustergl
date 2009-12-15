@@ -2419,7 +2419,6 @@ static void EXEC_glArrayElement(byte *commandbuf){
 
 //308
 static void EXEC_glColorPointer(byte *commandbuf){
-
 	LOG("glColorPointer()\n");
 
 }
