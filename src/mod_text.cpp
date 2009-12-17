@@ -6,11 +6,19 @@
 
 typedef void (*TextFunc)(byte *buf);
 
+/*********************************************************
+	Text Module Globals
+*********************************************************/
+
 static TextFunc mFunctions[1500];
 
 TextModule::TextModule(){
 	init();
 }
+
+/*********************************************************
+	Text Module Process Instructions
+*********************************************************/
 
 bool TextModule::process(list<Instruction> &list){
 	
@@ -30,10 +38,18 @@ bool TextModule::sync(){
 	return true;
 }
 
+/*********************************************************
+	Text Module SDL Methods
+*********************************************************/
+
 static void EXEC_CGLSwapBuffers(byte *commandbuf){	
 	LOG("SDL_GL_SwapBuffers()\n");
 }
 
+
+/*********************************************************
+	Text Module GL Methods
+*********************************************************/
 //0
 static void EXEC_glNewList(byte *commandbuf){
 	GLuint *list = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
@@ -2419,8 +2435,10 @@ static void EXEC_glArrayElement(byte *commandbuf){
 
 //308
 static void EXEC_glColorPointer(byte *commandbuf){
-	LOG("glColorPointer()\n");
-
+	GLint *size = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLint);
+	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	LOG("glColorPointer(size=%d, type=%0.1f, stride=%0.1f)\n", *size, (float)*type, (float)*stride);
 }
 
 //309

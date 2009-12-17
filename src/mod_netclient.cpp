@@ -3,9 +3,17 @@
 #include <zlib.h>
 #include <netinet/tcp.h>
 
+/*********************************************************
+	Net Client Globals
+*********************************************************/
+
 int incomingSize = 0;
 int outgoingSize = 0;
 NetCompressModule *compressor2;
+
+/*********************************************************
+	Net Client Module
+*********************************************************/
 
 NetClientModule::NetClientModule(string address, int port){
         //Make the socket and connect
@@ -13,7 +21,8 @@ NetClientModule::NetClientModule(string address, int port){
 
 	//make a compressor object
 	compressor2 = new NetCompressModule();
-
+	
+	//set TCP options
 	int one = 1;
 	setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 	setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
@@ -45,6 +54,10 @@ NetClientModule::NetClientModule(string address, int port){
 
 	LOG("Connected to remote pipeline on %s:%d\n", address.c_str(), port);
 }
+
+/*********************************************************
+	Net Client Process Instrctions
+*********************************************************/
 
 bool NetClientModule::process(list<Instruction> &list){
 	//Send all the commands in the list down the socket
@@ -83,6 +96,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 	    }
 
+		//TODO: find the bug that causes this to crash occasionlly
 	    if (i->id == pIter->id 		
 		&& !mustSend && i->id 			
 		&& false //uncomment to disable deltas
@@ -188,8 +202,11 @@ bool NetClientModule::process(list<Instruction> &list){
 	return true;
 }
 
+/*********************************************************
+	Net Client Sync
+*********************************************************/
+
 bool NetClientModule::sync(){
-	//LOG("SYNC\n");
 	int * a = (int *)malloc(sizeof(int));
 	*a = 987654;
 	if(myWrite(mSocket, a, sizeof(int)) != sizeof(int)){
@@ -206,7 +223,12 @@ bool NetClientModule::sync(){
 	return true;
 }
 
+/*********************************************************
+	Net Client Run Compression
+*********************************************************/
+
 int NetClientModule::myWrite(int fd, void* buf, int nByte){
+
 	//create room for new compressed buffer
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	Bytef *out = (Bytef*) malloc(CompBuffSize);
@@ -233,6 +255,7 @@ int NetClientModule::myWrite(int fd, void* buf, int nByte){
 }
 
 int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
+
 	//create room for new compressed buffer
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	Bytef *out = (Bytef*) malloc(CompBuffSize);
@@ -258,7 +281,8 @@ int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
 	return ret;
 }
 
-int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){	
+int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
+	
 	//create room for new compressed buffer
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	Bytef *out = (Bytef*) malloc(CompBuffSize);
@@ -283,9 +307,13 @@ int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
 	free(out);
 	return ret;
 }
+
+/*********************************************************
+	Net Client Run Decompression
+*********************************************************/
 
 int NetClientModule::myRead(int fd, void *buf, size_t count){
-	//LOG("READING:\n");
+
 	size_t *a = &count;
 	//read the size of the compressed packet
 	int compressedSize = 0;
@@ -303,7 +331,6 @@ int NetClientModule::myRead(int fd, void *buf, size_t count){
 		ret = origSize;
 	compressor2->myDecompress(buf, count, in, compressedSize);
 	free(in);
-	//LOG("READ:\n");
 	return ret;
 }
 

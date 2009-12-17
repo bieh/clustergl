@@ -6,8 +6,16 @@
 
 typedef void (*ExecFunc)(byte *buf);
 
+/*********************************************************
+	Execution Globals
+*********************************************************/
+
 static ExecFunc mFunctions[1500];
 static Instruction *mCurrentInstruction = NULL;
+
+/*********************************************************
+	Execute Module Stuff
+*********************************************************/
 
 ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){\
 	netBytes= 0;
@@ -42,7 +50,7 @@ bool ExecModule::makeWindow(){
 	videoFlags  = SDL_OPENGL;         
 	videoFlags |= SDL_GL_DOUBLEBUFFER; 
 	videoFlags |= SDL_HWPALETTE;
-	//videoFlags |= SDL_NOFRAME;     //nice way of drawing segmented screens
+	//videoFlags |= SDL_NOFRAME;     //nice way of drawing segmented screens with no borders (in window mode)
 
 	if ( videoInfo->hw_available )	videoFlags |= SDL_HWSURFACE; //use hardwareSurface
 	else				videoFlags |= SDL_SWSURFACE; //use softwareSurface
@@ -61,9 +69,6 @@ bool ExecModule::makeWindow(){
 
 	width = dpy->current_w;  //get screen width
 	height = dpy->current_h; //get screen height
-
-	//width = 400;	//temp
-	//height = 300;
 
 	// if the app res is less than the current screen size
 	if (iScreenX < width && iScreenY<height)
@@ -88,6 +93,10 @@ bool ExecModule::makeWindow(){
 	return true;
 }
 
+/*********************************************************
+	Process Each Instruction
+*********************************************************/
+
 bool ExecModule::process(list<Instruction> &list){
 
 	for(std::list<Instruction>::iterator iter = list.begin(); 
@@ -100,31 +109,41 @@ bool ExecModule::process(list<Instruction> &list){
 	    	}
 	    	
 	    	mCurrentInstruction = &(*iter);
-	    	//LOG("current In %d\n",mCurrentInstruction->id);
 
-		// Set our own glViewPort/glScissor
-		// We scale this to try to keep as much of the orignal settings as possible
+		//check if the message requires special attention (adjusting)
+		//else use standard process calling methods below
 		if (iter->id== 305) {//glViewPort, which now runs glFrustum
 			
-			//old one liner with 8192 pixel limitation
-			//glViewport(-iOffsetX, -iOffsetY, iScreenX, iScreenY);
+			int x = *((GLint*)iter->args);
+			int y = *((GLint*)(iter->args+ sizeof(GLint)));
+			int w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
+			int h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 
+			origWidth = w;
+			origHeight = h;
+	
 			//new frustum claculation that in theory, has no limitation
 		        glMatrixMode( GL_PROJECTION );
 		        glLoadIdentity( );
 			#ifdef SYMPHONY
 				//work out the proportion of screen that this will be displaying in the x direction
+				//TODO: use input values to adjust
+				//TODO: intercept and/or disable gluPerspective, which overrides this function
 				float scale = 1.0;
 				float myWidth = SYMPHONY_SCREEN_WIDTH* scale / SYMPHONY_SCREEN_TOTAL_WIDTH;
 				float myHeight = 0;
-				//use the aspect ratio (4/3 for now) to work out the height value
+
+				float aspectRatio = origWidth/origHeight;
 				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * scale) - (0.5 * scale));
-				float myOffsetY = (SYMPHONY_SCREEN_WIDTH*scale/SYMPHONY_SCREEN_TOTAL_WIDTH) * 4/3 ;
+				float myOffsetY = (SYMPHONY_SCREEN_WIDTH*scale/SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
+
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
 			#else
 				//LOG("VIEWPORT!\n");
-				//glViewport(0, 0, iScreenX, iScreenY);
 				//if not running on symphony, use 'standard' values
+				//if not running on symphony, there is no 8192 limitation, so why not just use viewport
+				//glViewport(iOffsetX, iOffsetY, iScreenX, iScreenY);
+				
 				float myWidth = 2.0/2;
 				float myHeight = -(1.0 * 3/4)/2;
 				float myOffsetX = -1.0/2;
@@ -133,33 +152,42 @@ bool ExecModule::process(list<Instruction> &list){
 			#endif
 
 		} else if (iter->id== 176) { //glScissor
-				//LOG("SCISSOR!\n");
+
+			//read original values from the instruction
 			int x = *((GLint*)iter->args);
 			int y = *((GLint*)(iter->args+ sizeof(GLint)));
 			int w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
 			int h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
-		   	glScissor(x, y, iScreenX, iScreenY);
-				/*glScissor(x*((float)(iScreenX+iOffsetX)/(float)origWidth),  
+			
+			//use these values to scale the scissor up to our custom screen size
+			glScissor(x*((float)(iScreenX+iOffsetX)/(float)origWidth),  
 				  y*((float)(iScreenY+iOffsetY)/(float)origHeight),
 				  w*((float)(iScreenX+iOffsetX)/(float)origWidth),  
-				  h*((float)(iScreenY+iOffsetY)/(float)origHeight));  */
+				  h*((float)(iScreenY+iOffsetY)/(float)origHeight));
+
 		} else if (iter->id == 296) { //glOrtho
-				//LOG("glOrtho!\n");
+			
+			//read original values from the instruction
 			GLdouble left = *((GLdouble*)iter->args);
 			GLdouble right = *((GLdouble*)(iter->args+ sizeof(GLdouble)));
 			GLdouble bottom = *((GLdouble*)(iter->args+ sizeof(GLdouble)*2));
 			GLdouble top = *((GLdouble*)(iter->args+ sizeof(GLdouble)*3));
 			GLdouble nearVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*4));
 			GLdouble farVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*5));
-			//LOG("Ortho: %lf, %lf, %lf, %lf, %lf, %lf\n", left, right, bottom, top, nearVal, farVal);
-		   	glOrtho(0.0, iScreenX, iScreenY, 0.0, nearVal, farVal);
+			
+			//use these values to scale the orthographic view up to our custom screen size
+		   	glOrtho(left*((float)(iScreenX+iOffsetX)/(float)origWidth),
+				right*((float)(iScreenY+iOffsetY)/(float)origHeight),
+				bottom*((float)(iScreenX+iOffsetX)/(float)origWidth),  
+				top*((float)(iScreenY+iOffsetY)/(float)origHeight),
+				nearVal, farVal);
+
 		} else {
-			LOG("ID: %d\n", iter->id); 
+			//LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
+			//LOG("finished ID: %d\n", iter->id); 
 		}
-	}
-	
-	   
+	}   
 	return true;
 }
 
@@ -168,7 +196,7 @@ bool ExecModule::sync(){
 }
 
 byte *popBuf(){
-	LOG("Popping buf %d\n", mCurrentInstruction->buffers[0].len);
+	//LOG("Popping buf %d for instruct %d\n", mCurrentInstruction->buffers[0].len, mCurrentInstruction->id);
 	return mCurrentInstruction->buffers[0].buffer;
 }
 
@@ -209,24 +237,19 @@ void pushRet(const GLchar * val){
 	mCurrentInstruction->buffers[i].needClear = true;
 	mCurrentInstruction->buffers[i].needReply = true;
 }
-
-
-
-
-/**************************************
-			CGL functions
-**************************************/
+		
+/*********************************************************
+	CGL functions
+*********************************************************/
 
 //1499
 void EXEC_CGLSwapBuffers(byte *commandbuf){	
 	SDL_GL_SwapBuffers();
 }
-
-
-
-/**************************************
-		Regular GL stuff
-**************************************/
+	
+/*********************************************************
+	Regular GL stuff
+*********************************************************/
 
 //0
 void EXEC_glNewList(byte *commandbuf){
@@ -1186,7 +1209,6 @@ void EXEC_glVertex2dv(byte *commandbuf){
 void EXEC_glVertex2f(byte *commandbuf){
 	GLfloat *x = (GLfloat*)commandbuf;	 commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;	 commandbuf += sizeof(GLfloat);
-
 	glVertex2f(*x, *y);
 }
 
@@ -2362,7 +2384,7 @@ void EXEC_glGetString(byte *commandbuf){
 	GLenum *name = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
 	pushRet(glGetString(*name));
-	
+	//TODO: fix me!
 	LOG("WARNING: glGetString won't work! FIXME\n");
 }
 
@@ -2618,14 +2640,22 @@ void EXEC_glArrayElement(byte *commandbuf){
 	glArrayElement(*i);
 }
 
+//307
+void EXEC_glBindTexture(byte *commandbuf){
+	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
+	GLuint *texture = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
+	glBindTexture(*target, *texture);
+}
+
 //308
 void EXEC_glColorPointer(byte *commandbuf){
 	GLint *size = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLboolean *null = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLsizei);	
 	const GLvoid * buf =  (const GLvoid *)popBuf();
-	GLint * num = (GLint *) buf;
-	if(*num == -1)
+
+	if(*null)
 		glColorPointer(*size, *type, *stride, (char *) NULL);
 	else
 		glColorPointer(*size, *type, *stride, buf);
@@ -2652,14 +2682,9 @@ void EXEC_glDrawElements(byte *commandbuf){
 	GLenum *mode = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-LOG("a\n");
 	const GLvoid * buf = (const GLvoid *)popBuf();
-	if(!buf)
-		LOG("NULL!\n");
-	else
-		LOG("NOT NULL!\n");
+
 	glDrawElements(*mode, *count, *type, buf);
-LOG("b\n");
 }
 
 //312
@@ -2676,19 +2701,25 @@ void EXEC_glEnableClientState(byte *commandbuf){
 	glEnableClientState(*array);
 }
 
-//329
-void EXEC_glGetPointerv(byte *commandbuf){
-	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
-	glGetPointerv(*pname, (GLvoid **)popBuf());
-}
-
 //314
 void EXEC_glIndexPointer(byte *commandbuf){
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 
 	glIndexPointer(*type, *stride, (const GLvoid *)popBuf());
+}
+
+//315
+void EXEC_glIndexub(byte *commandbuf){
+	GLubyte *c = (GLubyte*)commandbuf;	 commandbuf += sizeof(GLubyte);
+
+	glIndexub(*c);
+}
+
+//316
+void EXEC_glIndexubv(byte *commandbuf){
+
+	glIndexubv((const GLubyte *)popBuf());
 }
 
 //317
@@ -2707,14 +2738,23 @@ void EXEC_glNormalPointer(byte *commandbuf){
 	glNormalPointer(*type, *stride, (const GLvoid *)popBuf());
 }
 
+//319
+void EXEC_glPolygonOffset(byte *commandbuf){
+	GLfloat *factor = (GLfloat*)commandbuf;	 commandbuf += sizeof(GLfloat);
+	GLfloat *units = (GLfloat*)commandbuf;	 commandbuf += sizeof(GLfloat);
+
+	glPolygonOffset(*factor, *units);
+}
+
 //320
 void EXEC_glTexCoordPointer(byte *commandbuf){
 	GLint *size = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLboolean *null = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLsizei);	
 	const GLvoid * buf =  (const GLvoid *)popBuf();
-	GLint * num = (GLint *) buf;
-	if(!num || *num == -1)
+
+	if(*null)
 		glTexCoordPointer(*size, *type, *stride, (char *) NULL);
 	else
 		glTexCoordPointer(*size, *type, *stride, buf);
@@ -2725,20 +2765,19 @@ void EXEC_glVertexPointer(byte *commandbuf){
 	GLint *size = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLboolean *null = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLsizei);	
 	const GLvoid * buf =  (const GLvoid *)popBuf();
-	GLint * num = (GLint *) buf;
-	if(!num || *num == -1)
+	if(*null)
 		glVertexPointer(*size, *type, *stride, (char *) NULL);
 	else
 		glVertexPointer(*size, *type, *stride, buf);
 }
 
-//319
-void EXEC_glPolygonOffset(byte *commandbuf){
-	GLfloat *factor = (GLfloat*)commandbuf;	 commandbuf += sizeof(GLfloat);
-	GLfloat *units = (GLfloat*)commandbuf;	 commandbuf += sizeof(GLfloat);
+//322
+void EXEC_glAreTexturesResident(byte *commandbuf){
+	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 
-	glPolygonOffset(*factor, *units);
+	pushRet(glAreTexturesResident(*n, (const GLuint *)popBuf(), (GLboolean *)popBuf()));
 }
 
 //323
@@ -2794,6 +2833,41 @@ void EXEC_glCopyTexSubImage2D(byte *commandbuf){
 	glCopyTexSubImage2D(*target, *level, *xoffset, *yoffset, *x, *y, *width, *height);
 }
 
+//327
+void EXEC_glDeleteTextures(byte *commandbuf){
+	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+
+	glDeleteTextures(*n, (const GLuint *)popBuf());
+}
+
+//328
+void EXEC_glGenTextures(byte *commandbuf){
+	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	glGenTextures(*n, (GLuint *)popBuf());
+}
+
+//329
+void EXEC_glGetPointerv(byte *commandbuf){
+	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
+
+	glGetPointerv(*pname, (GLvoid **)popBuf());
+}
+
+//330
+void EXEC_glIsTexture(byte *commandbuf){
+	GLuint *texture = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
+
+	pushRet(glIsTexture(*texture));
+}
+
+
+//331
+void EXEC_glPrioritizeTextures(byte *commandbuf){
+	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+
+	glPrioritizeTextures(*n, (const GLuint *)popBuf(), (const GLclampf *)popBuf());
+}
+
 //332
 void EXEC_glTexSubImage1D(byte *commandbuf){
 	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
@@ -2820,60 +2894,6 @@ void EXEC_glTexSubImage2D(byte *commandbuf){
 	//GLuint *UNUSED = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
 
 	glTexSubImage2D(*target, *level, *xoffset, *yoffset, *width, *height, *format, *type,  (const GLvoid *)popBuf());
-}
-
-//322
-void EXEC_glAreTexturesResident(byte *commandbuf){
-	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	pushRet(glAreTexturesResident(*n, (const GLuint *)popBuf(), (GLboolean *)popBuf()));
-}
-
-//307
-void EXEC_glBindTexture(byte *commandbuf){
-	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-	GLuint *texture = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
-	glBindTexture(*target, *texture);
-}
-
-//327
-void EXEC_glDeleteTextures(byte *commandbuf){
-	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glDeleteTextures(*n, (const GLuint *)popBuf());
-}
-
-//328
-void EXEC_glGenTextures(byte *commandbuf){
-	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-	glGenTextures(*n, (GLuint *)popBuf());
-}
-
-//330
-void EXEC_glIsTexture(byte *commandbuf){
-	GLuint *texture = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
-
-	pushRet(glIsTexture(*texture));
-}
-
-//331
-void EXEC_glPrioritizeTextures(byte *commandbuf){
-	GLsizei *n = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glPrioritizeTextures(*n, (const GLuint *)popBuf(), (const GLclampf *)popBuf());
-}
-
-//315
-void EXEC_glIndexub(byte *commandbuf){
-	GLubyte *c = (GLubyte*)commandbuf;	 commandbuf += sizeof(GLubyte);
-
-	glIndexub(*c);
-}
-
-//316
-void EXEC_glIndexubv(byte *commandbuf){
-
-	glIndexubv((const GLubyte *)popBuf());
 }
 
 //334
@@ -3739,6 +3759,7 @@ void EXEC_glPointParameteri(byte *commandbuf){
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 
+//TODO: why does this exist?
 #ifndef SYMPHONY
 	glPointParameteri(*pname, *param);
 #endif
@@ -3748,6 +3769,7 @@ void EXEC_glPointParameteri(byte *commandbuf){
 void EXEC_glPointParameteriv(byte *commandbuf){
 	GLenum *pname = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
+//TODO: why does this exist?
 #ifndef SYMPHONY
 	glPointParameteriv(*pname, (GLint *)popBuf());
 #endif
@@ -4327,10 +4349,10 @@ void EXEC_glGetShaderInfoLog(byte *commandbuf){
 	GLsizei *bufSize = (GLsizei*)commandbuf; commandbuf += sizeof(GLsizei);
 	GLint	*length  = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLchar	*infolog = (GLchar *)popBuf();	
-	if(*length == -1)
-	{
+	if(*length == -1) {
 	length = NULL;
 	}
+
 	glGetShaderInfoLog(*shader, *bufSize, length, infolog);
 	pushRet(infolog);
 }
@@ -4341,10 +4363,10 @@ void EXEC_glGetShaderSource(byte *commandbuf){
 	GLsizei *bufSize = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLint	*length  = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLchar	*source = (GLchar *)popBuf();	
-	if(*length == -1)
-	{
+	if(*length == -1) {
 	length = NULL;
 	}
+
 	glGetShaderSource(*shader, *bufSize, length, source);
 }
 
@@ -4430,10 +4452,10 @@ void EXEC_glShaderSource(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	const GLchar * string = (const GLchar *)popBuf();
 	GLint	*length = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
-	if(*length == -1)
-	{
+	if(*length == -1) {
 	length = NULL;
 	}
+
 	glShaderSource(*shader, *count, &string, length);
 }
 
@@ -4921,6 +4943,7 @@ void EXEC_glUniformMatrix2x3fv(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *transpose = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLboolean);
 
+//TODO: why does this exist?
 #ifndef SYMPHONY
 	glUniformMatrix2x3fv(*location, *count, *transpose, (const GLfloat *)popBuf());
 #endif
@@ -6314,10 +6337,10 @@ void EXEC_glShaderSourceARB(byte *commandbuf){
 	GLsizei *count = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	const GLchar * string = (const GLchar *)popBuf();
 	GLint	*length = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
-	if(*length == -1)
-	{
+	if(*length == -1){
 	length = NULL;
 	}
+
 	glShaderSourceARB(*shader, *count,  &string, length);
 }
 
@@ -6600,8 +6623,7 @@ void EXEC_glGetShaderSourceARB(byte *commandbuf){
 	GLsizei *bufSize = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLint	*length  = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLchar	*source = (GLchar *)popBuf();	
-	if(*length == -1)
-	{
+	if(*length == -1) {
 	length = NULL;
 	}
 
@@ -10447,7 +10469,9 @@ void EXEC_glLoadIdentityDeformationMapSGIX(byte *commandbuf){
 	//glLoadIdentityDeformationMapSGIX(*mask);
 }
 
-
+/*********************************************************
+	Method Pointers
+*********************************************************/
 
 bool ExecModule::init(){
 	

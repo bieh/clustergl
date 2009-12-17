@@ -88,7 +88,7 @@ public:
 bool		g_fVBOSupported = false;							// ARB_vertex_buffer_object supported?
 CMesh*		g_pMesh = NULL;										// Mesh Data
 float		g_flYRot = 0.0f;									// Rotation
-int			g_nFPS = 0, g_nFrames = 0;							// FPS and FPS Counter
+int		g_nFPS = 0, g_nFrames = 0;							// FPS and FPS Counter
 int		g_dwLastFPS = 0;									// Last FPS Check Time	
 //~TUTORIAL
 
@@ -146,7 +146,7 @@ bool Initialize (void)					                     // Any GL Init Code & User Initi
 	// Check For VBOs Supported
 	Log("Checking for extensions.....");
 #ifndef NO_VBOS
-	g_fVBOSupported = false;//IsExtensionSupported( "GL_ARB_vertex_buffer_object" );
+	g_fVBOSupported = IsExtensionSupported( "GL_ARB_vertex_buffer_object" );
 	if( g_fVBOSupported )
 	{
 		Log("VBOs supported, great!\n");

@@ -3,7 +3,16 @@
 #include <zlib.h>
 #include <netinet/tcp.h>
 
-  NetCompressModule *compressor;
+/*********************************************************
+	Net Server Globals
+*********************************************************/
+
+NetCompressModule *compressor;
+int prevInstruction = 0;
+
+/*********************************************************
+	Net Server Module
+*********************************************************/
 
 NetSrvModule::NetSrvModule(int port){
 
@@ -26,6 +35,7 @@ NetSrvModule::NetSrvModule(int port){
 
 	compressor = new NetCompressModule();
 
+	//set TCP options
 	int one = 1;
 	setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 	setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
@@ -53,7 +63,9 @@ NetSrvModule::NetSrvModule(int port){
 	LOG("%s connected\n", string(inet_ntoa(clientaddr.sin_addr)).c_str() );
 }
 
-int prevInstruction = 0;
+/*********************************************************
+	Net Server Process Instructions
+*********************************************************/
 
 bool NetSrvModule::process(list<Instruction> &list){
 
@@ -67,10 +79,10 @@ bool NetSrvModule::process(list<Instruction> &list){
 		LOG("Read error\n");
 		return false;
 	}
-	
-	//LOG("Reading %d instructions!\n\n", num);
 
+	//LOG("Reading %d instructions!\n\n", num);
 	// Variables for processing Deltas
+	//TODO: unsigned int initialized to -1??
 	uint32_t count = -1;
 	std::list<Instruction>::iterator pIter = (*prevFrame).begin();
 	
@@ -79,14 +91,13 @@ bool NetSrvModule::process(list<Instruction> &list){
 		count++;
 		
 		int r = myRead((byte *)&i, sizeof(Instruction));
-		if(r != sizeof(Instruction)){
+		if(r != sizeof(Instruction)) {
 			LOG("Read error (%d)\n", r);
 			LOG("Last Instruction %d, %d, \n", prevInstruction, x);
 			perror("NetSrvMod Instruction");
 			return false;
 		}
-		else
-		{
+		else {
 		prevInstruction = i.id;
 		//LOG("Instruction %d\n", i.id);
 		}
@@ -129,7 +140,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 			count = 0;
 			num++;
 		}
-		else{
+		else {
 			//LOG("READ INSTRUCTION: %d on stack\n", i.id);
 			list.push_back(i);
 			if (pIter != (*prevFrame).end()) pIter++;
@@ -138,13 +149,18 @@ bool NetSrvModule::process(list<Instruction> &list){
 	return true;
 }
 
-void NetSrvModule::reply(Instruction *instr, int i){
+void NetSrvModule::reply(Instruction *instr, int i) {
+
 	//LOG("reply size: %d, for instruction: %d\n", instr->buffers[i].len, instr->id);
 	myWrite(instr->buffers[i].buffer, instr->buffers[i].len);
 }
 
-bool NetSrvModule::sync(){
-	//LOG("SYNC\n");
+/*********************************************************
+	Net Server Sync
+*********************************************************/
+
+bool NetSrvModule::sync() {
+
 	int a;
 	if(myRead((byte *)&a, sizeof(int)) != sizeof(int)){
 		LOG("Connection problem (didn't recv sync)!\n");
@@ -157,8 +173,12 @@ bool NetSrvModule::sync(){
 	return true;
 }
 
-int NetSrvModule::myRead(byte *input, int nByte){
-	//LOG("READING:\n");
+/*********************************************************
+	Net Server Run Decompression
+*********************************************************/
+
+int NetSrvModule::myRead(byte *input, int nByte) {
+
 	//read the size of the compressed packet
 	int compressedSize = 0;
 	mClientSocket->read((byte *)&compressedSize, sizeof(int));
@@ -175,12 +195,15 @@ int NetSrvModule::myRead(byte *input, int nByte){
 		ret = origSize;
 	compressor->myDecompress(input, nByte, in, compressedSize);
 	free(in);
-	//LOG("READ:\n");
 	return ret;
 }
 
-int NetSrvModule::myWrite(byte *input, int nByte){
-	//LOG("WRITING: %d\n", nByte);
+/*********************************************************
+	Net Server Run Compression
+*********************************************************/
+
+int NetSrvModule::myWrite(byte *input, int nByte) {
+
 	//create room for new compressed buffer
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	Bytef *out = (Bytef*) malloc(CompBuffSize);
@@ -200,10 +223,13 @@ int NetSrvModule::myWrite(byte *input, int nByte){
 	//cheack and set return value to keep caller happy
 	if(ret == newSize)
 		ret = nByte;
+
+	//calculate bandwidth requirements
 	netBytes += nByte; 
 	netBytes2 += sizeof(int) * 2;  
 	netBytes2 += newSize; 
 	free(out);
+
 	return ret;
 }
 

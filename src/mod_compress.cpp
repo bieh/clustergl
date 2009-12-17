@@ -2,6 +2,10 @@
 #include <zconf.h>
 #include <zlib.h>
 
+/*********************************************************
+	Module Stuff
+*********************************************************/
+
 NetCompressModule::NetCompressModule(){
 }
 
@@ -18,6 +22,10 @@ bool NetCompressModule::sync(){
 }
 
 
+/*********************************************************
+	Compress Method
+*********************************************************/
+
 int NetCompressModule::myCompress(void *input, int nByte, void *output){
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	if(nByte > 4)
@@ -26,9 +34,9 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 		if(ret != Z_OK)
 		{
 			if(ret == Z_MEM_ERROR)
-				LOG("\t\tERROR compressing: memory\n");
+				LOG("ERROR compressing: memory error\n");
 			else if(ret == Z_BUF_ERROR)
-				LOG("\t\tERROR compressing: buffer\n");
+				LOG("ERROR compressing: buffer error\n");
 		}
 	}
 	else
@@ -38,6 +46,10 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 	}
 	return CompBuffSize;
 }
+
+/*********************************************************
+	Decompress Method
+*********************************************************/
 
 int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int sourceLen){
 	uLongf newSource = sourceLen;
@@ -49,18 +61,16 @@ int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int s
 		if(ret != Z_OK)
 		{
 			if(ret == Z_MEM_ERROR)
-				LOG("error decompressing: memory\n");
+				LOG("ERROR decompressing: memory error\n");
 			else if(ret == Z_BUF_ERROR)
-				LOG("error decompressing: buffer\n");
+				LOG("ERROR decompressing: buffer error\n");
 			else if(ret == Z_DATA_ERROR)
-				LOG("error decompressing: data, %d, %d\n", destLen, sourceLen);
+				LOG("ERROR decompressing: data error,\n");
 		}
 	}
 	else
 	{
 		memcpy(dest, source, sourceLen);
 	}
-	//if(sourceLen < 10)
-	//LOG("incoming: %d bytes, outgoing %d bytes\n", sourceLen, destLen);
 	return ret;
 }

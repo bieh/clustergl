@@ -1,20 +1,24 @@
 #include "main.h"
 
+/********************************************************
+	Main Globals
+********************************************************/
+
 bool bHasInit = false;
-/* default values */
+/* default values, should never get used */
 int sizeX = 256;
 int sizeY = 256;
 int offsetX = 0;
 int offsetY = 0;
 string dnNumber = "0";
 int port;
-
-/*******************************************************************************
-				Application object
-*******************************************************************************/
+			
+/********************************************************
+	Application Object
+********************************************************/
 int App::run(int argc, char **argv){
     	if (argc != 2) {
-       		fprintf(stderr,"usage: cgl <SYMPHONY number. Use 0 for testing>\n");
+       		fprintf(stderr,"usage: cgl <SYMPHONY number. Use 0 for testing, 1-5 for SYMPHONY>\n");
 	       exit(0);
 	}
 	dnNumber = argv[1];
@@ -42,7 +46,6 @@ int App::run_shared(){
 	
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
-	//mModules.push_back(new NetKeyboardModule());
 	//mModules.push_back(new TextModule());
 	mModules.push_back(new NetClientModule("127.0.0.1", port));
 
@@ -55,7 +58,6 @@ int App::run_shared(){
 	mModules.push_back(new NetClientModule("192.168.22.105", port));//dn5
 #endif
 
-	
 	//Return control to the parent process.
 	
 	return 0;
@@ -80,15 +82,16 @@ void App::init(){
 		int dn = atoi(dnNumber.c_str());
 		offsetX = (SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * (dn - 1);
 	#endif
+
 	LOG("\n");
 	LOG("**********************************************\n");
-	LOG("               ClusterGL\n");
+	LOG("                 ClusterGL\n");
 	LOG("**********************************************\n");
 	bHasInit = true;
 }
 
 void App::debug(){
-	LOG("******************* %d modules ********************\n", mModules.size());
+	LOG("******************* %d modules ***************\n", mModules.size());
 } 
 
 list<Instruction> *thisFrame = NULL; // pointer to the current frame
@@ -114,7 +117,7 @@ bool App::tick(){
 			frames/(curTime - prevTime));
 		frames = 0;
 
-		// Now Calculate BPS (bytes per second)
+		// Now Calculate KBPS (Kbytes per second)
 		int bytes = 0;
 		int bytes2 = 0;
 		for(int i=0;i<(int)mModules.size();i++){
@@ -172,7 +175,7 @@ bool App::tick(){
 	    iter->clear();
 	}
 	
-	// swap frames
+	//swap frames
 	for(int i=0;i<(int)mModules.size();i++)
 		mModules[i]->prevFrame = thisFrame;
 	if (thisFrame == &oneFrame)
@@ -183,11 +186,10 @@ bool App::tick(){
 	
 	return true;
 }
-
-
-/*******************************************************************************
-				Entry points
-*******************************************************************************/
+			
+/********************************************************
+	Entry Points
+********************************************************/
 App *theApp = NULL;
 
 int main( int argc, char **argv )
