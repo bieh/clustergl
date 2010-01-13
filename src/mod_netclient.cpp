@@ -10,23 +10,26 @@
 int incomingSize = 0;
 int outgoingSize = 0;
 NetCompressModule *compressor2;
+bool useCompress = false;
 
 /*********************************************************
 	Net Client Module
 *********************************************************/
 
-NetClientModule::NetClientModule(string address, int port){
+NetClientModule::NetClientModule(string address, int port, bool compression){
         //Make the socket and connect
 	mSocket = socket(PF_INET, SOCK_STREAM, 0); 
-
-	//make a compressor object
-	compressor2 = new NetCompressModule();
+	
+	useCompress = compression;
+	if(useCompress) {
+		//make a compressor object
+		compressor2 = new NetCompressModule();
+	}
 	
 	//set TCP options
 	int one = 1;
 	setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 	setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-
 
 	if(mSocket == 0){
 		LOG("Couldn't make socket!\n");
@@ -95,10 +98,9 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 	    }
 
-		//TODO: find the bug that causes this to crash occasionlly
 	    if (i->id == pIter->id 		
 		&& !mustSend && i->id 			
-		  && false //uncomment to disable deltas
+		  //&& false //uncomment to disable deltas
 		  && sameCount < 100		//stops sameBuffer filling up indefinitely
 		) {
 			bool same = true;
@@ -242,83 +244,104 @@ bool NetClientModule::sync(){
 
 int NetClientModule::myWrite(int fd, void* buf, int nByte){
 
-	//create room for new compressed buffer
-	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
-	Bytef *out = (Bytef*) malloc(CompBuffSize);
-	int newSize = compressor2->myCompress(buf, nByte, out);
+	if(useCompress) {
+		//create room for new compressed buffer
+		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
+		Bytef *out = (Bytef*) malloc(CompBuffSize);
+		int newSize = compressor2->myCompress(buf, nByte, out);
 
-	//write the size of the next instruction
-	if(!write(mSocket, &newSize, sizeof(int))){
-		LOG("Connection problem!\n");
-	}
-	//write the old size of the next instruction
-	if(!write(mSocket, &nByte, sizeof(int))){
-		LOG("Connection problem!\n");
-	}
+		//write the size of the next instruction
+		if(!write(mSocket, &newSize, sizeof(int))){
+			LOG("Connection problem!\n");
+		}
+		//write the old size of the next instruction
+		if(!write(mSocket, &nByte, sizeof(int))){
+			LOG("Connection problem!\n");
+		}
 	
-	//write the compressed instruction
-	int ret = write(fd, out, newSize);
-	//check and set return value to keep caller happy
-	if(ret == newSize)
-		ret = nByte;
-	netBytes2 += sizeof(int) * 2;
-	netBytes2 += newSize;
-	free(out);
-	return ret;
+		//write the compressed instruction
+		int ret = write(fd, out, newSize);
+		//check and set return value to keep caller happy
+		if(ret == newSize)
+			ret = nByte;
+		netBytes2 += sizeof(int) * 2;
+		netBytes2 += newSize;
+		free(out);
+		return ret;
+	}
+	else {
+		int ret = write(fd, buf, nByte);
+		netBytes2 += nByte;
+		return ret;
+	}
 }
 
 int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
 
-	//create room for new compressed buffer
-	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
-	Bytef *out = (Bytef*) malloc(CompBuffSize);
-	int newSize = compressor2->myCompress(buf, nByte, out);
+	if(useCompress) {
+		//create room for new compressed buffer
+		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
+		Bytef *out = (Bytef*) malloc(CompBuffSize);
+		int newSize = compressor2->myCompress(buf, nByte, out);
 
-	//write the size of the next instruction
-	if(!write(mSocket, &newSize, sizeof(int))){
-		LOG("Connection problem!\n");
-	}
-	//write the old size of the next instruction
-	if(!write(mSocket, &nByte, sizeof(int))){
-		LOG("Connection problem!\n");
-	}
+		//write the size of the next instruction
+		if(!write(mSocket, &newSize, sizeof(int))){
+			LOG("Connection problem!\n");
+		}
+		//write the old size of the next instruction
+		if(!write(mSocket, &nByte, sizeof(int))){
+			LOG("Connection problem!\n");
+		}
 	
-	//write the compressed instruction
-	int ret = write(fd, out, newSize);
-	//check and set return value to keep caller happy
-	if(ret == newSize)
-		ret = nByte;
-	netBytes2 += sizeof(int) * 2;
-	netBytes2 += newSize;
-	free(out);
-	return ret;
+		//write the compressed instruction
+		int ret = write(fd, out, newSize);
+		//check and set return value to keep caller happy
+		if(ret == newSize)
+			ret = nByte;
+		netBytes2 += sizeof(int) * 2;
+		netBytes2 += newSize;
+		free(out);
+		return ret;
+	}
+	else {
+		int ret = write(fd, buf, nByte);
+		netBytes2 += nByte;
+		return ret;
+	}
 }
 
 int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
 	
-	//create room for new compressed buffer
-	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
-	Bytef *out = (Bytef*) malloc(CompBuffSize);
-	int newSize = compressor2->myCompress(buf, nByte, out);
+	if(useCompress) {
+		//create room for new compressed buffer
+		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
+		Bytef *out = (Bytef*) malloc(CompBuffSize);
+		int newSize = compressor2->myCompress(buf, nByte, out);
 
-	//write the size of the next instruction
-	if(!write(mSocket, &newSize, sizeof(int))){
-		LOG("Connection problem!\n");
-	}
-	//write the old size of the next instruction
-	if(!write(mSocket, &nByte, sizeof(int))){
-		LOG("Connection problem!\n");
-	}
+		//write the size of the next instruction
+		if(!write(mSocket, &newSize, sizeof(int))){
+			LOG("Connection problem!\n");
+		}
+		//write the old size of the next instruction
+		if(!write(mSocket, &nByte, sizeof(int))){
+			LOG("Connection problem!\n");
+		}
 	
-	//write the compressed instruction
-	int ret = write(fd, out, newSize);
-	//check and set return value to keep caller happy
-	if(ret == newSize)
-		ret = nByte;
-	netBytes2 += sizeof(int) * 2;
-	netBytes2 += newSize;
-	free(out);
-	return ret;
+		//write the compressed instruction
+		int ret = write(fd, out, newSize);
+		//check and set return value to keep caller happy
+		if(ret == newSize)
+			ret = nByte;
+		netBytes2 += sizeof(int) * 2;
+		netBytes2 += newSize;
+		free(out);
+		return ret;
+	}
+	else {
+		int ret = write(fd, buf, nByte);
+		netBytes2 += nByte;
+		return ret;
+	}
 }
 
 /*********************************************************
@@ -326,24 +349,30 @@ int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
 *********************************************************/
 
 int NetClientModule::myRead(int fd, void *buf, size_t count){
+	
+	if(useCompress) {
+		size_t *a = &count;
+		//read the size of the compressed packet
+		int compressedSize = 0;
+		int c = read(fd, &compressedSize, sizeof(int));
 
-	size_t *a = &count;
-	//read the size of the compressed packet
-	int compressedSize = 0;
-	int c = read(fd, &compressedSize, sizeof(int));
+		//read the size of the original packet
+		int origSize = 0;
+		int d = read(fd, &origSize, sizeof(int));
 
-	//read the size of the original packet
-	int origSize = 0;
-	int d = read(fd, &origSize, sizeof(int));
-
-	//read the size of the incoming packet
-	//then read the compressed packet data and uncompress
-	Bytef *in = (Bytef*) malloc(compressedSize);
-	int ret = read(fd, in, compressedSize);
-	if(ret == compressedSize)
-		ret = origSize;
-	compressor2->myDecompress(buf, count, in, compressedSize);
-	free(in);
-	return ret;
+		//read the size of the incoming packet
+		//then read the compressed packet data and uncompress
+		Bytef *in = (Bytef*) malloc(compressedSize);
+		int ret = read(fd, in, compressedSize);
+		if(ret == compressedSize)
+			ret = origSize;
+		compressor2->myDecompress(buf, count, in, compressedSize);
+		free(in);
+		return ret;
+	}
+	else {
+		int ret = read(fd, buf, count);
+		return ret;
+	}
 }
 

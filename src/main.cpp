@@ -6,12 +6,15 @@
 
 bool bHasInit = false;
 /* default values, should never get used */
-int sizeX = 256;
-int sizeY = 256;
-int offsetX = 0;
-int offsetY = 0;
-string dnNumber = "0";
-int port = 0;
+int sizeX;
+int sizeY;
+int offsetX;
+int offsetY;
+int scaleX;
+int scaleY;
+string dnNumber;
+int port;
+bool useCompression;
 			
 /********************************************************
 	Application Object
@@ -28,8 +31,8 @@ int App::run(int argc, char **argv){
 	init();
 	
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
-	mModules.push_back(new NetSrvModule(port));
-	mModules.push_back(new ExecModule(sizeX, sizeY, offsetX, offsetY));
+	mModules.push_back(new NetSrvModule(port, useCompression));
+	mModules.push_back(new ExecModule(sizeX, sizeY, offsetX, offsetY, scaleX, scaleY));
 	//mModules.push_back(new TextModule());
 	
 	while( tick() ){ }
@@ -47,15 +50,15 @@ int App::run_shared(){
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new NetClientModule("127.0.0.1", port));
+	mModules.push_back(new NetClientModule("127.0.0.1", port, useCompression));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
 	//mModules.push_back(new NetClientModule("192.168.22.101", port));//dn1
-	mModules.push_back(new NetClientModule("192.168.22.102", port));//dn2
-	mModules.push_back(new NetClientModule("192.168.22.103", port));//dn3
-	mModules.push_back(new NetClientModule("192.168.22.104", port));//dn4
-	mModules.push_back(new NetClientModule("192.168.22.105", port));//dn5
+	mModules.push_back(new NetClientModule("192.168.22.102", port, useCompression));//dn2
+	mModules.push_back(new NetClientModule("192.168.22.103", port, useCompression));//dn3
+	mModules.push_back(new NetClientModule("192.168.22.104", port, useCompression));//dn4
+	mModules.push_back(new NetClientModule("192.168.22.105", port, useCompression));//dn5
 #endif
 
 	//Return control to the parent process.
@@ -70,6 +73,9 @@ void App::init(){
 	CFG_SIMPLE_INT((char *)("offsetX"), &offsetX),
         CFG_SIMPLE_INT((char *)("offsetY"), &offsetY),
         CFG_SIMPLE_INT((char *)("port"), &port),
+	CFG_SIMPLE_INT((char *)("scaleX"), &scaleX),
+        CFG_SIMPLE_INT((char *)("scaleY"), &scaleY),
+	CFG_SIMPLE_BOOL((char *)("useCompression"), &useCompression),
         CFG_END()
     };
     cfg_t *cfg;

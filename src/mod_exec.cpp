@@ -17,15 +17,22 @@ static Instruction *mCurrentInstruction = NULL;
 	Execute Module Stuff
 *********************************************************/
 
-ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){
+ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, int scaleX, int scaleY){
+
 	netBytes= 0;
 	netBytes2 = 0;
+
 	init();
+
 	iScreenX = sizeX;
 	iScreenY = sizeY;
 
 	iOffsetX = offsetX;
 	iOffsetY = offsetY;
+
+	iScaleX = scaleX;
+	iScaleY = scaleY;
+
 	if(!makeWindow()){
 		LOG("failed to make window!\n");
 		exit(1);
@@ -129,12 +136,12 @@ bool ExecModule::process(list<Instruction> &list){
 				      //xscale = (w - x)/w;
 				float yscale = 1.0;
 				      //yscale = (h - y)/y;
-				float myWidth = SYMPHONY_SCREEN_WIDTH* scale / SYMPHONY_SCREEN_TOTAL_WIDTH;
+				float myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
 				float myHeight = 0;
 
 				float aspectRatio = origWidth/origHeight;
-				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * xscale) - (0.5 * xscale));
-				float myOffsetY = (SYMPHONY_SCREEN_WIDTH*yscale/SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
+				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * iScaleX) - (0.5 * iScaleX));
+				float myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
 
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
 			#else
@@ -182,7 +189,7 @@ bool ExecModule::process(list<Instruction> &list){
 				nearVal, farVal);
 
 		} else {
-			LOG("ID: %d\n", iter->id); 
+			//LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
 			//LOG("finished ID: %d\n", iter->id); 
 		}

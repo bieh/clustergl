@@ -58,8 +58,10 @@ class ExecModule : public Module{
 	int iOffsetY;
 	int origWidth;
 	int origHeight;
+	int iScaleX;
+	int iScaleY;
 public:
-	ExecModule(int sizeX, int sizeY, int offsetX, int offsetY);
+	ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, int scaleX, int scaleY);
 
 	bool init();	
 	bool process(list<Instruction> &i);
@@ -76,7 +78,7 @@ class NetSrvModule : public Module{
   int mSocket;
   BufferedFd *mClientSocket;
 public:
-	NetSrvModule(int port);
+	NetSrvModule(int port, bool decompression);
 	
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);
@@ -93,7 +95,7 @@ public:
 class NetClientModule : public Module{
   int mSocket;
 public:
-	NetClientModule(string address, int port);
+	NetClientModule(string address, int port, bool compression);
 	
 	bool process(list<Instruction> &i);
 	bool sync();

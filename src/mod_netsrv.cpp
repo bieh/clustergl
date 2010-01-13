@@ -9,12 +9,13 @@
 
 NetCompressModule *compressor;
 int prevInstruction = 0;
+bool useDecompress = false;
 
 /*********************************************************
 	Net Server Module
 *********************************************************/
 
-NetSrvModule::NetSrvModule(int port){
+NetSrvModule::NetSrvModule(int port, bool decompression){
 
 	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
 		LOG("Failed to create socket\n");
@@ -32,8 +33,11 @@ NetSrvModule::NetSrvModule(int port){
 	//reset BPS calculations
 	netBytes = 0;   
 	netBytes2 = 0; 
-
-	compressor = new NetCompressModule();
+	
+	useDecompress = decompression;
+	if(useDecompress) {
+		compressor = new NetCompressModule();
+	}
 
 	//set TCP options
 	int one = 1;
@@ -176,26 +180,32 @@ bool NetSrvModule::sync() {
 *********************************************************/
 
 int NetSrvModule::myRead(byte *input, int nByte) {
+	
+	if(useDecompress) {
+		//read the size of the compressed packet
+		int compressedSize = 0;
+		mClientSocket->read((byte *)&compressedSize, sizeof(int));
 
-	//read the size of the compressed packet
-	int compressedSize = 0;
-	mClientSocket->read((byte *)&compressedSize, sizeof(int));
-
-	//read the size of the original packet
-	int origSize = 0;
-	mClientSocket->read((byte *)&origSize, sizeof(int));
-	if(origSize < 4)
-		LOG("READING: %d\n", origSize);
-	//then read the compressed packet data and uncompress
-	Bytef *in = (Bytef*) malloc(compressedSize);
-	int ret = mClientSocket->read(in, compressedSize);
-	if(ret == compressedSize)
-		ret = origSize;
-	else
-		LOG("ELSE MYREAD!\n");
-	compressor->myDecompress(input, nByte, in, compressedSize);
-	free(in);
-	return ret;
+		//read the size of the original packet
+		int origSize = 0;
+		mClientSocket->read((byte *)&origSize, sizeof(int));
+		if(origSize < 4)
+			LOG("READING: %d\n", origSize);
+		//then read the compressed packet data and uncompress
+		Bytef *in = (Bytef*) malloc(compressedSize);
+		int ret = mClientSocket->read(in, compressedSize);
+		if(ret == compressedSize)
+			ret = origSize;
+		else
+			LOG("ELSE MYREAD: mismatched compress/uncompressed sizes!\n");
+		compressor->myDecompress(input, nByte, in, compressedSize);
+		free(in);
+		return ret;
+	}
+	else {
+		int ret = mClientSocket->read(input, nByte);
+		return ret;
+	}
 }
 
 /*********************************************************
@@ -204,33 +214,40 @@ int NetSrvModule::myRead(byte *input, int nByte) {
 
 int NetSrvModule::myWrite(byte *input, int nByte) {
 
-	//create room for new compressed buffer
-	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
-	Bytef *out = (Bytef*) malloc(CompBuffSize);
-	int newSize = compressor->myCompress(input, nByte, out);
+	if(useDecompress) {
+		//create room for new compressed buffer
+		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
+		Bytef *out = (Bytef*) malloc(CompBuffSize);
+		int newSize = compressor->myCompress(input, nByte, out);
 
-	//write the size of the next instruction
-	if(!mClientSocket->write( (byte*)&newSize, sizeof(int))){
-		LOG("Connection problem!\n");
+		//write the size of the next instruction
+		if(!mClientSocket->write( (byte*)&newSize, sizeof(int))){
+			LOG("Connection problem!\n");
+		}
+		//write the old size of the next instruction
+		if(!mClientSocket->write( (byte*)&nByte, sizeof(int))){
+			LOG("Connection problem!\n");
+		}
+
+		//write the compressed instruction
+		int ret =mClientSocket->write(out, newSize);
+		//cheack and set return value to keep caller happy
+		if(ret == newSize)
+			ret = nByte;
+
+		//calculate bandwidth requirements
+		netBytes += nByte; 
+		netBytes2 += sizeof(int) * 2;  
+		netBytes2 += newSize; 
+		free(out);
+
+		return ret;
 	}
-	//write the old size of the next instruction
-	if(!mClientSocket->write( (byte*)&nByte, sizeof(int))){
-		LOG("Connection problem!\n");
+	else {
+		int ret = mClientSocket->write(input, nByte);
+		netBytes2 += nByte;
+		return ret;
 	}
-
-	//write the compressed instruction
-	int ret =mClientSocket->write(out, newSize);
-	//cheack and set return value to keep caller happy
-	if(ret == newSize)
-		ret = nByte;
-
-	//calculate bandwidth requirements
-	netBytes += nByte; 
-	netBytes2 += sizeof(int) * 2;  
-	netBytes2 += newSize; 
-	free(out);
-
-	return ret;
 }
 
 
