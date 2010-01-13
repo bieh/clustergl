@@ -17,7 +17,7 @@ static Instruction *mCurrentInstruction = NULL;
 	Execute Module Stuff
 *********************************************************/
 
-ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){\
+ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){
 	netBytes= 0;
 	netBytes2 = 0;
 	init();
@@ -26,7 +26,6 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){\
 
 	iOffsetX = offsetX;
 	iOffsetY = offsetY;
-	
 	if(!makeWindow()){
 		LOG("failed to make window!\n");
 		exit(1);
@@ -34,7 +33,6 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY){\
 }
 
 bool ExecModule::makeWindow(){
-
 	const SDL_VideoInfo *videoInfo;
 
 	if ( SDL_Init( SDL_INIT_VIDEO ) < 0 ){	
@@ -101,8 +99,6 @@ bool ExecModule::process(list<Instruction> &list){
 
 	for(std::list<Instruction>::iterator iter = list.begin(); 
 	    iter != list.end(); iter++){
-		//LOG("ID: %d\n", iter->id);
-		fflush(stdout);
 	    	if(iter->id >= 1500 || !mFunctions[iter->id]){
 	    		LOG("Unimplemented %d\n", iter->id);
 	    		continue;
@@ -114,28 +110,31 @@ bool ExecModule::process(list<Instruction> &list){
 		//else use standard process calling methods below
 		if (iter->id== 305) {//glViewPort, which now runs glFrustum
 			
-			int x = *((GLint*)iter->args);
-			int y = *((GLint*)(iter->args+ sizeof(GLint)));
-			int w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
-			int h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
+			//TODO: intercept and/or disable gluPerspective, which overrides this function
+			GLint x = *((GLint*)iter->args);
+			GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
+			GLint w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
+			GLint h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 
 			origWidth = w;
 			origHeight = h;
 	
-			//new frustum claculation that in theory, has no limitation
+			//new frustum calculation that in theory, has no limitation
 		        glMatrixMode( GL_PROJECTION );
 		        glLoadIdentity( );
 			#ifdef SYMPHONY
 				//work out the proportion of screen that this will be displaying in the x direction
-				//TODO: use input values to adjust
-				//TODO: intercept and/or disable gluPerspective, which overrides this function
-				float scale = 1.0;
+
+				float xscale = 1.0;
+				      //xscale = (w - x)/w;
+				float yscale = 1.0;
+				      //yscale = (h - y)/y;
 				float myWidth = SYMPHONY_SCREEN_WIDTH* scale / SYMPHONY_SCREEN_TOTAL_WIDTH;
 				float myHeight = 0;
 
 				float aspectRatio = origWidth/origHeight;
-				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * scale) - (0.5 * scale));
-				float myOffsetY = (SYMPHONY_SCREEN_WIDTH*scale/SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
+				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * xscale) - (0.5 * xscale));
+				float myOffsetY = (SYMPHONY_SCREEN_WIDTH*yscale/SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
 
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
 			#else
@@ -154,10 +153,10 @@ bool ExecModule::process(list<Instruction> &list){
 		} else if (iter->id== 176) { //glScissor
 
 			//read original values from the instruction
-			int x = *((GLint*)iter->args);
-			int y = *((GLint*)(iter->args+ sizeof(GLint)));
-			int w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
-			int h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
+			GLint x = *((GLint*)iter->args);
+			GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
+			GLint w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
+			GLint h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 			
 			//use these values to scale the scissor up to our custom screen size
 			glScissor(x*((float)(iScreenX+iOffsetX)/(float)origWidth),  
@@ -183,7 +182,7 @@ bool ExecModule::process(list<Instruction> &list){
 				nearVal, farVal);
 
 		} else {
-			//LOG("ID: %d\n", iter->id); 
+			LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
 			//LOG("finished ID: %d\n", iter->id); 
 		}
@@ -239,7 +238,7 @@ void pushRet(const GLchar * val){
 }
 		
 /*********************************************************
-	CGL functions
+	ClusterGL functions
 *********************************************************/
 
 //1499
@@ -248,7 +247,7 @@ void EXEC_CGLSwapBuffers(byte *commandbuf){
 }
 	
 /*********************************************************
-	Regular GL stuff
+	Regular OpenGL stuff
 *********************************************************/
 
 //0
@@ -2382,10 +2381,8 @@ void EXEC_glGetPolygonStipple(byte *commandbuf){
 //275
 void EXEC_glGetString(byte *commandbuf){
 	GLenum *name = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
+	
 	pushRet(glGetString(*name));
-	//TODO: fix me!
-	LOG("WARNING: glGetString won't work! FIXME\n");
 }
 
 //276
@@ -2653,12 +2650,12 @@ void EXEC_glColorPointer(byte *commandbuf){
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *null = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLsizei);	
-	const GLvoid * buf =  (const GLvoid *)popBuf();
-
 	if(*null)
 		glColorPointer(*size, *type, *stride, (char *) NULL);
-	else
+	else {
+		const GLvoid * buf =  (const GLvoid *)popBuf();
 		glColorPointer(*size, *type, *stride, buf);
+	}
 }
 
 //309
@@ -2752,12 +2749,12 @@ void EXEC_glTexCoordPointer(byte *commandbuf){
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *null = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLsizei);	
-	const GLvoid * buf =  (const GLvoid *)popBuf();
-
 	if(*null)
 		glTexCoordPointer(*size, *type, *stride, (char *) NULL);
-	else
+	else {
+		const GLvoid * buf =  (const GLvoid *)popBuf();
 		glTexCoordPointer(*size, *type, *stride, buf);
+	}
 }
 
 //321
@@ -2766,11 +2763,13 @@ void EXEC_glVertexPointer(byte *commandbuf){
 	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 	GLboolean *null = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLsizei);	
-	const GLvoid * buf =  (const GLvoid *)popBuf();
+
 	if(*null)
 		glVertexPointer(*size, *type, *stride, (char *) NULL);
-	else
+	else {
+		const GLvoid * buf =  (const GLvoid *)popBuf();
 		glVertexPointer(*size, *type, *stride, buf);
+	}
 }
 
 //322
@@ -4360,7 +4359,7 @@ void EXEC_glGetShaderInfoLog(byte *commandbuf){
 //507
 void EXEC_glGetShaderSource(byte *commandbuf){
 	GLuint *shader = (GLuint*)commandbuf;	 commandbuf += sizeof(GLuint);
-	GLsizei *bufSize = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLsizei *bufSize = (GLsizei*)commandbuf; commandbuf += sizeof(GLsizei);
 	GLint	*length  = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
 	GLchar	*source = (GLchar *)popBuf();	
 	if(*length == -1) {

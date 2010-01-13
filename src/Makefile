@@ -4,7 +4,7 @@
 
 
 #Output filename
-NAME= cgl
+NAME= GL
 
 
 #files
@@ -31,7 +31,7 @@ all: $(OBJS) $(NAME)
   
 $(NAME): $(OBJS) 
 	$(CXX) -o ../runtime/$@ $(OBJS_APP) $(CXXFLAGS) $(LDFLAGS)
-	$(CXX) -o ../runtime/lib$@.so $(OBJS_SHARED) $(CXXFLAGS) $(LDFLAGS) -shared 
+	$(CXX) -o ../runtime/lib$@.so.1 $(OBJS_SHARED) $(CXXFLAGS) $(LDFLAGS) -shared 
 	
 #------------------------------------------------------#
 #					Test
@@ -45,4 +45,4 @@ run-app:
 clean:
 	rm -f *.o
 	rm -f ../runtime/$(NAME)
-	rm -f ../runtime/lib$(NAME).so
+	rm -f ../runtime/lib$(NAME).so.1

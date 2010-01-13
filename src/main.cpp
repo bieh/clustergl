@@ -11,7 +11,7 @@ int sizeY = 256;
 int offsetX = 0;
 int offsetY = 0;
 string dnNumber = "0";
-int port;
+int port = 0;
 			
 /********************************************************
 	Application Object

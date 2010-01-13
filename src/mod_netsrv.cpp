@@ -68,7 +68,6 @@ NetSrvModule::NetSrvModule(int port){
 *********************************************************/
 
 bool NetSrvModule::process(list<Instruction> &list){
-
 	//Read instructions off the network and insert them into the list
 	//First read the uint32 that tells us how many instructions we will have
 	uint32_t num = 0;
@@ -80,15 +79,14 @@ bool NetSrvModule::process(list<Instruction> &list){
 		return false;
 	}
 
-	//LOG("Reading %d instructions!\n\n", num);
+	//LOG("Reading %d instructions!\n", num);
 	// Variables for processing Deltas
-	//TODO: unsigned int initialized to -1??
-	uint32_t count = -1;
 	std::list<Instruction>::iterator pIter = (*prevFrame).begin();
 	
 	for(uint32_t x=0;x<num;x++){
+		//LOG("Reading instruction %d!\n", x);
+		
 		Instruction i;		
-		count++;
 		
 		int r = myRead((byte *)&i, sizeof(Instruction));
 		if(r != sizeof(Instruction)) {
@@ -112,15 +110,17 @@ bool NetSrvModule::process(list<Instruction> &list){
 				myRead(i.buffers[n].buffer, l);
 			}			
 		}
-		
 		if(i.id == CGL_REPEAT_INSTRUCTION){
-			for (uint32_t a = count;count<a+(uint32_t)i.args[0];count++){
+			//LOG("SKIP: %d\n", i.args[0]);
+			//decrease num, as we won't need to read these instructions from the socket
+			num -= i.args[0];
+			for (uint32_t a = 0;a <(uint32_t)i.args[0];a++){
 				Instruction p;
 				
 				p.id = pIter->id;
 				for (int j =0;j<MAX_ARG_LEN;j++)
 					p.args[j] = pIter->args[j];
-
+				
 				//Now see if we're expecting any buffers
 				for(int n=0;n<3;n++){
 					int l = pIter->buffers[n].len;
@@ -132,16 +132,14 @@ bool NetSrvModule::process(list<Instruction> &list){
 					}			
 				}
 				list.push_back(p);
-				num--;
-				if (pIter != (*prevFrame).end()) pIter++;
-				
+				//LOG("INSTRUCTION: %d\n", p.id );
+				if (pIter != (*prevFrame).end())
+					pIter++;				
 			}
-			count--;
-			count = 0;
-			num++;
+			//decrease x, as CGL_REPEAT_INSTRUCTION does not count as an instruction
+			x--;
 		}
 		else {
-			//LOG("READ INSTRUCTION: %d on stack\n", i.id);
 			list.push_back(i);
 			if (pIter != (*prevFrame).end()) pIter++;
 		}
@@ -193,6 +191,8 @@ int NetSrvModule::myRead(byte *input, int nByte) {
 	int ret = mClientSocket->read(in, compressedSize);
 	if(ret == compressedSize)
 		ret = origSize;
+	else
+		LOG("ELSE MYREAD!\n");
 	compressor->myDecompress(input, nByte, in, compressedSize);
 	free(in);
 	return ret;

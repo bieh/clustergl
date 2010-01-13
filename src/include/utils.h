@@ -4,7 +4,7 @@
 class BufferedFd {
  private:
   int fd;
-  char buffer[1024*1024*8];
+  char buffer[1024*1024];
   int bufferOffset;
   int bufferLength;
  public:

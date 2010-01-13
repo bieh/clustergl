@@ -38,7 +38,7 @@ void textcolor(int attr, int fg, int bg)
 	Pointer Structures
 *********************************************************/
 
-struct replacementPointer {
+struct storedPointer {
 bool sent;
 GLint size;
 GLenum type;
@@ -46,9 +46,9 @@ GLsizei stride;
 const GLvoid * pointer;
 };
 
-replacementPointer rpTex;
-replacementPointer rpVert;
-replacementPointer rpCol;
+storedPointer rpTex;
+storedPointer rpVert;
+storedPointer rpCol;
 
 /*********************************************************
 	Interception Globals
@@ -103,7 +103,7 @@ bool AppModule::sync(){
 
 void pushOp(uint16_t opID){
 	//if(opID != 306)
-		//LOG("OP: %d\n", opID);
+	//	LOG("OP: %d\n", opID);
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
 		
@@ -157,8 +157,13 @@ void pushBuf(const void *buffer, int len, bool needReply = false){
 	else
 		buf->buffer = copy;
 	buf->len = len;
-	buf->needClear = !needReply;
+	/*if(mCurrentInstruction->id == 308 || mCurrentInstruction->id == 320 
+	|| mCurrentInstruction->id == 311 || mCurrentInstruction->id == 321)
+		buf->needClear = false;	//don't clear, as they need to be reused 
+	else*/
+		buf->needClear = !needReply;
 	buf->needReply = needReply;
+	iCurrentBuffer++;
 }
 
 void waitForReturn(){
@@ -273,7 +278,7 @@ void sendPointers(int length) {
 	//TODO: fill in other pointer values, or 
 	//create a better, more elegant solution
 	
-	//tex pointer
+	//texture pointer
 	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
 	{
 	pushOp(320);
@@ -285,7 +290,7 @@ void sendPointers(int length) {
 	rpTex.sent = true;
 	}
 
-	//vert pointer
+	//vertex pointer
 	if(!rpVert.sent && rpVert.size)	//check if sent already, and not null
 	{
 	pushOp(321);
@@ -299,7 +304,7 @@ void sendPointers(int length) {
 	
 	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
 	{
-	//col pointer
+	//colour pointer
 	pushOp(308);
 	pushParam(rpCol.size);
 	pushParam(rpCol.type);
@@ -317,12 +322,11 @@ void sendPointers(int length) {
 //Pointer to SDL_INIT
 static int (*_SDL_Init)(unsigned int flags) = NULL;
 //Pointer to SDL_SetVideoMode
-static SDL_Surface* (*_SDL_SetVideoMode)(int ,int ,int ,unsigned int) = NULL;
+static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
 
 bool bHasMinimized = false;
 
 extern "C" int SDL_Init(unsigned int flags) {
-
 	if (_SDL_Init == NULL) {
 		_SDL_Init = (int (*)(unsigned int)) dlsym(RTLD_NEXT, "SDL_Init");
 	}
@@ -339,12 +343,10 @@ extern "C" int SDL_Init(unsigned int flags) {
 		theApp = new App();
 		theApp->run_shared();
 	}
-		
 	return r;
 }
 
-extern "C" SDL_Surface* SDL_SetVideoMode(int width,int height,int bpp,unsigned int  videoFlags ) {
-	
+extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigned int videoFlags) {
 	if (_SDL_SetVideoMode == NULL) {
 		_SDL_SetVideoMode = (SDL_Surface* (*)(int,int,int,unsigned int)) dlsym(RTLD_NEXT, "SDL_SetVideoMode");
 	}
@@ -352,8 +354,12 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width,int height,int bpp,unsigned i
 		printf("Couldn't find SDL_SetVideoMode: %s\n", dlerror());
 		exit(0);
 	}
-	return (*_SDL_SetVideoMode)(100,100, bpp, videoFlags );
+	SDL_Surface* surf = (*_SDL_SetVideoMode)(100, 100, bpp, videoFlags );
+	if(!surf)
+		LOG("NULL surface!\n");
+	return surf;
 }
+
 
 extern "C" void SDL_GL_SwapBuffers( ) {
 	if(!bHasMinimized){
@@ -2311,6 +2317,7 @@ extern "C" void glGetClipPlane(GLenum plane, GLdouble * equation){
 }
 
 //260
+//HACK
 /*
 extern "C" void glGetDoublev(GLenum pname, GLdouble * params){
 	LOG("Called unimplemted stub GetDoublev!\n");
@@ -2342,15 +2349,17 @@ extern "C" GLenum glGetError(){
 }
 
 //262
-//extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
-//	LOG("Called unimplemted stub GetFloatv!\n");
-//}
+//HACK
+
+extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
+	LOG("Called unimplemted stub GetFloatv!\n");
+}
 
 //263
-//HACK
-//extern "C" void glGetIntegerv(GLenum pname, GLint * params){
-//	LOG("Called unimplemted stub GetIntegerv!\n");
-//}
+extern "C" void glGetIntegerv(GLenum pname, GLint * params){
+	LOG("Called unimplemted stub GetIntegerv!\n");
+}
+
 
 //264
 extern "C" void glGetLightfv(GLenum light, GLenum pname, GLfloat * params){
@@ -2450,22 +2459,27 @@ extern "C" void glGetPixelMapusv(GLenum map, GLushort * values){
 //274
 extern "C" void glGetPolygonStipple(GLubyte * mask){
 	LOG("Called untested stub GetPolygonStipple!\n");
+	pushOp(274);
 	pushBuf(mask, sizeof(GLubyte) * 32 * 32, true); //32 x 32 stipple
 }
 
-//275
-//Hack! We let the native implementation handle this
 /*
+//275
 extern "C" const GLubyte * glGetString(GLenum name){
+	LOG("Called untested stub glGetString!\n");
 	pushOp(275);
 	pushParam(name);
 
-	const GLubyte * ret;
-	pushBuf(&ret, sizeof(const GLubyte *), true);
+	//currently glGetString returns 3379 characters on my machine
+	const GLubyte * ret = (GLubyte *)malloc(sizeof(GLubyte *)*4096);		
+	pushBuf(ret, sizeof(GLubyte *)*4096, true);
 	waitForReturn();
 
 	return ret;
 }
+
+//Hack! We let the native implementation handle this
+//TODO: implement these methods
 
 //276
 extern "C" void glGetTexEnvfv(GLenum target, GLenum pname, GLfloat * params){
@@ -2515,8 +2529,8 @@ extern "C" void glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pnam
 //285
 extern "C" void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint * params){
 	LOG("Called unimplemted stub GetTexLevelParameteriv!\n");
-}*/
-
+}
+*/
 //286
 extern "C" GLboolean glIsEnabled(GLenum cap){
 	pushOp(286);
@@ -2696,8 +2710,7 @@ extern "C" void glColorPointer(GLint size, GLenum type, GLsizei stride, const GL
 	pushParam(type);
 	pushParam(stride);
 	pushParam(!pointer);
-	GLint mynull = 0;
-	pushBuf(&mynull, sizeof(GLint));
+	pushParam(true);
 	}
 	else {
 		rpCol.size = size;
@@ -2795,8 +2808,7 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 	pushParam(type);
 	pushParam(stride);
 	pushParam(!pointer);
-	GLint mynull = 0;
-	pushBuf(&mynull, sizeof(GLint));
+	pushParam(true);
 	}
 	else {
 		rpTex.size = size;
@@ -2815,8 +2827,7 @@ extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const G
 	pushParam(type);
 	pushParam(stride);
 	pushParam(!pointer);
-	GLint mynull = 0;
-	pushBuf(&mynull, sizeof(GLint));
+	pushParam(true);
 	}
 	else {
 		rpVert.size = size;

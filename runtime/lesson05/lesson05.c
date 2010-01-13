@@ -297,7 +297,7 @@ int main( int argc, char **argv )
     if ( !surface )
 	{
 	    fprintf( stderr,  "Video mode set failed: %s\n", SDL_GetError( ) );
-	    Quit( 1 );
+	    /*Quit( 1 );*/
 	}
 
     /* initialize OpenGL */

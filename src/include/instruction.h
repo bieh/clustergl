@@ -30,7 +30,8 @@ public:
 		for(int i=0;i<3;i++){
 			if(buffers[i].buffer && buffers[i].needClear){
 				//printf("deleted (%d)\n", id);
-				delete buffers[i].buffer;
+				//previously delete buffers[i].buffer
+				free(buffers[i].buffer);
 				
 				buffers[i].buffer = NULL;
 				buffers[i].len = 0;
@@ -42,5 +43,3 @@ public:
 	
 	InstructionBuffer buffers[3];
 };
-
-

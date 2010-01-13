@@ -69,7 +69,6 @@ bool NetClientModule::process(list<Instruction> &list){
 	
 	//First send the total number
 	uint32_t num = list.size();
-	//LOG("num of instructions: %d\n", num);
 	fflush(stdout);
 	netBytes += sizeof(uint32_t);
 	if(!myWrite(mSocket, &num, sizeof(uint32_t))){
@@ -81,10 +80,10 @@ bool NetClientModule::process(list<Instruction> &list){
 	uint32_t sameCount = 0;
 
 	//Now send the instructions
+	int counter = 0;
 	for(std::list<Instruction>::iterator iter = list.begin(), pIter = (*prevFrame).begin(); 
 	    iter != list.end(); iter++){
-	    
-	    Instruction *i = &(*iter); //yuck 
+	    Instruction *i = &(*iter); //yuck
             //LOG("ID:%d\n",i->id);
 	    bool mustSend = false;
 
@@ -99,34 +98,44 @@ bool NetClientModule::process(list<Instruction> &list){
 		//TODO: find the bug that causes this to crash occasionlly
 	    if (i->id == pIter->id 		
 		&& !mustSend && i->id 			
-		&& false //uncomment to disable deltas
+		  && false //uncomment to disable deltas
+		  && sameCount < 100		//stops sameBuffer filling up indefinitely
 		) {
 			bool same = true;
 			for (int a=0;a<MAX_ARG_LEN;a++){
-				if (i->args[a]!=pIter->args[a])
-					same = false;	
+				if (i->args[a]!=pIter->args[a]){
+					same = false;
+					break;
+				}
 			}
 			if (same){
-				for (int a=0;a<3;a++)
+				for (int a=0;a<3;a++) {
 					if (i->buffers[a].len >0 && pIter->buffers[a].len >0){
-						if (i->buffers[a].len != pIter->buffers[a].len)
+						if (i->buffers[a].len != pIter->buffers[a].len){
 							same = false;
-						else if (i->buffers[a].needClear != pIter->buffers[a].needClear)
+							break;
+						}
+						else if (i->buffers[a].needClear != pIter->buffers[a].needClear){
 							same = false;
+							break;
+						}
 						else if (!memcmp(i->buffers[a].buffer,pIter->buffers[a].buffer,i->buffers[a].len)){
 							same = false;
+							break;
 						}
 					}
+				}
 			}
 			if (same) {
 				sameCount++;
-				//LOG("same count: %d %d\n", sameCount, i->id);
-				if (pIter != (*prevFrame).end()) pIter++;
+				if (pIter != (*prevFrame).end()) 
+					pIter++;
 				continue; 
 			}	
 	    }
 
 	    if (sameCount> 0){ // send a count of the duplicates before this instruction
+		//LOG("SKIP: %d\n", sameCount);
 		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
 		if (skip == 0){
 			LOG("ERROR: Out of memory\n");
@@ -176,9 +185,12 @@ bool NetClientModule::process(list<Instruction> &list){
 			}
 		}
 		if (pIter != (*prevFrame).end()) pIter++;
+	    counter++;
 	}
-
+	
+	   //send any instructions that are remaining in the CGL_REPEAT_INSTRUCTION buffer
 	    if (sameCount> 0){ // send a count of the duplicates before this instruction
+		//LOG("SKIP: %d\n", sameCount);
 		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
 		if (skip == 0){
 			LOG("ERROR: Out of memory\n");
@@ -199,6 +211,7 @@ bool NetClientModule::process(list<Instruction> &list){
 		sameCount = 0; // reset the count and free the memory
 		free(skip);
 	    }
+
 	return true;
 }
 
