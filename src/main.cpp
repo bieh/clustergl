@@ -151,7 +151,7 @@ bool App::tick(){
 	}
 
 	//Sync every 20 frames
-	if (totFrames%20 == 0){
+	if (totFrames%20 == 0 && totFrames > 0){
 		for(int i=0;i<(int)mModules.size();i++){
 			Module *m = mModules[i];		
 			if( !m->sync() ){

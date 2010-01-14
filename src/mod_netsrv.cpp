@@ -11,6 +11,13 @@ NetCompressModule *compressor;
 int prevInstruction = 0;
 bool useDecompress = false;
 
+const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS * 8;
+int iRecieveBufPos = 0;
+int bytesRemaining = 0;;
+
+//big buffer
+byte mRecieveBuf[recieveBufferSize];
+
 /*********************************************************
 	Net Server Module
 *********************************************************/
@@ -181,7 +188,21 @@ bool NetSrvModule::sync() {
 
 int NetSrvModule::myRead(byte *input, int nByte) {
 	
-	if(useDecompress) {
+	if(bytesRemaining > 0) {
+		memcpy(input, mRecieveBuf + iRecieveBufPos, nByte);
+		iRecieveBufPos += nByte;
+		bytesRemaining -= nByte;
+	}
+	else {
+		recieveBuffer();
+		memcpy(input, mRecieveBuf + iRecieveBufPos, nByte);
+		iRecieveBufPos += nByte;
+		bytesRemaining -= nByte;
+	}
+
+	return nByte;
+
+	/*if(useDecompress) {
 		//read the size of the compressed packet
 		int compressedSize = 0;
 		mClientSocket->read((byte *)&compressedSize, sizeof(int));
@@ -205,9 +226,29 @@ int NetSrvModule::myRead(byte *input, int nByte) {
 	else {
 		int ret = mClientSocket->read(input, nByte);
 		return ret;
-	}
+	}*/
 }
 
+void NetSrvModule::recieveBuffer(void) {
+	//LOG("recieving buffer!\n");
+	//first read the original number of bytes coming
+	mClientSocket->read((byte *)&bytesRemaining, sizeof(int));
+	//LOG("original size: %d!\n", bytesRemaining);
+	//read the size of the compressed packet
+	int compSize = 0;
+	mClientSocket->read((byte *)&compSize, sizeof(int));
+	//LOG("compressed size: %d!\n", compSize);
+	//LOG("recieving buffer of size: %d!\n", bytesRemaining);
+	//then read in that many bytes
+
+	Bytef *in = (Bytef*) malloc(compSize);
+
+	mClientSocket->read(in, compSize);
+
+
+	compressor->myDecompress(mRecieveBuf, bytesRemaining, in, compSize);
+	iRecieveBufPos = 0;
+}
 /*********************************************************
 	Net Server Run Compression
 *********************************************************/

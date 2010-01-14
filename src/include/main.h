@@ -22,7 +22,7 @@ const float SYMPHONY_SCREEN_GAP = 120.0;
 
 
 #define CGL_REPEAT_INSTRUCTION 1498
-//#define MAX_INSTRUCTIONS 500000
+#define MAX_INSTRUCTIONS 500000
 
 /*********************************************
 			Main application object

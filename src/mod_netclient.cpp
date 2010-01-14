@@ -13,6 +13,14 @@ NetCompressModule *compressor2;
 bool useCompress = false;
 bool useCGLrepeat = false;
 
+const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS * 8;
+int iSendBufPos = 0;
+int bytesLeft = sendBufferSize;
+
+//big buffer
+byte mSendBuf[sendBufferSize];
+
+
 /*********************************************************
 	Net Client Module
 *********************************************************/
@@ -75,6 +83,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	
 	//First send the total number
 	uint32_t num = list.size();
+	//LOG("num size %d!\n", num);
 	fflush(stdout);
 	netBytes += sizeof(uint32_t);
 	if(!myWrite(mSocket, &num, sizeof(uint32_t))){
@@ -192,6 +201,9 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 		if (pIter != (*prevFrame).end()) pIter++;
 	    counter++;
+	    if(mustSend) {
+	    	sendBuffer(mSocket);
+	    }
 	}
 	
 	   //send any instructions that are remaining in the CGL_REPEAT_INSTRUCTION buffer
@@ -217,6 +229,8 @@ bool NetClientModule::process(list<Instruction> &list){
 		sameCount = 0; // reset the count and free the memory
 		free(skip);
 	    }
+		
+	    sendBuffer(mSocket);
 
 	return true;
 }
@@ -233,6 +247,7 @@ bool NetClientModule::sync(){
 		LOG("Connection problem (didn't send sync)!\n");
 		return false;
 	}
+	sendBuffer(mSocket);
 	if(myRead(mSocket, a, sizeof(int)) != sizeof(int)){
 		LOG("Connection problem (didn't recv sync)!\n");
 		return false;
@@ -248,19 +263,29 @@ bool NetClientModule::sync(){
 *********************************************************/
 
 int NetClientModule::myWrite(int fd, void* buf, int nByte){
+	
+	if(bytesLeft - nByte > 0) {
+		memcpy(mSendBuf + iSendBufPos, buf, nByte);
+		iSendBufPos += nByte;
+		bytesLeft -= nByte;
+	}
+	else {
+		sendBuffer(fd);
+	}
+	return nByte;
 
-	if(useCompress) {
+	/*if(useCompress) {
 		//create room for new compressed buffer
 		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 		Bytef *out = (Bytef*) malloc(CompBuffSize);
 		int newSize = compressor2->myCompress(buf, nByte, out);
 
 		//write the size of the next instruction
-		if(!write(mSocket, &newSize, sizeof(int))){
+		if(!write(fd, &newSize, sizeof(int))){
 			LOG("Connection problem!\n");
 		}
 		//write the old size of the next instruction
-		if(!write(mSocket, &nByte, sizeof(int))){
+		if(!write(fd, &nByte, sizeof(int))){
 			LOG("Connection problem!\n");
 		}
 	
@@ -278,12 +303,21 @@ int NetClientModule::myWrite(int fd, void* buf, int nByte){
 		int ret = write(fd, buf, nByte);
 		netBytes2 += nByte;
 		return ret;
-	}
+	}*/
 }
 
 int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
 
-	if(useCompress) {
+	if(bytesLeft - nByte > 0) {
+		memcpy(mSendBuf + iSendBufPos, buf, nByte);
+		iSendBufPos += nByte;
+		bytesLeft -= nByte;
+	}
+	else {
+		sendBuffer(fd);
+	}
+	return nByte;
+	/*if(useCompress) {
 		//create room for new compressed buffer
 		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 		Bytef *out = (Bytef*) malloc(CompBuffSize);
@@ -312,11 +346,21 @@ int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
 		int ret = write(fd, buf, nByte);
 		netBytes2 += nByte;
 		return ret;
-	}
+	} */
 }
 
 int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
 	
+	if(bytesLeft - nByte > 0) {
+		memcpy(mSendBuf + iSendBufPos, buf, nByte);
+		iSendBufPos += nByte;
+		bytesLeft -= nByte;
+	}
+	else {
+		sendBuffer(fd);
+	}
+	return nByte;
+	/*
 	if(useCompress) {
 		//create room for new compressed buffer
 		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
@@ -346,7 +390,36 @@ int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
 		int ret = write(fd, buf, nByte);
 		netBytes2 += nByte;
 		return ret;
+	}*/
+}
+
+void NetClientModule::sendBuffer(int fd) {
+	//LOG("sending buffer of size: %d!\n", iSendBufPos);
+
+	//create room for new compressed buffer
+	uLongf CompBuffSize = (uLongf)(iSendBufPos + (iSendBufPos * 0.1) + 12);
+	Bytef *out = (Bytef*) malloc(CompBuffSize);
+	int newSize = compressor2->myCompress(mSendBuf, iSendBufPos, out);
+
+	//first write the original size of the buffer
+	if(!write(fd, &iSendBufPos, sizeof(int))){
+		LOG("Connection problem!\n");
 	}
+	//LOG("original size: %d!\n", iSendBufPos);
+	//first write the compressed size of the buffer
+	if(!write(fd, &newSize, sizeof(int))){
+		LOG("Connection problem!\n");
+	}
+	//LOG("compressed size: %d!\n", newSize);
+	//then write the actual buffer
+	if(!write(fd, out, newSize)){
+		LOG("Connection problem!\n");
+	}
+	//reset values
+	iSendBufPos = 0;
+	bytesLeft = sendBufferSize;
+	netBytes2 += newSize + (sizeof(int) * 2);
+	//LOG("iSendBufPos %d\n", iSendBufPos);
 }
 
 /*********************************************************

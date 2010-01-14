@@ -85,6 +85,7 @@ public:
 	bool sync();
 	int myRead(byte *input, int nByte);
 	int myWrite(byte *input, int nByte);
+	void recieveBuffer(void);
 };
 
 /*********************************************
@@ -103,6 +104,7 @@ public:
 	int myWrite(int fd, void* buf, unsigned nByte);
 	int myWrite(int fd, void* buf, long unsigned nByte);
 	int myRead(int fd, void *buf, size_t count);
+	void sendBuffer(int fd);
 };
 
 /*********************************************
