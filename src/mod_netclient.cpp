@@ -11,16 +11,19 @@ int incomingSize = 0;
 int outgoingSize = 0;
 NetCompressModule *compressor2;
 bool useCompress = false;
+bool useCGLrepeat = false;
 
 /*********************************************************
 	Net Client Module
 *********************************************************/
 
-NetClientModule::NetClientModule(string address, int port, bool compression){
+NetClientModule::NetClientModule(string address, int port, bool compression, bool repeatInstruction){
         //Make the socket and connect
 	mSocket = socket(PF_INET, SOCK_STREAM, 0); 
 	
 	useCompress = compression;
+	useCGLrepeat = repeatInstruction;
+
 	if(useCompress) {
 		//make a compressor object
 		compressor2 = new NetCompressModule();
@@ -87,6 +90,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	for(std::list<Instruction>::iterator iter = list.begin(), pIter = (*prevFrame).begin(); 
 	    iter != list.end(); iter++){
 	    Instruction *i = &(*iter); //yuck
+
             //LOG("ID:%d\n",i->id);
 	    bool mustSend = false;
 
@@ -100,7 +104,7 @@ bool NetClientModule::process(list<Instruction> &list){
 
 	    if (i->id == pIter->id 		
 		&& !mustSend && i->id 			
-		  //&& false //uncomment to disable deltas
+		  && useCGLrepeat //value from config to enable/disable deltas
 		  && sameCount < 100		//stops sameBuffer filling up indefinitely
 		) {
 			bool same = true;
@@ -224,6 +228,7 @@ bool NetClientModule::process(list<Instruction> &list){
 bool NetClientModule::sync(){
 	int * a = (int *)malloc(sizeof(int));
 	*a = 987654;
+	netBytes += sizeof(int);
 	if(myWrite(mSocket, a, sizeof(int)) != sizeof(int)){
 		LOG("Connection problem (didn't send sync)!\n");
 		return false;

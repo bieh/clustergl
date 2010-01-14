@@ -1,5 +1,5 @@
 /**************************************
-		Network Buffer
+	Network Buffer
 **************************************/
 class BufferedFd {
  private:

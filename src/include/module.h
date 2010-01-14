@@ -95,7 +95,7 @@ public:
 class NetClientModule : public Module{
   int mSocket;
 public:
-	NetClientModule(string address, int port, bool compression);
+	NetClientModule(string address, int port, bool compression, bool repeatInstruction);
 	
 	bool process(list<Instruction> &i);
 	bool sync();

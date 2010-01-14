@@ -189,8 +189,8 @@ int NetSrvModule::myRead(byte *input, int nByte) {
 		//read the size of the original packet
 		int origSize = 0;
 		mClientSocket->read((byte *)&origSize, sizeof(int));
-		if(origSize < 4)
-			LOG("READING: %d\n", origSize);
+		if(origSize < 4 && origSize > 0)
+			LOG("READING SMALL PACKET: %d, COMPRESSED: %d \n", origSize, compressedSize);
 		//then read the compressed packet data and uncompress
 		Bytef *in = (Bytef*) malloc(compressedSize);
 		int ret = mClientSocket->read(in, compressedSize);

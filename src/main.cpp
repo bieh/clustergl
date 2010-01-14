@@ -8,6 +8,8 @@ bool bHasInit = false;
 /* default values, should never get used */
 int sizeX;
 int sizeY;
+int sizeSYMPHONYX;
+int sizeSYMPHONYY;
 int offsetX;
 int offsetY;
 int scaleX;
@@ -15,6 +17,7 @@ int scaleY;
 string dnNumber;
 int port;
 bool useCompression;
+bool useRepeat;
 			
 /********************************************************
 	Application Object
@@ -50,15 +53,15 @@ int App::run_shared(){
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new NetClientModule("127.0.0.1", port, useCompression));
+	mModules.push_back(new NetClientModule("127.0.0.1", port, useCompression, useRepeat));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
 	//mModules.push_back(new NetClientModule("192.168.22.101", port));//dn1
-	mModules.push_back(new NetClientModule("192.168.22.102", port, useCompression));//dn2
-	mModules.push_back(new NetClientModule("192.168.22.103", port, useCompression));//dn3
-	mModules.push_back(new NetClientModule("192.168.22.104", port, useCompression));//dn4
-	mModules.push_back(new NetClientModule("192.168.22.105", port, useCompression));//dn5
+	mModules.push_back(new NetClientModule("192.168.22.102", port, useCompression, useRepeat));//dn2
+	mModules.push_back(new NetClientModule("192.168.22.103", port, useCompression, useRepeat));//dn3
+	mModules.push_back(new NetClientModule("192.168.22.104", port, useCompression, useRepeat));//dn4
+	mModules.push_back(new NetClientModule("192.168.22.105", port, useCompression, useRepeat));//dn5
 #endif
 
 	//Return control to the parent process.
@@ -70,12 +73,15 @@ void App::init(){
     cfg_opt_t opts[] = {
 	CFG_SIMPLE_INT((char *)("sizeX"), &sizeX),
 	CFG_SIMPLE_INT((char *)("sizeY"), &sizeY),
+	CFG_SIMPLE_INT((char *)("sizeSYMPHONYX"), &sizeSYMPHONYX),
+	CFG_SIMPLE_INT((char *)("sizeSYMPHONYY"), &sizeSYMPHONYY),
 	CFG_SIMPLE_INT((char *)("offsetX"), &offsetX),
         CFG_SIMPLE_INT((char *)("offsetY"), &offsetY),
         CFG_SIMPLE_INT((char *)("port"), &port),
 	CFG_SIMPLE_INT((char *)("scaleX"), &scaleX),
         CFG_SIMPLE_INT((char *)("scaleY"), &scaleY),
 	CFG_SIMPLE_BOOL((char *)("useCompression"), &useCompression),
+	CFG_SIMPLE_BOOL((char *)("useCGLRepeat"), &useRepeat),
         CFG_END()
     };
     cfg_t *cfg;
@@ -87,6 +93,8 @@ void App::init(){
 	#ifdef SYMPHONY
 		int dn = atoi(dnNumber.c_str());
 		offsetX = (SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * (dn - 1);
+		sizeX = sizeSYMPHONYX;
+		sizeY = sizeSYMPHONYY;
 	#endif
 
 	LOG("\n");
@@ -118,7 +126,7 @@ bool App::tick(){
 	// Output FPS and BPS
 	if (curTime - prevTime>= 5){ //maybe need more precision	
 		LOG("Last %ld Seconds:\n", curTime - prevTime);	
-		// First calculat FPS
+		// First calculate FPS
 		LOG("ClusterGL2 Average FPS:\t\t\t%ld\n",
 			frames/(curTime - prevTime));
 		frames = 0;

@@ -2,11 +2,18 @@
 #include <iostream>
 
 #include <GL/gl.h>
+
+//#define  HACK true
+
+#ifdef HACK
 #include <GL/glx.h>
+#include <GL/glu.h>
+
+#endif
 
 extern App *theApp;
 
-//#define  HACK true
+
 
 /*********************************************************
 	Coloured Console Output (not used)
@@ -377,234 +384,6 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 		exit(1);
 	}
 }
-
-/********************************************************
-	GLX Intercepts
-********************************************************/
-
-#ifdef HACK
-
-extern "C" XVisualInfo* glXChooseVisual( Display *dpy, int screen, int *attribList ) {
-LOG("Called unimplemted stub glXChooseVisual!\n");
-}
-
-extern "C" GLXContext glXCreateContext( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct ) {
-LOG("Called unimplemted stub glXCreateContext!\n");
-}
-
-extern "C" void glXDestroyContext( Display *dpy, GLXContext ctx ) {
-LOG("Called unimplemted stub glXDestroyContext!\n");
-}
-
-extern "C" Bool glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ctx) {
-LOG("Called unimplemted stub glXMakeCurrent!\n");
-}
-
-extern "C" void glXCopyContext( Display *dpy, GLXContext src, GLXContext dst, unsigned long mask ) {
-LOG("Called unimplemted stub glXCopyContext!\n");
-}
-
-extern "C" void glXSwapBuffers( Display *dpy, GLXDrawable drawable ) {
-LOG("Called unimplemted stub glXSwapBuffers!\n");
-}
-
-extern "C" GLXPixmap glXCreateGLXPixmap( Display *dpy, XVisualInfo *visual, Pixmap pixmap ) {
-LOG("Called unimplemted stub glXCreateGLXPixmap!\n");
-}
-
-extern "C" void glXDestroyGLXPixmap( Display *dpy, GLXPixmap pixmap ) {
-LOG("Called unimplemted stub glXDestroyGLXPixmap!\n");
-}
-
-extern "C" Bool glXQueryExtension( Display *dpy, int *errorb, int *event ) {
-LOG("Called unimplemted stub glXQueryExtension!\n");
-}
-
-extern "C" Bool glXQueryVersion( Display *dpy, int *maj, int *min ) {
-LOG("Called unimplemted stub glXQueryVersion!\n");
-}
-
-extern "C" Bool glXIsDirect( Display *dpy, GLXContext ctx ) {
-LOG("Called unimplemted stub glXIsDirect!\n");
-}
-
-extern "C" int glXGetConfig( Display *dpy, XVisualInfo *visual, int attrib, int *value ) {
-LOG("Called unimplemted stub glXGetConfig!\n");
-}
-
-extern "C" GLXContext glXGetCurrentContext( void ) {
-LOG("Called unimplemted stub glXGetCurrentContext!\n");
-}
-
-extern "C" GLXDrawable glXGetCurrentDrawable( void ) {
-LOG("Called unimplemted stub glXGetCurrentDrawable!\n");
-}
-
-extern "C" void glXWaitGL( void ) {
-LOG("Called unimplemted stub glXWaitGL!\n");
-}
-
-extern "C" void glXWaitX( void ) {
-LOG("Called unimplemted stub glXWaitX!\n");
-}
-
-extern "C" void glXUseXFont( Font font, int first, int count, int list ) {
-LOG("Called unimplemted stub glXUseXFont!\n");
-}
-
-
-
-//GLX 1.1 and later
-extern "C" const char *glXQueryExtensionsString( Display *dpy, int screen ) {
-LOG("Called unimplemted stub glXQueryExtensionsString!\n");
-}
-
-extern "C" const char *glXQueryServerString( Display *dpy, int screen, int name ) {
-LOG("Called unimplemted stub glXQueryServerString!\n");
-}
-
-extern "C" const char *glXGetClientString( Display *dpy, int name ) {
-LOG("Called unimplemted stub glXGetClientString!\n");
-}
-
-
-// GLX 1.2 and later
-extern "C" Display *glXGetCurrentDisplay( void ) {
-LOG("Called unimplemted stub glXGetCurrentDisplay!\n");
-}
-
-
-// GLX 1.3 and later 
-extern "C" GLXFBConfig *glXChooseFBConfig( Display *dpy, int screen, const int *attribList, int *nitems ) {
-LOG("Called unimplemted stub glXChooseFBConfig!\n");
-}
-
-extern "C" int glXGetFBConfigAttrib( Display *dpy, GLXFBConfig config, int attribute, int *value ) {
-LOG("Called unimplemted stub glXGetFBConfigAttrib!\n");
-}
-
-extern "C" GLXFBConfig *glXGetFBConfigs( Display *dpy, int screen, int *nelements ) {
-LOG("Called unimplemted stub glXGetFBConfigs!\n");
-}
-
-extern "C" XVisualInfo *glXGetVisualFromFBConfig( Display *dpy, GLXFBConfig config ) {
-LOG("Called unimplemted stub glXGetVisualFromFBConfig!\n");
-}
-
-extern "C" GLXWindow glXCreateWindow( Display *dpy, GLXFBConfig config, Window win, const int *attribList ) {
-LOG("Called unimplemted stub glXCreateWindow!\n");
-}
-
-extern "C" void glXDestroyWindow( Display *dpy, GLXWindow window ) {
-LOG("Called unimplemted stub glXDestroyWindow!\n");
-}
-
-extern "C" GLXPixmap glXCreatePixmap( Display *dpy, GLXFBConfig config, Pixmap pixmap, const int *attribList ) {
-LOG("Called unimplemted stub glXCreatePixmap!\n");
-}
-
-extern "C" void glXDestroyPixmap( Display *dpy, GLXPixmap pixmap ) {
-LOG("Called unimplemted stub glXDestroyPixmap!\n");
-}
-
-extern "C" GLXPbuffer glXCreatePbuffer( Display *dpy, GLXFBConfig config, const int *attribList ) {
-LOG("Called unimplemted stub glXCreatePbuffer!\n");
-}
-
-extern "C" void glXDestroyPbuffer( Display *dpy, GLXPbuffer pbuf ) {
-LOG("Called unimplemted stub glXDestroyPbuffer!\n");
-}
-
-extern "C" void glXQueryDrawable( Display *dpy, GLXDrawable draw, int attribute, unsigned int *value ) {
-LOG("Called unimplemted stub glXQueryDrawable!\n");
-}
-
-extern "C" GLXContext glXCreateNewContext( Display *dpy, GLXFBConfig config, int renderType, GLXContext shareList, Bool direct ) {
-LOG("Called unimplemted stub glXCreateNewContext!\n");
-}
-
-extern "C" Bool glXMakeContextCurrent( Display *dpy, GLXDrawable draw, GLXDrawable read, GLXContext ctx ) {
-LOG("Called unimplemted stub glXMakeContextCurrent!\n");
-}
-
-extern "C" GLXDrawable glXGetCurrentReadDrawable( void ) {
-LOG("Called unimplemted stub glXGetCurrentReadDrawable!\n");
-}
-
-extern "C" int glXQueryContext( Display *dpy, GLXContext ctx, int attribute, int *value ) {
-LOG("Called unimplemted stub glXQueryContext!\n");
-}
-
-extern "C" void glXSelectEvent( Display *dpy, GLXDrawable drawable, unsigned long mask ) {
-LOG("Called unimplemted stub glXSelectEvent!\n");
-}
-
-extern "C" void glXGetSelectedEvent( Display *dpy, GLXDrawable drawable, unsigned long *mask ) {
-LOG("Called unimplemted stub glXGetSelectedEvent!\n");
-}
-
-extern "C" __GLXextFuncPtr glXGetProcAddressARB (const GLubyte *) {
-LOG("Called unimplemted stub glXGetProcAddressARB!\n");
-}
-
-extern "C" void (*glXGetProcAddress(const GLubyte *procname))( void ) {
-LOG("Called unimplemted stub glXGetProcAddress!\n");
-}
-extern "C" void *glXAllocateMemoryNV(GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority) {
-LOG("Called unimplemted stub glXAllocateMemoryNV!\n");
-}
-extern "C" void glXFreeMemoryNV(GLvoid *pointer) {
-LOG("Called unimplemted stub glXFreeMemoryNV!\n");
-}
-
-extern "C" void *glXAllocateMemoryMESA(Display *dpy, int scrn, size_t size, float readfreq, float writefreq, float priority) {
-LOG("Called unimplemted stub glXAllocateMemoryMESA!\n");
-}
-extern "C" void glXFreeMemoryMESA(Display *dpy, int scrn, void *pointer) {
-LOG("Called unimplemted stub glXFreeMemoryMESA!\n");
-}
-extern "C" GLuint glXGetMemoryOffsetMESA(Display *dpy, int scrn, const void *pointer) {
-LOG("Called unimplemted stub glXGetMemoryOffsetMESA!\n");
-}
-
-extern "C" Bool glXBindTexImageARB(Display *dpy, GLXPbuffer pbuffer, int buffer) {
-LOG("Called unimplemted stub glXBindTexImageARB!\n");
-}
-extern "C" Bool glXReleaseTexImageARB(Display *dpy, GLXPbuffer pbuffer, int buffer) {
-LOG("Called unimplemted stub glXReleaseTexImageARB!\n");
-}
-extern "C" Bool glXDrawableAttribARB(Display *dpy, GLXDrawable draw, const int *attribList) {
-LOG("Called unimplemted stub glXDrawableAttribARB!\n");
-}
-
-extern "C" int glXGetFrameUsageMESA(Display *dpy, GLXDrawable drawable, float *usage) {
-LOG("Called unimplemted stub glXGetFrameUsageMESA!\n");
-}
-extern "C" int glXBeginFrameTrackingMESA(Display *dpy, GLXDrawable drawable) {
-LOG("Called unimplemted stub glXBeginFrameTrackingMESA!\n");
-}
-extern "C" int glXEndFrameTrackingMESA(Display *dpy, GLXDrawable drawable) {
-LOG("Called unimplemted stub glXEndFrameTrackingMESA!\n");
-}
-extern "C" int glXQueryFrameTrackingMESA(Display *dpy, GLXDrawable drawable, int64_t *swapCount, int64_t *missedFrames, float *lastMissedUsage) {
-LOG("Called unimplemted stub glXQueryFrameTrackingMESA!\n");
-}
-
-extern "C" int glXSwapIntervalMESA(unsigned int interval) {
-LOG("Called unimplemted stub glXSwapIntervalMESA!\n");
-}
-extern "C" int glXGetSwapIntervalMESA(void) {
-LOG("Called unimplemted stub glXGetSwapIntervalMESA!\n");
-}
-
-extern "C" void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer, const int *attrib_list) {
-LOG("Called unimplemted stub glXBindTexImageEXT!\n");
-}
-extern "C" void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer) {
-LOG("Called unimplemted stub glXReleaseTexImageEXT!\n");
-}
-
-#endif
 
 /********************************************************
 	Interception Exports
@@ -10694,3 +10473,476 @@ extern "C" void glLoadIdentityDeformationMapSGIX(GLenum mask){
 	pushOp(1228);
 	pushParam(mask);
 }
+
+/********************************************************
+	GLX Intercepts
+********************************************************/
+
+#ifdef HACK
+
+extern "C" XVisualInfo* glXChooseVisual( Display *dpy, int screen, int *attribList ) {
+LOG("Called unimplemted stub glXChooseVisual!\n");
+}
+
+extern "C" GLXContext glXCreateContext( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct ) {
+LOG("Called unimplemted stub glXCreateContext!\n");
+}
+
+extern "C" void glXDestroyContext( Display *dpy, GLXContext ctx ) {
+LOG("Called unimplemted stub glXDestroyContext!\n");
+}
+
+extern "C" Bool glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ctx) {
+LOG("Called unimplemted stub glXMakeCurrent!\n");
+}
+
+extern "C" void glXCopyContext( Display *dpy, GLXContext src, GLXContext dst, unsigned long mask ) {
+LOG("Called unimplemted stub glXCopyContext!\n");
+}
+
+extern "C" void glXSwapBuffers( Display *dpy, GLXDrawable drawable ) {
+LOG("Called unimplemted stub glXSwapBuffers!\n");
+}
+
+extern "C" GLXPixmap glXCreateGLXPixmap( Display *dpy, XVisualInfo *visual, Pixmap pixmap ) {
+LOG("Called unimplemted stub glXCreateGLXPixmap!\n");
+}
+
+extern "C" void glXDestroyGLXPixmap( Display *dpy, GLXPixmap pixmap ) {
+LOG("Called unimplemted stub glXDestroyGLXPixmap!\n");
+}
+
+extern "C" Bool glXQueryExtension( Display *dpy, int *errorb, int *event ) {
+LOG("Called unimplemted stub glXQueryExtension!\n");
+}
+
+extern "C" Bool glXQueryVersion( Display *dpy, int *maj, int *min ) {
+LOG("Called unimplemted stub glXQueryVersion!\n");
+}
+
+extern "C" Bool glXIsDirect( Display *dpy, GLXContext ctx ) {
+LOG("Called unimplemted stub glXIsDirect!\n");
+}
+
+extern "C" int glXGetConfig( Display *dpy, XVisualInfo *visual, int attrib, int *value ) {
+LOG("Called unimplemted stub glXGetConfig!\n");
+}
+
+extern "C" GLXContext glXGetCurrentContext( void ) {
+LOG("Called unimplemted stub glXGetCurrentContext!\n");
+}
+
+extern "C" GLXDrawable glXGetCurrentDrawable( void ) {
+LOG("Called unimplemted stub glXGetCurrentDrawable!\n");
+}
+
+extern "C" void glXWaitGL( void ) {
+LOG("Called unimplemted stub glXWaitGL!\n");
+}
+
+extern "C" void glXWaitX( void ) {
+LOG("Called unimplemted stub glXWaitX!\n");
+}
+
+extern "C" void glXUseXFont( Font font, int first, int count, int list ) {
+LOG("Called unimplemted stub glXUseXFont!\n");
+}
+
+
+
+//GLX 1.1 and later
+extern "C" const char *glXQueryExtensionsString( Display *dpy, int screen ) {
+LOG("Called unimplemted stub glXQueryExtensionsString!\n");
+}
+
+extern "C" const char *glXQueryServerString( Display *dpy, int screen, int name ) {
+LOG("Called unimplemted stub glXQueryServerString!\n");
+}
+
+extern "C" const char *glXGetClientString( Display *dpy, int name ) {
+LOG("Called unimplemted stub glXGetClientString!\n");
+}
+
+
+// GLX 1.2 and later
+extern "C" Display *glXGetCurrentDisplay( void ) {
+LOG("Called unimplemted stub glXGetCurrentDisplay!\n");
+}
+
+
+// GLX 1.3 and later 
+extern "C" GLXFBConfig *glXChooseFBConfig( Display *dpy, int screen, const int *attribList, int *nitems ) {
+LOG("Called unimplemted stub glXChooseFBConfig!\n");
+}
+
+extern "C" int glXGetFBConfigAttrib( Display *dpy, GLXFBConfig config, int attribute, int *value ) {
+LOG("Called unimplemted stub glXGetFBConfigAttrib!\n");
+}
+
+extern "C" GLXFBConfig *glXGetFBConfigs( Display *dpy, int screen, int *nelements ) {
+LOG("Called unimplemted stub glXGetFBConfigs!\n");
+}
+
+extern "C" XVisualInfo *glXGetVisualFromFBConfig( Display *dpy, GLXFBConfig config ) {
+LOG("Called unimplemted stub glXGetVisualFromFBConfig!\n");
+}
+
+extern "C" GLXWindow glXCreateWindow( Display *dpy, GLXFBConfig config, Window win, const int *attribList ) {
+LOG("Called unimplemted stub glXCreateWindow!\n");
+}
+
+extern "C" void glXDestroyWindow( Display *dpy, GLXWindow window ) {
+LOG("Called unimplemted stub glXDestroyWindow!\n");
+}
+
+extern "C" GLXPixmap glXCreatePixmap( Display *dpy, GLXFBConfig config, Pixmap pixmap, const int *attribList ) {
+LOG("Called unimplemted stub glXCreatePixmap!\n");
+}
+
+extern "C" void glXDestroyPixmap( Display *dpy, GLXPixmap pixmap ) {
+LOG("Called unimplemted stub glXDestroyPixmap!\n");
+}
+
+extern "C" GLXPbuffer glXCreatePbuffer( Display *dpy, GLXFBConfig config, const int *attribList ) {
+LOG("Called unimplemted stub glXCreatePbuffer!\n");
+}
+
+extern "C" void glXDestroyPbuffer( Display *dpy, GLXPbuffer pbuf ) {
+LOG("Called unimplemted stub glXDestroyPbuffer!\n");
+}
+
+extern "C" void glXQueryDrawable( Display *dpy, GLXDrawable draw, int attribute, unsigned int *value ) {
+LOG("Called unimplemted stub glXQueryDrawable!\n");
+}
+
+extern "C" GLXContext glXCreateNewContext( Display *dpy, GLXFBConfig config, int renderType, GLXContext shareList, Bool direct ) {
+LOG("Called unimplemted stub glXCreateNewContext!\n");
+}
+
+extern "C" Bool glXMakeContextCurrent( Display *dpy, GLXDrawable draw, GLXDrawable read, GLXContext ctx ) {
+LOG("Called unimplemted stub glXMakeContextCurrent!\n");
+}
+
+extern "C" GLXDrawable glXGetCurrentReadDrawable( void ) {
+LOG("Called unimplemted stub glXGetCurrentReadDrawable!\n");
+}
+
+extern "C" int glXQueryContext( Display *dpy, GLXContext ctx, int attribute, int *value ) {
+LOG("Called unimplemted stub glXQueryContext!\n");
+}
+
+extern "C" void glXSelectEvent( Display *dpy, GLXDrawable drawable, unsigned long mask ) {
+LOG("Called unimplemted stub glXSelectEvent!\n");
+}
+
+extern "C" void glXGetSelectedEvent( Display *dpy, GLXDrawable drawable, unsigned long *mask ) {
+LOG("Called unimplemted stub glXGetSelectedEvent!\n");
+}
+
+extern "C" __GLXextFuncPtr glXGetProcAddressARB (const GLubyte *) {
+LOG("Called unimplemted stub glXGetProcAddressARB!\n");
+}
+
+extern "C" void (*glXGetProcAddress(const GLubyte *procname))( void ) {
+LOG("Called unimplemted stub glXGetProcAddress!\n");
+}
+extern "C" void *glXAllocateMemoryNV(GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority) {
+LOG("Called unimplemted stub glXAllocateMemoryNV!\n");
+}
+extern "C" void glXFreeMemoryNV(GLvoid *pointer) {
+LOG("Called unimplemted stub glXFreeMemoryNV!\n");
+}
+
+extern "C" void *glXAllocateMemoryMESA(Display *dpy, int scrn, size_t size, float readfreq, float writefreq, float priority) {
+LOG("Called unimplemted stub glXAllocateMemoryMESA!\n");
+}
+extern "C" void glXFreeMemoryMESA(Display *dpy, int scrn, void *pointer) {
+LOG("Called unimplemted stub glXFreeMemoryMESA!\n");
+}
+extern "C" GLuint glXGetMemoryOffsetMESA(Display *dpy, int scrn, const void *pointer) {
+LOG("Called unimplemted stub glXGetMemoryOffsetMESA!\n");
+}
+
+extern "C" Bool glXBindTexImageARB(Display *dpy, GLXPbuffer pbuffer, int buffer) {
+LOG("Called unimplemted stub glXBindTexImageARB!\n");
+}
+extern "C" Bool glXReleaseTexImageARB(Display *dpy, GLXPbuffer pbuffer, int buffer) {
+LOG("Called unimplemted stub glXReleaseTexImageARB!\n");
+}
+extern "C" Bool glXDrawableAttribARB(Display *dpy, GLXDrawable draw, const int *attribList) {
+LOG("Called unimplemted stub glXDrawableAttribARB!\n");
+}
+
+extern "C" int glXGetFrameUsageMESA(Display *dpy, GLXDrawable drawable, float *usage) {
+LOG("Called unimplemted stub glXGetFrameUsageMESA!\n");
+}
+extern "C" int glXBeginFrameTrackingMESA(Display *dpy, GLXDrawable drawable) {
+LOG("Called unimplemted stub glXBeginFrameTrackingMESA!\n");
+}
+extern "C" int glXEndFrameTrackingMESA(Display *dpy, GLXDrawable drawable) {
+LOG("Called unimplemted stub glXEndFrameTrackingMESA!\n");
+}
+extern "C" int glXQueryFrameTrackingMESA(Display *dpy, GLXDrawable drawable, int64_t *swapCount, int64_t *missedFrames, float *lastMissedUsage) {
+LOG("Called unimplemted stub glXQueryFrameTrackingMESA!\n");
+}
+
+extern "C" int glXSwapIntervalMESA(unsigned int interval) {
+LOG("Called unimplemted stub glXSwapIntervalMESA!\n");
+}
+extern "C" int glXGetSwapIntervalMESA(void) {
+LOG("Called unimplemted stub glXGetSwapIntervalMESA!\n");
+}
+
+extern "C" void glXBindTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer, const int *attrib_list) {
+LOG("Called unimplemted stub glXBindTexImageEXT!\n");
+}
+extern "C" void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int buffer) {
+LOG("Called unimplemted stub glXReleaseTexImageEXT!\n");
+}
+
+#endif
+
+/********************************************************
+	GLU Intercepts
+********************************************************/
+
+#ifdef HACK
+
+extern "C" void gluBeginCurve (GLUnurbs* nurb) {
+LOG("Called unimplemted stub gluBeginCurve!\n");
+}
+
+extern "C" void gluBeginPolygon (GLUtesselator* tess) {
+LOG("Called unimplemted stub gluBeginPolygon!\n");
+}
+
+extern "C" void gluBeginSurface (GLUnurbs* nurb) {
+LOG("Called unimplemted stub gluBeginSurface!\n");
+}
+
+extern "C" void gluBeginTrim (GLUnurbs* nurb) {
+LOG("Called unimplemted stub gluBeginTrim!\n");
+}
+
+extern "C" GLint gluBuild1DMipmapLevels (GLenum target, GLint internalFormat, GLsizei width, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data) {
+LOG("Called unimplemted stub gluBuild1DMipmapLevels !\n");
+}
+
+extern "C" GLint gluBuild1DMipmaps (GLenum target, GLint internalFormat, GLsizei width, GLenum format, GLenum type, const void *data) {
+LOG("Called unimplemted stub gluBuild1DMipmaps!\n");
+}
+
+extern "C" GLint gluBuild2DMipmapLevels (GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data) {
+LOG("Called unimplemted stub gluBuild2DMipmapLevels!\n");
+}
+
+extern "C" GLint gluBuild2DMipmaps (GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data) {
+LOG("Called unimplemted stub gluBuild2DMipmaps!\n");
+}
+
+extern "C" GLint gluBuild3DMipmapLevels (GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data) {
+LOG("Called unimplemted stub gluBuild3DMipmapLevels!\n");
+}
+
+extern "C" GLint gluBuild3DMipmaps (GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *data) {
+LOG("Called unimplemted stub gluBuild3DMipmaps!\n");
+}
+
+extern "C" GLboolean gluCheckExtension (const GLubyte *extName, const GLubyte *extString) {
+LOG("Called unimplemted stub gluCheckExtension!\n");
+}
+
+extern "C" void gluCylinder (GLUquadric* quad, GLdouble base, GLdouble top, GLdouble height, GLint slices, GLint stacks) {
+LOG("Called unimplemted stub gluCylinder!\n");
+}
+
+extern "C" void gluDeleteNurbsRenderer (GLUnurbs* nurb) {
+LOG("Called unimplemted stub gluDeleteNurbsRenderer!\n");
+}
+
+extern "C" void gluDeleteQuadric (GLUquadric* quad) {
+LOG("Called unimplemted stub gluDeleteQuadric!\n");
+}
+
+extern "C" void gluDeleteTess (GLUtesselator* tess) {
+LOG("Called unimplemted stub gluDeleteTess!\n");
+}
+
+extern "C" void  gluDisk (GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops) {
+LOG("Called unimplemted stub gluDisk!\n");
+}
+
+extern "C" void gluEndCurve (GLUnurbs* nurb) {
+LOG("Called unimplemted stub gluEndCurve!\n");
+}
+
+extern "C" void gluEndPolygon (GLUtesselator* tess) {
+LOG("Called unimplemted stub gluEndPolygon!\n");
+}
+
+extern "C" void gluEndSurface (GLUnurbs* nurb) {
+LOG("Called unimplemted stub gluEndSurface!\n");
+}
+
+extern "C" void gluEndTrim (GLUnurbs* nurb) {
+LOG("Called unimplemted stub gluEndTrim!\n");
+}
+
+extern "C" const GLubyte * gluErrorString (GLenum error) {
+LOG("Called unimplemted stub gluErrorString!\n");
+}
+
+extern "C" void gluGetNurbsProperty (GLUnurbs* nurb, GLenum property, GLfloat* data) {
+LOG("Called unimplemted stub gluGetNurbsProperty!\n");
+}
+
+extern "C" const GLubyte * gluGetString (GLenum name) {
+LOG("Called unimplemted stub gluGetString!\n");
+}
+
+extern "C" void  gluGetTessProperty (GLUtesselator* tess, GLenum which, GLdouble* data) {
+LOG("Called unimplemted stub gluGetTessProperty!\n");
+}
+
+extern "C" void  gluLoadSamplingMatrices (GLUnurbs* nurb, const GLfloat *model, const GLfloat *perspective, const GLint *view) {
+LOG("Called unimplemted stub gluLoadSamplingMatrices!\n");
+}
+
+extern "C" void  gluLookAt (GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble centerX, GLdouble centerY, GLdouble centerZ, GLdouble upX, GLdouble upY, GLdouble upZ) {
+LOG("Called unimplemted stub gluLookAt!\n");
+}
+
+extern "C" GLUnurbs* gluNewNurbsRenderer (void) {
+LOG("Called unimplemted stub gluNewNurbsRenderer!\n");
+}
+
+extern "C" GLUquadric* gluNewQuadric (void) {
+LOG("Called unimplemted stub gluNewQuadric!\n");
+}
+
+extern "C" GLUtesselator* gluNewTess (void) {
+LOG("Called unimplemted stub gluNewTess!\n");
+}
+
+extern "C" void gluNextContour (GLUtesselator* tess, GLenum type) {
+LOG("Called unimplemted stub gluNextContour!\n");
+}
+
+extern "C" void gluNurbsCallback (GLUnurbs* nurb, GLenum which, _GLUfuncptr CallBackFunc) {
+LOG("Called unimplemted stub gluNurbsCallback!\n");
+}
+
+extern "C" void gluNurbsCallbackData (GLUnurbs* nurb, GLvoid* userData) {
+LOG("Called unimplemted stub gluNurbsCallbackData!\n");
+}
+
+extern "C" void gluNurbsCallbackDataEXT (GLUnurbs* nurb, GLvoid* userData) {
+LOG("Called unimplemted stub gluNurbsCallbackDataEXT!\n");
+}
+
+extern "C" void gluNurbsCurve (GLUnurbs* nurb, GLint knotCount, GLfloat *knots, GLint stride, GLfloat *control, GLint order, GLenum type) {
+LOG("Called unimplemted stub gluNurbsCurve!\n");
+}
+
+extern "C" void gluNurbsProperty (GLUnurbs* nurb, GLenum property, GLfloat value) {
+LOG("Called unimplemted stub gluNurbsProperty!\n");
+}
+
+extern "C" void gluNurbsSurface (GLUnurbs* nurb, GLint sKnotCount, GLfloat* sKnots, GLint tKnotCount, GLfloat* tKnots, GLint sStride, GLint tStride, GLfloat* control, GLint sOrder, GLint tOrder, GLenum type) {
+LOG("Called unimplemted stub gluNurbsSurface!\n");
+}
+
+extern "C" void gluOrtho2D (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top) {
+LOG("Called unimplemted stub gluOrtho2D!\n");
+}
+
+extern "C" void gluPartialDisk (GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops, GLdouble start, GLdouble sweep) {
+LOG("Called unimplemted stub gluPartialDisk!\n");
+}
+
+extern "C" void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar) {
+LOG("Called unimplemted stub gluPerspective!\n");
+}
+
+extern "C" void gluPickMatrix (GLdouble x, GLdouble y, GLdouble delX, GLdouble delY, GLint *viewport) {
+LOG("Called unimplemted stub gluPickMatrix!\n");
+}
+
+extern "C" GLint gluProject (GLdouble objX, GLdouble objY, GLdouble objZ, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble* winX, GLdouble* winY, GLdouble* winZ) {
+LOG("Called unimplemted stub gluProject!\n");
+}
+
+extern "C" void gluPwlCurve (GLUnurbs* nurb, GLint count, GLfloat* data, GLint stride, GLenum type) {
+LOG("Called unimplemted stub gluPwlCurve!\n");
+}
+
+extern "C" void gluQuadricCallback (GLUquadric* quad, GLenum which, _GLUfuncptr CallBackFunc) {
+LOG("Called unimplemted stub gluQuadricCallback!\n");
+}
+
+extern "C" void gluQuadricDrawStyle (GLUquadric* quad, GLenum draw) {
+LOG("Called unimplemted stub gluQuadricDrawStyle!\n");
+}
+
+extern "C" void gluQuadricNormals (GLUquadric* quad, GLenum normal) {
+LOG("Called unimplemted stub gluQuadricNormals!\n");
+}
+
+extern "C" void gluQuadricOrientation (GLUquadric* quad, GLenum orientation) {
+LOG("Called unimplemted stub gluQuadricOrientation!\n");
+}
+
+extern "C" void gluQuadricTexture (GLUquadric* quad, GLboolean texture) {
+LOG("Called unimplemted stub gluQuadricTexture!\n");
+}
+
+extern "C" GLint gluScaleImage (GLenum format, GLsizei wIn, GLsizei hIn, GLenum typeIn, const void *dataIn, GLsizei wOut, GLsizei hOut, GLenum typeOut, GLvoid* dataOut) {
+LOG("Called unimplemted stub gluScaleImage!\n");
+}
+
+extern "C" void gluSphere (GLUquadric* quad, GLdouble radius, GLint slices, GLint stacks) {
+LOG("Called unimplemted stub gluSphere!\n");
+}
+
+extern "C" void gluTessBeginContour (GLUtesselator* tess) {
+LOG("Called unimplemted stub gluTessBeginContour!\n");
+}
+
+extern "C" void gluTessBeginPolygon (GLUtesselator* tess, GLvoid* data) {
+LOG("Called unimplemted stub gluTessBeginPolygon!\n");
+}
+
+extern "C" void gluTessCallback (GLUtesselator* tess, GLenum which, _GLUfuncptr CallBackFunc) {
+LOG("Called unimplemted stub gluTessCallback!\n");
+}
+
+extern "C" void gluTessEndContour (GLUtesselator* tess) {
+LOG("Called unimplemted stub gluTessEndContour!\n");
+}
+
+extern "C" void gluTessEndPolygon (GLUtesselator* tess) {
+LOG("Called unimplemted stub gluTessEndPolygon!\n");
+}
+
+extern "C" void gluTessNormal (GLUtesselator* tess, GLdouble valueX, GLdouble valueY, GLdouble valueZ) {
+LOG("Called unimplemted stub gluTessNormal!\n");
+}
+
+extern "C" void gluTessProperty (GLUtesselator* tess, GLenum which, GLdouble data) {
+LOG("Called unimplemted stub gluTessProperty!\n");
+}
+
+extern "C" void gluTessVertex (GLUtesselator* tess, GLdouble *location, GLvoid* data) {
+LOG("Called unimplemted stub gluTessVertex!\n");
+}
+
+extern "C" GLint gluUnProject (GLdouble winX, GLdouble winY, GLdouble winZ, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble* objX, GLdouble* objY, GLdouble* objZ) {
+LOG("Called unimplemted stub gluUnProject!\n");
+}
+
+extern "C" GLint gluUnProject4 (GLdouble winX, GLdouble winY, GLdouble winZ, GLdouble clipW, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble nearVal, GLdouble farVal, GLdouble* objX, GLdouble* objY, GLdouble* objZ, GLdouble* objW) {
+LOG("Called unimplemted stub gluUnProject4!\n");
+}
+
+#endif
+

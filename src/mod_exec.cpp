@@ -10,7 +10,7 @@ typedef void (*ExecFunc)(byte *buf);
 	Execution Globals
 *********************************************************/
 
-static ExecFunc mFunctions[1500];
+static ExecFunc mFunctions[1700];
 static Instruction *mCurrentInstruction = NULL;
 
 /*********************************************************
@@ -106,7 +106,7 @@ bool ExecModule::process(list<Instruction> &list){
 
 	for(std::list<Instruction>::iterator iter = list.begin(); 
 	    iter != list.end(); iter++){
-	    	if(iter->id >= 1500 || !mFunctions[iter->id]){
+	    	if(iter->id >= 1700 || !mFunctions[iter->id]){
 	    		LOG("Unimplemented %d\n", iter->id);
 	    		continue;
 	    	}
@@ -144,6 +144,10 @@ bool ExecModule::process(list<Instruction> &list){
 				float myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
 
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
+
+				//possible performance increase	
+				//glScissor(iOffsetX, iOffsetY, SYMPHONY_SCREEN__WIDTH, SYMPHONY_SCREEN_HEIGHT);
+
 			#else
 				//LOG("VIEWPORT!\n");
 				//if not running on symphony, use 'standard' values
@@ -10483,7 +10487,7 @@ bool ExecModule::init(){
 	
 	LOG("Loading ExecModule\n");
 	
-	for(int i=0;i<1500;i++){
+	for(int i=0;i<1700;i++){
 		mFunctions[i] = NULL;
 	}
 
