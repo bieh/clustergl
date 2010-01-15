@@ -16,7 +16,8 @@ int scaleX;
 int scaleY;
 string dnNumber;
 int port;
-bool useCompression;
+bool usingSendCompression;
+bool usingReplyCompression;
 bool useRepeat;
 			
 /********************************************************
@@ -34,7 +35,7 @@ int App::run(int argc, char **argv){
 	init();
 	
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
-	mModules.push_back(new NetSrvModule(port, useCompression));
+	mModules.push_back(new NetSrvModule(port, usingSendCompression, usingReplyCompression));
 	mModules.push_back(new ExecModule(sizeX, sizeY, offsetX, offsetY, scaleX, scaleY));
 	//mModules.push_back(new TextModule());
 	
@@ -53,15 +54,15 @@ int App::run_shared(){
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new NetClientModule("127.0.0.1", port, useCompression, useRepeat));
+	mModules.push_back(new NetClientModule("127.0.0.1", port, usingSendCompression, usingReplyCompression, useRepeat));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
 	//mModules.push_back(new NetClientModule("192.168.22.101", port));//dn1
-	mModules.push_back(new NetClientModule("192.168.22.102", port, useCompression, useRepeat));//dn2
-	mModules.push_back(new NetClientModule("192.168.22.103", port, useCompression, useRepeat));//dn3
-	mModules.push_back(new NetClientModule("192.168.22.104", port, useCompression, useRepeat));//dn4
-	mModules.push_back(new NetClientModule("192.168.22.105", port, useCompression, useRepeat));//dn5
+	mModules.push_back(new NetClientModule("192.168.22.102", port, usingSendCompression, usingReplyCompression, useRepeat));//dn2
+	mModules.push_back(new NetClientModule("192.168.22.103", port, usingSendCompression, usingReplyCompression, useRepeat));//dn3
+	mModules.push_back(new NetClientModule("192.168.22.104", port, usingSendCompression, usingReplyCompression, useRepeat));//dn4
+	mModules.push_back(new NetClientModule("192.168.22.105", port, usingSendCompression, usingReplyCompression, useRepeat));//dn5
 #endif
 
 	//Return control to the parent process.
@@ -80,7 +81,8 @@ void App::init(){
         CFG_SIMPLE_INT((char *)("port"), &port),
 	CFG_SIMPLE_INT((char *)("scaleX"), &scaleX),
         CFG_SIMPLE_INT((char *)("scaleY"), &scaleY),
-	CFG_SIMPLE_BOOL((char *)("useCompression"), &useCompression),
+	CFG_SIMPLE_BOOL((char *)("usingSendCompression"), &usingSendCompression),
+	CFG_SIMPLE_BOOL((char *)("usingReplyCompression"), &usingReplyCompression),
 	CFG_SIMPLE_BOOL((char *)("useCGLRepeat"), &useRepeat),
         CFG_END()
     };

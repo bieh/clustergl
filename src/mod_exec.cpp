@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glx.h>
 
 typedef void (*ExecFunc)(byte *buf);
 
@@ -108,7 +109,7 @@ bool ExecModule::process(list<Instruction> &list){
 	    iter != list.end(); iter++){
 	    	if(iter->id >= 1700 || !mFunctions[iter->id]){
 	    		LOG("Unimplemented %d\n", iter->id);
-	    		continue;
+			return false;	
 	    	}
 	    	
 	    	mCurrentInstruction = &(*iter);
@@ -132,9 +133,9 @@ bool ExecModule::process(list<Instruction> &list){
 			#ifdef SYMPHONY
 				//work out the proportion of screen that this will be displaying in the x direction
 
-				float xscale = 1.0;
+				//float xscale = 1.0;
 				      //xscale = (w - x)/w;
-				float yscale = 1.0;
+				//float yscale = 1.0;
 				      //yscale = (h - y)/y;
 				float myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
 				float myHeight = 0;
@@ -152,14 +153,39 @@ bool ExecModule::process(list<Instruction> &list){
 				//LOG("VIEWPORT!\n");
 				//if not running on symphony, use 'standard' values
 				//if not running on symphony, there is no 8192 limitation, so why not just use viewport
+				
+				//gluPerspective( 45.0f, 1.33f, 0.1f, 100.0f );
 				//glViewport(iOffsetX, iOffsetY, iScreenX, iScreenY);
 				
-				float myWidth = 2.0/2;
-				float myHeight = -(1.0 * 3/4)/2;
-				float myOffsetX = -1.0/2;
-				float myOffsetY = (1.0 * 3/4);
+				float myWidth = 2.0/2 * iScaleX;
+				float myHeight = -(1.0 * 3/4)/2 * iScaleY;
+				float myOffsetX = -1.0/2 * iScaleX;
+				float myOffsetY = (1.0 * 3/4) * iScaleY;
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 1000.0f);
 			#endif
+			
+				iter++;
+				LOG("next: %d\n", iter->id);
+				GLenum *mode = (GLenum*)iter->args;
+				if(iter->id == 293 && GL_PROJECTION == *mode) {
+					iter++;
+					LOG("next: %d\n", iter->id);
+					if(iter->id == 290) {
+					LOG("skipping glu perspective commands\n");
+					continue;
+					}
+					else {
+					iter --;
+					iter--;
+					LOG("gl setup in unusal order, may not work\n");
+					continue;
+					}
+				}
+				else {
+					iter--;
+					LOG("gl setup in unusal order, may not work\n");
+					continue;
+				}
 
 		} else if (iter->id== 176) { //glScissor
 
@@ -10479,6 +10505,751 @@ void EXEC_glLoadIdentityDeformationMapSGIX(byte *commandbuf){
 	//glLoadIdentityDeformationMapSGIX(*mask);
 }
 
+/********************************************************
+	GLU Intercepts
+********************************************************/
+
+//1501
+void EXEC_gluBeginCurve(byte *commandbuf) {
+	LOG("Called unimplemted stub gluBeginCurve!\n");
+	// (GLUnurbs* nurb)
+}
+
+//1502
+void EXEC_gluBeginPolygon(byte *commandbuf) {
+	LOG("Called unimplemted stub gluBeginPolygon!\n");
+	//(GLUtesselator* tess) 
+}
+
+//1503
+void EXEC_gluBeginSurface(byte *commandbuf) {
+	LOG("Called unimplemted stub gluBeginSurface!\n");
+	// (GLUnurbs* nurb)
+}
+
+//1504
+void EXEC_gluBeginTrim(byte *commandbuf) {
+	LOG("Called unimplemted stub gluBeginTrim!\n");
+	// (GLUnurbs* nurb)
+}
+
+//1505
+void EXEC_gluBuild1DMipmapLevels(byte *commandbuf) {
+	LOG("Called unimplemted stub gluBuild1DMipmapLevels !\n");
+	// (GLenum target, GLint internalFormat, GLsizei width, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data)
+	//returns GLint
+}
+
+//1506
+void EXEC_gluBuild1DMipmaps(byte *commandbuf) {
+	LOG("Called unimplemted stub gluBuild1DMipmaps!\n");
+	//(GLenum target, GLint internalFormat, GLsizei width, GLenum format, GLenum type, const void *data) 
+	//returns GLint
+}
+
+//1507
+void EXEC_gluBuild2DMipmapLevels(byte *commandbuf) {
+LOG("Called unimplemted stub gluBuild2DMipmapLevels!\n");
+//(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data) 
+//returns GLint
+}
+
+//1508
+void EXEC_gluBuild2DMipmaps(byte *commandbuf) {
+LOG("Called unimplemted stub gluBuild2DMipmaps!\n");
+//(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data) 
+//returns GLint
+}
+
+//1509
+void EXEC_gluBuild3DMipmapLevels(byte *commandbuf)  {
+LOG("Called unimplemted stub gluBuild3DMipmapLevels!\n");
+//(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data)
+//returns GLint
+}
+
+//1510
+void EXEC_gluBuild3DMipmaps(byte *commandbuf) {
+//(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *data)
+LOG("Called unimplemted stub gluBuild3DMipmaps!\n");
+//returns GLint
+}
+
+//1511
+void EXEC_gluCheckExtension(byte *commandbuf) {
+LOG("Called unimplemted stub gluCheckExtension!\n");
+//(const GLubyte *extName, const GLubyte *extString) 
+//returns GLboolean
+}
+
+//1512
+void EXEC_gluCylinder(byte *commandbuf) {
+LOG("Called unimplemted stub gluCylinder!\n");
+//(GLUquadric* quad, GLdouble base, GLdouble top, GLdouble height, GLint slices, GLint stacks) 
+}
+
+//1513
+void EXEC_gluDeleteNurbsRenderer(byte *commandbuf) {
+LOG("Called unimplemted stub gluDeleteNurbsRenderer!\n");
+//(GLUnurbs* nurb) 
+}
+
+//1514
+void EXEC_gluDeleteQuadric(byte *commandbuf) {
+LOG("Called unimplemted stub gluDeleteQuadric!\n");
+//(GLUquadric* quad) 
+}
+
+//1515
+void EXEC_gluDeleteTess(byte *commandbuf)  {
+LOG("Called unimplemted stub gluDeleteTess!\n");
+//(GLUtesselator* tess) 
+}
+
+//1516
+void EXEC_gluDisk(byte *commandbuf)  {
+LOG("Called unimplemted stub gluDisk!\n");
+//(GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops) 
+}
+
+//1517
+void EXEC_gluEndCurve(byte *commandbuf)  {
+LOG("Called unimplemted stub gluEndCurve!\n");
+//(GLUnurbs* nurb) 
+}
+
+//1518
+void EXEC_gluEndPolygon(byte *commandbuf)  {
+LOG("Called unimplemted stub gluEndPolygon!\n");
+//(GLUtesselator* tess) 
+}
+
+//1519
+void EXEC_gluEndSurface(byte *commandbuf)  {
+LOG("Called unimplemted stub gluEndSurface!\n");
+//(GLUnurbs* nurb) 
+}
+
+//1520
+void EXEC_gluEndTrim(byte *commandbuf) {
+LOG("Called unimplemted stub gluEndTrim!\n");
+//(GLUnurbs* nurb) 
+}
+
+//1521
+void EXEC_gluErrorString(byte *commandbuf) {
+LOG("Called unimplemted stub gluErrorString!\n");
+//(GLenum error) 
+//returns const GLubyte *
+}
+
+//1522
+void EXEC_gluGetNurbsProperty(byte *commandbuf) {
+LOG("Called unimplemted stub gluGetNurbsProperty!\n");
+//(GLUnurbs* nurb, GLenum property, GLfloat* data) 
+}
+
+//1523
+void EXEC_gluGetString(byte *commandbuf) {
+LOG("Called unimplemted stub gluGetString!\n");
+//(GLenum name) 
+//returns const GLubyte *
+}
+
+//1524
+void EXEC_gluGetTessProperty(byte *commandbuf) {
+LOG("Called unimplemted stub gluGetTessProperty!\n");
+//(GLUtesselator* tess, GLenum which, GLdouble* data) 
+}
+
+//1525
+void EXEC_gluLoadSamplingMatrices(byte *commandbuf) {
+LOG("Called unimplemted stub gluLoadSamplingMatrices!\n");
+//(GLUnurbs* nurb, const GLfloat *model, const GLfloat *perspective, const GLint *view) 
+}
+
+//1526
+void EXEC_gluLookAt(byte *commandbuf) {
+LOG("Called unimplemted stub gluLookAt!\n");
+//(GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble centerX, GLdouble centerY, GLdouble centerZ, GLdouble upX, GLdouble upY, GLdouble upZ) 
+}
+
+//1527
+void EXEC_gluNewNurbsRenderer(byte *commandbuf) {
+LOG("Called unimplemted stub gluNewNurbsRenderer!\n");
+//returns GLUnurbs*
+}
+
+//1528
+void EXEC_gluNewQuadric(byte *commandbuf) {
+LOG("Called unimplemted stub gluNewQuadric!\n");
+//returns GLUquadric*
+}
+
+//1529
+void EXEC_gluNewTess(byte *commandbuf) {
+LOG("Called unimplemted stub gluNewTess!\n");
+//returns GLUtesselator*
+}
+
+//1530
+void EXEC_gluNextContour(byte *commandbuf) {
+LOG("Called unimplemted stub gluNextContour!\n");
+//(GLUtesselator* tess, GLenum type) 
+}
+
+//1531
+void EXEC_gluNurbsCallback(byte *commandbuf) {
+LOG("Called unimplemted stub gluNurbsCallback!\n");
+//(GLUnurbs* nurb, GLenum which, _GLUfuncptr CallBackFunc) 
+}
+
+//1532
+void EXEC_gluNurbsCallbackData(byte *commandbuf) {
+LOG("Called unimplemted stub gluNurbsCallbackData!\n");
+//(GLUnurbs* nurb, GLvoid* userData) 
+}
+
+//1533
+void EXEC_gluNurbsCallbackDataEXT(byte *commandbuf) {
+LOG("Called unimplemted stub gluNurbsCallbackDataEXT!\n");
+//(GLUnurbs* nurb, GLvoid* userData) 
+}
+
+//1534
+void EXEC_gluNurbsCurve(byte *commandbuf) {
+LOG("Called unimplemted stub gluNurbsCurve!\n");
+//(GLUnurbs* nurb, GLint knotCount, GLfloat *knots, GLint stride, GLfloat *control, GLint order, GLenum type) 
+}
+
+//1535
+void EXEC_gluNurbsProperty(byte *commandbuf) {
+LOG("Called unimplemted stub gluNurbsProperty!\n");
+//(GLUnurbs* nurb, GLenum property, GLfloat value) 
+}
+
+//1536
+void EXEC_gluNurbsSurface(byte *commandbuf) {
+LOG("Called unimplemted stub gluNurbsSurface!\n");
+//(GLUnurbs* nurb, GLint sKnotCount, GLfloat* sKnots, GLint tKnotCount, GLfloat* tKnots, GLint sStride, GLint tStride, GLfloat* control, GLint sOrder, GLint tOrder, GLenum type) 
+}
+
+//1537
+void EXEC_gluOrtho2D(byte *commandbuf) {
+LOG("Called unimplemted stub gluOrtho2D!\n");
+//(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top) 
+}
+
+//1538
+void EXEC_gluPartialDisk(byte *commandbuf) {
+LOG("Called unimplemted stub gluPartialDisk!\n");
+//(GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops, GLdouble start, GLdouble sweep) 
+}
+
+
+//1539
+void EXEC_gluPerspective(byte *commandbuf) {
+LOG("Called unimplemted stub gluPerspective!\n");
+//(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar) 
+}
+
+//1540
+void EXEC_gluPickMatrix(byte *commandbuf) {
+LOG("Called unimplemted stub gluPickMatrix!\n");
+//(GLdouble x, GLdouble y, GLdouble delX, GLdouble delY, GLint *viewport) 
+}
+
+//1541
+void EXEC_gluProject(byte *commandbuf) {
+LOG("Called unimplemted stub gluProject!\n");
+//(GLdouble objX, GLdouble objY, GLdouble objZ, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble* winX, GLdouble* winY, GLdouble* winZ)
+//returns GLint
+}
+
+//1542
+void EXEC_gluPwlCurve(byte *commandbuf) {
+LOG("Called unimplemted stub gluPwlCurve!\n");
+//(GLUnurbs* nurb, GLint count, GLfloat* data, GLint stride, GLenum type) 
+}
+
+//1543
+void EXEC_gluQuadricCallback(byte *commandbuf) {
+LOG("Called unimplemted stub gluQuadricCallback!\n");
+//(GLUquadric* quad, GLenum which, _GLUfuncptr CallBackFunc) 
+}
+
+//1544
+void EXEC_gluQuadricDrawStyle(byte *commandbuf) {
+LOG("Called unimplemted stub gluQuadricDrawStyle!\n");
+//(GLUquadric* quad, GLenum draw) 
+}
+
+//1545
+void EXEC_gluQuadricNormals(byte *commandbuf) {
+LOG("Called unimplemted stub gluQuadricNormals!\n");
+//(GLUquadric* quad, GLenum normal) 
+}
+
+//1546
+void EXEC_gluQuadricOrientation(byte *commandbuf) {
+LOG("Called unimplemted stub gluQuadricOrientation!\n");
+//(GLUquadric* quad, GLenum orientation) 
+}
+
+//1547
+void EXEC_gluQuadricTexture(byte *commandbuf) {
+LOG("Called unimplemted stub gluQuadricTexture!\n");
+//(GLUquadric* quad, GLboolean texture) 
+}
+
+//1548
+void EXEC_glugluScaleImage(byte *commandbuf) {
+LOG("Called unimplemted stub gluScaleImage!\n");
+//(GLenum format, GLsizei wIn, GLsizei hIn, GLenum typeIn, const void *dataIn, GLsizei wOut, GLsizei hOut, GLenum typeOut, GLvoid* dataOut) 
+//returns Glint
+}
+
+//1549
+void EXEC_gluSphere(byte *commandbuf) {
+LOG("Called unimplemted stub gluSphere!\n");
+//(GLUquadric* quad, GLdouble radius, GLint slices, GLint stacks) 
+}
+
+//1550
+void EXEC_gluTessBeginContour(byte *commandbuf) {
+LOG("Called unimplemted stub gluTessBeginContour!\n");
+//(GLUtesselator* tess) 
+}
+
+//1551
+void EXEC_gluTessBeginPolygon(byte *commandbuf) {
+LOG("Called unimplemted stub gluTessBeginPolygon!\n");
+//(GLUtesselator* tess, GLvoid* data) 
+}
+
+//1552
+void EXEC_gluTessCallback(byte *commandbuf) {
+LOG("Called unimplemted stub gluTessCallback!\n");
+//(GLUtesselator* tess, GLenum which, _GLUfuncptr CallBackFunc) 
+}
+
+//1553
+void EXEC_gluTessEndContour(byte *commandbuf) {
+LOG("Called unimplemted stub gluTessEndContour!\n");
+//(GLUtesselator* tess) 
+}
+
+//1554
+void EXEC_gluTessEndPolygon(byte *commandbuf) {
+LOG("Called unimplemted stub gluTessEndPolygon!\n");
+//(GLUtesselator* tess) 
+}
+
+//1555
+void EXEC_gluTessNormal(byte *commandbuf) {
+LOG("Called unimplemted stub gluTessNormal!\n");
+//(GLUtesselator* tess, GLdouble valueX, GLdouble valueY, GLdouble valueZ) 
+}
+
+//1556
+void EXEC_gluTessProperty(byte *commandbuf) {
+LOG("Called unimplemted stub gluTessProperty!\n");
+//(GLUtesselator* tess, GLenum which, GLdouble data) 
+}
+
+//1557
+void EXEC_gluTessVertex(byte *commandbuf) {
+LOG("Called unimplemted stub gluTessVertex!\n");
+//(GLUtesselator* tess, GLdouble *location, GLvoid* data) 
+}
+
+//1558
+void EXEC_gluUnProject(byte *commandbuf) {
+LOG("Called unimplemted stub gluUnProject!\n");
+//(GLdouble winX, GLdouble winY, GLdouble winZ, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble* objX, GLdouble* objY, GLdouble* objZ) 
+//returns glint
+}
+
+//1559
+void EXEC_gluUnProject4(byte *commandbuf) {
+LOG("Called unimplemted stub gluUnProject4!\n");
+//(GLdouble winX, GLdouble winY, GLdouble winZ, GLdouble clipW, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble nearVal, GLdouble farVal, GLdouble* objX, GLdouble* objY, GLdouble* objZ, GLdouble* objW) 
+//returns glint
+}
+
+/********************************************************
+	GLX Intercepts
+********************************************************/
+
+//1601
+void EXEC_glXChooseVisual(byte *commandbuf) {
+LOG("Called unimplemted stub glXChooseVisual!\n");
+//( Display *dpy, int screen, int *attribList )
+//returns XVisualInfo*
+}
+
+//1602
+void EXEC_glXCreateContext(byte *commandbuf) {
+LOG("Called unimplemted stub glXCreateContext!\n");
+//( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct )
+//returns GLXContext
+}
+
+//1603
+void EXEC_glXDestroyContext(byte *commandbuf) {
+LOG("Called unimplemted stub glXDestroyContext!\n");
+//( Display *dpy, GLXContext ctx )
+}
+
+//1604
+void EXEC_glXMakeCurrent(byte *commandbuf) {
+LOG("Called unimplemted stub glXMakeCurrent!\n");
+//( Display *dpy, GLXDrawable drawable, GLXContext ctx)
+//returns Bool
+}
+
+//1605
+void EXEC_glXCopyContext(byte *commandbuf) {
+LOG("Called unimplemted stub glXCopyContext!\n");
+//( Display *dpy, GLXContext src, GLXContext dst, unsigned long mask )
+}
+
+//1606
+void EXEC_glXSwapBuffers(byte *commandbuf) {
+LOG("Called unimplemted stub glXSwapBuffers!\n");
+//( Display *dpy, GLXDrawable drawable ) 
+}
+
+//1607
+void EXEC_glXCreateGLXPixmap(byte *commandbuf) {
+LOG("Called unimplemted stub glXCreateGLXPixmap!\n");
+//( Display *dpy, XVisualInfo *visual, Pixmap pixmap )
+//returns GLXPixmap
+}
+
+//1608
+void EXEC_glXDestroyGLXPixmap(byte *commandbuf) {
+LOG("Called unimplemted stub glXDestroyGLXPixmap!\n");
+//( Display *dpy, GLXPixmap pixmap )
+}
+
+//1609
+void EXEC_glXQueryExtension(byte *commandbuf) {
+LOG("Called unimplemted stub glXQueryExtension!\n");
+//( Display *dpy, int *errorb, int *event )
+//returns bool
+}
+
+//1610
+void EXEC_glXQueryVersion(byte *commandbuf) {
+LOG("Called unimplemted stub glXQueryVersion!\n");
+//( Display *dpy, int *maj, int *min )
+//returns bool
+}
+
+//1611
+void EXEC_glXIsDirect(byte *commandbuf) {
+LOG("Called unimplemted stub glXIsDirect!\n");
+//( Display *dpy, GLXContext ctx )
+//returns bool
+}
+
+//1612
+void EXEC_glXGetConfig(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetConfig!\n");
+//( Display *dpy, XVisualInfo *visual, int attrib, int *value )
+//returns int
+}
+
+//1613
+void EXEC_glXGetCurrentContext(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetCurrentContext!\n");
+//returns GLXContext
+}
+
+//1614
+void EXEC_glXGetCurrentDrawable(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetCurrentDrawable!\n");
+//returns GLXDrawable
+}
+
+//1615
+void EXEC_glXWaitGL(byte *commandbuf) {
+LOG("Called unimplemted stub glXWaitGL!\n");
+}
+
+//1616
+void EXEC_glXWaitX(byte *commandbuf) {
+LOG("Called unimplemted stub glXWaitX!\n");
+}
+
+//1617
+void EXEC_glXUseXFont(byte *commandbuf) {
+LOG("Called unimplemted stub glXUseXFont!\n");
+//( Font font, int first, int count, int list )
+}
+
+
+
+//GLX 1.1 and later
+//1618
+void EXEC_glXQueryExtensionsString(byte *commandbuf) {
+LOG("Called unimplemted stub glXQueryExtensionsString!\n");
+//( Display *dpy, int screen )
+//returns const char *
+}
+
+//1619
+void EXEC_glXQueryServerString(byte *commandbuf) {
+LOG("Called unimplemted stub glXQueryServerString!\n");
+//( Display *dpy, int screen, int name ) 
+//returns const char *
+}
+
+//1620
+void EXEC_glXGetClientString(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetClientString!\n");
+//( Display *dpy, int name )
+//returns const char *
+}
+
+
+// GLX 1.2 and later
+//1621
+void EXEC_glXGetCurrentDisplay(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetCurrentDisplay!\n");
+//returns Display *
+}
+
+
+// GLX 1.3 and later 
+//1622
+void EXEC_glXChooseFBConfig(byte *commandbuf) {
+LOG("Called unimplemted stub glXChooseFBConfig!\n");
+//( Display *dpy, int screen, const int *attribList, int *nitems )
+//returns GLXFBConfig *
+}
+
+//1623
+void EXEC_glXGetFBConfigAttrib(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetFBConfigAttrib!\n");
+//( Display *dpy, GLXFBConfig config, int attribute, int *value )
+//returns int
+}
+
+//1624
+void EXEC_glXGetFBConfigs(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetFBConfigs!\n");
+//( Display *dpy, int screen, int *nelements ) 
+//returns GLXFBConfig *
+}
+
+//1625
+void EXEC_glXGetVisualFromFBConfig(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetVisualFromFBConfig!\n");
+//( Display *dpy, GLXFBConfig config )
+//returns XVisualInfo *
+}
+
+//1626
+void EXEC_glXCreateWindow(byte *commandbuf) {
+LOG("Called unimplemted stub glXCreateWindow!\n");
+//( Display *dpy, GLXFBConfig config, Window win, const int *attribList )
+//returns  GLXWindow 
+}
+
+//1627
+void EXEC_glXDestroyWindow(byte *commandbuf) {
+LOG("Called unimplemted stub glXDestroyWindow!\n");
+//( Display *dpy, GLXWindow window )
+}
+
+//1628
+void EXEC_glXCreatePixmap(byte *commandbuf) {
+LOG("Called unimplemted stub glXCreatePixmap!\n");
+//( Display *dpy, GLXFBConfig config, Pixmap pixmap, const int *attribList )
+//returns GLXPixmap 
+}
+
+//1629
+void EXEC_glXDestroyPixmap(byte *commandbuf) {
+LOG("Called unimplemted stub glXDestroyPixmap!\n");
+//( Display *dpy, GLXPixmap pixmap )
+}
+
+//1630
+void EXEC_glXCreatePbuffer(byte *commandbuf) {
+LOG("Called unimplemted stub glXCreatePbuffer!\n");
+//( Display *dpy, GLXFBConfig config, const int *attribList )
+//returns GLXPbuffer
+}
+
+//1631
+void EXEC_glXDestroyPbuffer(byte *commandbuf) {
+LOG("Called unimplemted stub glXDestroyPbuffer!\n");
+//( Display *dpy, GLXPbuffer pbuf )
+}
+
+//1632
+void EXEC_glXQueryDrawable(byte *commandbuf) {
+LOG("Called unimplemted stub glXQueryDrawable!\n");
+//( Display *dpy, GLXDrawable draw, int attribute, unsigned int *value ) 
+}
+
+//1633
+void EXEC_glXCreateNewContext(byte *commandbuf) {
+LOG("Called unimplemted stub glXCreateNewContext!\n");
+//( Display *dpy, GLXFBConfig config, int renderType, GLXContext shareList, Bool direct )
+//returns GLXContext 
+}
+
+//1634
+void EXEC_glXMakeContextCurrent(byte *commandbuf) {
+LOG("Called unimplemted stub glXMakeContextCurrent!\n");
+//( Display *dpy, GLXDrawable draw, GLXDrawable read, GLXContext ctx )
+//returns Bool
+}
+
+//1635
+void EXEC_glXGetCurrentReadDrawable(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetCurrentReadDrawable!\n");
+//returns GLXDrawable
+}
+
+//1636
+void EXEC_glXQueryContext(byte *commandbuf) {
+LOG("Called unimplemted stub glXQueryContext!\n");
+//( Display *dpy, GLXContext ctx, int attribute, int *value )
+//returns int
+}
+
+//1637
+void EXEC_glXSelectEvent(byte *commandbuf) {
+LOG("Called unimplemted stub glXSelectEvent!\n");
+//( Display *dpy, GLXDrawable drawable, unsigned long mask )
+}
+
+//1638
+void EXEC_glXGetSelectedEvent(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetSelectedEvent!\n");
+//( Display *dpy, GLXDrawable drawable, unsigned long *mask )
+}
+
+//1639
+void EXEC_glXGetProcAddressARB(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetProcAddressARB!\n");
+//(const GLubyte *) 
+//returns __GLXextFuncPtr
+}
+
+//1640
+void EXEC_glXGetProcAddress(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetProcAddress!\n");
+//(const GLubyte *procname)
+}
+
+//1641
+void EXEC_glXAllocateMemoryNV(byte *commandbuf) {
+LOG("Called unimplemted stub glXAllocateMemoryNV!\n");
+//(GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority)
+}
+
+//1642
+void EXEC_glXFreeMemoryNV(byte *commandbuf) {
+LOG("Called unimplemted stub glXFreeMemoryNV!\n");
+//(GLvoid *pointer)
+}
+
+//1643
+void EXEC_glXAllocateMemoryMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXAllocateMemoryMESA!\n");
+//(Display *dpy, int scrn, size_t size, float readfreq, float writefreq, float priority)
+}
+
+//1644
+void EXEC_glXFreeMemoryMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXFreeMemoryMESA!\n");
+//(Display *dpy, int scrn, void *pointer)
+}
+
+//1645
+void EXEC_glXGetMemoryOffsetMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetMemoryOffsetMESA!\n");
+//(Display *dpy, int scrn, const void *pointer)
+//returns GLuint
+}
+
+//1646
+void EXEC_glXBindTexImageARB(byte *commandbuf) {
+LOG("Called unimplemted stub glXBindTexImageARB!\n");
+//(Display *dpy, GLXPbuffer pbuffer, int buffer)
+//returns Bool
+}
+//1647
+void EXEC_glXReleaseTexImageARB(byte *commandbuf) {
+LOG("Called unimplemted stub glXReleaseTexImageARB!\n");
+//(Display *dpy, GLXPbuffer pbuffer, int buffer) 
+//returns Bool
+}
+//1648
+void EXEC_glXDrawableAttribARB(byte *commandbuf) {
+LOG("Called unimplemted stub glXDrawableAttribARB!\n");
+//(Display *dpy, GLXDrawable draw, const int *attribList)
+//returns Bool
+}
+
+//1649
+void EXEC_glXGetFrameUsageMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetFrameUsageMESA!\n");
+//(Display *dpy, GLXDrawable drawable, float *usage)
+//returns int
+}
+
+//1650
+void EXEC_glXBeginFrameTrackingMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXBeginFrameTrackingMESA!\n");
+//(Display *dpy, GLXDrawable drawable)
+//returns int
+}
+
+//1651
+void EXEC_glXEndFrameTrackingMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXEndFrameTrackingMESA!\n");
+//(Display *dpy, GLXDrawable drawable)
+//returns int
+}
+//1652
+void EXEC_glXQueryFrameTrackingMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXQueryFrameTrackingMESA!\n");
+//(Display *dpy, GLXDrawable drawable, int64_t *swapCount, int64_t *missedFrames, float *lastMissedUsage)
+//returns int
+}
+
+//1653
+void EXEC_glXSwapIntervalMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXSwapIntervalMESA!\n");
+//(unsigned int interval)
+//returns int
+}
+
+//1654
+void EXEC_glXGetSwapIntervalMESA(byte *commandbuf) {
+LOG("Called unimplemted stub glXGetSwapIntervalMESA!\n");
+//returns int
+}
+
+//1655
+void EXEC_glXBindTexImageEXT(byte *commandbuf) {
+LOG("Called unimplemted stub glXBindTexImageEXT!\n");
+//(Display *dpy, GLXDrawable drawable, int buffer, const int *attrib_list)
+}
+
+//1656
+void EXEC_glXReleaseTexImageEXT(byte *commandbuf) {
+LOG("Called unimplemted stub glXReleaseTexImageEXT!\n");
+//(Display *dpy, GLXDrawable drawable, int buffer)
+}
+
 /*********************************************************
 	Method Pointers
 *********************************************************/
@@ -10490,7 +11261,8 @@ bool ExecModule::init(){
 	for(int i=0;i<1700;i++){
 		mFunctions[i] = NULL;
 	}
-
+	
+	//GL functions
 	mFunctions[0] = EXEC_glNewList;
 	mFunctions[1] = EXEC_glEndList;
 	mFunctions[2] = EXEC_glCallList;
@@ -11721,7 +12493,127 @@ bool ExecModule::init(){
 	mFunctions[1227] = EXEC_glDeformSGIX;
 	mFunctions[1228] = EXEC_glLoadIdentityDeformationMapSGIX;
 	
+	//CGL functions
 	mFunctions[1499] = EXEC_CGLSwapBuffers;
+	
+	//GLU functions
+	mFunctions[1501] = EXEC_gluBeginCurve;
+	mFunctions[1502] = EXEC_gluBeginPolygon;
+	mFunctions[1503] = EXEC_gluBeginSurface;
+	mFunctions[1504] = EXEC_gluBeginTrim;
+	mFunctions[1505] = EXEC_gluBuild1DMipmapLevels;
+	mFunctions[1506] = EXEC_gluBuild1DMipmaps;
+	mFunctions[1507] = EXEC_gluBuild2DMipmapLevels;
+	mFunctions[1508] = EXEC_gluBuild2DMipmaps;
+	mFunctions[1509] = EXEC_gluBuild3DMipmapLevels;
+	mFunctions[1510] = EXEC_gluBuild3DMipmaps;
+	mFunctions[1511] = EXEC_gluCheckExtension;
+	mFunctions[1512] = EXEC_gluCylinder;
+	mFunctions[1513] = EXEC_gluDeleteNurbsRenderer;
+	mFunctions[1514] = EXEC_gluDeleteQuadric;
+	mFunctions[1515] = EXEC_gluDeleteTess;
+	mFunctions[1516] = EXEC_gluDisk;
+	mFunctions[1517] = EXEC_gluEndCurve;
+	mFunctions[1518] = EXEC_gluEndPolygon;
+	mFunctions[1519] = EXEC_gluEndSurface;
+	mFunctions[1520] = EXEC_gluEndTrim;
+	mFunctions[1521] = EXEC_gluErrorString;
+	mFunctions[1522] = EXEC_gluGetNurbsProperty;
+	mFunctions[1523] = EXEC_gluGetString;
+	mFunctions[1524] = EXEC_gluGetTessProperty;
+	mFunctions[1525] = EXEC_gluLoadSamplingMatrices;
+	mFunctions[1526] = EXEC_gluLookAt;
+	mFunctions[1527] = EXEC_gluNewNurbsRenderer;
+	mFunctions[1528] = EXEC_gluNewQuadric;
+	mFunctions[1529] = EXEC_gluNewTess;
+	mFunctions[1530] = EXEC_gluNextContour;
+	mFunctions[1531] = EXEC_gluNurbsCallback;
+	mFunctions[1532] = EXEC_gluNurbsCallbackData;
+	mFunctions[1533] = EXEC_gluNurbsCallbackDataEXT;
+	mFunctions[1534] = EXEC_gluNurbsCurve;
+	mFunctions[1535] = EXEC_gluNurbsProperty;
+	mFunctions[1536] = EXEC_gluNurbsSurface;
+	mFunctions[1537] = EXEC_gluOrtho2D;
+	mFunctions[1538] = EXEC_gluPartialDisk;
+	mFunctions[1539] = EXEC_gluPerspective;
+	mFunctions[1540] = EXEC_gluPickMatrix;
+	mFunctions[1541] = EXEC_gluProject;
+	mFunctions[1542] = EXEC_gluPwlCurve;
+	mFunctions[1543] = EXEC_gluQuadricCallback;
+	mFunctions[1544] = EXEC_gluQuadricDrawStyle;
+	mFunctions[1545] = EXEC_gluQuadricNormals;
+	mFunctions[1546] = EXEC_gluQuadricOrientation;
+	mFunctions[1547] = EXEC_gluQuadricTexture;
+	mFunctions[1548] = EXEC_glugluScaleImage;
+	mFunctions[1549] = EXEC_gluSphere;
+	mFunctions[1550] = EXEC_gluTessBeginContour;
+	mFunctions[1551] = EXEC_gluTessBeginPolygon;
+	mFunctions[1552] = EXEC_gluTessCallback;
+	mFunctions[1553] = EXEC_gluTessEndContour;
+	mFunctions[1554] = EXEC_gluTessEndPolygon;
+	mFunctions[1555] = EXEC_gluTessNormal;
+	mFunctions[1556] = EXEC_gluTessProperty;
+	mFunctions[1557] = EXEC_gluTessVertex;
+	mFunctions[1558] = EXEC_gluUnProject;
+	mFunctions[1559] = EXEC_gluUnProject4;
+	
+	//GLX functions
+	mFunctions[1601] = EXEC_glXChooseVisual;
+	mFunctions[1602] = EXEC_glXCreateContext;
+	mFunctions[1603] = EXEC_glXDestroyContext;
+	mFunctions[1604] = EXEC_glXMakeCurrent;
+	mFunctions[1605] = EXEC_glXCopyContext;
+	mFunctions[1606] = EXEC_glXSwapBuffers;
+	mFunctions[1607] = EXEC_glXCreateGLXPixmap;
+	mFunctions[1608] = EXEC_glXDestroyGLXPixmap;
+	mFunctions[1609] = EXEC_glXQueryExtension;
+	mFunctions[1610] = EXEC_glXQueryVersion;
+	mFunctions[1611] = EXEC_glXIsDirect;
+	mFunctions[1612] = EXEC_glXGetConfig;
+	mFunctions[1613] = EXEC_glXGetCurrentContext;
+	mFunctions[1614] = EXEC_glXGetCurrentDrawable;
+	mFunctions[1615] = EXEC_glXWaitGL;
+	mFunctions[1616] = EXEC_glXWaitX;
+	mFunctions[1617] = EXEC_glXUseXFont;
+	mFunctions[1618] = EXEC_glXQueryExtensionsString;
+	mFunctions[1619] = EXEC_glXQueryServerString;
+	mFunctions[1620] = EXEC_glXGetClientString;
+	mFunctions[1621] = EXEC_glXGetCurrentDisplay;
+	mFunctions[1622] = EXEC_glXChooseFBConfig;
+	mFunctions[1623] = EXEC_glXGetFBConfigAttrib;
+	mFunctions[1624] = EXEC_glXGetFBConfigs;
+	mFunctions[1625] = EXEC_glXGetVisualFromFBConfig;
+	mFunctions[1626] = EXEC_glXCreateWindow;
+	mFunctions[1627] = EXEC_glXDestroyWindow;
+	mFunctions[1628] = EXEC_glXCreatePixmap;
+	mFunctions[1629] = EXEC_glXDestroyPixmap;
+	mFunctions[1630] = EXEC_glXCreatePbuffer;
+	mFunctions[1631] = EXEC_glXDestroyPbuffer;
+	mFunctions[1632] = EXEC_glXQueryDrawable;
+	mFunctions[1633] = EXEC_glXCreateNewContext;
+	mFunctions[1634] = EXEC_glXMakeContextCurrent;
+	mFunctions[1635] = EXEC_glXGetCurrentReadDrawable;
+	mFunctions[1636] = EXEC_glXQueryContext;
+	mFunctions[1637] = EXEC_glXSelectEvent;
+	mFunctions[1638] = EXEC_glXGetSelectedEvent;
+	mFunctions[1639] = EXEC_glXGetProcAddressARB;
+	mFunctions[1640] = EXEC_glXGetProcAddress;
+	mFunctions[1641] = EXEC_glXAllocateMemoryNV;
+	mFunctions[1642] = EXEC_glXFreeMemoryNV;
+	mFunctions[1643] = EXEC_glXAllocateMemoryMESA;
+	mFunctions[1644] = EXEC_glXFreeMemoryMESA;
+	mFunctions[1645] = EXEC_glXGetMemoryOffsetMESA;
+	mFunctions[1646] = EXEC_glXBindTexImageARB; 
+	mFunctions[1647] = EXEC_glXReleaseTexImageARB; 
+	mFunctions[1648] = EXEC_glXDrawableAttribARB;
+	mFunctions[1649] = EXEC_glXGetFrameUsageMESA;
+	mFunctions[1650] = EXEC_glXBeginFrameTrackingMESA;
+	mFunctions[1651] = EXEC_glXEndFrameTrackingMESA; 
+	mFunctions[1652] = EXEC_glXQueryFrameTrackingMESA;
+	mFunctions[1653] = EXEC_glXSwapIntervalMESA;
+	mFunctions[1654] = EXEC_glXGetSwapIntervalMESA;
+	mFunctions[1655] = EXEC_glXBindTexImageEXT;
+	mFunctions[1656] = EXEC_glXReleaseTexImageEXT;
 	
 	LOG("Loaded!\n");
 		

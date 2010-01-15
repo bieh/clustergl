@@ -9,7 +9,8 @@
 
 NetCompressModule *compressor;
 int prevInstruction = 0;
-bool useDecompress = false;
+bool useDecompression = false;
+bool useReplyCompression = false;
 
 const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS * 8;
 int iRecieveBufPos = 0;
@@ -22,7 +23,7 @@ byte mRecieveBuf[recieveBufferSize];
 	Net Server Module
 *********************************************************/
 
-NetSrvModule::NetSrvModule(int port, bool decompression){
+NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression){
 
 	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
 		LOG("Failed to create socket\n");
@@ -41,8 +42,9 @@ NetSrvModule::NetSrvModule(int port, bool decompression){
 	netBytes = 0;   
 	netBytes2 = 0; 
 	
-	useDecompress = decompression;
-	if(useDecompress) {
+	useDecompression = decompression;
+	useReplyCompression = replyCompression;
+	if(useDecompression || useReplyCompression) {
 		compressor = new NetCompressModule();
 	}
 
@@ -230,24 +232,33 @@ int NetSrvModule::myRead(byte *input, int nByte) {
 }
 
 void NetSrvModule::recieveBuffer(void) {
-	//LOG("recieving buffer!\n");
-	//first read the original number of bytes coming
-	mClientSocket->read((byte *)&bytesRemaining, sizeof(int));
-	//LOG("original size: %d!\n", bytesRemaining);
-	//read the size of the compressed packet
-	int compSize = 0;
-	mClientSocket->read((byte *)&compSize, sizeof(int));
-	//LOG("compressed size: %d!\n", compSize);
-	//LOG("recieving buffer of size: %d!\n", bytesRemaining);
-	//then read in that many bytes
+	if(useDecompression) {
+		//LOG("recieving buffer!\n");
+		//first read the original number of bytes coming
+		mClientSocket->read((byte *)&bytesRemaining, sizeof(int));
+		//LOG("original size: %d!\n", bytesRemaining);
+		//read the size of the compressed packet
+		int compSize = 0;
+		mClientSocket->read((byte *)&compSize, sizeof(int));
+		//LOG("compressed size: %d!\n", compSize);
+		//LOG("recieving buffer of size: %d!\n", bytesRemaining);
+		//then read in that many bytes
 
-	Bytef *in = (Bytef*) malloc(compSize);
+		Bytef *in = (Bytef*) malloc(compSize);
 
-	mClientSocket->read(in, compSize);
+		mClientSocket->read(in, compSize);
 
 
-	compressor->myDecompress(mRecieveBuf, bytesRemaining, in, compSize);
-	iRecieveBufPos = 0;
+		compressor->myDecompress(mRecieveBuf, bytesRemaining, in, compSize);
+		iRecieveBufPos = 0;
+	}
+	else {
+		//first read the original number of bytes coming
+		mClientSocket->read((byte *)&bytesRemaining, sizeof(int));
+		//read the buffer
+		mClientSocket->read(mRecieveBuf, bytesRemaining);
+		iRecieveBufPos = 0;
+	}
 }
 /*********************************************************
 	Net Server Run Compression
@@ -255,7 +266,7 @@ void NetSrvModule::recieveBuffer(void) {
 
 int NetSrvModule::myWrite(byte *input, int nByte) {
 
-	if(useDecompress) {
+	if(useReplyCompression) {
 		//create room for new compressed buffer
 		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 		Bytef *out = (Bytef*) malloc(CompBuffSize);
@@ -285,7 +296,9 @@ int NetSrvModule::myWrite(byte *input, int nByte) {
 		return ret;
 	}
 	else {
+		//LOG("sending a message!\n");
 		int ret = mClientSocket->write(input, nByte);
+		netBytes += nByte;
 		netBytes2 += nByte;
 		return ret;
 	}

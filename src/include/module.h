@@ -78,7 +78,7 @@ class NetSrvModule : public Module{
   int mSocket;
   BufferedFd *mClientSocket;
 public:
-	NetSrvModule(int port, bool decompression);
+	NetSrvModule(int port, bool decompression, bool replyCompression);
 	
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);
@@ -96,7 +96,7 @@ public:
 class NetClientModule : public Module{
   int mSocket;
 public:
-	NetClientModule(string address, int port, bool compression, bool repeatInstruction);
+	NetClientModule(string address, int port, bool sendCompression, bool recieveCompression, bool repeatInstruction);
 	
 	bool process(list<Instruction> &i);
 	bool sync();
