@@ -165,25 +165,25 @@ bool ExecModule::process(list<Instruction> &list){
 			#endif
 			
 				iter++;
-				LOG("next: %d\n", iter->id);
+				//LOG("next: %d\n", iter->id);
 				GLenum *mode = (GLenum*)iter->args;
 				if(iter->id == 293 && GL_PROJECTION == *mode) {
 					iter++;
-					LOG("next: %d\n", iter->id);
+					//LOG("next: %d\n", iter->id);
 					if(iter->id == 290) {
-					LOG("skipping glu perspective commands\n");
+					//LOG("skipping glu perspective commands\n");
 					continue;
 					}
 					else {
 					iter --;
 					iter--;
-					LOG("gl setup in unusal order, may not work\n");
+					//LOG("gl setup in unusal order, may not work\n");
 					continue;
 					}
 				}
 				else {
 					iter--;
-					LOG("gl setup in unusal order, may not work\n");
+					//LOG("gl setup in unusal order, may not work\n");
 					continue;
 				}
 

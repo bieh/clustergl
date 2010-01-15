@@ -3,9 +3,9 @@
 
 #include <GL/gl.h>
 
-//#define  HACK true
+//#define  NOHACK true
 
-#ifdef HACK
+#ifdef NOHACK
 #include <GL/glx.h>
 #include <GL/glu.h>
 
@@ -2322,7 +2322,7 @@ extern "C" void glGetClipPlane(GLenum plane, GLdouble * equation){
 	waitForReturn();
 }
 
-#ifdef HACK
+#ifdef NOHACK
 
 //260
 extern "C" void glGetDoublev(GLenum pname, GLdouble * params){
@@ -2355,7 +2355,7 @@ extern "C" GLenum glGetError(){
 	return ret;
 }
 
-#ifdef HACK
+#ifdef NOHACK
 //262
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 	LOG("Called unimplemted stub GetFloatv!\n");
@@ -2469,7 +2469,7 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 	pushBuf(mask, sizeof(GLubyte) * 32 * 32, true); //32 x 32 stipple
 }
 
-#ifdef HACK
+#ifdef NOHACK
 //Hack! We let the native implementation handle this
 //TODO: implement these methods
 
@@ -6711,7 +6711,15 @@ extern "C" void glGetAttachedObjectsARB(GLhandleARB containerObj, GLsizei maxLen
 
 //777
 extern "C" GLint glGetUniformLocationARB(GLhandleARB program, const GLcharARB * name){
-	LOG("Called unimplemted stub GetUniformLocationARB!\n");
+	LOG("Called untested stub GetUniformLocationARB!\n");
+	pushOp(777);
+	pushParam(program);
+	pushBuf(name, sizeof(GLchar) * strlen(name));
+	GLint ret;
+	pushBuf(&ret, sizeof(GLint), true);
+	waitForReturn();
+
+	return ret;
 }
 
 //778
@@ -10476,7 +10484,7 @@ extern "C" void glLoadIdentityDeformationMapSGIX(GLenum mask){
 	GLU Intercepts
 ********************************************************/
 
-#ifdef HACK
+#ifdef NOHACK
 
 //1501
 extern "C" void gluBeginCurve (GLUnurbs* nurb) {
@@ -10672,7 +10680,7 @@ LOG("Called unimplemted stub gluPartialDisk!\n");
 
 //1539
 extern "C" void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar) {
-LOG("Called unimplemted stub gluPerspective!\n");
+	//LOG("Called unimplemted stub gluPerspective!\n");
 	/*pushOp(1539);
 	pushParam(fovy);
 	pushParam(aspect);
@@ -10680,7 +10688,7 @@ LOG("Called unimplemted stub gluPerspective!\n");
 	pushParam(zFar);*/
 }
 
-#ifdef HACK
+#ifdef NOHACK
 
 //1540
 extern "C" void gluPickMatrix (GLdouble x, GLdouble y, GLdouble delX, GLdouble delY, GLint *viewport) {
@@ -10788,7 +10796,7 @@ LOG("Called unimplemted stub gluUnProject4!\n");
 	GLX Intercepts
 ********************************************************/
 
-#ifdef HACK
+#ifdef NOHACK
 
 //1601
 extern "C" XVisualInfo* glXChooseVisual( Display *dpy, int screen, int *attribList ) {
