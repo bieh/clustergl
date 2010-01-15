@@ -12,6 +12,7 @@
  
 #include <stdio.h>
 #include <stdlib.h>
+#define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "SDL.h"
@@ -68,8 +69,22 @@ int LoadGLTextures( )
 		printf("Got texture ID %d\n", texture[0]);
 
 		glGenTextures( 1, &texture[0] );
-
 		printf("Got texture ID %d\n", texture[0]);
+
+
+		int error = glGetError();
+		printf("Got error ID %d\n", error);
+
+		GLhandleARB abc = 4;
+		GLcharARB num;
+		int number = glGetUniformLocationARB(abc, &num);
+		printf("Got glGetUniformLocationARB ID %d\n", number);
+
+		number = glGetUniformLocationARB(abc, &num);
+		printf("Got glGetUniformLocationARB ID %d\n", number);
+
+		number = glGetUniformLocationARB(abc, &num);
+		printf("Got glGetUniformLocationARB ID %d\n", number);
 
 	    /* Typical Texture Generation Using Data From The Bitmap */
 	    glBindTexture( GL_TEXTURE_2D, texture[0] );

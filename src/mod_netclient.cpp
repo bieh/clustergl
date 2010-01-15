@@ -196,10 +196,12 @@ bool NetClientModule::process(list<Instruction> &list){
 				if(i->buffers[n].needReply){
 					
 					sendBuffer(mSocket);
-					if(myRead(mSocket, i->buffers[n].buffer, l) != l){
-						LOG("Connection problem (didn't recv buffer %d)!\n", l);
+					//LOG("sent buffer!\n");
+					if(int x = myRead(mSocket, i->buffers[n].buffer, l) != l){
+						LOG("Connection problem (didn't recv buffer %d got: %d)!\n", l, x);
 						return false;
 					}
+					//LOG("got buffer back!\n");
 				}
 			}
 		}

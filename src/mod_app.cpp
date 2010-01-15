@@ -160,10 +160,7 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 	//hrm. How many times can we use the word 'buffer' in one line?
 	//4 apparantly
 	InstructionBuffer *buf = &mCurrentInstruction->buffers[iCurrentBuffer];
-	if(!buffer)
-		buf->buffer = NULL;
-	else
-		buf->buffer = copy;
+	buf->buffer = copy;
 	buf->len = len;
 	/*if(mCurrentInstruction->id == 308 || mCurrentInstruction->id == 320 
 	|| mCurrentInstruction->id == 311 || mCurrentInstruction->id == 321)
@@ -6701,7 +6698,8 @@ extern "C" void glGetObjectParameterivARB(GLhandleARB obj, GLenum pname, GLint *
 
 //775
 extern "C" void glGetInfoLogARB(GLhandleARB obj, GLsizei maxLength, GLsizei * length, GLcharARB * infoLog){
-	LOG("Called unimplemted stub GetInfoLogARB!\n");
+	LOG("Called badly hacked stub GetInfoLogARB!\n");
+	*length = 0;
 }
 
 //776
@@ -6710,15 +6708,13 @@ extern "C" void glGetAttachedObjectsARB(GLhandleARB containerObj, GLsizei maxLen
 }
 
 //777
-extern "C" GLint glGetUniformLocationARB(GLhandleARB program, const GLcharARB * name){
-	LOG("Called untested stub GetUniformLocationARB!\n");
+extern "C" GLint glGetUniformLocationARB(GLhandleARB program, const GLcharARB * name){;
 	pushOp(777);
 	pushParam(program);
-	pushBuf(name, sizeof(GLchar) * strlen(name));
-	GLint ret;
+	pushBuf(name, sizeof(GLchar) * (strlen(name) + 1));
+	GLint ret = 0;
 	pushBuf(&ret, sizeof(GLint), true);
 	waitForReturn();
-
 	return ret;
 }
 

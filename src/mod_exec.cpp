@@ -13,6 +13,7 @@ typedef void (*ExecFunc)(byte *buf);
 
 static ExecFunc mFunctions[1700];
 static Instruction *mCurrentInstruction = NULL;
+int currentBuffer = 0;
 
 /*********************************************************
 	Execute Module Stuff
@@ -113,6 +114,7 @@ bool ExecModule::process(list<Instruction> &list){
 	    	}
 	    	
 	    	mCurrentInstruction = &(*iter);
+		currentBuffer = 0;
 
 		//check if the message requires special attention (adjusting)
 		//else use standard process calling methods below
@@ -233,18 +235,18 @@ bool ExecModule::sync(){
 
 byte *popBuf(){
 	//LOG("Popping buf %d for instruct %d\n", mCurrentInstruction->buffers[0].len, mCurrentInstruction->id);
-	return mCurrentInstruction->buffers[0].buffer;
+	currentBuffer++;
+	return mCurrentInstruction->buffers[currentBuffer-1].buffer;
 }
 
 #define PUSHRET(TYPE) \
 void pushRet(TYPE val){ \
-	int i = 0;\
 	int len = sizeof(TYPE);\
 	byte *b = new byte[len];\
 	memcpy(b, &val, len);\
-	mCurrentInstruction->buffers[i].buffer = b;\
-	mCurrentInstruction->buffers[i].needClear = true;\
-	mCurrentInstruction->buffers[i].needReply = true;\
+	mCurrentInstruction->buffers[currentBuffer].buffer = b;\
+	mCurrentInstruction->buffers[currentBuffer].needClear = true;\
+	mCurrentInstruction->buffers[currentBuffer].needReply = true;\
 }
 
 PUSHRET(const GLuint);
@@ -255,23 +257,21 @@ PUSHRET(const GLbyte);
 PUSHRET(const GLubyte);
 
 void pushRet(const GLubyte *val){
-	int i = 0;
 	int len = strlen((char *)val);
 	byte *b = new byte[len];
 	memcpy(b, val, len);
-	mCurrentInstruction->buffers[i].buffer = b;
-	mCurrentInstruction->buffers[i].needClear = true;
-	mCurrentInstruction->buffers[i].needReply = true;
+	mCurrentInstruction->buffers[currentBuffer].buffer = b;
+	mCurrentInstruction->buffers[currentBuffer].needClear = true;
+	mCurrentInstruction->buffers[currentBuffer].needReply = true;
 }
 
 void pushRet(const GLchar * val){
-	int i = 0;
 	int len = strlen((char *)val);
 	byte *b = new byte[len];
 	memcpy(b, val, len);
-	mCurrentInstruction->buffers[i].buffer = b;
-	mCurrentInstruction->buffers[i].needClear = true;
-	mCurrentInstruction->buffers[i].needReply = true;
+	mCurrentInstruction->buffers[currentBuffer].buffer = b;
+	mCurrentInstruction->buffers[currentBuffer].needClear = true;
+	mCurrentInstruction->buffers[currentBuffer].needReply = true;
 }
 		
 /*********************************************************
@@ -6624,8 +6624,8 @@ void EXEC_glGetAttachedObjectsARB(byte *commandbuf){
 //777
 void EXEC_glGetUniformLocationARB(byte *commandbuf){
 	GLhandleARB *program = (GLhandleARB*)commandbuf;	 commandbuf += sizeof(GLhandleARB);
-
-	pushRet(glGetUniformLocationARB(*program, (const GLcharARB *)popBuf()));
+	int num = glGetUniformLocationARB(*program, (const GLcharARB *)popBuf());
+	pushRet(num);
 }
 
 //778
