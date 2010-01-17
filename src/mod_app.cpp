@@ -4395,6 +4395,7 @@ extern "C" void glGetProgramiv(GLuint program, GLenum pname, GLint * params){
 //504
 extern "C" void glGetProgramInfoLog(GLuint program, GLsizei bufSize, GLsizei * length, GLchar * infoLog){
 	LOG("Called unimplemted stub GetProgramInfoLog!\n");
+
 }
 
 //505
@@ -4441,7 +4442,14 @@ extern "C" void glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei * leng
 
 //508
 extern "C" GLint glGetUniformLocation(GLuint program, const GLchar * name){
-	LOG("Called unimplemted stub GetUniformLocation!\n");
+	LOG("Called untested stub GetUniformLocation!\n");
+	pushOp(508);
+	pushParam(program);
+	pushBuf(name, sizeof(GLchar) * strlen(name));
+	GLint ret = 0;
+	pushBuf(&ret, sizeof(GLint), true);
+	waitForReturn();
+	return ret;
 }
 
 //509
@@ -6698,8 +6706,17 @@ extern "C" void glGetObjectParameterivARB(GLhandleARB obj, GLenum pname, GLint *
 
 //775
 extern "C" void glGetInfoLogARB(GLhandleARB obj, GLsizei maxLength, GLsizei * length, GLcharARB * infoLog){
-	LOG("Called badly hacked stub GetInfoLogARB!\n");
-	*length = 0;
+	LOG("Called untested stub GetInfoLogARB!\n");
+	pushOp(775);
+	pushParam(obj);
+	pushParam(maxLength);
+	pushParam(*length);
+	pushBuf(infoLog, maxLength * sizeof(GLcharARB), true);
+	waitForReturn();
+	
+	*length = strlen(infoLog);
+	//BAD HACK
+	//*Length = 0;
 }
 
 //776
@@ -6711,7 +6728,7 @@ extern "C" void glGetAttachedObjectsARB(GLhandleARB containerObj, GLsizei maxLen
 extern "C" GLint glGetUniformLocationARB(GLhandleARB program, const GLcharARB * name){;
 	pushOp(777);
 	pushParam(program);
-	pushBuf(name, sizeof(GLchar) * (strlen(name) + 1));
+	pushBuf(name, sizeof(GLchar) * strlen(name));
 	GLint ret = 0;
 	pushBuf(&ret, sizeof(GLint), true);
 	waitForReturn();
@@ -10387,7 +10404,17 @@ extern "C" void glClearDebugLogMESA(GLhandleARB obj, GLenum logType, GLenum shad
 
 //1220
 extern "C" void glGetDebugLogMESA(GLhandleARB obj, GLenum logType, GLenum shaderType, GLsizei maxLength, GLsizei * length, GLcharARB * debugLog){
-	LOG("Called unimplemted stub GetDebugLogMESA!\n");
+	LOG("Called untested stub GetDebugLogMESA!\n");
+	pushOp(1220);
+	pushParam(obj);
+	pushParam(logType);
+	pushParam(shaderType);
+	pushParam(maxLength);
+	pushParam(*length);
+	pushBuf(debugLog, sizeof(GLchar) * maxLength);
+	waitForReturn();
+
+	*length = strlen(debugLog);
 }
 
 //1221

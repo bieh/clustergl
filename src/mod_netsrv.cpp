@@ -23,7 +23,7 @@ byte mRecieveBuf[recieveBufferSize];
 	Net Server Module
 *********************************************************/
 
-NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression){
+NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression, int compressionLevel){
 
 	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
 		LOG("Failed to create socket\n");
@@ -45,7 +45,7 @@ NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression){
 	useDecompression = decompression;
 	useReplyCompression = replyCompression;
 	if(useDecompression || useReplyCompression) {
-		compressor = new NetCompressModule();
+		compressor = new NetCompressModule(compressionLevel);
 	}
 
 	//set TCP options
@@ -203,32 +203,6 @@ int NetSrvModule::myRead(byte *input, int nByte) {
 	}
 
 	return nByte;
-
-	/*if(useDecompress) {
-		//read the size of the compressed packet
-		int compressedSize = 0;
-		mClientSocket->read((byte *)&compressedSize, sizeof(int));
-
-		//read the size of the original packet
-		int origSize = 0;
-		mClientSocket->read((byte *)&origSize, sizeof(int));
-		if(origSize < 4 && origSize > 0)
-			LOG("READING SMALL PACKET: %d, COMPRESSED: %d \n", origSize, compressedSize);
-		//then read the compressed packet data and uncompress
-		Bytef *in = (Bytef*) malloc(compressedSize);
-		int ret = mClientSocket->read(in, compressedSize);
-		if(ret == compressedSize)
-			ret = origSize;
-		else
-			LOG("ELSE MYREAD: mismatched compress/uncompressed sizes!\n");
-		compressor->myDecompress(input, nByte, in, compressedSize);
-		free(in);
-		return ret;
-	}
-	else {
-		int ret = mClientSocket->read(input, nByte);
-		return ret;
-	}*/
 }
 
 void NetSrvModule::recieveBuffer(void) {

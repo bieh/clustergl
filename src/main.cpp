@@ -16,9 +16,12 @@ int scaleX;
 int scaleY;
 string dnNumber;
 int port;
+int syncRate;
+int compressingLevel;
 bool usingSendCompression;
 bool usingReplyCompression;
 bool useRepeat;
+bool useSYMPHONYnodes[5];
 			
 /********************************************************
 	Application Object
@@ -35,7 +38,7 @@ int App::run(int argc, char **argv){
 	init();
 	
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
-	mModules.push_back(new NetSrvModule(port, usingSendCompression, usingReplyCompression));
+	mModules.push_back(new NetSrvModule(port, usingSendCompression, usingReplyCompression, compressingLevel));
 	mModules.push_back(new ExecModule(sizeX, sizeY, offsetX, offsetY, scaleX, scaleY));
 	//mModules.push_back(new TextModule());
 	
@@ -54,15 +57,15 @@ int App::run_shared(){
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule());
-	mModules.push_back(new NetClientModule("127.0.0.1", port, usingSendCompression, usingReplyCompression, useRepeat));
+	mModules.push_back(new NetClientModule("127.0.0.1", port, usingSendCompression, usingReplyCompression, compressingLevel, useRepeat));
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
 	//mModules.push_back(new NetClientModule("192.168.22.101", port));//dn1
-	mModules.push_back(new NetClientModule("192.168.22.102", port, usingSendCompression, usingReplyCompression, useRepeat));//dn2
-	mModules.push_back(new NetClientModule("192.168.22.103", port, usingSendCompression, usingReplyCompression, useRepeat));//dn3
-	mModules.push_back(new NetClientModule("192.168.22.104", port, usingSendCompression, usingReplyCompression, useRepeat));//dn4
-	mModules.push_back(new NetClientModule("192.168.22.105", port, usingSendCompression, usingReplyCompression, useRepeat));//dn5
+	if(useSYMPHONYnodes[2]) mModules.push_back(new NetClientModule("192.168.22.102", port, usingSendCompression, usingReplyCompression, compressingLevel, useRepeat));//dn2
+	if(useSYMPHONYnodes[3]) mModules.push_back(new NetClientModule("192.168.22.103", port, usingSendCompression, usingReplyCompression, compressingLevel, useRepeat));//dn3
+	if(useSYMPHONYnodes[4]) mModules.push_back(new NetClientModule("192.168.22.104", port, usingSendCompression, usingReplyCompression, compressingLevel, useRepeat));//dn4
+	if(useSYMPHONYnodes[5]) mModules.push_back(new NetClientModule("192.168.22.105", port, usingSendCompression, usingReplyCompression, compressingLevel, useRepeat));//dn5
 #endif
 
 	//Return control to the parent process.
@@ -81,15 +84,21 @@ void App::init(){
         CFG_SIMPLE_INT((char *)("port"), &port),
 	CFG_SIMPLE_INT((char *)("scaleX"), &scaleX),
         CFG_SIMPLE_INT((char *)("scaleY"), &scaleY),
+	CFG_SIMPLE_INT((char *)("syncRate"), &syncRate),
+	CFG_SIMPLE_INT((char *)("compressingLevel"), &compressingLevel),
 	CFG_SIMPLE_BOOL((char *)("usingSendCompression"), &usingSendCompression),
 	CFG_SIMPLE_BOOL((char *)("usingReplyCompression"), &usingReplyCompression),
 	CFG_SIMPLE_BOOL((char *)("useCGLRepeat"), &useRepeat),
+	CFG_BOOL_LIST((char *)("SYMPHONYnodes"), (char *)"{false}", CFGF_NONE),
         CFG_END()
     };
     cfg_t *cfg;
 
     cfg = cfg_init(opts, 0);
     cfg_parse(cfg, "config.conf");
+    for(uint32_t i = 0; i < cfg_size(cfg, "SYMPHONYnodes"); i++)
+    	useSYMPHONYnodes[i] = cfg_getnbool(cfg, "SYMPHONYnodes", i);
+
     cfg_free(cfg);
 
 	#ifdef SYMPHONY
@@ -153,7 +162,7 @@ bool App::tick(){
 	}
 
 	//Sync every 20 frames
-	if (totFrames%20 == 0 && totFrames > 0){
+	if (totFrames%syncRate == 0 && totFrames > 0){
 		for(int i=0;i<(int)mModules.size();i++){
 			Module *m = mModules[i];		
 			if( !m->sync() ){

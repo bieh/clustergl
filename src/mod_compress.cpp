@@ -6,7 +6,8 @@
 	Module Stuff
 *********************************************************/
 
-NetCompressModule::NetCompressModule(){
+NetCompressModule::NetCompressModule(int level) {
+	compressLevel = level;
 }
 
 bool NetCompressModule::process(list<Instruction> &i){
@@ -22,6 +23,7 @@ bool NetCompressModule::sync(){
 }
 
 
+
 /*********************************************************
 	Compress Method
 *********************************************************/
@@ -30,13 +32,15 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	if(nByte > 4)
 	{
-		int ret = compress((Bytef *) output, &CompBuffSize, (Bytef *) input, nByte);
+		int ret = compress2((Bytef *) output, &CompBuffSize, (Bytef *) input, nByte, compressLevel);
 		if(ret != Z_OK)
 		{
 			if(ret == Z_MEM_ERROR)
 				LOG("ERROR compressing: memory error\n");
 			else if(ret == Z_BUF_ERROR)
 				LOG("ERROR compressing: buffer error\n");
+			else if(ret == Z_STREAM_ERROR)
+				LOG("ERROR compressing: compressLevel not (1-9), %d\n", compressLevel);
 		}
 	}
 	else

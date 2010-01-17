@@ -141,7 +141,7 @@ bool ExecModule::process(list<Instruction> &list){
 				      //yscale = (h - y)/y;
 				float myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
 				float myHeight = 0;
-
+				
 				float aspectRatio = origWidth/origHeight;
 				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * iScaleX) - (0.5 * iScaleX));
 				float myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
@@ -6609,8 +6609,9 @@ void EXEC_glGetObjectParameterivARB(byte *commandbuf){
 void EXEC_glGetInfoLogARB(byte *commandbuf){
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;	 commandbuf += sizeof(GLhandleARB);
 	GLsizei *maxLength = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLsizei *length = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
 
-	glGetInfoLogARB(*obj, *maxLength, (GLsizei *)popBuf(), (GLcharARB *)popBuf());
+	glGetInfoLogARB(*obj, *maxLength, length, (GLcharARB *)popBuf());
 }
 
 //776
@@ -10415,11 +10416,12 @@ void EXEC_glClearDebugLogMESA(byte *commandbuf){
 //1220
 void EXEC_glGetDebugLogMESA(byte *commandbuf){
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;	 commandbuf += sizeof(GLhandleARB);
-	GLenum *logType = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
+	GLenum *logType = (GLenum*)commandbuf;	 	commandbuf += sizeof(GLenum);
 	GLenum *shaderType = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *maxLength = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLsizei *length = (GLsizei*)commandbuf;	 	commandbuf += sizeof(GLsizei);
 
-	//glGetDebugLogMESA(*obj, *logType, *shaderType, *maxLength, (GLsizei *)popBuf(), (GLcharARB *)popBuf());
+	//glGetDebugLogMESA(*obj, *logType, *shaderType, *maxLength, length, (GLcharARB *)popBuf());
 }
 
 //1221
