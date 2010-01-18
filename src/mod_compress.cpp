@@ -3,6 +3,8 @@
 #include <zlib.h>
 #include <lzo/lzo1b.h>
 
+#define lzo true
+
 /*********************************************************
 	Module Stuff
 *********************************************************/
@@ -37,10 +39,15 @@ bool NetCompressModule::sync(){
 int NetCompressModule::myCompress(void *input, int nByte, void *output){
 	uLongf CompBuffSize = (uLongf)(nByte + (nByte/1024 * 16 ) + 16);
 	unsigned char * workingMemory = (unsigned char*)malloc(LZO1B_MEM_COMPRESS);
+	int ret = 0;
 	if(nByte > 4)
-	{
-		//int ret = compress2((Bytef *) output, &CompBuffSize, (Bytef *) input, nByte, compressLevel);
-		int ret = lzo1b_compress((Bytef *) input, nByte, (Bytef *) output, &CompBuffSize, workingMemory, compressLevel);
+	{	
+		
+		#ifndef lzo
+			ret = compress2((Bytef *) output, &CompBuffSize, (Bytef *) input, nByte, compressLevel);
+		#else
+			ret = lzo1b_compress((Bytef *) input, nByte, (Bytef *) output, &CompBuffSize, workingMemory, compressLevel);
+		#endif
 		if(ret != Z_OK)
 		{
 			if(ret == Z_MEM_ERROR)
@@ -70,8 +77,11 @@ int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int s
 	int ret = 0;		
 	if(sourceLen > 4)
 	{
-		//ret = uncompress((Bytef*) dest, (uLongf*) &newDest, (const Bytef*)source, newSource);
+		#ifndef lzo
+		ret = uncompress((Bytef*) dest, (uLongf*) &newDest, (const Bytef*)source, newSource);
+		#else
 		ret = lzo1b_decompress((const Bytef*)source, newSource, (Bytef*) dest, &newDest, NULL);
+		#endif
 		if(ret != Z_OK)
 		{
 			if(ret == Z_MEM_ERROR)
