@@ -335,6 +335,7 @@ void NetClientModule::sendBuffer(int fd) {
 			iSendBufPos = 0;
 			bytesLeft = sendBufferSize;
 			netBytes2 += newSize + (sizeof(int) * 2);
+			free(out);
 			//LOG("iSendBufPos %d\n", iSendBufPos);
 		}
 		else {

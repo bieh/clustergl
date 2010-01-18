@@ -225,6 +225,7 @@ void NetSrvModule::recieveBuffer(void) {
 
 		compressor->myDecompress(mRecieveBuf, bytesRemaining, in, compSize);
 		iRecieveBufPos = 0;
+		free(in);
 	}
 	else {
 		//first read the original number of bytes coming

@@ -20,7 +20,7 @@ DEPS := $(wildcard include/*.h)
 
 #compiler-type things
 CXXFLAGS=-Iinclude -O3 -W -Wextra -g -pg -fPIC 
-LDFLAGS=-lGL -lGLU -lconfuse -lz `sdl-config --cflags --libs` -lSDL_net -lconfuse -lGLEW
+LDFLAGS=-lGL -lGLU -lconfuse -llzo2 -lz `sdl-config --cflags --libs` -lSDL_net -lconfuse -lGLEW
 #CGL libs
 #-lCg -lCgGL 
 

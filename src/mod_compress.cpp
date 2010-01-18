@@ -1,6 +1,7 @@
 #include "main.h"
 #include <zconf.h>
 #include <zlib.h>
+#include <lzo/lzo1b.h>
 
 /*********************************************************
 	Module Stuff
@@ -8,6 +9,11 @@
 
 NetCompressModule::NetCompressModule(int level) {
 	compressLevel = level;
+	if (lzo_init() != LZO_E_OK)
+	{
+	    printf("Uh oh! LZO init failed!\n");
+	}
+
 }
 
 bool NetCompressModule::process(list<Instruction> &i){
@@ -29,10 +35,12 @@ bool NetCompressModule::sync(){
 *********************************************************/
 
 int NetCompressModule::myCompress(void *input, int nByte, void *output){
-	uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
+	uLongf CompBuffSize = (uLongf)(nByte + (nByte/1024 * 16 ) + 16);
+	unsigned char * workingMemory = (unsigned char*)malloc(LZO1B_MEM_COMPRESS);
 	if(nByte > 4)
 	{
-		int ret = compress2((Bytef *) output, &CompBuffSize, (Bytef *) input, nByte, compressLevel);
+		//int ret = compress2((Bytef *) output, &CompBuffSize, (Bytef *) input, nByte, compressLevel);
+		int ret = lzo1b_compress((Bytef *) input, nByte, (Bytef *) output, &CompBuffSize, workingMemory, compressLevel);
 		if(ret != Z_OK)
 		{
 			if(ret == Z_MEM_ERROR)
@@ -48,6 +56,7 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 	memcpy(output, input, nByte);
 	CompBuffSize = nByte;
 	}
+	free(workingMemory);
 	return CompBuffSize;
 }
 
@@ -61,7 +70,8 @@ int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int s
 	int ret = 0;		
 	if(sourceLen > 4)
 	{
-		ret = uncompress((Bytef*) dest, (uLongf*) &newDest, (const Bytef*)source, newSource);
+		//ret = uncompress((Bytef*) dest, (uLongf*) &newDest, (const Bytef*)source, newSource);
+		ret = lzo1b_decompress((const Bytef*)source, newSource, (Bytef*) dest, &newDest, NULL);
 		if(ret != Z_OK)
 		{
 			if(ret == Z_MEM_ERROR)

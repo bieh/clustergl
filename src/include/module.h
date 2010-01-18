@@ -110,6 +110,7 @@ public:
 /*********************************************
  Network compress module. This compresses each
  instruction/buffer to send over the network.
+ Internal to NetSrvModule & NetClientModule
 **********************************************/
 class NetCompressModule : public Module{
   int compressLevel;

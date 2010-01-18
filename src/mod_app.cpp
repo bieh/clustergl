@@ -332,6 +332,7 @@ static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
 Bool bHasMinimized = false;
 
 extern "C" int SDL_Init(unsigned int flags) {
+	LOG("SDL_Init\n");
 	if (_SDL_Init == NULL) {
 		_SDL_Init = (int (*)(unsigned int)) dlsym(RTLD_NEXT, "SDL_Init");
 	}
@@ -348,10 +349,12 @@ extern "C" int SDL_Init(unsigned int flags) {
 		theApp = new App();
 		theApp->run_shared();
 	}
+	LOG("SDL_Init finished\n");
 	return r;
 }
 
 extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigned int videoFlags) {
+	LOG("SDL_SetVideoMode\n");
 	if (_SDL_SetVideoMode == NULL) {
 		_SDL_SetVideoMode = (SDL_Surface* (*)(int,int,int,unsigned int)) dlsym(RTLD_NEXT, "SDL_SetVideoMode");
 	}
@@ -362,6 +365,7 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 	SDL_Surface* surf = (*_SDL_SetVideoMode)(100, 100, bpp, videoFlags );
 	if(!surf)
 		LOG("NULL surface!\n");
+	LOG("SDL_SetVideoMode finished\n");
 	return surf;
 }
 
@@ -10821,9 +10825,21 @@ LOG("Called unimplemted stub gluUnProject4!\n");
 
 #ifdef NOHACK
 
+//Pointer to glXChooseVisual
+static XVisualInfo* (*_glXChooseVisual)(Display*, int, int*) = NULL;
+
 //1601
 extern "C" XVisualInfo* glXChooseVisual( Display *dpy, int screen, int *attribList ) {
-LOG("Called unimplemted stub glXChooseVisual!\n");
+LOG("Called untested stub glXChooseVisual!\n");
+	if (_glXChooseVisual == NULL) {
+		_glXChooseVisual = (XVisualInfo* (*)(Display*, int, int*))  dlsym(RTLD_NEXT, "glXChooseVisual");
+	}
+	if(!_glXChooseVisual){
+		printf("Couldn't find glXChooseVisual: %s\n", dlerror());
+		exit(0);
+	}
+	return  (*_glXChooseVisual) (dpy ,screen, attribList);
+	
 }
 
 //1602
