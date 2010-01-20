@@ -19,7 +19,7 @@ int currentBuffer = 0;
 	Execute Module Stuff
 *********************************************************/
 
-ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, int scaleX, int scaleY){
+ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, float scaleX, float scaleY){
 
 	netBytes= 0;
 	netBytes2 = 0;
@@ -34,7 +34,7 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, int scale
 
 	iScaleX = scaleX;
 	iScaleY = scaleY;
-
+	LOG("scale values %lf %lf\n", scaleX, scaleY);
 	if(!makeWindow()){
 		LOG("failed to make window!\n");
 		exit(1);
@@ -120,7 +120,6 @@ bool ExecModule::process(list<Instruction> &list){
 		//else use standard process calling methods below
 		if (iter->id== 305) {//glViewPort, which now runs glFrustum
 			
-			//TODO: intercept and/or disable gluPerspective, which overrides this function
 			GLint x = *((GLint*)iter->args);
 			GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
 			GLint w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
@@ -173,8 +172,16 @@ bool ExecModule::process(list<Instruction> &list){
 					iter++;
 					//LOG("next: %d\n", iter->id);
 					if(iter->id == 290) {
-					//LOG("skipping glu perspective commands\n");
-					continue;
+						 iter++;
+						 if(iter->id == 1539) {	
+							//LOG("skipping glu perspective commands\n");
+							continue;
+						}
+						else {
+						iter --;
+						iter--;
+						iter--;
+						}
 					}
 					else {
 					iter --;
@@ -187,21 +194,21 @@ bool ExecModule::process(list<Instruction> &list){
 					iter--;
 					//LOG("gl setup in unusal order, may not work\n");
 					continue;
-				}
+				} 
 
 		} else if (iter->id== 176) { //glScissor
 
 			//read original values from the instruction
 			GLint x = *((GLint*)iter->args);
 			GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
-			GLint w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
-			GLint h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
+			GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
+			GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 			
 			//use these values to scale the scissor up to our custom screen size
-			glScissor(x*((float)(iScreenX+iOffsetX)/(float)origWidth),  
-				  y*((float)(iScreenY+iOffsetY)/(float)origHeight),
-				  w*((float)(iScreenX+iOffsetX)/(float)origWidth),  
-				  h*((float)(iScreenY+iOffsetY)/(float)origHeight));
+			glScissor( (GLint) x*((iScreenX+iOffsetX)/origWidth),  
+				   (GLint) y*((iScreenY+iOffsetY)/origHeight),
+				   (GLsizei) w*((iScreenX+iOffsetX)/origWidth),  
+				   (GLsizei) h*((iScreenY+iOffsetY)/origHeight));
 
 		} else if (iter->id == 296) { //glOrtho
 			
@@ -219,6 +226,7 @@ bool ExecModule::process(list<Instruction> &list){
 				bottom*((float)(iScreenX+iOffsetX)/(float)origWidth),  
 				top*((float)(iScreenY+iOffsetY)/(float)origHeight),
 				nearVal, farVal);
+			//LOG("values used for ortho: %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
 
 		} else {
 			//LOG("ID: %d\n", iter->id); 
@@ -242,7 +250,7 @@ byte *popBuf(){
 #define PUSHRET(TYPE) \
 void pushRet(TYPE val){ \
 	int len = sizeof(TYPE);\
-	byte *b = new byte[len];\
+	byte *b = (byte *) malloc(len);\
 	memcpy(b, &val, len);\
 	mCurrentInstruction->buffers[currentBuffer].buffer = b;\
 	mCurrentInstruction->buffers[currentBuffer].needClear = true;\
@@ -258,7 +266,7 @@ PUSHRET(const GLubyte);
 
 void pushRet(const GLubyte *val){
 	int len = strlen((char *)val);
-	byte *b = new byte[len];
+	byte *b = (byte *) malloc(len);
 	memcpy(b, val, len);
 	mCurrentInstruction->buffers[currentBuffer].buffer = b;
 	mCurrentInstruction->buffers[currentBuffer].needClear = true;
@@ -267,7 +275,7 @@ void pushRet(const GLubyte *val){
 
 void pushRet(const GLchar * val){
 	int len = strlen((char *)val);
-	byte *b = new byte[len];
+	byte *b = (byte *) malloc(len);
 	memcpy(b, val, len);
 	mCurrentInstruction->buffers[currentBuffer].buffer = b;
 	mCurrentInstruction->buffers[currentBuffer].needClear = true;

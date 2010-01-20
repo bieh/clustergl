@@ -23,7 +23,7 @@ byte mRecieveBuf[recieveBufferSize];
 	Net Server Module
 *********************************************************/
 
-NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression, int compressionLevel){
+NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression, int compressionMethod){
 
 	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
 		LOG("Failed to create socket\n");
@@ -45,7 +45,7 @@ NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression, 
 	useDecompression = decompression;
 	useReplyCompression = replyCompression;
 	if(useDecompression || useReplyCompression) {
-		compressor = new NetCompressModule(compressionLevel);
+		compressor = new NetCompressModule(compressionMethod);
 	}
 
 	//set TCP options
@@ -118,7 +118,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 						
 			if(l > 0){
 				//LOG("Reading buffer of size %d (%d)\n", l, i.id);
-				i.buffers[n].buffer = new byte[l];
+				i.buffers[n].buffer = (byte *) malloc(l);
 				i.buffers[n].needClear = true;	
 				myRead(i.buffers[n].buffer, l);
 			}			
@@ -139,7 +139,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 					int l = pIter->buffers[n].len;
 								
 					if(l > 0){
-						p.buffers[n].buffer = new byte[l];
+						p.buffers[n].buffer = (byte *) malloc(l);
 						p.buffers[n].needClear = true;			
 						memcpy((byte *)(p.buffers[n].buffer), &(*pIter->buffers[n].buffer),l);
 					}			

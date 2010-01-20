@@ -58,10 +58,10 @@ class ExecModule : public Module{
 	int iOffsetY;
 	int origWidth;
 	int origHeight;
-	int iScaleX;
-	int iScaleY;
+	float iScaleX;
+	float iScaleY;
 public:
-	ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, int scaleX, int scaleY);
+	ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, float scaleX, float scaleY);
 
 	bool init();	
 	bool process(list<Instruction> &i);
@@ -78,7 +78,7 @@ class NetSrvModule : public Module{
   int mSocket;
   BufferedFd *mClientSocket;
 public:
-	NetSrvModule(int port, bool decompression, bool replyCompression, int compressionLevel);
+	NetSrvModule(int port, bool decompression, bool replyCompression, int compressionMethod);
 	
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);
@@ -96,7 +96,7 @@ public:
 class NetClientModule : public Module{
   int mSocket;
 public:
-	NetClientModule(string address, int port, bool sendCompression, bool recieveCompression, int compressLevel, bool repeatInstruction);
+	NetClientModule(string address, int port, bool sendCompression, bool recieveCompression, int compressMethod, bool repeatInstruction);
 	
 	bool process(list<Instruction> &i);
 	bool sync();
@@ -113,9 +113,8 @@ public:
  Internal to NetSrvModule & NetClientModule
 **********************************************/
 class NetCompressModule : public Module{
-  int compressLevel;
 public:
-	NetCompressModule(int level);
+	NetCompressModule(int method);
 	
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);

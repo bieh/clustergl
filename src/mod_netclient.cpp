@@ -26,7 +26,7 @@ byte mSendBuf[sendBufferSize];
 	Net Client Module
 *********************************************************/
 
-NetClientModule::NetClientModule(string address, int port, bool sendCompression, bool recieveCompression, int compressLevel, bool repeatInstruction){
+NetClientModule::NetClientModule(string address, int port, bool sendCompression, bool recieveCompression, int compressMethod, bool repeatInstruction){
         //Make the socket and connect
 	mSocket = socket(PF_INET, SOCK_STREAM, 0); 
 	
@@ -37,7 +37,7 @@ NetClientModule::NetClientModule(string address, int port, bool sendCompression,
 
 	if(useSendCompression | useRecieveCompression) {
 		//make a compressor object
-		compressor2 = new NetCompressModule(compressLevel);
+		compressor2 = new NetCompressModule(compressMethod);
 	}
 	
 	//set TCP options
@@ -102,8 +102,8 @@ bool NetClientModule::process(list<Instruction> &list){
 	for(std::list<Instruction>::iterator iter = list.begin(), pIter = (*prevFrame).begin(); 
 	    iter != list.end(); iter++){
 	    Instruction *i = &(*iter); //yuck
-
-            //LOG("ID:%d\n",i->id);
+	   // if(i->id == 1499)
+            //	LOG("ID:%d %d %d\n",i->id, counter, num);
 	    bool mustSend = false;
 
 	    for(int n=0;n<3;n++){		
@@ -313,6 +313,7 @@ void NetClientModule::sendBuffer(int fd) {
 			//LOG("sending buffer of size: %d!\n", iSendBufPos);
 
 			//create room for new compressed buffer
+			//TODO: change the size CompBuffSize according to compress method
 			uLongf CompBuffSize = (uLongf)(iSendBufPos + (iSendBufPos * 0.1) + 12);
 			Bytef *out = (Bytef*) malloc(CompBuffSize);
 			int newSize = compressor2->myCompress(mSendBuf, iSendBufPos, out);

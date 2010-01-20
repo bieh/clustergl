@@ -5,11 +5,11 @@
 
 //#define  NOHACK true
 
-#ifdef NOHACK
+//#ifdef NOHACK
 #include <GL/glx.h>
 #include <GL/glu.h>
 
-#endif
+//#endif
 
 extern App *theApp;
 
@@ -81,9 +81,9 @@ AppModule::AppModule(string command){
 	//initialize values and structures
 	netBytes = 0;
 	netBytes2 = 0;
-	rpTex.size = NULL;
-	rpVert.size = NULL;
-	rpCol.size = NULL;
+	rpTex.size = (GLint) NULL;
+	rpVert.size = (GLint) NULL;
+	rpCol.size = (GLint) NULL;
 	init(command);
 }
 
@@ -111,7 +111,7 @@ bool AppModule::sync(){
 
 void pushOp(uint16_t opID){
 	//if(opID != 306)
-	//	LOG("OP: %d\n", opID);
+	//LOG("OP: %d\n", opID);
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
 		
@@ -150,7 +150,7 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 	//the stack), so we need to copy it
 	//If we *do* need a reply, we're going to block, so it's OK not to copy
 	if(!needReply){
-		copy = new byte[len];
+		copy = (byte *) malloc(len);
 		if(!buffer)
 			len = 0;
 		memcpy(copy, buffer, len);
@@ -328,6 +328,10 @@ void sendPointers(int length) {
 static int (*_SDL_Init)(unsigned int flags) = NULL;
 //Pointer to SDL_SetVideoMode
 static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
+//Pointer to SDL_LoadLibrary
+static int (*_SDL_GL_LoadLibrary)(const char *) = NULL;
+//Pointer to SDL_LoadLibrary
+static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
 
 Bool bHasMinimized = false;
 
@@ -362,6 +366,7 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 		printf("Couldn't find SDL_SetVideoMode: %s\n", dlerror());
 		exit(0);
 	}
+	
 	SDL_Surface* surf = (*_SDL_SetVideoMode)(100, 100, bpp, videoFlags );
 	if(!surf)
 		LOG("NULL surface!\n");
@@ -369,6 +374,32 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 	return surf;
 }
 
+/*extern "C" int SDL_GL_LoadLibrary(const char *path) {
+	LOG("*SDL_GL_LoadLibrary called, searching for: %s!\n", path);
+	return -1;
+}*/
+
+
+void    *handle = NULL;
+
+extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
+	LOG("*SDL_GL_GetProcAddress called, searching for: %s!\n", proc);
+
+      char *path = NULL;
+      size_t size = 0;
+      path = getcwd(path,size);
+      char *fullPath = (char *)calloc(strlen(path) + strlen("/libGL.so.1") + 1, sizeof(char));
+      strcat(fullPath, path);
+      strcat(fullPath, "/libGL.so.1");
+
+	if(!handle)
+		handle = dlopen(fullPath, RTLD_LOCAL | RTLD_LAZY);
+
+	if(!dlsym(handle, proc))
+		LOG("*SDL_GL_GetProcAddress failed finding: %s!\n", proc);
+
+	return dlsym(handle, proc);
+}
 
 extern "C" void SDL_GL_SwapBuffers( ) {
 	if(!bHasMinimized){
@@ -1715,7 +1746,7 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
     pushParam(border);
     pushParam(format);
     pushParam(type);
-    if(pixels)
+    //if(pixels)
 	    pushBuf(pixels, getFormatSize(format) *  width * height * getTypeSize(type));
 }
 
@@ -1922,10 +1953,10 @@ extern "C" void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLbo
 	//disabled for openarena, as it screws things up (unsure why)
 	LOG("********210*********\n");	
 	/*pushOp(210);
-	pushParam(red);
-	pushParam(green);
-	pushParam(blue);
-	pushParam(alpha);*/
+	pushParam(true);
+	pushParam(true);
+	pushParam(true);
+	pushParam(true);*/
 }
 
 //211
@@ -2353,10 +2384,13 @@ extern "C" GLenum glGetError(){
 		LOG("\t\t\t\t***********GL_STACK_UNDERFLOW\n");
 	else if(ret == GL_OUT_OF_MEMORY)
 		LOG("\t\t\t\t***********GL_OUT_OF_MEMORY\n");
+	if(ret != GL_NO_ERROR)
+		sleep(30);
 	return ret;
 }
 
 #ifdef NOHACK
+
 //262
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 	LOG("Called unimplemted stub GetFloatv!\n");
@@ -2366,6 +2400,7 @@ extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 extern "C" void glGetIntegerv(GLenum pname, GLint * params){
 	LOG("Called unimplemted stub GetIntegerv!\n");
 }
+
 #endif
 
 //264
@@ -2470,9 +2505,10 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 	pushBuf(mask, sizeof(GLubyte) * 32 * 32, true); //32 x 32 stipple
 }
 
-#ifdef NOHACK
 //Hack! We let the native implementation handle this
-//TODO: implement these methods
+//TODO: implement these methods, so no hacks are required
+
+#ifdef NOHACK
 
 //275
 extern "C" const GLubyte * glGetString(GLenum name){
@@ -4449,7 +4485,7 @@ extern "C" GLint glGetUniformLocation(GLuint program, const GLchar * name){
 	LOG("Called untested stub GetUniformLocation!\n");
 	pushOp(508);
 	pushParam(program);
-	pushBuf(name, sizeof(GLchar) * strlen(name));
+	pushBuf(name, sizeof(GLchar) * (strlen(name) + 1));
 	GLint ret = 0;
 	pushBuf(&ret, sizeof(GLint), true);
 	waitForReturn();
@@ -5097,12 +5133,14 @@ extern "C" void glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean tr
 
 //374
 extern "C" void glActiveTextureARB(GLenum texture){
+	LOG("called glActiveTextureARB!\n");
 	pushOp(374);
 	pushParam(texture);
 }
 
 //375
 extern "C" void glClientActiveTextureARB(GLenum texture){
+	LOG("called glClientActiveTextureARB!\n");
 	pushOp(375);
 	pushParam(texture);
 }
@@ -5180,6 +5218,7 @@ extern "C" void glMultiTexCoord2dvARB(GLenum target, const GLdouble * v){
 
 //386
 extern "C" void glMultiTexCoord2fARB(GLenum target, GLfloat s, GLfloat t){
+	LOG("called glMultiTexCoord2fARB\n");
 	pushOp(386);
 	pushParam(target);
 	pushParam(s);
@@ -6710,7 +6749,7 @@ extern "C" void glGetObjectParameterivARB(GLhandleARB obj, GLenum pname, GLint *
 
 //775
 extern "C" void glGetInfoLogARB(GLhandleARB obj, GLsizei maxLength, GLsizei * length, GLcharARB * infoLog){
-	LOG("Called untested stub GetInfoLogARB!\n");
+	/*LOG("Called untested stub GetInfoLogARB!\n");
 	pushOp(775);
 	pushParam(obj);
 	pushParam(maxLength);
@@ -6719,8 +6758,8 @@ extern "C" void glGetInfoLogARB(GLhandleARB obj, GLsizei maxLength, GLsizei * le
 	waitForReturn();
 	
 	*length = strlen(infoLog);
-	//BAD HACK
-	//*Length = 0;
+	//BAD HACK*/
+	*length = 0;
 }
 
 //776
@@ -6732,7 +6771,7 @@ extern "C" void glGetAttachedObjectsARB(GLhandleARB containerObj, GLsizei maxLen
 extern "C" GLint glGetUniformLocationARB(GLhandleARB program, const GLcharARB * name){;
 	pushOp(777);
 	pushParam(program);
-	pushBuf(name, sizeof(GLchar) * strlen(name));
+	pushBuf(name, sizeof(GLchar) * (strlen(name) + 1));
 	GLint ret = 0;
 	pushBuf(&ret, sizeof(GLint), true);
 	waitForReturn();
@@ -7797,6 +7836,7 @@ extern "C" void glIndexFuncEXT(GLenum func, GLclampf ref){
 
 //898
 extern "C" void glLockArraysEXT(GLint first, GLsizei count){
+	//LOG("called glLockArraysEXT\n");
 	pushOp(898);
 	pushParam(first);
 	pushParam(count);
@@ -10708,8 +10748,8 @@ LOG("Called unimplemted stub gluPartialDisk!\n");
 //1539
 extern "C" void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar) {
 	//LOG("Called unimplemted stub gluPerspective!\n");
-	/*pushOp(1539);
-	pushParam(fovy);
+	pushOp(1539);
+	/*pushParam(fovy);
 	pushParam(aspect);
 	pushParam(zNear);
 	pushParam(zFar);*/
@@ -11034,6 +11074,8 @@ extern "C" void glXGetSelectedEvent( Display *dpy, GLXDrawable drawable, unsigne
 LOG("Called unimplemted stub glXGetSelectedEvent!\n");
 }
 
+#endif
+
 //1639
 extern "C" __GLXextFuncPtr glXGetProcAddressARB (const GLubyte *) {
 LOG("Called unimplemted stub glXGetProcAddressARB!\n");
@@ -11043,6 +11085,8 @@ LOG("Called unimplemted stub glXGetProcAddressARB!\n");
 extern "C" void (*glXGetProcAddress(const GLubyte *procname))( void ) {
 LOG("Called unimplemted stub glXGetProcAddress!\n");
 }
+
+#ifdef NOHACK
 
 //1641
 extern "C" void *glXAllocateMemoryNV(GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority) {
