@@ -5133,14 +5133,12 @@ extern "C" void glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean tr
 
 //374
 extern "C" void glActiveTextureARB(GLenum texture){
-	LOG("called glActiveTextureARB!\n");
 	pushOp(374);
 	pushParam(texture);
 }
 
 //375
 extern "C" void glClientActiveTextureARB(GLenum texture){
-	LOG("called glClientActiveTextureARB!\n");
 	pushOp(375);
 	pushParam(texture);
 }
@@ -5218,7 +5216,6 @@ extern "C" void glMultiTexCoord2dvARB(GLenum target, const GLdouble * v){
 
 //386
 extern "C" void glMultiTexCoord2fARB(GLenum target, GLfloat s, GLfloat t){
-	LOG("called glMultiTexCoord2fARB\n");
 	pushOp(386);
 	pushParam(target);
 	pushParam(s);
@@ -7836,7 +7833,6 @@ extern "C" void glIndexFuncEXT(GLenum func, GLclampf ref){
 
 //898
 extern "C" void glLockArraysEXT(GLint first, GLsizei count){
-	//LOG("called glLockArraysEXT\n");
 	pushOp(898);
 	pushParam(first);
 	pushParam(count);
@@ -10747,12 +10743,12 @@ LOG("Called unimplemted stub gluPartialDisk!\n");
 
 //1539
 extern "C" void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar) {
-	//LOG("Called unimplemted stub gluPerspective!\n");
+	LOG("Called unimplemted stub gluPerspective!\n");
 	pushOp(1539);
-	/*pushParam(fovy);
+	pushParam(fovy);
 	pushParam(aspect);
 	pushParam(zNear);
-	pushParam(zFar);*/
+	pushParam(zFar);
 }
 
 #ifdef NOHACK

@@ -124,13 +124,13 @@ bool NetSrvModule::process(list<Instruction> &list){
 			}			
 		}
 		if(i.id == CGL_REPEAT_INSTRUCTION){
-			//LOG("SKIP: %d\n", i.args[0]);
+			LOG("SKIP: %d\n", i.args[0]);
 			//decrease num, as we won't need to read these instructions from the socket
 			num -= i.args[0];
 			for (uint32_t a = 0;a <(uint32_t)i.args[0];a++){
 				Instruction p;
 				
-				p.id = pIter->id;
+				p.id = pIter->id;	
 				for (int j =0;j<MAX_ARG_LEN;j++)
 					p.args[j] = pIter->args[j];
 				
@@ -139,8 +139,12 @@ bool NetSrvModule::process(list<Instruction> &list){
 					int l = pIter->buffers[n].len;
 								
 					if(l > 0){
+						LOG("SKIP with buffers!, %d\n", l);
 						p.buffers[n].buffer = (byte *) malloc(l);
-						p.buffers[n].needClear = true;			
+						p.buffers[n].needClear = true;
+						//TODO fix me!
+						if(!(*pIter->buffers[n].buffer))
+							LOG("copying a cleared buffer, something wrong here: TODO fix me!!\n");	
 						memcpy((byte *)(p.buffers[n].buffer), &(*pIter->buffers[n].buffer),l);
 					}			
 				}

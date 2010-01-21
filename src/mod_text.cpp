@@ -1490,8 +1490,16 @@ static void EXEC_glTexImage1D(byte *commandbuf){
 
 //183
 static void EXEC_glTexImage2D(byte *commandbuf){
+	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
+	GLint *level = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	GLint *internalformat = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	GLsizei *width = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLsizei *height = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
+	GLint *border = (GLint*)commandbuf;	 commandbuf += sizeof(GLint);
+	GLenum *format = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
+	GLenum *type = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
-	LOG("glTexImage2D()\n");
+	LOG("glTexImage2D(target =%0.1f, level=%d, internalformat=%d, width=%0.1f, height=%0.1f, border=%d, format=%0.1f, type=%0.1f)\n", (float)*target, *level, *internalformat, (float)*width, (float)*height, *border, (float)*format, (float)*type);
 
 }
 

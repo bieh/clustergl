@@ -129,8 +129,9 @@ bool ExecModule::process(list<Instruction> &list){
 			origHeight = h;
 	
 			//new frustum calculation that in theory, has no limitation
-		        glMatrixMode( GL_PROJECTION );
-		        glLoadIdentity( );
+			//commented out to get openarena to work
+		        //glMatrixMode( GL_PROJECTION );
+		        //glLoadIdentity( );
 			#ifdef SYMPHONY
 				//work out the proportion of screen that this will be displaying in the x direction
 
@@ -194,7 +195,7 @@ bool ExecModule::process(list<Instruction> &list){
 					iter--;
 					//LOG("gl setup in unusal order, may not work\n");
 					continue;
-				} 
+				}
 
 		} else if (iter->id== 176) { //glScissor
 
@@ -10760,7 +10761,11 @@ LOG("Called unimplemted stub gluPartialDisk!\n");
 //1539
 void EXEC_gluPerspective(byte *commandbuf) {
 LOG("Called unimplemted stub gluPerspective!\n");
-//(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar) 
+	GLdouble *fovy = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
+	GLdouble *aspect = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
+	GLdouble *zNear = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
+	GLdouble *zFar = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
+	gluPerspective(*fovy, *aspect, *zNear, *zFar);
 }
 
 //1540
