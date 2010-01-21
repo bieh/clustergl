@@ -5,6 +5,9 @@
 #include <GL/glu.h>
 #include <GL/glx.h>
 
+#define FRUSTUM true
+#define QUAKEHACKS true
+
 typedef void (*ExecFunc)(byte *buf);
 
 /*********************************************************
@@ -34,7 +37,7 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, float sca
 
 	iScaleX = scaleX;
 	iScaleY = scaleY;
-	LOG("scale values %lf %lf\n", scaleX, scaleY);
+
 	if(!makeWindow()){
 		LOG("failed to make window!\n");
 		exit(1);
@@ -130,72 +133,69 @@ bool ExecModule::process(list<Instruction> &list){
 	
 			//new frustum calculation that in theory, has no limitation
 			//commented out to get openarena to work
-		        //glMatrixMode( GL_PROJECTION );
-		        //glLoadIdentity( );
-			#ifdef SYMPHONY
-				//work out the proportion of screen that this will be displaying in the x direction
-
-				//float xscale = 1.0;
-				      //xscale = (w - x)/w;
-				//float yscale = 1.0;
-				      //yscale = (h - y)/y;
-				float myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
-				float myHeight = 0;
+			#ifdef FRUSTUM
+				#ifndef QUAKEHACKS
+					glMatrixMode( GL_PROJECTION );
+					glLoadIdentity( );
+				#endif
+				#ifdef SYMPHONY
+					
+					float myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
+					float myHeight = 0;
 				
-				float aspectRatio = origWidth/origHeight;
-				float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * iScaleX) - (0.5 * iScaleX));
-				float myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
+					float aspectRatio = origWidth/origHeight;
+					float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * iScaleX) - (0.5 * iScaleX));
+					float myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
 
-				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
+					glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
 
-				//possible performance increase	
-				//glScissor(iOffsetX, iOffsetY, SYMPHONY_SCREEN__WIDTH, SYMPHONY_SCREEN_HEIGHT);
+					//possible performance increase	
+					//glScissor(iOffsetX, iOffsetY, SYMPHONY_SCREEN__WIDTH, SYMPHONY_SCREEN_HEIGHT);
 
-			#else
-				//LOG("VIEWPORT!\n");
-				//if not running on symphony, use 'standard' values
-				//if not running on symphony, there is no 8192 limitation, so why not just use viewport
-				
-				//gluPerspective( 45.0f, 1.33f, 0.1f, 100.0f );
-				//glViewport(iOffsetX, iOffsetY, iScreenX, iScreenY);
-				
-				float myWidth = 2.0/2 * iScaleX;
-				float myHeight = -(1.0 * 3/4)/2 * iScaleY;
-				float myOffsetX = -1.0/2 * iScaleX;
-				float myOffsetY = (1.0 * 3/4) * iScaleY;
-				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 1000.0f);
-			#endif
-			
-				/*iter++;
-				//LOG("next: %d\n", iter->id);
-				GLenum *mode = (GLenum*)iter->args;
-				if(iter->id == 293 && GL_PROJECTION == *mode) {
+				#else			
+					float myWidth = 2.0/2 * iScaleX;
+					float myHeight = -(1.0 * 3/4)/2 * iScaleY;
+					float myOffsetX = -1.0/2 * iScaleX;
+					float myOffsetY = (1.0 * 3/4) * iScaleY;
+					glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 1000.0f);
+				#endif
+				#ifndef QUAKEHACKS
 					iter++;
 					//LOG("next: %d\n", iter->id);
-					if(iter->id == 290) {
-						 iter++;
-						 if(iter->id == 1539) {	
-							//LOG("skipping glu perspective commands\n");
-							continue;
+					GLenum *mode = (GLenum*)iter->args;
+					if(iter->id == 293 && GL_PROJECTION == *mode) {
+						iter++;
+						//LOG("next: %d\n", iter->id);
+						if(iter->id == 290) {
+							 iter++;
+							//LOG("next: %d\n", iter->id);
+							 if(iter->id == 1539) {	
+								//LOG("skipping glu perspective commands\n");
+								continue;
+							}
+							else {
+							iter --;
+							iter--;
+							iter--;
+							//LOG("gl setup in unusal order, may not work\n");
+							}
 						}
 						else {
 						iter --;
 						iter--;
-						iter--;
+						//LOG("gl setup in unusal order, may not work\n");
+						continue;
 						}
 					}
 					else {
-					iter --;
-					iter--;
-					//LOG("gl setup in unusal order, may not work\n");
-					continue;
+						iter--;
+						//LOG("gl setup in unusal order, may not work\n");
+						continue;
 					}
-				}
-				else {
-					iter--;
-					//LOG("gl setup in unusal order, may not work\n");
-					continue;
-				}*/
+				#endif
+			#else
+				glViewport(-iOffsetX, iOffsetY, iScreenX, iScreenY);
+			#endif
 
 		} else if (iter->id== 176) { //glScissor
 
@@ -223,8 +223,8 @@ bool ExecModule::process(list<Instruction> &list){
 			
 			//use these values to scale the orthographic view up to our custom screen size
 		   	glOrtho(left*((float)(iScreenX+iOffsetX)/(float)origWidth),
-				right*((float)(iScreenY+iOffsetY)/(float)origHeight),
-				bottom*((float)(iScreenX+iOffsetX)/(float)origWidth),  
+				right*((float)(iScreenX+iOffsetX)/(float)origWidth),
+				bottom*((float)(iScreenY+iOffsetY)/(float)origHeight),  
 				top*((float)(iScreenY+iOffsetY)/(float)origHeight),
 				nearVal, farVal);
 			//LOG("values used for ortho: %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
@@ -10760,7 +10760,6 @@ LOG("Called unimplemted stub gluPartialDisk!\n");
 
 //1539
 void EXEC_gluPerspective(byte *commandbuf) {
-LOG("Called unimplemted stub gluPerspective!\n");
 	GLdouble *fovy = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
 	GLdouble *aspect = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
 	GLdouble *zNear = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);

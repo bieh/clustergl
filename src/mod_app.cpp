@@ -136,7 +136,8 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, Bool needReply = false){
-
+	if(!buffer)
+		LOG("pushing null buffer!\n");
 	//LOG("bufSize: %d for insruct %d\n", len, mCurrentInstruction->id);
 	int saved = len;
 	if(iCurrentBuffer >= 3){
@@ -151,8 +152,10 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 	//If we *do* need a reply, we're going to block, so it's OK not to copy
 	if(!needReply){
 		copy = (byte *) malloc(len);
-		if(!buffer)
+		if(!buffer) {
 			len = 0;
+			LOG("pushing null buffer!\n");
+		}
 		memcpy(copy, buffer, len);
 		len = saved;
 	}
@@ -166,7 +169,7 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 	|| mCurrentInstruction->id == 311 || mCurrentInstruction->id == 321)
 		buf->needClear = false;	//don't clear, as they need to be reused 
 	else*/
-		buf->needClear = !needReply;
+	buf->needClear = !needReply;
 	buf->needReply = needReply;
 	iCurrentBuffer++;
 }
@@ -340,7 +343,7 @@ static SDL_Rect ** (*_SDL_ListModes)(SDL_PixelFormat *format, Uint32 flags) = NU
 Bool bHasMinimized = false;
 
 extern "C" int SDL_Init(unsigned int flags) {
-	LOG("SDL_Init\n");
+	//LOG("SDL_Init\n");
 	if (_SDL_Init == NULL) {
 		_SDL_Init = (int (*)(unsigned int)) dlsym(RTLD_NEXT, "SDL_Init");
 	}
@@ -357,12 +360,12 @@ extern "C" int SDL_Init(unsigned int flags) {
 		theApp = new App();
 		theApp->run_shared();
 	}
-	LOG("SDL_Init finished\n");
+	//LOG("SDL_Init finished\n");
 	return r;
 }
 
 extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigned int videoFlags) {
-	LOG("SDL_SetVideoMode\n");
+	//LOG("SDL_SetVideoMode\n");
 	if (_SDL_SetVideoMode == NULL) {
 		_SDL_SetVideoMode = (SDL_Surface* (*)(int,int,int,unsigned int)) dlsym(RTLD_NEXT, "SDL_SetVideoMode");
 	}
@@ -374,12 +377,13 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 	SDL_Surface* surf = (*_SDL_SetVideoMode)(100, 100, bpp, videoFlags );
 	if(!surf)
 		LOG("NULL surface!\n");
-	LOG("SDL_SetVideoMode finished\n");
+	//LOG("SDL_SetVideoMode finished\n");
 	return surf;
 }
 
+/*
 extern "C" const SDL_VideoInfo * SDL_GetVideoInfo(void) {
-	LOG("SDL_GetVideoInfo\n");
+	//LOG("SDL_GetVideoInfo\n");
 	if (_SDL_GetVideoInfo == NULL) {
 		_SDL_GetVideoInfo = (const SDL_VideoInfo * (*)(void)) dlsym(RTLD_NEXT, "SDL_GetVideoInfo");
 	}
@@ -399,6 +403,7 @@ extern "C" const SDL_VideoInfo * SDL_GetVideoInfo(void) {
 	#endif
 	return (const SDL_VideoInfo *) r;
 }
+*/
 
 extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
 	/*LOG("SDL_ListModes\n");
@@ -413,6 +418,7 @@ extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
 	
 	SDL_Rect ** ret = (*_SDL_ListModes)(format, flags);*/
 
+	// -1 means nay mode is supported
 	return (SDL_Rect **) -1;
 }
 
@@ -425,7 +431,7 @@ extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
 void    *handle = NULL;
 
 extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
-	LOG("*SDL_GL_GetProcAddress called, searching for: %s!\n", proc);
+	//LOG("*SDL_GL_GetProcAddress called, searching for: %s!\n", proc);
 
       char *path = NULL;
       size_t size = 0;
@@ -1788,8 +1794,10 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
     pushParam(border);
     pushParam(format);
     pushParam(type);
-    //if(pixels)
+    if(pixels)
 	    pushBuf(pixels, getFormatSize(format) *  width * height * getTypeSize(type));
+    else 
+	   LOG("183 no pixels!\n");
 }
 
 //184
@@ -10785,7 +10793,6 @@ LOG("Called unimplemted stub gluPartialDisk!\n");
 
 //1539
 extern "C" void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar) {
-	LOG("Called unimplemted stub gluPerspective!\n");
 	pushOp(1539);
 	pushParam(fovy);
 	pushParam(aspect);

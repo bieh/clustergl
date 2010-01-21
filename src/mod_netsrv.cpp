@@ -119,7 +119,8 @@ bool NetSrvModule::process(list<Instruction> &list){
 			if(l > 0){
 				//LOG("Reading buffer of size %d (%d)\n", l, i.id);
 				i.buffers[n].buffer = (byte *) malloc(l);
-				i.buffers[n].needClear = true;	
+				//need clear was set at the other end
+				i.buffers[n].needClear = true;;
 				myRead(i.buffers[n].buffer, l);
 			}			
 		}
@@ -130,7 +131,8 @@ bool NetSrvModule::process(list<Instruction> &list){
 			for (uint32_t a = 0;a <(uint32_t)i.args[0];a++){
 				Instruction p;
 				
-				p.id = pIter->id;	
+				p.id = pIter->id;
+				//LOG("SKIP INSTRUCT: %d\n", p.id);	
 				for (int j =0;j<MAX_ARG_LEN;j++)
 					p.args[j] = pIter->args[j];
 				
@@ -139,12 +141,14 @@ bool NetSrvModule::process(list<Instruction> &list){
 					int l = pIter->buffers[n].len;
 								
 					if(l > 0){
-						LOG("SKIP with buffers!, %d\n", l);
+						//LOG("%d SKIP with buffers!, %d\n", p.id, l);
 						p.buffers[n].buffer = (byte *) malloc(l);
 						p.buffers[n].needClear = true;
 						//TODO fix me!
 						if(!(*pIter->buffers[n].buffer))
-							LOG("copying a cleared buffer, something wrong here: TODO fix me!!\n");	
+						{
+							LOG("copying a cleared buffer, something wrong here!!\n");	
+						}
 						memcpy((byte *)(p.buffers[n].buffer), &(*pIter->buffers[n].buffer),l);
 					}			
 				}

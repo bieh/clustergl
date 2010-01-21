@@ -31,9 +31,9 @@ public:
 			if(buffers[i].buffer && buffers[i].needClear){
 				//printf("deleted (%d)\n", id);
 				//previously delete buffers[i].buffer
-				free(buffers[i].buffer);
-				buffers[i].buffer = NULL;
-				buffers[i].len = 0;
+					free(buffers[i].buffer);
+					buffers[i].buffer = NULL;
+					buffers[i].len = 0;
 			}
 		}
 	}

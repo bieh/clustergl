@@ -7,6 +7,7 @@
 	Net Client Globals
 *********************************************************/
 
+int bufferSavings = 0;
 int incomingSize = 0;
 int outgoingSize = 0;
 NetCompressModule *compressor2;
@@ -126,13 +127,10 @@ bool NetClientModule::process(list<Instruction> &list){
 				}
 			}
 			if (same){
-				for (int a=0;a<3;a++) {
-					if (i->buffers[a].len >0 && pIter->buffers[a].len >0){
-						if (i->buffers[a].len != pIter->buffers[a].len){
-							same = false;
-							break;
-						}
-						else if (i->buffers[a].needClear != pIter->buffers[a].needClear){
+				for (int a=0;a<3;a++) {						
+					if (i->buffers[a].len >0 && i->buffers[a].len == pIter->buffers[a].len){
+
+						if (i->buffers[a].needClear != pIter->buffers[a].needClear){
 							same = false;
 							break;
 						}
@@ -143,7 +141,12 @@ bool NetClientModule::process(list<Instruction> &list){
 					}
 				}
 			}
-			if (same) {
+			//if (same && i->buffers[0].len > 0)
+			//	bufferSavings += i->buffers[0].len;
+			if (same && i->buffers[0].len == 0) {
+				//if(i->buffers[0].len > 0) {
+				//	LOG("%d skipped!, buffer size: %d\n", i->id, i->buffers[0].len);
+				//}
 				sameCount++;
 				if (pIter != (*prevFrame).end()) 
 					pIter++;
@@ -232,7 +235,11 @@ bool NetClientModule::process(list<Instruction> &list){
 		sameCount = 0; // reset the count and free the memory
 		free(skip);
 	    }
-		
+	  /*  if(bufferSavings > 0)
+		{
+		LOG("couldv'e saved: %d bytes this frame\n", bufferSavings);
+		bufferSavings = 0;
+		}*/
 	    sendBuffer(mSocket);
 
 	return true;

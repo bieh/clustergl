@@ -60,7 +60,7 @@ int App::run_shared(){
 
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
-	//mModules.push_back(new NetClientModule("192.168.22.101", port));//dn1
+	//if(useSYMPHONYnodes[0]) mModules.push_back(new NetClientModule("192.168.22.101", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn1
 	if(useSYMPHONYnodes[1]) mModules.push_back(new NetClientModule("192.168.22.102", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn2
 	if(useSYMPHONYnodes[2]) mModules.push_back(new NetClientModule("192.168.22.103", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn3
 	if(useSYMPHONYnodes[3]) mModules.push_back(new NetClientModule("192.168.22.104", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn4
@@ -201,7 +201,7 @@ bool App::tick(){
 	    		mModules[0]->reply(&(*iter), i);
 	    	}
 	    }	    
-	    iter->clear();
+		iter->clear();
 	}
 	
 	//swap frames
@@ -211,6 +211,10 @@ bool App::tick(){
 		thisFrame = &twoFrame;
 	else
 		thisFrame = &oneFrame;
+	//for(std::list<Instruction>::iterator iter = thisFrame->begin(); 
+	//    iter != (*thisFrame).end(); iter++){
+	//	iter->clear();
+	//}
 	thisFrame->clear();// clear previous frame so this frame can be drawn
 	
 	return true;
