@@ -2,13 +2,9 @@
 #include <zconf.h>
 #include <zlib.h>
 
-#ifdef SYMPHONY
-#include <lzo1b.h>
-#include <lzo1x.h>
-#else
+
 #include <lzo/lzo1b.h>
 #include <lzo/lzo1x.h>
-#endif
 
 /* Compression methods:
    1 = ZLib, best compression, but much slower
