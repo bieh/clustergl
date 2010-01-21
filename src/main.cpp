@@ -61,10 +61,10 @@ int App::run_shared(){
 #ifdef SYMPHONY
 	// Symphony ip addys (if this is run from dn1 then we use local host above)
 	//mModules.push_back(new NetClientModule("192.168.22.101", port));//dn1
-	if(useSYMPHONYnodes[2]) mModules.push_back(new NetClientModule("192.168.22.102", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn2
-	if(useSYMPHONYnodes[3]) mModules.push_back(new NetClientModule("192.168.22.103", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn3
-	if(useSYMPHONYnodes[4]) mModules.push_back(new NetClientModule("192.168.22.104", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn4
-	if(useSYMPHONYnodes[5]) mModules.push_back(new NetClientModule("192.168.22.105", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn5
+	if(useSYMPHONYnodes[1]) mModules.push_back(new NetClientModule("192.168.22.102", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn2
+	if(useSYMPHONYnodes[2]) mModules.push_back(new NetClientModule("192.168.22.103", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn3
+	if(useSYMPHONYnodes[3]) mModules.push_back(new NetClientModule("192.168.22.104", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn4
+	if(useSYMPHONYnodes[4]) mModules.push_back(new NetClientModule("192.168.22.105", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn5
 #endif
 
 	//Return control to the parent process.

@@ -166,7 +166,7 @@ bool ExecModule::process(list<Instruction> &list){
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 1000.0f);
 			#endif
 			
-				iter++;
+				/*iter++;
 				//LOG("next: %d\n", iter->id);
 				GLenum *mode = (GLenum*)iter->args;
 				if(iter->id == 293 && GL_PROJECTION == *mode) {
@@ -195,7 +195,7 @@ bool ExecModule::process(list<Instruction> &list){
 					iter--;
 					//LOG("gl setup in unusal order, may not work\n");
 					continue;
-				}
+				}*/
 
 		} else if (iter->id== 176) { //glScissor
 

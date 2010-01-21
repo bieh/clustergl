@@ -330,8 +330,12 @@ static int (*_SDL_Init)(unsigned int flags) = NULL;
 static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
 //Pointer to SDL_LoadLibrary
 static int (*_SDL_GL_LoadLibrary)(const char *) = NULL;
-//Pointer to SDL_LoadLibrary
+//Pointer to SDL_GL_GetProcAddress
 static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
+//Pointer to SDL_GetVideoInfo
+static const SDL_VideoInfo * (*_SDL_GetVideoInfo)(void) = NULL;
+//Pointer to SDL_ListModes
+static SDL_Rect ** (*_SDL_ListModes)(SDL_PixelFormat *format, Uint32 flags) = NULL;
 
 Bool bHasMinimized = false;
 
@@ -372,6 +376,44 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 		LOG("NULL surface!\n");
 	LOG("SDL_SetVideoMode finished\n");
 	return surf;
+}
+
+extern "C" const SDL_VideoInfo * SDL_GetVideoInfo(void) {
+	LOG("SDL_GetVideoInfo\n");
+	if (_SDL_GetVideoInfo == NULL) {
+		_SDL_GetVideoInfo = (const SDL_VideoInfo * (*)(void)) dlsym(RTLD_NEXT, "SDL_GetVideoInfo");
+	}
+		
+	if(!_SDL_GetVideoInfo){
+		printf("Couldn't find SDL_GetVideoInfo: %s\n", dlerror());
+		exit(0);
+	}
+	
+	SDL_VideoInfo *r = (SDL_VideoInfo *) (*_SDL_GetVideoInfo)( );
+	#ifdef SYMPHONY
+	r->current_w = 8880;
+	r->current_h = 4560;
+	#else
+	//r->current_w = 900;
+	//r->current_h = 450;
+	#endif
+	return (const SDL_VideoInfo *) r;
+}
+
+extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
+	/*LOG("SDL_ListModes\n");
+	if (_SDL_ListModes == NULL) {
+		_SDL_ListModes = (SDL_Rect ** (*)(SDL_PixelFormat *format, Uint32 flags)) dlsym(RTLD_NEXT, "SDL_ListModes");
+	}
+		
+	if(!_SDL_ListModes) {
+		printf("Couldn't find SDL_ListModes: %s\n", dlerror());
+		exit(0);
+	}
+	
+	SDL_Rect ** ret = (*_SDL_ListModes)(format, flags);*/
+
+	return (SDL_Rect **) -1;
 }
 
 /*extern "C" int SDL_GL_LoadLibrary(const char *path) {
