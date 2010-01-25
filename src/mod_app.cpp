@@ -136,8 +136,6 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, Bool needReply = false){
-	if(!buffer)
-		LOG("pushing null buffer!\n");
 	//LOG("bufSize: %d for insruct %d\n", len, mCurrentInstruction->id);
 	int saved = len;
 	if(iCurrentBuffer >= 3){
@@ -165,10 +163,6 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 	InstructionBuffer *buf = &mCurrentInstruction->buffers[iCurrentBuffer];
 	buf->buffer = copy;
 	buf->len = len;
-	/*if(mCurrentInstruction->id == 308 || mCurrentInstruction->id == 320 
-	|| mCurrentInstruction->id == 311 || mCurrentInstruction->id == 321)
-		buf->needClear = false;	//don't clear, as they need to be reused 
-	else*/
 	buf->needClear = !needReply;
 	buf->needReply = needReply;
 	iCurrentBuffer++;

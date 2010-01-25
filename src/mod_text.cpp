@@ -23,10 +23,13 @@ TextModule::TextModule(){
 bool TextModule::process(list<Instruction> &list){
 	
 	LOG("*** Start of frame: %d instructions\n", list.size());
-
+	int counter = 0;
 	for(std::list<Instruction>::iterator iter = list.begin(); 
 	    iter != list.end(); iter++){
+		counter++;
 	    	mFunctions[iter->id](iter->args);
+	//if(counter == 10)
+	//	sleep(1);	
 	}
 	
 	LOG("*** End of frame\n\n");
@@ -2469,7 +2472,6 @@ static void EXEC_glDrawArrays(byte *commandbuf){
 static void EXEC_glDrawElements(byte *commandbuf){
 
 	LOG("glDrawElements()\n");
-
 }
 
 //312

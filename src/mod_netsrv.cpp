@@ -120,7 +120,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 				//LOG("Reading buffer of size %d (%d)\n", l, i.id);
 				i.buffers[n].buffer = (byte *) malloc(l);
 				//need clear was set at the other end
-				i.buffers[n].needClear = true;;
+				i.buffers[n].needClear = true;
 				myRead(i.buffers[n].buffer, l);
 			}			
 		}
@@ -141,12 +141,12 @@ bool NetSrvModule::process(list<Instruction> &list){
 					int l = pIter->buffers[n].len;
 								
 					if(l > 0){
-						//LOG("%d SKIP with buffers!, %d\n", p.id, l);
+						LOG("%d SKIP with buffers!, %d\n", p.id, l);
 						p.buffers[n].buffer = (byte *) malloc(l);
 						p.buffers[n].needClear = true;
+						p.buffers[n].len = l;
 						//TODO fix me!
-						if(!(*pIter->buffers[n].buffer))
-						{
+						if(!(*pIter->buffers[n].buffer)) {
 							LOG("copying a cleared buffer, something wrong here!!\n");	
 						}
 						memcpy((byte *)(p.buffers[n].buffer), &(*pIter->buffers[n].buffer),l);
@@ -198,17 +198,11 @@ bool NetSrvModule::sync() {
 
 int NetSrvModule::myRead(byte *input, int nByte) {
 	
-	if(bytesRemaining > 0) {
-		memcpy(input, mRecieveBuf + iRecieveBufPos, nByte);
-		iRecieveBufPos += nByte;
-		bytesRemaining -= nByte;
-	}
-	else {
+	if(bytesRemaining == 0)
 		recieveBuffer();
-		memcpy(input, mRecieveBuf + iRecieveBufPos, nByte);
-		iRecieveBufPos += nByte;
-		bytesRemaining -= nByte;
-	}
+	memcpy(input, mRecieveBuf + iRecieveBufPos, nByte);
+	iRecieveBufPos += nByte;
+	bytesRemaining -= nByte;
 
 	return nByte;
 }

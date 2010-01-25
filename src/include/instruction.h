@@ -21,6 +21,7 @@ public:
 			buffers[i].buffer = NULL;
 			buffers[i].len = 0;
 			buffers[i].needClear = false;
+			buffers[i].needReply = false;
 		}
 	}
 	

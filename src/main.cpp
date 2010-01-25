@@ -201,7 +201,7 @@ bool App::tick(){
 	    		mModules[0]->reply(&(*iter), i);
 	    	}
 	    }	    
-		iter->clear();
+		//iter->clear();
 	}
 	
 	//swap frames
@@ -211,10 +211,10 @@ bool App::tick(){
 		thisFrame = &twoFrame;
 	else
 		thisFrame = &oneFrame;
-	//for(std::list<Instruction>::iterator iter = thisFrame->begin(); 
-	//    iter != (*thisFrame).end(); iter++){
-	//	iter->clear();
-	//}
+	for(std::list<Instruction>::iterator iter = thisFrame->begin(); 
+	    iter != (*thisFrame).end(); iter++){
+		iter->clear();
+	}
 	thisFrame->clear();// clear previous frame so this frame can be drawn
 	
 	return true;

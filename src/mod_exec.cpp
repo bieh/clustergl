@@ -121,81 +121,16 @@ bool ExecModule::process(list<Instruction> &list){
 
 		//check if the message requires special attention (adjusting)
 		//else use standard process calling methods below
-		if (iter->id== 305) {//glViewPort, which now runs glFrustum
+		if (iter->id== 305) {//glViewPort
 			
 			GLint x = *((GLint*)iter->args);
 			GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
-			GLint w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
-			GLint h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
+			GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
+			GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
+			
+			//LOG("glViewPort values %d %d %d %d\n", x, y, w, h);			
 
-			origWidth = w;
-			origHeight = h;
-	
-			//new frustum calculation that in theory, has no limitation
-			//commented out to get openarena to work
-			#ifdef FRUSTUM
-				#ifndef QUAKEHACKS
-					glMatrixMode( GL_PROJECTION );
-					glLoadIdentity( );
-				#endif
-				#ifdef SYMPHONY
-					
-					float myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
-					float myHeight = 0;
-				
-					float aspectRatio = origWidth/origHeight;
-					float myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * iScaleX) - (0.5 * iScaleX));
-					float myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
-
-					glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0f, 100.0f);
-
-					//possible performance increase	
-					//glScissor(iOffsetX, iOffsetY, SYMPHONY_SCREEN__WIDTH, SYMPHONY_SCREEN_HEIGHT);
-
-				#else			
-					float myWidth = 2.0/2 * iScaleX;
-					float myHeight = -(1.0 * 3/4)/2 * iScaleY;
-					float myOffsetX = -1.0/2 * iScaleX;
-					float myOffsetY = (1.0 * 3/4) * iScaleY;
-					glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, 1000.0f);
-				#endif
-				#ifndef QUAKEHACKS
-					iter++;
-					//LOG("next: %d\n", iter->id);
-					GLenum *mode = (GLenum*)iter->args;
-					if(iter->id == 293 && GL_PROJECTION == *mode) {
-						iter++;
-						//LOG("next: %d\n", iter->id);
-						if(iter->id == 290) {
-							 iter++;
-							//LOG("next: %d\n", iter->id);
-							 if(iter->id == 1539) {	
-								//LOG("skipping glu perspective commands\n");
-								continue;
-							}
-							else {
-							iter --;
-							iter--;
-							iter--;
-							//LOG("gl setup in unusal order, may not work\n");
-							}
-						}
-						else {
-						iter --;
-						iter--;
-						//LOG("gl setup in unusal order, may not work\n");
-						continue;
-						}
-					}
-					else {
-						iter--;
-						//LOG("gl setup in unusal order, may not work\n");
-						continue;
-					}
-				#endif
-			#else
-				glViewport(-iOffsetX, iOffsetY, iScreenX, iScreenY);
-			#endif
+			//no nothing, will be handled later
 
 		} else if (iter->id== 176) { //glScissor
 
@@ -205,11 +140,13 @@ bool ExecModule::process(list<Instruction> &list){
 			GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
 			GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 			
-			//use these values to scale the scissor up to our custom screen size
-			glScissor( (GLint) x*((iScreenX+iOffsetX)/origWidth),  
-				   (GLint) y*((iScreenY+iOffsetY)/origHeight),
-				   (GLsizei) w*((iScreenX+iOffsetX)/origWidth),  
-				   (GLsizei) h*((iScreenY+iOffsetY)/origHeight));
+			//LOG("glScissor values %d %d %d %d\n", x, y, w, h);
+
+			#ifdef SYMPHONY
+				glScissor(iOffsetX, y, iOffsetX + SYMPHONY_SCREEN_WIDTH, h);
+			#else
+				glScissor(x, y, w, h);
+			#endif
 
 		} else if (iter->id == 296) { //glOrtho
 			
@@ -221,14 +158,42 @@ bool ExecModule::process(list<Instruction> &list){
 			GLdouble nearVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*4));
 			GLdouble farVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*5));
 			
-			//use these values to scale the orthographic view up to our custom screen size
-		   	glOrtho(left*((float)(iScreenX+iOffsetX)/(float)origWidth),
-				right*((float)(iScreenX+iOffsetX)/(float)origWidth),
-				bottom*((float)(iScreenY+iOffsetY)/(float)origHeight),  
-				top*((float)(iScreenY+iOffsetY)/(float)origHeight),
-				nearVal, farVal);
-			//LOG("values used for ortho: %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
+			//LOG("glOrtho values %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
 
+			#ifdef SYMPHONY
+				glOrtho(iOffsetX, iOffsetX + SYMPHONY_SCREEN_WIDTH, bottom, top, nearVal, farVal);
+			#else
+				glOrtho(left, right, bottom, top, nearVal, farVal);
+			#endif
+
+		} else if (iter->id == 1539) { //gluPerspective
+
+			//read original values from the instruction
+			GLdouble fovy = *((GLdouble*)iter->args);
+			GLdouble aspect = *((GLdouble*)(iter->args+ sizeof(GLdouble)));
+			GLdouble zNear = *((GLdouble*)(iter->args+ sizeof(GLdouble)*2));
+			GLdouble zFar = *((GLdouble*)(iter->args+ sizeof(GLdouble)*3));
+
+			//LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
+			
+			#ifdef SYMPHONY
+				double myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
+				double myHeight = 0;
+				
+				double aspectRatio = 1/aspect;
+				double myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * iScaleX) - (0.5 * iScaleX));
+				double myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
+
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0, zFar);
+			#else
+				double aspectRatio = 1/aspect;		
+				double myWidth = iScaleX;
+				double myHeight = -(1.0 * aspectRatio)/2 * iScaleY;
+				double myOffsetX = -1.0/2 * iScaleX;
+				double myOffsetY = (1.0 * aspectRatio) * iScaleY;
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, zFar);
+			#endif
+			
 		} else {
 			//LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
@@ -2545,7 +2510,7 @@ void EXEC_glFrustum(byte *commandbuf){
 	GLdouble *top = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
 	GLdouble *zNear = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
 	GLdouble *zFar = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
-
+	LOG("called glFrustum, panic!!!!\n");
 	glFrustum(*left, *right, *bottom, *top, *zNear, *zFar);
 }
 

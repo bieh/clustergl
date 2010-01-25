@@ -134,7 +134,7 @@ bool NetClientModule::process(list<Instruction> &list){
 							same = false;
 							break;
 						}
-						else if (!memcmp(i->buffers[a].buffer,pIter->buffers[a].buffer,i->buffers[a].len)){
+						else if (memcmp(i->buffers[a].buffer,pIter->buffers[a].buffer,i->buffers[a].len) == 0){
 							same = false;
 							break;
 						}
@@ -143,7 +143,7 @@ bool NetClientModule::process(list<Instruction> &list){
 			}
 			//if (same && i->buffers[0].len > 0)
 			//	bufferSavings += i->buffers[0].len;
-			if (same && i->buffers[0].len == 0) {
+			if (same) {
 				//if(i->buffers[0].len > 0) {
 				//	LOG("%d skipped!, buffer size: %d\n", i->id, i->buffers[0].len);
 				//}
