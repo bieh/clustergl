@@ -17,6 +17,7 @@ typedef void (*ExecFunc)(byte *buf);
 static ExecFunc mFunctions[1700];
 static Instruction *mCurrentInstruction = NULL;
 int currentBuffer = 0;
+GLenum currentMode = GL_MODELVIEW;
 
 /*********************************************************
 	Execute Module Stuff
@@ -194,7 +195,41 @@ bool ExecModule::process(list<Instruction> &list){
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, zFar);
 			#endif
 			
-		} else {
+		} else if (iter->id == 291) { //glLoadMatrixf
+
+				GLfloat * m = (GLfloat *)iter->buffers[0].buffer;
+				if(currentMode == GL_PROJECTION) {
+					//LOG("glLoadMatrixf buffer:\n [%f, %f, %f, %f]\n [%f, %f, %f, %f]\n [%f, %f, %f, %f]\n [%f, %f, %f, %f]\n\n", 
+					//m[0], m[4],m[8], m[12],m[1], m[5],m[9], m[13], m[2], m[6], m[10], m[14], m[3], m[7], m[11], m[15]);
+					/*m[0]= m[0]*3; //2NearVal / (right - left) //m[0] * num of horizontal screens (i.e. 5)
+					m[1]= 0;
+					m[2]= 0; 
+					m[3]= 0;
+					m[4]= 0;
+					m[5]= m[5];
+					m[6]= 0;
+					m[7]= 0;
+					m[8]= 0.0; //(right + left) / (right - left) SYMPHONY VALUES = -4, -2, 0, 2, 4
+					m[9]= 0; 
+					m[10]= m[10];
+					m[11]= m[11];
+					m[12]= 0;
+					m[13]= 0;
+					m[14]= m[14];
+					m[15]= 0;*/
+					//m[9] = -1.0;
+					#ifdef SYMPHONY
+						m[0]= m[0] * 5;
+						int intOffset = iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP);
+						m[8]=  -4 + intOffset * 2;
+					#endif
+					glLoadMatrixf(m);
+				}
+				else {
+				glLoadMatrixf(m);
+				}
+
+		}else {
 			//LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
 			//LOG("finished ID: %d\n", iter->id); 
@@ -2535,7 +2570,7 @@ void EXEC_glLoadMatrixd(byte *commandbuf){
 //293
 void EXEC_glMatrixMode(byte *commandbuf){
 	GLenum *mode = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
+	currentMode = *mode;
 	glMatrixMode(*mode);
 }
 
