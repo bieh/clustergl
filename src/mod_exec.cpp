@@ -187,12 +187,26 @@ bool ExecModule::process(list<Instruction> &list){
 
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0, zFar);
 			#else
-				double aspectRatio = 1/aspect;		
-				double myWidth = iScaleX;
-				double myHeight = -(1.0 * aspectRatio)/2 * iScaleY;
-				double myOffsetX = -1.0/2 * iScaleX;
-				double myOffsetY = (1.0 * aspectRatio) * iScaleY;
-				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, zFar);
+				//double aspectRatio = 1/aspect;		
+				//double myWidth = iScaleX;
+				//double myHeight = -(1.0 * aspectRatio)/2 * iScaleY;
+				//double myOffsetX = -1.0/2 * iScaleX;
+				//double myOffsetY = (1.0 * aspectRatio) * iScaleY;
+				//glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, zFar);
+				GLfloat * m = (GLfloat *) malloc(sizeof(float) * 16);
+				double myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
+				double myHeight = 0;
+				
+				double aspectRatio = 1/aspect;
+				iOffsetX = 1800;
+				double myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * iScaleX) - (0.5 * iScaleX));
+				double myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
+
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0, zFar);
+				LOG("glFrustum values %lf %lf %lf %lf %lf %lf\n", myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0, zFar);
+				glGetFloatv(GL_PROJECTION_MATRIX ,m);
+				LOG("frustum matrix:\n [%f, %f, %f, %f]\n [%f, %f, %f, %f]\n [%f, %f, %f, %f]\n [%f, %f, %f, %f]\n\n", 
+					m[0], m[1],m[2], m[3],m[4], m[5],m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]);
 			#endif
 			
 		} else if (iter->id == 291) { //glLoadMatrixf
@@ -219,9 +233,10 @@ bool ExecModule::process(list<Instruction> &list){
 					m[15]= 0;*/
 					//m[9] = -1.0;
 					#ifdef SYMPHONY
-						m[0]= m[0] * 5;
+						//TODO: replace magical numbers with constants
+						m[0]= m[0] * (5/(8400/8880));
 						int intOffset = iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP);
-						m[8]=  -4 + intOffset * 2;
+						m[8]=  -4.285714 + intOffset * (2 * 8880/8400);
 					#endif
 					glLoadMatrixf(m);
 				}
