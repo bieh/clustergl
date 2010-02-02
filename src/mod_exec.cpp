@@ -129,7 +129,7 @@ bool ExecModule::process(list<Instruction> &list){
 			GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 			
 			//LOG("glViewPort values %d %d %d %d\n", x, y, w, h);			
-			glViewport(x, y, w, h);
+			//glViewport(x, y, w, h);
 			//no nothing, will be handled later
 
 		} else if (iter->id== 176) { //glScissor

@@ -71,7 +71,7 @@ NetClientModule::NetClientModule(int port, bool sendCompression, bool recieveCom
 		mAddr[i].sin_addr.s_addr = inet_addr(addresses[i].c_str()); 
 		mAddr[i].sin_port = htons(port);  
 		//Establish connection
-		if (connect(mSocket[0],
+		if (connect(mSocket[i],
 		        (struct sockaddr *) &mAddr[i],
 		        sizeof(mAddr[i])) < 0) {
 			LOG("Failed to connect with server '%s:%d'\n", addresses[i].c_str(), port);
@@ -96,7 +96,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	//Send all the commands in the list down the socket
 	//LOG("processing:\n");
 	for(int i = 0; i < numConnections; i++) {
-		if(mSocket[0] == 0){
+		if(mSocket[i] == 0){
 			return false;
 		}
 	}
@@ -351,13 +351,13 @@ void NetClientModule::sendBuffer() {
 				if(!write(fd, out, newSize)){
 					LOG("Connection problem!\n");
 				}
-				//reset values
-				iSendBufPos = 0;
-				bytesLeft = sendBufferSize;
-				netBytes2 += newSize + (sizeof(int) * 2) * numConnections;
-				free(out);
+				
 				//LOG("iSendBufPos %d\n", iSendBufPos);
 			}
+			free(out);
+			iSendBufPos = 0;
+			bytesLeft = sendBufferSize;
+			netBytes2 += (newSize + (sizeof(int) * 2)) * numConnections;
 		}
 		else {
 			for(int i = 0; i < numConnections; i++) {
@@ -402,8 +402,8 @@ int NetClientModule::myRead(void *buf, size_t count){
 			//then read the compressed packet data and uncompress
 			Bytef *in = (Bytef*) malloc(compressedSize);
 			ret = read(fd, in, compressedSize);
-			if(ret != compressedSize)
-				return 0;
+		//	if(ret != compressedSize)
+		//		return 0;
 			compressor2->myDecompress(buf, count, in, compressedSize);
 			free(in);
 		}
