@@ -368,12 +368,12 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 		printf("Couldn't find SDL_SetVideoMode: %s\n", dlerror());
 		exit(0);
 	}
-	
-	SDL_Surface* surf = (*_SDL_SetVideoMode)(100, 100, bpp, videoFlags );
-	if(!surf)
-		LOG("NULL surface!\n");
-	//LOG("SDL_SetVideoMode finished\n");
-	return surf;
+	#ifdef SYMPHONY
+		//make a 1 * 1 window (that way it cannot be seen)
+		return (*_SDL_SetVideoMode)(1, 1, bpp, videoFlags );
+	#else
+		return (*_SDL_SetVideoMode)(200, 200, bpp, videoFlags );
+	#endif
 }
 
 /*

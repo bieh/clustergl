@@ -19,7 +19,7 @@ OBJS_APP := $(patsubst mod_app.o,,$(OBJS))
 DEPS := $(wildcard include/*.h) 
 
 #compiler-type things
-CXXFLAGS=-Iinclude -O3 -Wall -Wextra -g -pg -fPIC -shared
+CXXFLAGS=-Iinclude -O3 -Wextra -g -pg -fPIC
 LDFLAGS=-lGL -lGLU -lconfuse -llzo2 -lz `sdl-config --cflags --libs` -lSDL_net -lconfuse -lGLEW
 #CGL libs
 #-lCg -lCgGL 

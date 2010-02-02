@@ -5,9 +5,6 @@
 #include <GL/glu.h>
 #include <GL/glx.h>
 
-#define FRUSTUM true
-#define QUAKEHACKS true
-
 typedef void (*ExecFunc)(byte *buf);
 
 /*********************************************************
@@ -128,7 +125,7 @@ bool ExecModule::process(list<Instruction> &list){
 			GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
 			GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 			
-			//LOG("glViewPort values %d %d %d %d\n", x, y, w, h);			
+			//LOG("glViewPort values %d %d %d %d\n", x, y, w, h);		
 			//glViewport(x, y, w, h);
 			//no nothing, will be handled later
 
@@ -144,7 +141,7 @@ bool ExecModule::process(list<Instruction> &list){
 
 			#ifdef SYMPHONY
 				//could be smaller, but this is better than nothing
-				glScissor(0, 0, SYMPHONY_SCREEN_TOTAL_WIDTH, SYMPHONY_SCREEN_TOTAL_HEIGHT);
+				//glScissor(0, 0, SYMPHONY_SCREEN_TOTAL_WIDTH, SYMPHONY_SCREEN_TOTAL_HEIGHT);
 			#else
 				glScissor(x, y, w, h);
 			#endif
@@ -181,9 +178,9 @@ bool ExecModule::process(list<Instruction> &list){
 				double aspectRatio = SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH;
 
 				double myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
-				double myHeight = 0;
+				double myHeight = 0; //centered on 0
 				
-				double myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2 * iScaleX) - (0.5 * iScaleX));
+				double myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2) - 0.5) * iScaleX;
 				double myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
 
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0, zFar);
@@ -206,9 +203,9 @@ bool ExecModule::process(list<Instruction> &list){
 					#ifdef SYMPHONY
 						m[0]= m[0] * (5/(8400/SYMPHONY_SCREEN_TOTAL_WIDTH));
 						int intOffset = iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP);
-						m[8]=  -4.285714 + intOffset * (2 * 8880.0/8400.0);
+						//m[8]=  -4.285714 + intOffset * (2 * 8880.0/8400.0);
 						//m[8] = (left + right)/(left-right) + screenOffset * bezel
-						//m[8]=  (2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) + intOffset * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
+						m[8]=  -(2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) + intOffset * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
 					#endif
 					glLoadMatrixf(m);
 				}

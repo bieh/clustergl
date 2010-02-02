@@ -372,8 +372,8 @@ void NetClientModule::sendBuffer() {
 				}
 			}
 		
+			netBytes2 += iSendBufPos * numConnections;	//should + sizeof(int) * numConnections overhead
 			bytesLeft = sendBufferSize;
-			netBytes2 += iSendBufPos * numConnections;	//should add sizeof(int) * numConnections overhead
 			iSendBufPos = 0;
 		}
 	}	
@@ -402,8 +402,10 @@ int NetClientModule::myRead(void *buf, size_t count){
 			//then read the compressed packet data and uncompress
 			Bytef *in = (Bytef*) malloc(compressedSize);
 			ret = read(fd, in, compressedSize);
-		//	if(ret != compressedSize)
-		//		return 0;
+			if(ret == compressedSize)
+				ret = origSize;
+			else
+				return 0; //error
 			compressor2->myDecompress(buf, count, in, compressedSize);
 			free(in);
 		}
