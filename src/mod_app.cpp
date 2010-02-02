@@ -53,7 +53,7 @@ Bool sent;
 GLint size;
 GLenum type;
 GLsizei stride;
-const GLvoid * pointer;
+const GLvoid *pointer;
 };
 
 storedPointer rpTex;
@@ -66,8 +66,6 @@ storedPointer rpCol;
 
 Instruction mInstructions[MAX_INSTRUCTIONS];
 int iInstructionCount = 0;
-/* pointer to current buffer, currently always 0
-TODO: increment when more than 1 buffer must be sent */
 int iCurrentBuffer = 0;
 
 Instruction *mCurrentInstruction = NULL;
@@ -136,7 +134,10 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, Bool needReply = false){
-	//LOG("bufSize: %d for insruct %d\n", len, mCurrentInstruction->id);
+	//if(mCurrentInstruction->id != 308 && mCurrentInstruction->id != 311 && mCurrentInstruction->id != 320 && mCurrentInstruction->id != 321 && mCurrentInstruction->id != 183  && mCurrentInstruction->id != 261 &7  && mCurrentInstruction->id != 291 && mCurrentInstruction->id != 333 && mCurrentInstruction->id != 327) {
+	//	LOG("bufSize: %d for instruct %d\n", len, mCurrentInstruction->id);
+	//	sleep(3);
+	//}
 	int saved = len;
 	if(iCurrentBuffer >= 3){
 		LOG("Out of buffer space!\n");
@@ -412,7 +413,7 @@ extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
 	
 	SDL_Rect ** ret = (*_SDL_ListModes)(format, flags);*/
 
-	// -1 means nay mode is supported
+	// -1 means any mode is supported (easier than adding symphony values to list)
 	return (SDL_Rect **) -1;
 }
 
@@ -425,17 +426,16 @@ extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
 void    *handle = NULL;
 
 extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
-	//LOG("*SDL_GL_GetProcAddress called, searching for: %s!\n", proc);
-
-      char *path = NULL;
-      size_t size = 0;
-      path = getcwd(path,size);
-      char *fullPath = (char *)calloc(strlen(path) + strlen("/libGL.so.1") + 1, sizeof(char));
-      strcat(fullPath, path);
-      strcat(fullPath, "/libGL.so.1");
-
-	if(!handle)
-		handle = dlopen(fullPath, RTLD_LOCAL | RTLD_LAZY);
+	LOG("*SDL_GL_GetProcAddress called, searching for: %s!\n", proc);
+      if(!handle) {
+	      char *path = NULL;
+	      size_t size = 0;
+	      path = getcwd(path,size);
+	      char *fullPath = (char *)calloc(strlen(path) + strlen("/libGL.so.1") + 1, sizeof(char));
+	      strcat(fullPath, path);
+	      strcat(fullPath, "/libGL.so.1");
+	      handle = dlopen(fullPath, RTLD_LOCAL | RTLD_LAZY);
+	}
 
 	if(!dlsym(handle, proc))
 		LOG("*SDL_GL_GetProcAddress failed finding: %s!\n", proc);
@@ -1741,7 +1741,7 @@ extern "C" void glTexParameterfv(GLenum target, GLenum pname, const GLfloat * pa
 	pushOp(179);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //180
@@ -2891,7 +2891,7 @@ extern "C" void glPolygonOffset(GLfloat factor, GLfloat units){
 }
 
 //320
-extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){;
+extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
 	if(!pointer) {
 	pushOp(320);
 	pushParam(size);
@@ -5260,6 +5260,7 @@ extern "C" void glMultiTexCoord2dvARB(GLenum target, const GLdouble * v){
 
 //386
 extern "C" void glMultiTexCoord2fARB(GLenum target, GLfloat s, GLfloat t){
+	LOG("386 called!\n");
 	pushOp(386);
 	pushParam(target);
 	pushParam(s);

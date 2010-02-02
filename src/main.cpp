@@ -211,11 +211,11 @@ bool App::tick(){
 		thisFrame = &twoFrame;
 	else
 		thisFrame = &oneFrame;
-	for(std::list<Instruction>::iterator iter = thisFrame->begin(); 
+	for(std::list<Instruction>::iterator iter = thisFrame->begin(); // clear previous frame so this frame can be drawn
 	    iter != (*thisFrame).end(); iter++){
 		iter->clear();
 	}
-	thisFrame->clear();// clear previous frame so this frame can be drawn
+	thisFrame->clear();
 	
 	return true;
 }

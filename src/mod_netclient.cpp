@@ -79,7 +79,6 @@ NetClientModule::NetClientModule(string address, int port, bool sendCompression,
 
 bool NetClientModule::process(list<Instruction> &list){
 	//Send all the commands in the list down the socket
-	//TODO: Don't do so many send() calls!
 	//LOG("processing:\n");
 	if(mSocket == 0){
 		return false;
@@ -87,7 +86,7 @@ bool NetClientModule::process(list<Instruction> &list){
 	
 	//First send the total number
 	uint32_t num = list.size();
-	//LOG("num size %d!\n", num);
+	//LOG("num instructions netClient: %d!\n", num);
 	fflush(stdout);
 	netBytes += sizeof(uint32_t);
 	if(!myWrite(mSocket, &num, sizeof(uint32_t))){
@@ -114,6 +113,8 @@ bool NetClientModule::process(list<Instruction> &list){
 			if(i->buffers[n].needReply) mustSend = true;
 		}
 	    };
+	    //if(mustSend)
+	//	LOG("mustSend %d!\n", counter);
 	    if (i->id == pIter->id 		
 		&& !mustSend && i->id 			
 		  && useCGLrepeat //value from config to enable/disable deltas
@@ -128,25 +129,23 @@ bool NetClientModule::process(list<Instruction> &list){
 			}
 			if (same){
 				for (int a=0;a<3;a++) {						
-					if (i->buffers[a].len >0 && i->buffers[a].len == pIter->buffers[a].len){
-
-						if (i->buffers[a].needClear != pIter->buffers[a].needClear){
+					if (i->buffers[a].len > 0){
+						if(i->buffers[a].len != pIter->buffers[a].len){
 							same = false;
 							break;
 						}
-						else if (memcmp(i->buffers[a].buffer,pIter->buffers[a].buffer,i->buffers[a].len) == 0){
+						else if (i->buffers[a].needClear != pIter->buffers[a].needClear){
+							same = false;
+							break;
+						}
+						else if (memcmp(i->buffers[a].buffer,pIter->buffers[a].buffer,i->buffers[a].len) != 0){
 							same = false;
 							break;
 						}
 					}
 				}
 			}
-			//if (same && i->buffers[0].len > 0)
-			//	bufferSavings += i->buffers[0].len;
 			if (same) {
-				//if(i->buffers[0].len > 0) {
-				//	LOG("%d skipped!, buffer size: %d\n", i->id, i->buffers[0].len);
-				//}
 				sameCount++;
 				if (pIter != (*prevFrame).end()) 
 					pIter++;
@@ -235,11 +234,6 @@ bool NetClientModule::process(list<Instruction> &list){
 		sameCount = 0; // reset the count and free the memory
 		free(skip);
 	    }
-	  /*  if(bufferSavings > 0)
-		{
-		LOG("couldv'e saved: %d bytes this frame\n", bufferSavings);
-		bufferSavings = 0;
-		}*/
 	    sendBuffer(mSocket);
 
 	return true;
@@ -302,7 +296,6 @@ int NetClientModule::myWrite(int fd, void* buf, unsigned nByte){
 }
 
 int NetClientModule::myWrite(int fd, void* buf, long unsigned nByte){
-	
 	if(bytesLeft - nByte > 0) {
 		memcpy(mSendBuf + iSendBufPos, buf, nByte);
 		iSendBufPos += nByte;

@@ -45,14 +45,16 @@ void Quit( int returnCode )
     exit( returnCode );
 }
 
+    /* Create storage space for the texture */
+    SDL_Surface *TextureImage[1]; 
+
 /* function to load in bitmap as a GL texture */
 int LoadGLTextures( )
 {
     /* Status indicator */
     int Status = FALSE;
 
-    /* Create storage space for the texture */
-    SDL_Surface *TextureImage[1]; 
+
 
     /* Load The Bitmap, Check For Errors, If Bitmap's Not Found Quit */
     if ( ( TextureImage[0] = SDL_LoadBMP( "data/nehe.bmp" ) ) )
@@ -63,28 +65,6 @@ int LoadGLTextures( )
 
 	    /* Create The Texture */
 		glGenTextures( 1, &texture[0] );
-		printf("Got texture ID %d\n", texture[0]);
-
-		glGenTextures( 1, &texture[0] );
-		printf("Got texture ID %d\n", texture[0]);
-
-		glGenTextures( 1, &texture[0] );
-		printf("Got texture ID %d\n", texture[0]);
-
-
-		int error = glGetError();
-		printf("Got error ID %d\n", error);
-
-		GLhandleARB abc = 4;
-		GLcharARB num;
-		int number = glGetUniformLocationARB(abc, &num);
-		printf("Got glGetUniformLocationARB ID %d\n", number);
-
-		number = glGetUniformLocationARB(abc, &num);
-		printf("Got glGetUniformLocationARB ID %d\n", number);
-
-		number = glGetUniformLocationARB(abc, &num);
-		printf("Got glGetUniformLocationARB ID %d\n", number);
 
 	    /* Typical Texture Generation Using Data From The Bitmap */
 	    glBindTexture( GL_TEXTURE_2D, texture[0] );
@@ -100,8 +80,8 @@ int LoadGLTextures( )
         }
 
     /* Free up any memory we may have used */
-    if ( TextureImage[0] )
-	    SDL_FreeSurface( TextureImage[0] );
+    //if ( TextureImage[0] )
+//	    SDL_FreeSurface( TextureImage[0] );
 
     return Status;
 }
@@ -197,6 +177,18 @@ int initGL( GLvoid )
 /* Here goes our drawing code */
 int drawGLScene( GLvoid )
 {
+	    /* Typical Texture Generation Using Data From The Bitmap */
+	    glBindTexture( GL_TEXTURE_2D, texture[0] );
+	   
+ /* Generate The Texture */
+	    glTexImage2D( GL_TEXTURE_2D, 0, 3, TextureImage[0]->w,
+			  TextureImage[0]->h, 0, GL_BGR,
+			  GL_UNSIGNED_BYTE, TextureImage[0]->pixels );
+
+	    /* Linear Filtering */
+	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
     /* These are to calculate our fps */
     static GLint T0     = 0;
     static GLint Frames = 0;

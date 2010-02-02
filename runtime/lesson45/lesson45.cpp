@@ -146,7 +146,7 @@ bool Initialize (void)					                     // Any GL Init Code & User Initi
 	// Check For VBOs Supported
 	Log("Checking for extensions.....");
 #ifndef NO_VBOS
-	g_fVBOSupported = IsExtensionSupported( "GL_ARB_vertex_buffer_object" );
+	g_fVBOSupported = false;//IsExtensionSupported( "GL_ARB_vertex_buffer_object" );
 	if( g_fVBOSupported )
 	{
 		Log("VBOs supported, great!\n");
@@ -248,6 +248,7 @@ void Draw (void)
 	{
 		//printf("size = %d\n", sizeof(&g_pMesh->m_pVertices));
 		glVertexPointer( 3, GL_FLOAT, 0, g_pMesh->m_pVertices ); // Set The Vertex Pointer To Our Vertex Data
+		glTexCoordPointer( 2, GL_FLOAT, 0, g_pMesh->m_pTexCoords ); // Set The Vertex Pointer To Our TexCoord Data
 		glTexCoordPointer( 2, GL_FLOAT, 0, g_pMesh->m_pTexCoords ); // Set The Vertex Pointer To Our TexCoord Data
 	}
 
