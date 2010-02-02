@@ -2,6 +2,13 @@
 						TODO
 ********************************************************************************
 
+- Make NetModule handle symphony ips, rather than make 5 NetModule which compress 
+  the same data 5 times
+- Multicast - do prevent sending the same data 5 times
+- Make CGLRepeat handle buffers correctly
+
+
+
 - Instruction size
 	- Simplest: size byte in packet header
 	- Better: Lookup table of sizes

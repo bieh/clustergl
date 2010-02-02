@@ -141,9 +141,14 @@ bool NetSrvModule::process(list<Instruction> &list){
 					int l = pIter->buffers[n].len;
 								
 					if(l > 0){
+						//LOG("%d SKIP with buffers!, %d\n", p.id, l);
 						p.buffers[n].buffer = (byte *) malloc(l);
 						p.buffers[n].needClear = true;
 						p.buffers[n].len = l;
+						//TODO fix me!
+						if(!(pIter->buffers[n].buffer)) {
+							LOG("copying a cleared buffer, something wrong here!!\n");
+						}
 						memcpy((byte *)(p.buffers[n].buffer), &(*pIter->buffers[n].buffer),l);
 					}			
 				}

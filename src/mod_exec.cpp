@@ -206,9 +206,9 @@ bool ExecModule::process(list<Instruction> &list){
 					#ifdef SYMPHONY
 						m[0]= m[0] * (5/(8400/SYMPHONY_SCREEN_TOTAL_WIDTH));
 						int intOffset = iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP);
-						//m[8]=  -4.285714 + intOffset * (2 * 8880/8400);
+						m[8]=  -4.285714 + intOffset * (2 * 8880.0/8400.0);
 						//m[8] = (left + right)/(left-right) + screenOffset * bezel
-						m[8]=  (2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) + intOffset * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
+						//m[8]=  (2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) + intOffset * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
 					#endif
 					glLoadMatrixf(m);
 				}

@@ -94,17 +94,18 @@ public:
  pipe (probably on the app side). 
 **********************************************/
 class NetClientModule : public Module{
-  int mSocket;
+  int mSocket[5];
+  int numConnections;
 public:
-	NetClientModule(string address, int port, bool sendCompression, bool recieveCompression, int compressMethod, bool repeatInstruction);
+	NetClientModule(int port, bool sendCompression, bool recieveCompression, int compressMethod, bool repeatInstruction);
 	
 	bool process(list<Instruction> &i);
 	bool sync();
-	int myWrite(int fd, void* buf, int nByte);
-	int myWrite(int fd, void* buf, unsigned nByte);
-	int myWrite(int fd, void* buf, long unsigned nByte);
-	int myRead(int fd, void *buf, size_t count);
-	void sendBuffer(int fd);
+	int myWrite(void* buf, int nByte);
+	int myWrite(void* buf, unsigned nByte);
+	int myWrite(void* buf, long unsigned nByte);
+	int myRead(void *buf, size_t count);
+	void sendBuffer();
 };
 
 /*********************************************
