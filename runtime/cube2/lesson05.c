@@ -159,7 +159,7 @@ int LoadGLTextures( )
 	/* if successful, put them to use*/
 	if (compiled && compiled2)
 	{
-		printf("compiled\n");
+		//printf("compiled\n");
 		GLuint p = glCreateProgram();
 		glAttachShader(p,v);
 		glAttachShader(p,f);
@@ -292,6 +292,7 @@ int initGL( GLvoid )
 /* Here goes our drawing code */
 int drawGLScene( GLvoid )
 {
+	LoadGLTextures();
     /* These are to calculate our fps */
     static GLint T0     = 0;
     static GLint Frames = 0;

@@ -130,7 +130,7 @@ bool ExecModule::process(list<Instruction> &list){
 			GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 			
 			//LOG("glViewPort values %d %d %d %d\n", x, y, w, h);		
-			//glViewport(x, y, w, h);
+		//	glViewport(x, y, w, h);
 			
 
 		} else if (iter->id== 176) { //glScissor
@@ -202,7 +202,7 @@ bool ExecModule::process(list<Instruction> &list){
 				//center the screen on 0
 				double myHeight = 0; 
 				//calculate the xoffset based on which dn is being used * scale
-				double myOffsetX = (displayNumber * 0.2) - 0.5) * iScaleX;
+				double myOffsetX = ((displayNumber * 0.2) - 0.5) * iScaleX;
 				//calculate the yoffset based on aspect ratio
 				double myOffsetY = 2 * (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
 
@@ -238,7 +238,7 @@ bool ExecModule::process(list<Instruction> &list){
 				}
 
 		}else {
-			//LOG("ID: %d\n", iter->id); 
+		//	LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
 			//LOG("finished ID: %d\n", iter->id); 
 		}

@@ -376,7 +376,7 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 	}
 	#ifdef SYMPHONY
 		//make a 1 * 1 window (that way it cannot be seen)
-		return (*_SDL_SetVideoMode)(1, 1, bpp, videoFlags );
+		return (*_SDL_SetVideoMode)(100, 100, bpp, videoFlags );
 	#else
 		return (*_SDL_SetVideoMode)(200, 200, bpp, videoFlags );
 	#endif
@@ -2515,8 +2515,6 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 //Hack! We let the native implementation handle this
 //TODO: implement these methods, so no hacks are required
 
-#ifdef NOHACK
-
 //275
 extern "C" const GLubyte * glGetString(GLenum name){
 	LOG("Called untested stub glGetString!\n");
@@ -2531,6 +2529,7 @@ extern "C" const GLubyte * glGetString(GLenum name){
 	return ret;
 }
 
+#ifdef NOHACK
 
 //276
 extern "C" void glGetTexEnvfv(GLenum target, GLenum pname, GLfloat * params){

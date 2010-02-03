@@ -221,7 +221,7 @@ bool NetClientModule::process(list<Instruction> &list){
 					sendBuffer();
 					//LOG("sent buffer!\n");
 					if(int x = myRead(i->buffers[n].buffer, l) != l){
-						LOG("Connection problem (didn't recv buffer %d got: %d)!\n", l, x);
+						LOG("Connection problem NetClient (didn't recv buffer %d got: %d)!\n", l, x);
 						return false;
 					}
 					//LOG("got buffer back!\n");
@@ -393,7 +393,7 @@ void NetClientModule::sendBuffer() {
 *********************************************************/
 
 int NetClientModule::myRead(void *buf, size_t count){
-	int ret = 0;
+	int ret[5];
 	//read in replys from each socket
 	for(int i = 0; i < numConnections; i++) {
 			int fd = mSocket[i];
@@ -411,12 +411,12 @@ int NetClientModule::myRead(void *buf, size_t count){
 			//read the size of the incoming packet
 			//then read the compressed packet data and uncompress
 			Bytef *in = (Bytef*) malloc(compressedSize);
-			ret = read(fd, in, compressedSize);
-			if(ret == compressedSize)
-				ret = origSize;
+			ret[i] = read(fd, in, compressedSize);
+			if(ret[i] == compressedSize)
+				ret[i] = origSize;
 			else
 				return 0; //return error
-
+			//LOG("got buffer: %d\n", origSize);
 			if(i == 0)	//only bother to decompress/process the first one
 				compressor2->myDecompress(buf, count, in, compressedSize);
 
@@ -424,9 +424,17 @@ int NetClientModule::myRead(void *buf, size_t count){
 		}
 		else {
 			//LOG("waiting for a message!\n");
-			ret = read(fd, buf, count);
+				if(i == 0)
+					ret[i] = read(fd, buf, count);
+				else {
+				byte * tempBuf = (byte *) malloc(count);
+				ret[i] = read(fd, tempBuf, count);
+				free(tempBuf);
+				}
+			//	read(fd, buf, count);
+			//LOG("got buffer %d\n", ret[i]);
 		}
 	}
-	return ret;
+	return ret[0];
 }
 
