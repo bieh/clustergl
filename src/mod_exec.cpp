@@ -14,6 +14,7 @@ typedef void (*ExecFunc)(byte *buf);
 static ExecFunc mFunctions[1700];
 static Instruction *mCurrentInstruction = NULL;
 int currentBuffer = 0;
+int displayNumber = 0;
 GLenum currentMode = GL_MODELVIEW;
 
 /*********************************************************
@@ -34,6 +35,8 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, float sca
 
 	iScaleX = scaleX;
 	iScaleY = scaleY;
+
+	displayNumber = iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP);
 
 	if(!makeWindow()){
 		LOG("failed to make window!\n");
@@ -120,6 +123,7 @@ bool ExecModule::process(list<Instruction> &list){
 		//else use standard process calling methods below
 		if (iter->id== 305) {//glViewPort
 			
+			//no nothing, will be handled later (in gluPerpespective or glLoadMatrix)
 			GLint x = *((GLint*)iter->args);
 			GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
 			GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
@@ -127,7 +131,7 @@ bool ExecModule::process(list<Instruction> &list){
 			
 			//LOG("glViewPort values %d %d %d %d\n", x, y, w, h);		
 			//glViewport(x, y, w, h);
-			//no nothing, will be handled later
+			
 
 		} else if (iter->id== 176) { //glScissor
 
@@ -141,7 +145,7 @@ bool ExecModule::process(list<Instruction> &list){
 
 			#ifdef SYMPHONY
 				//could be smaller, but this is better than nothing
-				//glScissor(0, 0, SYMPHONY_SCREEN_TOTAL_WIDTH, SYMPHONY_SCREEN_TOTAL_HEIGHT);
+				glScissor(0, 0, SYMPHONY_SCREEN_TOTAL_WIDTH, SYMPHONY_SCREEN_TOTAL_HEIGHT);
 			#else
 				glScissor(x, y, w, h);
 			#endif
@@ -175,13 +179,32 @@ bool ExecModule::process(list<Instruction> &list){
 			//LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
 			
 			#ifdef SYMPHONY
-				double aspectRatio = SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH;
-
-				double myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
-				double myHeight = 0; //centered on 0
+				/*      diagram to explain how frustum works (without bezels)
+					(-1,-1)    (-0.6,-1)  (-0.2,-1)  (0.2,-1)   (0.6,-1)  (1,-1)
+					~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+					(-1,1)						      (1,1)
+				*/
 				
-				double myOffsetX = ((iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * 0.2) - 0.5) * iScaleX;
-				double myOffsetY = (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
+				//calculate aspect ratio
+				double aspectRatio = SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH;
+				//calcuate the % one screen takes * scale
+				double myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
+				//center the screen on 0
+				double myHeight = 0; 
+				//calculate the xoffset based on which dn is being used * scale
+				double myOffsetX = (displayNumber * 0.2) - 0.5) * iScaleX;
+				//calculate the yoffset based on aspect ratio
+				double myOffsetY = 2 * (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
 
 				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0, zFar);
 			#else
@@ -201,11 +224,12 @@ bool ExecModule::process(list<Instruction> &list){
 				GLfloat * m = (GLfloat *)iter->buffers[0].buffer;
 				if(currentMode == GL_PROJECTION) {
 					#ifdef SYMPHONY
+						//m[0]= whatever is is when we are given it * proportion that will be seen
 						m[0]= m[0] * (5/(8400/SYMPHONY_SCREEN_TOTAL_WIDTH));
-						int intOffset = iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP);
-						//m[8]=  -4.285714 + intOffset * (2 * 8880.0/8400.0);
-						//m[8] = (left + right)/(left-right) + screenOffset * bezel
-						m[8]=  -(2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) + intOffset * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
+						//m[8] = (left + right)/(left-right) + screenOffset * bezel (from API)
+						m[8]=  -(2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/
+							(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) 
+							+ displayNumber * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
 					#endif
 					glLoadMatrixf(m);
 				}

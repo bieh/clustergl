@@ -5,15 +5,10 @@
 
 //#define  NOHACK true
 
-//#ifdef NOHACK
 #include <GL/glx.h>
 #include <GL/glu.h>
 
-//#endif
-
 extern App *theApp;
-
-
 
 /*********************************************************
 	Coloured Console Output (not used)
@@ -47,6 +42,11 @@ void textcolor(int attr, int fg, int bg)
 /*********************************************************
 	Pointer Structures
 *********************************************************/
+//some methods simply specify a pointer to the beginning
+//of an array, that will be used later. As we do not yet
+//know the size of the array, we cannot send the buffer
+//We store the values for the method until the size is
+//known (usually when glDrawElements is called)
 
 struct storedPointer {
 Bool sent;
@@ -64,11 +64,16 @@ storedPointer rpCol;
 	Interception Globals
 *********************************************************/
 
+//list of instructions that are getting generated
 Instruction mInstructions[MAX_INSTRUCTIONS];
+//the number of instructions so far
 int iInstructionCount = 0;
+//the buffer we are currently using 
+//(there are a possible 3 buffers per message)
 int iCurrentBuffer = 0;
-
+//current instruction
 Instruction *mCurrentInstruction = NULL;
+//current arguements
 byte *mCurrentArgs = NULL;
 
 /*********************************************************
@@ -134,10 +139,6 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, Bool needReply = false){
-	//if(mCurrentInstruction->id != 308 && mCurrentInstruction->id != 311 && mCurrentInstruction->id != 320 && mCurrentInstruction->id != 321 && mCurrentInstruction->id != 183  && mCurrentInstruction->id != 261 &7  && mCurrentInstruction->id != 291 && mCurrentInstruction->id != 333 && mCurrentInstruction->id != 327) {
-	//	LOG("bufSize: %d for instruct %d\n", len, mCurrentInstruction->id);
-	//	sleep(3);
-	//}
 	int saved = len;
 	if(iCurrentBuffer >= 3){
 		LOG("Out of buffer space!\n");
@@ -152,6 +153,7 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 	if(!needReply){
 		copy = (byte *) malloc(len);
 		if(!buffer) {
+			//if the buffer is null, don't memcpy
 			len = 0;
 			LOG("pushing null buffer!\n");
 		}
@@ -199,6 +201,8 @@ PUSHPARAM(GLdouble);
 /*********************************************************
 	Size of Symbolic Constants Functions
 *********************************************************/
+//many methods specify what type is used in its array
+//which must be found to calculate the size of the buffer
 
 int getTypeSize(GLenum type) {
 
@@ -334,6 +338,8 @@ static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
 static const SDL_VideoInfo * (*_SDL_GetVideoInfo)(void) = NULL;
 //Pointer to SDL_ListModes
 static SDL_Rect ** (*_SDL_ListModes)(SDL_PixelFormat *format, Uint32 flags) = NULL;
+//handle to point to our own library
+void *handle = NULL;
 
 Bool bHasMinimized = false;
 
@@ -376,57 +382,14 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 	#endif
 }
 
-/*
-extern "C" const SDL_VideoInfo * SDL_GetVideoInfo(void) {
-	//LOG("SDL_GetVideoInfo\n");
-	if (_SDL_GetVideoInfo == NULL) {
-		_SDL_GetVideoInfo = (const SDL_VideoInfo * (*)(void)) dlsym(RTLD_NEXT, "SDL_GetVideoInfo");
-	}
-		
-	if(!_SDL_GetVideoInfo){
-		printf("Couldn't find SDL_GetVideoInfo: %s\n", dlerror());
-		exit(0);
-	}
-	
-	SDL_VideoInfo *r = (SDL_VideoInfo *) (*_SDL_GetVideoInfo)( );
-	#ifdef SYMPHONY
-	r->current_w = 8880;
-	r->current_h = 4560;
-	#else
-	//r->current_w = 900;
-	//r->current_h = 450;
-	#endif
-	return (const SDL_VideoInfo *) r;
-}
-*/
-
 extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
-	/*LOG("SDL_ListModes\n");
-	if (_SDL_ListModes == NULL) {
-		_SDL_ListModes = (SDL_Rect ** (*)(SDL_PixelFormat *format, Uint32 flags)) dlsym(RTLD_NEXT, "SDL_ListModes");
-	}
-		
-	if(!_SDL_ListModes) {
-		printf("Couldn't find SDL_ListModes: %s\n", dlerror());
-		exit(0);
-	}
-	
-	SDL_Rect ** ret = (*_SDL_ListModes)(format, flags);*/
-
+	//LOG("SDL_ListModes\n");
 	// -1 means any mode is supported (easier than adding symphony values to list)
 	return (SDL_Rect **) -1;
 }
 
-/*extern "C" int SDL_GL_LoadLibrary(const char *path) {
-	LOG("*SDL_GL_LoadLibrary called, searching for: %s!\n", path);
-	return -1;
-}*/
-
-
-void    *handle = NULL;
-
 extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
-	LOG("*SDL_GL_GetProcAddress called, searching for: %s!\n", proc);
+	//LOG("*SDL_GL_GetProcAddress called, searching for: %s!\n", proc);
       if(!handle) {
 	      char *path = NULL;
 	      size_t size = 0;

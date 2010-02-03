@@ -39,7 +39,7 @@ int App::run(int argc, char **argv){
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
 	mModules.push_back(new NetSrvModule(port, usingSendCompression, usingReplyCompression, compressingMethod));
 	mModules.push_back(new ExecModule(sizeX, sizeY, offsetX, offsetY, scaleX, scaleY));
-	//mModules.push_back(new TextModule());
+	//mModules.push_back(new TextModule()); //output OpenGL method calls to console
 	
 	while( tick() ){ }
 	return 0;
@@ -55,17 +55,8 @@ int App::run_shared(){
 	
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
-	//mModules.push_back(new TextModule());
+	//mModules.push_back(new TextModule()); //output OpenGL method calls to console
 	mModules.push_back(new NetClientModule(port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));
-
-//#ifdef SYMPHONY
-	// Symphony ip addys (if this is run from dn1 then we use local host above)
-	//if(useSYMPHONYnodes[0]) mModules.push_back(new NetClientModule("192.168.22.101", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn1
-//	if(useSYMPHONYnodes[1]) mModules.push_back(new NetClientModule("192.168.22.102", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn2
-//	if(useSYMPHONYnodes[2]) mModules.push_back(new NetClientModule("192.168.22.103", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn3
-//	if(useSYMPHONYnodes[3]) mModules.push_back(new NetClientModule("192.168.22.104", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn4
-//	if(useSYMPHONYnodes[4]) mModules.push_back(new NetClientModule("192.168.22.105", port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));//dn5
-//#endif
 
 	//Return control to the parent process.
 	
@@ -73,6 +64,7 @@ int App::run_shared(){
 }
 
 void App::init(){
+	//load values in from config file
     cfg_opt_t opts[] = {
 	CFG_SIMPLE_INT((char *)("sizeX"), &sizeX),
 	CFG_SIMPLE_INT((char *)("sizeY"), &sizeY),
@@ -101,7 +93,8 @@ void App::init(){
     scaleX = cfg_getfloat(cfg,(char *) "scaleX");
     scaleY = cfg_getfloat(cfg,(char *) "scaleY");
     cfg_free(cfg);
-	LOG("scale values: %f %f\n", scaleX, scaleY);
+
+	//adjust offset and size values for symphony display nodes
 	#ifdef SYMPHONY
 		int dn = atoi(dnNumber.c_str());
 		offsetX = (int) (SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * (dn - 1);

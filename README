@@ -1,13 +1,11 @@
 ********************************************************************************
-						TODO
+	TODO - updated 03/02/2010
 ********************************************************************************
 
-- Make NetModule handle symphony ips, rather than make 5 NetModule which compress 
-  the same data 5 times
-- Multicast - do prevent sending the same data 5 times
+- Multicast - do prevent sending the same data 5 times 
+  (not so bad when runnng compression)
 - Make CGLRepeat handle buffers correctly
-
-
+- Keyboard/Mouse Proxy and/or X Forwarding
 
 - Instruction size
 	- Simplest: size byte in packet header
@@ -20,7 +18,7 @@
 
 
 ********************************************************************************
-			Modules and pipelines and such
+	Modules and pipelines and such
 ********************************************************************************
 
 
@@ -82,7 +80,7 @@ Or, to play back stuff on the display wall
 And so on.
 
 ********************************************************************************
-			More thoughts on modules and problems
+	More thoughts on modules and problems
 ********************************************************************************
 				
 Modules take as input a list of commands for the current frame and can modify

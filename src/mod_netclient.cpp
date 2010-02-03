@@ -30,13 +30,14 @@ string addresses[5] = {"127.0.0.1", "192.168.22.102", "192.168.22.103", "192.168
 *********************************************************/
 
 NetClientModule::NetClientModule(int port, bool sendCompression, bool recieveCompression, int compressMethod, bool repeatInstruction){
+	//set the number of sockets to create/use
 	#ifdef SYMPHONY
 		numConnections = 5;
 	#else
 		numConnections = 1;
 	#endif
 
-        //Make the socket and connect
+        //Make each socket and connect
 	for(int i = 0; i < numConnections; i++) {
 		mSocket[i] = socket(PF_INET, SOCK_STREAM, 0);
 	}
@@ -47,11 +48,11 @@ NetClientModule::NetClientModule(int port, bool sendCompression, bool recieveCom
 	useCGLrepeat = repeatInstruction;
 
 	if(useSendCompression | useRecieveCompression) {
-		//make a compressor object
+		//make a compressor object (if required)
 		compressor2 = new NetCompressModule(compressMethod);
 	}
 	
-	//set TCP options
+	//set TCP options for each socket
 	int one = 1;
 	for(int i = 0; i < numConnections; i++) {
 		setsockopt(mSocket[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
@@ -65,6 +66,7 @@ NetClientModule::NetClientModule(int port, bool sendCompression, bool recieveCom
 	
 	struct sockaddr_in mAddr[5];
 	
+	//connect each socket to server
 	for(int i = 0; i < numConnections; i++) {
 		memset(&mAddr[i], 0, sizeof(mAddr[i]));   
 		mAddr[i].sin_family = AF_INET;   
@@ -119,31 +121,31 @@ bool NetClientModule::process(list<Instruction> &list){
 	for(std::list<Instruction>::iterator iter = list.begin(), pIter = (*prevFrame).begin(); 
 	    iter != list.end(); iter++){
 	    Instruction *i = &(*iter); //yuck
-	   // if(i->id == 1499)
-            //	LOG("ID:%d %d %d\n",i->id, counter, num);
 	    bool mustSend = false;
 
 	    for(int n=0;n<3;n++){		
 		if(i->buffers[n].len > 0){
-		  	//LOG("MustSend:%d\n",i->id);
 			//If we expect a buffer back then we must send Instruction
 			if(i->buffers[n].needReply) mustSend = true;
 		}
 	    };
-	    //if(mustSend)
-	//	LOG("mustSend %d!\n", counter);
-	    if (i->id == pIter->id 		
-		&& !mustSend && i->id 			
-		  && useCGLrepeat //value from config to enable/disable deltas
-		  && sameCount < 100		//stops sameBuffer filling up indefinitely
+
+	    if (i->id == pIter->id 	//if the instruction has the same id as previous	
+		&& !mustSend && i->id 	//mustSend is set when expecting a reply		
+		  && useCGLrepeat 	//value from config to enable/disable deltas
+		  && sameCount < 100	//stops sameBuffer filling up indefinitely (is this needed?)
 		) {
+			//assume the instruction is the same
 			bool same = true;
+			//compare all arguments
 			for (int a=0;a<MAX_ARG_LEN;a++){
 				if (i->args[a]!=pIter->args[a]){
 					same = false;
 					break;
 				}
 			}
+			
+			//if arguments the same, compare all buffers
 			if (same){
 				for (int a=0;a<3;a++) {						
 					if (i->buffers[a].len > 0){
@@ -162,6 +164,8 @@ bool NetClientModule::process(list<Instruction> &list){
 					}
 				}
 			}
+
+			//if arguments and buffers match, the instruction is identical
 			if (same) {
 				sameCount++;
 				if (pIter != (*prevFrame).end()) 
@@ -328,31 +332,32 @@ void NetClientModule::sendBuffer() {
 
 	if(iSendBufPos > 0) {
 		if(useSendCompression) {
-			//LOG("sending buffer of size: %d!\n", iSendBufPos);
-				//create room for new compressed buffer
+			//create room for new compressed buffer
 			//TODO: change the size CompBuffSize according to compress method
 			uLongf CompBuffSize = (uLongf)(iSendBufPos + (iSendBufPos * 0.1) + 12);
 			Bytef *out = (Bytef*) malloc(CompBuffSize);
 			int newSize = compressor2->myCompress(mSendBuf, iSendBufPos, out);
-			
+
+			//send the compressed buffer to each socket
 			for(int i = 0; i < numConnections; i++) {
+
 				int fd = mSocket[i];
+
 				//first write the original size of the buffer
 				if(!write(fd, &iSendBufPos, sizeof(int))){
 					LOG("Connection problem!\n");
 				}
-				//LOG("original size: %d!\n", iSendBufPos);
+
 				//then write the compressed size of the buffer
 				if(!write(fd, &newSize, sizeof(int))){
 					LOG("Connection problem!\n");
 				}
-				//LOG("compressed size: %d!\n", newSize);
+
 				//then write the actual buffer
 				if(!write(fd, out, newSize)){
 					LOG("Connection problem!\n");
 				}
 				
-				//LOG("iSendBufPos %d\n", iSendBufPos);
 			}
 			free(out);
 			iSendBufPos = 0;
@@ -360,12 +365,16 @@ void NetClientModule::sendBuffer() {
 			netBytes2 += (newSize + (sizeof(int) * 2)) * numConnections;
 		}
 		else {
+			//send the buffer to each socket
 			for(int i = 0; i < numConnections; i++) {
+
 				int fd = mSocket[i];
+
 				//first write the original size of the buffer
 				if(!write(fd, &iSendBufPos, sizeof(int))){
 					LOG("Connection problem!\n");
 				}
+
 				//then write the actual buffer
 				if(!write(fd, mSendBuf, iSendBufPos)){
 					LOG("Connection problem!\n");
@@ -385,6 +394,7 @@ void NetClientModule::sendBuffer() {
 
 int NetClientModule::myRead(void *buf, size_t count){
 	int ret = 0;
+	//read in replys from each socket
 	for(int i = 0; i < numConnections; i++) {
 			int fd = mSocket[i];
 
@@ -405,8 +415,11 @@ int NetClientModule::myRead(void *buf, size_t count){
 			if(ret == compressedSize)
 				ret = origSize;
 			else
-				return 0; //error
-			compressor2->myDecompress(buf, count, in, compressedSize);
+				return 0; //return error
+
+			if(i == 0)	//only bother to decompress/process the first one
+				compressor2->myDecompress(buf, count, in, compressedSize);
+
 			free(in);
 		}
 		else {

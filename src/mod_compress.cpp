@@ -25,9 +25,10 @@ NetCompressModule::NetCompressModule(int method) {
 		LOG("using lzo1b!\n");
 	else if(compressMethod == 3)
 		LOG("using lzo1x!\n");*/
-	if (lzo_init() != LZO_E_OK)
-	{
-	    printf("LZO init failed!\n");
+	if(compressMethod == 2 || compressMethod == 3) {
+		if (lzo_init() != LZO_E_OK) {
+		    printf("LZO init failed!\n");
+		}
 	}
 
 }	
@@ -43,8 +44,6 @@ void NetCompressModule::reply(Instruction *instr, int i){
 bool NetCompressModule::sync(){
 	LOG("NetCompressModule::sync: Shouldn't happen!\n");
 }
-
-
 
 /*********************************************************
 	Compress Method

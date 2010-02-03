@@ -145,7 +145,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 						p.buffers[n].buffer = (byte *) malloc(l);
 						p.buffers[n].needClear = true;
 						p.buffers[n].len = l;
-						//TODO fix me!
+
 						if(!(pIter->buffers[n].buffer)) {
 							LOG("copying a cleared buffer, something wrong here!!\n");
 						}
