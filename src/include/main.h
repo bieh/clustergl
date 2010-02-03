@@ -1,9 +1,9 @@
 /*******************************************************************************
-							main.h
+	main.h
 *******************************************************************************/
 
 /*********************************************
-			Internal headers
+	Internal headers
 **********************************************/
 #include "libs.h"
 #include "utils.h"
@@ -14,7 +14,7 @@
 #define LOG printf
 
 // used because SYMPHONY does not support all OpenGL commands (only version 1.4)
-#define  SYMPHONY true
+//#define  SYMPHONY true
 const float SYMPHONY_SCREEN_WIDTH = 1680.0;
 const float SYMPHONY_SCREEN_TOTAL_WIDTH = 8880.0;
 const float SYMPHONY_SCREEN_TOTAL_HEIGHT = 4560.0;
@@ -24,7 +24,7 @@ const float SYMPHONY_SCREEN_GAP = 120.0;
 #define MAX_INSTRUCTIONS 500000
 
 /*********************************************
-			Main application object
+	Main application object
 **********************************************/
 class App{
 	vector<Module *> mModules;  

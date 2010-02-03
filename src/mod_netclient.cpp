@@ -19,7 +19,7 @@ const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 int iSendBufPos = 0;
 int bytesLeft = sendBufferSize;
 
-//big buffer
+//big buffer to store instructions before sending
 byte mSendBuf[sendBufferSize];
  
 string addresses[5] = {"127.0.0.1", "192.168.22.102", "192.168.22.103", "192.168.22.104", "192.168.22.105"};
@@ -30,6 +30,7 @@ string addresses[5] = {"127.0.0.1", "192.168.22.102", "192.168.22.103", "192.168
 *********************************************************/
 
 NetClientModule::NetClientModule(int port, bool sendCompression, bool recieveCompression, int compressMethod, bool repeatInstruction){
+
 	//set the number of sockets to create/use
 	#ifdef SYMPHONY
 		numConnections = 5;
@@ -274,6 +275,7 @@ bool NetClientModule::sync(){
 		return false;
 	}
 	
+	//ensure sync messages are sent instantly
 	sendBuffer();
 
 	if(myRead(a, sizeof(int)) != sizeof(int)){
@@ -282,6 +284,7 @@ bool NetClientModule::sync(){
 	}
 	if (*a!=987654)
 		return false;
+
 	free(a);
 	return true;
 }
@@ -419,7 +422,6 @@ int NetClientModule::myRead(void *buf, size_t count){
 			//LOG("got buffer: %d\n", origSize);
 			if(i == 0)	//only bother to decompress/process the first one
 				compressor2->myDecompress(buf, count, in, compressedSize);
-
 			free(in);
 		}
 		else {

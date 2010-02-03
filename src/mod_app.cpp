@@ -330,12 +330,8 @@ void sendPointers(int length) {
 static int (*_SDL_Init)(unsigned int flags) = NULL;
 //Pointer to SDL_SetVideoMode
 static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
-//Pointer to SDL_LoadLibrary
-static int (*_SDL_GL_LoadLibrary)(const char *) = NULL;
 //Pointer to SDL_GL_GetProcAddress
 static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
-//Pointer to SDL_GetVideoInfo
-static const SDL_VideoInfo * (*_SDL_GetVideoInfo)(void) = NULL;
 //Pointer to SDL_ListModes
 static SDL_Rect ** (*_SDL_ListModes)(SDL_PixelFormat *format, Uint32 flags) = NULL;
 //handle to point to our own library

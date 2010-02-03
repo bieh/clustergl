@@ -12,7 +12,7 @@ int prevInstruction = 0;
 bool useDecompression = false;
 bool useReplyCompression = false;
 
-const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS * 8;
+const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 int iRecieveBufPos = 0;
 int bytesRemaining = 0;;
 
@@ -145,7 +145,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 						p.buffers[n].buffer = (byte *) malloc(l);
 						p.buffers[n].needClear = true;
 						p.buffers[n].len = l;
-
+						//TODO fix me!
 						if(!(pIter->buffers[n].buffer)) {
 							LOG("copying a cleared buffer, something wrong here!!\n");
 						}

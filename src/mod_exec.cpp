@@ -176,7 +176,7 @@ bool ExecModule::process(list<Instruction> &list){
 			GLdouble zNear = *((GLdouble*)(iter->args+ sizeof(GLdouble)*2));
 			GLdouble zFar = *((GLdouble*)(iter->args+ sizeof(GLdouble)*3));
 
-			//LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
+			LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
 			
 			#ifdef SYMPHONY
 				/*      diagram to explain how frustum works (without bezels)
@@ -194,29 +194,35 @@ bool ExecModule::process(list<Instruction> &list){
 					~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 					(-1,1)						      (1,1)
 				*/
-				
+
 				//calculate aspect ratio
 				double aspectRatio = SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH;
 				//calcuate the % one screen takes * scale
-				double myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH;
+				double myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH  * zNear;
 				//center the screen on 0
 				double myHeight = 0; 
 				//calculate the xoffset based on which dn is being used * scale
-				double myOffsetX = ((displayNumber * 0.2) - 0.5) * iScaleX;
+				double myOffsetX = ((displayNumber * 0.2) - 0.5) * iScaleX  * zNear;
 				//calculate the yoffset based on aspect ratio
-				double myOffsetY = 2 * (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio ;
+				double myOffsetY = 2 * (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio * zNear ;
 
-				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, 1.0, zFar);
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight-myOffsetY, myHeight+myOffsetY, zNear, zFar);
 			#else
+				const GLdouble pi = 3.1415926535897932384626433832795;
+				GLdouble fW, fH;
+				fH = tan( (fovy / 2) / 180 * pi ) * zNear;
+				fH = tan( fovy / 360 * pi ) * zNear;
+				fW = fH * aspect;
+				LOG("gluPerspective values: %lf %lf\n", fW, fH);
 				double aspectRatio = (double) iScreenY/iScreenX;
 
-				double myWidth = iScaleX;
-				double myHeight = -(1.0 * aspectRatio)/2 * iScaleY;
+				double myWidth = iScaleX * zNear;
+				double myHeight = -(1.0 * aspectRatio)/2 * iScaleY * zNear;
 
-				double myOffsetX = -1.0/2 * iScaleX;
-				double myOffsetY = (1.0 * aspectRatio) * iScaleY;
+				double myOffsetX = -1.0/2 * iScaleX * zNear;
+				double myOffsetY = (1.0 * aspectRatio) * iScaleY * zNear;
 
-				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, 1.0, zFar);
+				glFrustum(myOffsetX, myWidth+myOffsetX, myHeight, myHeight+myOffsetY, zNear, zFar);
 			#endif
 			
 		} else if (iter->id == 291) { //glLoadMatrixf
@@ -238,7 +244,7 @@ bool ExecModule::process(list<Instruction> &list){
 				}
 
 		}else {
-		//	LOG("ID: %d\n", iter->id); 
+			//LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
 			//LOG("finished ID: %d\n", iter->id); 
 		}

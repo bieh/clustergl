@@ -94,6 +94,7 @@ void App::init(){
     scaleY = cfg_getfloat(cfg,(char *) "scaleY");
     cfg_free(cfg);
 
+
 	//adjust offset and size values for symphony display nodes
 	#ifdef SYMPHONY
 		int dn = atoi(dnNumber.c_str());
