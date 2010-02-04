@@ -155,27 +155,15 @@ bool App::tick(){
 		}
 	        time(&prevTime);	
 	}
-
-	//Sync frames
-	if(syncRate > 0)
-	{
-		if (totFrames%syncRate == 0 && totFrames > 0){
-			for(int i=0;i<(int)mModules.size();i++){
-				Module *m = mModules[i];		
-				if( !m->sync() ){
-					LOG("Failed to sync frame (in %d), bailing out\n", i);
-					return false;
-				}
-			}
-		}
-	}
-
-	if (thisFrame == NULL){//initlize frames
+	
+	//initlize frames
+	if (thisFrame == NULL){
 		thisFrame = &oneFrame;
 		for(int i=0;i<(int)mModules.size();i++)
 			mModules[i]->prevFrame = &twoFrame;
 	}
 	
+	//process frames
 	for(int i=0;i<(int)mModules.size();i++){
 		Module *m = mModules[i];		
 		if( !m->process(*thisFrame) ){
@@ -184,7 +172,7 @@ bool App::tick(){
 		}
 	}
 	
-	
+	//return appropriate frames
 	for(std::list<Instruction>::iterator iter = thisFrame->begin(); 
 	    iter != (*thisFrame).end(); iter++){
 	    
@@ -196,6 +184,21 @@ bool App::tick(){
 	    	}
 	    }	    
 		//iter->clear();
+	}
+
+	//Sync frames
+	if(syncRate > 0)
+	{
+		if (totFrames%syncRate == 0 && totFrames > 0){
+			LOG("main sync: %d\n", totFrames);
+			for(int i=0;i<(int)mModules.size();i++){
+				Module *m = mModules[i];		
+				if( !m->sync() ){
+					LOG("Failed to sync frame (in %d), bailing out\n", i);
+					return false;
+				}
+			}
+		}
 	}
 	
 	//swap frames

@@ -75,6 +75,7 @@ int iCurrentBuffer = 0;
 Instruction *mCurrentInstruction = NULL;
 //current arguements
 byte *mCurrentArgs = NULL;
+uint32_t numberFrames = 0;
 
 /*********************************************************
 	Interception Module Stuff
@@ -105,6 +106,7 @@ bool AppModule::process(list<Instruction> &list){
 }
 
 bool AppModule::sync(){
+	LOG("AppModule::sync() %d\n", numberFrames);
 	return true;
 }
 
@@ -117,7 +119,7 @@ void pushOp(uint16_t opID){
 	//LOG("OP: %d\n", opID);
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
-		
+		numberFrames++;
 		//force the frame
 		if(!theApp->tick()){
 			exit(1);
@@ -177,6 +179,7 @@ void waitForReturn(){
 	//of the pipeline can get back to us with whatever it is they're going to
 	//do with the return buffer or value
 	//force the frame
+	numberFrames++;
 	if(!theApp->tick()){
 		exit(1);
 	}
@@ -410,6 +413,7 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 	}
 	
 	pushOp(1499); //Swap buffers
+	numberFrames++;
 	if(!theApp->tick()){
 		LOG("end swapping\n");
 		exit(1);
@@ -2387,8 +2391,8 @@ extern "C" GLenum glGetError(){
 		LOG("\t\t\t\t***********GL_STACK_UNDERFLOW\n");
 	else if(ret == GL_OUT_OF_MEMORY)
 		LOG("\t\t\t\t***********GL_OUT_OF_MEMORY\n");
-	if(ret != GL_NO_ERROR)
-		sleep(30);
+	//if(ret != GL_NO_ERROR)
+	//	sleep(30);
 	return ret;
 }
 

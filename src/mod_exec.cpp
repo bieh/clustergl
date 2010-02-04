@@ -16,13 +16,14 @@ static Instruction *mCurrentInstruction = NULL;
 int currentBuffer = 0;
 int displayNumber = 0;
 GLenum currentMode = GL_MODELVIEW;
+uint32_t numFrames = 0;
 
 /*********************************************************
 	Execute Module Stuff
 *********************************************************/
 
 ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, float scaleX, float scaleY){
-
+	
 	netBytes= 0;
 	netBytes2 = 0;
 
@@ -108,7 +109,7 @@ bool ExecModule::makeWindow(){
 *********************************************************/
 
 bool ExecModule::process(list<Instruction> &list){
-
+	numFrames++;
 	for(std::list<Instruction>::iterator iter = list.begin(); 
 	    iter != list.end(); iter++){
 	    	if(iter->id >= 1700 || !mFunctions[iter->id]){
@@ -200,7 +201,7 @@ bool ExecModule::process(list<Instruction> &list){
 			#ifdef SYMPHONY
 				//calculate height, then adjust according to how different the 
 				//programs aspect ratio and our ratio is
-				fH = tan( (fovy / 360) * pi ) * iScaleY * zNear * (1/((8880.0/4560.0) / aspect));
+				fH = tan( (fovy / 360) * pi ) * iScaleY * zNear * (1.0/((8880.0/4560.0) / aspect));
 				fW = tan( (fovy / 360) * pi ) * iScaleX * zNear * aspect;		
 				
 				GLdouble totalWidth = fW * 2;
@@ -222,7 +223,9 @@ bool ExecModule::process(list<Instruction> &list){
 
 				glFrustum(startingPoint, startingPoint + singleWidth, -fH, fH, zNear, zFar);
 			#else
-
+				fH = tan( (fovy / 360) * pi ) * iScaleY * zNear * (1.0/((iScreenX * 1.0/iScreenY) / aspect));
+				fW = tan( (fovy / 360) * pi ) * iScaleX * zNear * aspect;
+	
 				glFrustum(-fW, fW, -fH, fH, zNear, zFar);
 			#endif
 			
@@ -254,6 +257,7 @@ bool ExecModule::process(list<Instruction> &list){
 }
 
 bool ExecModule::sync(){
+	LOG("ExecModule::sync() %d\n", numFrames);
 	return true;
 }
 
@@ -303,7 +307,7 @@ void pushRet(const GLchar * val){
 *********************************************************/
 
 //1499
-void EXEC_CGLSwapBuffers(byte *commandbuf){	
+void EXEC_CGLSwapBuffers(byte *commandbuf){
 	SDL_GL_SwapBuffers();
 }
 	
@@ -365,7 +369,6 @@ void EXEC_glListBase(byte *commandbuf){
 //7
 void EXEC_glBegin(byte *commandbuf){
 	GLenum *mode = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
-
 	glBegin(*mode);
 }
 
