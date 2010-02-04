@@ -178,7 +178,6 @@ bool ExecModule::process(list<Instruction> &list){
 
 			LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
 			
-			
 				/*      diagram to explain how frustum works (without bezels)
 					(-1,-1)    (-0.6,-1)  (-0.2,-1)  (0.2,-1)   (0.6,-1)  (1,-1)
 					~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -197,16 +196,16 @@ bool ExecModule::process(list<Instruction> &list){
 
 				const GLdouble pi = 3.1415926535897932384626433832795;
 				GLdouble fW, fH;
+
+			#ifdef SYMPHONY
 				//calculate height, then adjust according to how different the 
 				//programs aspect ratio and our ratio is
-				fH = tan( (fovy / 360) * pi ) * zNear * (1/((iScreenX * 1.0/iScreenY) / aspect));
-				fW = tan( (fovy / 360) * pi ) * zNear * aspect;
-
-			#ifdef SYMPHONY		
+				fH = tan( (fovy / 360) * pi ) * iScaleY * zNear * (1/((8880.0/4560.0) / aspect));
+				fW = tan( (fovy / 360) * pi ) * iScaleX * zNear * aspect;		
 				
 				GLdouble totalWidth = fW * 2;
 				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
-				GLdouble startingPoint = -fW * (displayNumber * (totalWidth/5));
+				GLdouble startingPoint = -fW + (displayNumber * (totalWidth/5.0));
 
 				/*
 				//calculate aspect ratio

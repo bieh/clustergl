@@ -58,7 +58,7 @@ int resizeWindow( int width, int height )
     glLoadIdentity( );
 
     /* Set our perspective */
-    gluPerspective( 90.0f, ratio, 0.1f, 100.0f );
+    gluPerspective( 45.0f, ratio, 0.1f, 100.0f );
 
     /* Make sure we're chaning the model view and not the projection */
     glMatrixMode( GL_MODELVIEW );
