@@ -266,24 +266,26 @@ bool NetClientModule::process(list<Instruction> &list){
 *********************************************************/
 
 bool NetClientModule::sync(){
+	//ensure all remaining messages are sent instantly
+	sendBuffer();
+
 	int * a = (int *)malloc(sizeof(int));
 	*a = 987654;
 	netBytes += sizeof(int) * numConnections;
+	for(int i = 0; i < numConnections; i++) {
+		int fd = mSocket[i];
+		if(write(fd, a, sizeof(int)) != sizeof(int)){
+			LOG("Connection problem (didn't send sync)!\n");
+			return false;
+		}
 
-	if(myWrite(a, sizeof(int)) != sizeof(int)){
-		LOG("Connection problem (didn't send sync)!\n");
-		return false;
+		if(read(fd, a, sizeof(int)) != sizeof(int)){
+			LOG("Connection problem (didn't recv sync)!\n");
+			return false;
+		}
+		if (*a!=987654)
+			return false;
 	}
-	
-	//ensure sync messages are sent instantly
-	sendBuffer();
-
-	if(myRead(a, sizeof(int)) != sizeof(int)){
-		LOG("Connection problem (didn't recv sync)!\n");
-		return false;
-	}
-	if (*a!=987654)
-		return false;
 
 	free(a);
 	return true;
@@ -429,12 +431,12 @@ int NetClientModule::myRead(void *buf, size_t count){
 				if(i == 0)
 					ret[i] = read(fd, buf, count);
 				else {
-				byte * tempBuf = (byte *) malloc(count);
-				ret[i] = read(fd, tempBuf, count);
-				free(tempBuf);
+					byte * tempBuf = (byte *) malloc(count);
+					ret[i] = read(fd, tempBuf, count);
+					free(tempBuf);
 				}
 			//	read(fd, buf, count);
-			//LOG("got buffer %d\n", ret[i]);
+			//LOG("got buffer %d, expected %d\n", ret[i], count);
 		}
 	}
 	return ret[0];

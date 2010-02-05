@@ -106,7 +106,6 @@ bool AppModule::process(list<Instruction> &list){
 }
 
 bool AppModule::sync(){
-	LOG("AppModule::sync() %d\n", numberFrames);
 	return true;
 }
 
@@ -2517,7 +2516,7 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 
 //275
 extern "C" const GLubyte * glGetString(GLenum name){
-	LOG("Called untested stub glGetString!\n");
+	LOG("Called untested stub glGetString bbb!\n");
 	pushOp(275);
 	pushParam(name);
 
@@ -2525,7 +2524,7 @@ extern "C" const GLubyte * glGetString(GLenum name){
 	const GLubyte * ret = (GLubyte *)malloc(sizeof(GLubyte *)*4096);		
 	pushBuf(ret, sizeof(GLubyte *)*4096, true);
 	waitForReturn();
-
+	LOG("glGetString: %s\n", ret);
 	return ret;
 }
 
@@ -11076,8 +11075,6 @@ extern "C" void glXGetSelectedEvent( Display *dpy, GLXDrawable drawable, unsigne
 LOG("Called unimplemted stub glXGetSelectedEvent!\n");
 }
 
-#endif
-
 //1639
 extern "C" __GLXextFuncPtr glXGetProcAddressARB (const GLubyte *) {
 LOG("Called unimplemted stub glXGetProcAddressARB!\n");
@@ -11087,8 +11084,6 @@ LOG("Called unimplemted stub glXGetProcAddressARB!\n");
 extern "C" void (*glXGetProcAddress(const GLubyte *procname))( void ) {
 LOG("Called unimplemted stub glXGetProcAddress!\n");
 }
-
-#ifdef NOHACK
 
 //1641
 extern "C" void *glXAllocateMemoryNV(GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority) {

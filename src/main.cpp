@@ -175,7 +175,6 @@ bool App::tick(){
 	//return appropriate frames
 	for(std::list<Instruction>::iterator iter = thisFrame->begin(); 
 	    iter != (*thisFrame).end(); iter++){
-	    
 	    for(int i=0;i<3;i++){	    
 	    	//A bit dodgy. This is how we determine if it was created on this
 	    	//end of the network
@@ -190,7 +189,6 @@ bool App::tick(){
 	if(syncRate > 0)
 	{
 		if (totFrames%syncRate == 0 && totFrames > 0){
-			LOG("main sync: %d\n", totFrames);
 			for(int i=0;i<(int)mModules.size();i++){
 				Module *m = mModules[i];		
 				if( !m->sync() ){

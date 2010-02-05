@@ -257,7 +257,6 @@ bool ExecModule::process(list<Instruction> &list){
 }
 
 bool ExecModule::sync(){
-	LOG("ExecModule::sync() %d\n", numFrames);
 	return true;
 }
 
