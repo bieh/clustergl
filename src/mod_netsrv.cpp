@@ -13,8 +13,8 @@ bool useDecompression = false;
 bool useReplyCompression = false;
 
 const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
-int iRecieveBufPos = 0;
-int bytesRemaining = 0;;
+uint32_t iRecieveBufPos = 0;
+uint32_t bytesRemaining = 0;;
 
 //big buffer
 byte mRecieveBuf[recieveBufferSize];
@@ -39,6 +39,7 @@ NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression, 
 	addr.sin_port = htons(port);       
 	
 	//reset BPS calculations
+	frames = 0;
 	netBytes = 0;   
 	netBytes2 = 0; 
 	
@@ -180,13 +181,13 @@ void NetSrvModule::reply(Instruction *instr, int i) {
 
 bool NetSrvModule::sync() {
 
-	int a;
-	if(mClientSocket->read((byte *)&a, sizeof(int)) != sizeof(int)){
-		LOG("Connection problem (didn't recv sync)!\n");
+	uint32_t a;
+	if(mClientSocket->read((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)){
+		LOG("Connection problem NetSrvModule (didn't recv sync)!\n");
 		return false;
 	}
-	if(mClientSocket->write((byte *)&a, sizeof(int)) != sizeof(int)){
-		LOG("Connection problem (didn't send sync)!\n");
+	if(mClientSocket->write((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)){
+		LOG("Connection problem NetSrvModule (didn't send sync)!\n");
 		return false;
 	}	
 	return true;
@@ -211,11 +212,11 @@ void NetSrvModule::recieveBuffer(void) {
 	if(useDecompression) {
 		//LOG("recieving buffer!\n");
 		//first read the original number of bytes coming
-		mClientSocket->read((byte *)&bytesRemaining, sizeof(int));
+		mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
 		//LOG("original size: %d!\n", bytesRemaining);
 		//read the size of the compressed packet
 		int compSize = 0;
-		mClientSocket->read((byte *)&compSize, sizeof(int));
+		mClientSocket->read((byte *)&compSize, sizeof(uint32_t));
 		//LOG("compressed size: %d!\n", compSize);
 		//LOG("recieving buffer of size: %d!\n", bytesRemaining);
 		//then read in that many bytes
@@ -231,7 +232,7 @@ void NetSrvModule::recieveBuffer(void) {
 	}
 	else {
 		//first read the original number of bytes coming
-		mClientSocket->read((byte *)&bytesRemaining, sizeof(int));
+		mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
 		//read the buffer
 		mClientSocket->read(mRecieveBuf, bytesRemaining);
 		iRecieveBufPos = 0;
@@ -250,11 +251,11 @@ int NetSrvModule::myWrite(byte *input, int nByte) {
 		int newSize = compressor->myCompress(input, nByte, out);
 
 		//write the size of the next instruction
-		if(!mClientSocket->write( (byte*)&newSize, sizeof(int))){
+		if(!mClientSocket->write( (byte*)&newSize, sizeof(uint32_t))){
 			LOG("Connection problem!\n");
 		}
 		//write the old size of the next instruction
-		if(!mClientSocket->write( (byte*)&nByte, sizeof(int))){
+		if(!mClientSocket->write( (byte*)&nByte, sizeof(uint32_t))){
 			LOG("Connection problem!\n");
 		}
 
@@ -266,7 +267,7 @@ int NetSrvModule::myWrite(byte *input, int nByte) {
 
 		//calculate bandwidth requirements
 		netBytes += nByte; 
-		netBytes2 += sizeof(int) * 2;  
+		netBytes2 += sizeof(uint32_t) * 2;  
 		netBytes2 += newSize; 
 		free(out);
 

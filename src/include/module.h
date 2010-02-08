@@ -13,6 +13,7 @@ public:
 	list<Instruction> *prevFrame;	//used for comparing deltas (only used in NetClient and NetSrv)
 	ulong netBytes;			// variable to calculate network usage
 	ulong netBytes2;			// variable to calculate compressed network usage
+	uint32_t frames;
 
 	virtual bool process(list<Instruction> &i)=0;
 	virtual void reply(Instruction *instr, int i){}
@@ -136,3 +137,19 @@ public:
 	void reply(Instruction *instr, int i);
 	bool sync();
 };
+
+/*********************************************
+ Profiling Module
+**********************************************/
+class ProfileModule : public Module{
+public:
+	ProfileModule();
+	
+	bool process(list<Instruction> &i);
+	void reply(Instruction *instr, int i);
+	bool sync();
+	void resetCounts();
+	void output();
+	void outputBuffers();
+};
+

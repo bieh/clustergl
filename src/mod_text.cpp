@@ -10,9 +10,12 @@ typedef void (*TextFunc)(byte *buf);
 	Text Module Globals
 *********************************************************/
 
-static TextFunc mFunctions[1500];
+static TextFunc mFunctions[1700];
 
 TextModule::TextModule(){
+	netBytes = 0;
+	netBytes2 = 0;
+	frames = 0;
 	init();
 }
 

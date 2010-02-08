@@ -16,8 +16,8 @@ bool useRecieveCompression = false;
 bool useCGLrepeat = false;
 
 const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
-int iSendBufPos = 0;
-int bytesLeft = sendBufferSize;
+uint32_t iSendBufPos = 0;
+uint32_t bytesLeft = sendBufferSize;
 
 //big buffer to store instructions before sending
 byte mSendBuf[sendBufferSize];
@@ -85,6 +85,7 @@ NetClientModule::NetClientModule(int port, bool sendCompression, bool recieveCom
 	}
 	
 	//reset BPS calculations
+	frames = 0;
 	netBytes = 0;   
 	netBytes2 = 0; 
 
@@ -268,19 +269,18 @@ bool NetClientModule::process(list<Instruction> &list){
 bool NetClientModule::sync(){
 	//ensure all remaining messages are sent instantly
 	sendBuffer();
-
-	int * a = (int *)malloc(sizeof(int));
+	uint32_t * a = (uint32_t *)malloc(sizeof(uint32_t));
 	*a = 987654;
-	netBytes += sizeof(int) * numConnections;
+	netBytes += sizeof(uint32_t) * numConnections;
 	for(int i = 0; i < numConnections; i++) {
 		int fd = mSocket[i];
-		if(write(fd, a, sizeof(int)) != sizeof(int)){
-			LOG("Connection problem (didn't send sync)!\n");
+		if(write(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)){
+			LOG("Connection problem NetClientModule (didn't send sync)!\n");
 			return false;
 		}
 
-		if(read(fd, a, sizeof(int)) != sizeof(int)){
-			LOG("Connection problem (didn't recv sync)!\n");
+		if(read(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)){
+			LOG("Connection problem NetClientModule (didn't recv sync)!\n");
 			return false;
 		}
 		if (*a!=987654)
@@ -341,20 +341,20 @@ void NetClientModule::sendBuffer() {
 			//TODO: change the size CompBuffSize according to compress method
 			uLongf CompBuffSize = (uLongf)(iSendBufPos + (iSendBufPos * 0.1) + 12);
 			Bytef *out = (Bytef*) malloc(CompBuffSize);
-			int newSize = compressor2->myCompress(mSendBuf, iSendBufPos, out);
+			uint32_t newSize = compressor2->myCompress(mSendBuf, iSendBufPos, out);
 
 			//send the compressed buffer to each socket
 			for(int i = 0; i < numConnections; i++) {
 
-				int fd = mSocket[i];
+				uint32_t fd = mSocket[i];
 
 				//first write the original size of the buffer
-				if(!write(fd, &iSendBufPos, sizeof(int))){
+				if(!write(fd, &iSendBufPos, sizeof(uint32_t))){
 					LOG("Connection problem!\n");
 				}
 
 				//then write the compressed size of the buffer
-				if(!write(fd, &newSize, sizeof(int))){
+				if(!write(fd, &newSize, sizeof(uint32_t))){
 					LOG("Connection problem!\n");
 				}
 
@@ -367,16 +367,16 @@ void NetClientModule::sendBuffer() {
 			free(out);
 			iSendBufPos = 0;
 			bytesLeft = sendBufferSize;
-			netBytes2 += (newSize + (sizeof(int) * 2)) * numConnections;
+			netBytes2 += (newSize + (sizeof(uint32_t) * 2)) * numConnections;
 		}
 		else {
 			//send the buffer to each socket
 			for(int i = 0; i < numConnections; i++) {
 
-				int fd = mSocket[i];
+				uint32_t fd = mSocket[i];
 
 				//first write the original size of the buffer
-				if(!write(fd, &iSendBufPos, sizeof(int))){
+				if(!write(fd, &iSendBufPos, sizeof(uint32_t))){
 					LOG("Connection problem!\n");
 				}
 
@@ -398,7 +398,7 @@ void NetClientModule::sendBuffer() {
 *********************************************************/
 
 int NetClientModule::myRead(void *buf, size_t count){
-	int ret[5];
+	uint32_t ret[5];
 	//read in replys from each socket
 	for(int i = 0; i < numConnections; i++) {
 			int fd = mSocket[i];
@@ -406,12 +406,12 @@ int NetClientModule::myRead(void *buf, size_t count){
 		if(useRecieveCompression) {
 			size_t *a = &count;
 			//read the size of the compressed packet
-			int compressedSize = 0;
-			int c = read(fd, &compressedSize, sizeof(int));
+			uint32_t compressedSize = 0;
+			int c = read(fd, &compressedSize, sizeof(uint32_t));
 
 			//read the size of the original packet
-			int origSize = 0;
-			int d = read(fd, &origSize, sizeof(int));
+			uint32_t origSize = 0;
+			int d = read(fd, &origSize, sizeof(uint32_t));
 
 			//read the size of the incoming packet
 			//then read the compressed packet data and uncompress
@@ -427,15 +427,24 @@ int NetClientModule::myRead(void *buf, size_t count){
 			free(in);
 		}
 		else {
-			//LOG("waiting for a message!\n");
-				if(i == 0)
-					ret[i] = read(fd, buf, count);
-				else {
-					byte * tempBuf = (byte *) malloc(count);
-					ret[i] = read(fd, tempBuf, count);
-					free(tempBuf);
+ 			//LOG("waiting for a message!\n");
+				if(i == 0) {
+					int remaining = count;
+					while(remaining > 0) {
+					ret[i] = read(fd, buf, remaining);
+					remaining -= ret[i];
+					}
+					ret[0] = count;
 				}
-			//	read(fd, buf, count);
+ 				else {
+ 					byte * tempBuf = (byte *) malloc(count);
+					int remaining = count;
+					while(remaining > 0) {
+ 					ret[i] = read(fd, tempBuf, count);
+					remaining -= ret[i];
+					}
+ 					free(tempBuf);
+ 				}
 			//LOG("got buffer %d, expected %d\n", ret[i], count);
 		}
 	}

@@ -75,7 +75,8 @@ int iCurrentBuffer = 0;
 Instruction *mCurrentInstruction = NULL;
 //current arguements
 byte *mCurrentArgs = NULL;
-uint32_t numberFrames = 0;
+
+uint32_t *iFrames = NULL;
 
 /*********************************************************
 	Interception Module Stuff
@@ -85,6 +86,8 @@ AppModule::AppModule(string command){
 	//initialize values and structures
 	netBytes = 0;
 	netBytes2 = 0;
+	frames = 0;
+	iFrames = &frames;
 	rpTex.size = (GLint) NULL;
 	rpVert.size = (GLint) NULL;
 	rpCol.size = (GLint) NULL;
@@ -118,7 +121,6 @@ void pushOp(uint16_t opID){
 	//LOG("OP: %d\n", opID);
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
-		numberFrames++;
 		//force the frame
 		if(!theApp->tick()){
 			exit(1);
@@ -178,7 +180,6 @@ void waitForReturn(){
 	//of the pipeline can get back to us with whatever it is they're going to
 	//do with the return buffer or value
 	//force the frame
-	numberFrames++;
 	if(!theApp->tick()){
 		exit(1);
 	}
@@ -412,7 +413,7 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 	}
 	
 	pushOp(1499); //Swap buffers
-	numberFrames++;
+	(*iFrames)++;
 	if(!theApp->tick()){
 		LOG("end swapping\n");
 		exit(1);
@@ -2513,10 +2514,11 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 
 //Hack! We let the native implementation handle this
 //TODO: implement these methods, so no hacks are required
+#ifdef NOHACK
 
 //275
 extern "C" const GLubyte * glGetString(GLenum name){
-	LOG("Called untested stub glGetString bbb!\n");
+	LOG("Called untested stub glGetString!\n");
 	pushOp(275);
 	pushParam(name);
 
@@ -2524,11 +2526,10 @@ extern "C" const GLubyte * glGetString(GLenum name){
 	const GLubyte * ret = (GLubyte *)malloc(sizeof(GLubyte *)*4096);		
 	pushBuf(ret, sizeof(GLubyte *)*4096, true);
 	waitForReturn();
-	LOG("glGetString: %s\n", ret);
 	return ret;
 }
 
-#ifdef NOHACK
+
 
 //276
 extern "C" void glGetTexEnvfv(GLenum target, GLenum pname, GLfloat * params){

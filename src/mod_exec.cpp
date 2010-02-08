@@ -26,7 +26,7 @@ ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, float sca
 	
 	netBytes= 0;
 	netBytes2 = 0;
-
+	frames = 0;
 	init();
 
 	iScreenX = sizeX;
@@ -164,9 +164,17 @@ bool ExecModule::process(list<Instruction> &list){
 			//LOG("glOrtho values %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
 
 			#ifdef SYMPHONY
-				glOrtho(iOffsetX, iOffsetX + SYMPHONY_SCREEN_WIDTH, bottom, top, nearVal, farVal);
+				GLdouble totalWidth = right - left;
+				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
+				GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
+				GLdouble startingPoint = left + (displayNumber * (singleWidth + bezelWidth));
+
+				glOrtho(startingPoint, startingPoint + singleWidth, bottom, top, nearVal, farVal);
 			#else
-				glOrtho(left, right, bottom, top, nearVal, farVal);
+				if(right/bottom == (double) iScreenX/iScreenY)	//if ratio is correct, do nothing
+					glOrtho(left, right, bottom, top, nearVal, farVal);
+				else	//if ratio incorrect, adjust so things dont get stretched
+					glOrtho(left, right, right * iScreenY/iScreenX, top, nearVal, farVal);
 			#endif
 
 		} else if (iter->id == 1539) { //gluPerspective
@@ -179,7 +187,7 @@ bool ExecModule::process(list<Instruction> &list){
 
 			LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
 			
-				/*      diagram to explain how frustum works (without bezels)
+				/*      diagram to explain how frustum works (without bezels, ignoring fov)
 					(-1,-1)    (-0.6,-1)  (-0.2,-1)  (0.2,-1)   (0.6,-1)  (1,-1)
 					~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 					|---------||---------||---------||---------||---------|
@@ -201,30 +209,19 @@ bool ExecModule::process(list<Instruction> &list){
 			#ifdef SYMPHONY
 				//calculate height, then adjust according to how different the 
 				//programs aspect ratio and our ratio is
-				fH = tan( (fovy / 360) * pi ) * iScaleY * zNear * (1.0/((8880.0/4560.0) / aspect));
-				fW = tan( (fovy / 360) * pi ) * iScaleX * zNear * aspect;		
+				//fW and fH are the equivalent glFrustum calculations using the gluPerspective values
+				fH = tan( (fovy / 360.0) * pi ) * iScaleY * zNear * (1.0/((8880.0/4560.0) / aspect));
+				fW = tan( (fovy / 360.0) * pi ) * iScaleX * zNear * aspect;		
 				
 				GLdouble totalWidth = fW * 2;
 				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
-				GLdouble startingPoint = -fW + (displayNumber * (totalWidth/5.0));
-
-				/*
-				//calculate aspect ratio
-				double aspectRatio = SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH;
-				//calcuate the % one screen takes * scale
-				double myWidth = SYMPHONY_SCREEN_WIDTH* iScaleX / SYMPHONY_SCREEN_TOTAL_WIDTH  * zNear;
-				//center the screen on 0
-				double myHeight = 0; 
-				//calculate the xoffset based on which dn is being used * scale
-				double myOffsetX = ((displayNumber * 0.2) - 0.5) * iScaleX  * zNear;
-				//calculate the yoffset based on aspect ratio
-				double myOffsetY = 2 * (SYMPHONY_SCREEN_WIDTH * iScaleY / SYMPHONY_SCREEN_TOTAL_WIDTH) * aspectRatio * zNear ;
-				*/
+				GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
+				GLdouble startingPoint = -fW + (displayNumber * (singleWidth + bezelWidth));
 
 				glFrustum(startingPoint, startingPoint + singleWidth, -fH, fH, zNear, zFar);
 			#else
-				fH = tan( (fovy / 360) * pi ) * iScaleY * zNear * (1.0/((iScreenX * 1.0/iScreenY) / aspect));
-				fW = tan( (fovy / 360) * pi ) * iScaleX * zNear * aspect;
+				fH = tan( (fovy / 360.0) * pi ) * iScaleY * zNear * (1.0/((iScreenX * 1.0/iScreenY) / aspect));
+				fW = tan( (fovy / 360.0) * pi ) * iScaleX * zNear * aspect;
 	
 				glFrustum(-fW, fW, -fH, fH, zNear, zFar);
 			#endif

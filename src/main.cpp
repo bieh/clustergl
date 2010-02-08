@@ -21,6 +21,8 @@ bool usingSendCompression;
 bool usingReplyCompression;
 bool useRepeat;
 bool useSYMPHONYnodes[5];
+bool profileApp = false;
+ProfileModule *profile = NULL;
 			
 /********************************************************
 	Application Object
@@ -56,6 +58,10 @@ int App::run_shared(){
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule()); //output OpenGL method calls to console
+	if(profileApp) {
+		profile = new ProfileModule();
+		mModules.push_back(profile); //calculate instruction usage for the current program
+	}
 	mModules.push_back(new NetClientModule(port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));
 
 	//Return control to the parent process.
@@ -115,11 +121,10 @@ void App::debug(){
 } 
 
 list<Instruction> *thisFrame = NULL; // pointer to the current frame
-uint32_t frames = 0, totFrames = 0; //used for Calculations
+uint32_t totFrames = 0; //used for Calculations
 time_t totalTime = 0, prevTime = 0;
 
 bool App::tick(){
-	frames++;
 	totFrames++; //used to calculate when to SYNC
 
 	if (totalTime == 0){ // initlise time for calculating statistics
@@ -133,9 +138,14 @@ bool App::tick(){
 	if (curTime - prevTime>= 5){ //maybe need more precision	
 		LOG("Last %ld Seconds:\n", curTime - prevTime);	
 		// First calculate FPS
+		int FPS = 0;
+		for(int i=0;i<(int)mModules.size();i++){
+			Module *m = mModules[i];
+			FPS += m->frames;
+			 m->frames = 0;
+		}
 		LOG("ClusterGL2 Average FPS:\t\t\t%ld\n",
-			frames/(curTime - prevTime));
-		frames = 0;
+			FPS/(curTime - prevTime));
 
 		// Now Calculate KBPS (Kbytes per second)
 		int bytes = 0;
@@ -153,7 +163,8 @@ bool App::tick(){
 					(bytes2/(curTime - prevTime))/1024.0);
 			}
 		}
-	        time(&prevTime);	
+	        time(&prevTime);
+		if(profileApp) profile->output();
 	}
 	
 	//initlize frames
