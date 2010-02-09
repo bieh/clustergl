@@ -139,7 +139,7 @@ bool NetSrvModule::process(list<Instruction> &list){
 				
 				//Now see if we're expecting any buffers
 				for(int n=0;n<3;n++){
-					int l = pIter->buffers[n].len;
+					uint32_t l = pIter->buffers[n].len;
 								
 					if(l > 0){
 						//LOG("%d SKIP with buffers!, %d\n", p.id, l);

@@ -168,7 +168,6 @@ bool ExecModule::process(list<Instruction> &list){
 				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
 				GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
 				GLdouble startingPoint = left + (displayNumber * (singleWidth + bezelWidth));
-
 				glOrtho(startingPoint, startingPoint + singleWidth, bottom, top, nearVal, farVal);
 			#else
 				if(right/bottom == (double) iScreenX/iScreenY)	//if ratio is correct, do nothing
@@ -227,18 +226,28 @@ bool ExecModule::process(list<Instruction> &list){
 			#endif
 			
 		} else if (iter->id == 291) { //glLoadMatrixf
-
 				GLfloat * m = (GLfloat *)iter->buffers[0].buffer;
+				//LOG("modExec Matrix!\n");
+				//	for(int i = 0; i < 16; i++) {
+				//		        LOG("%f ", m[i]);
+				//				if(i%4 == 0)
+				//					LOG("\n");
+				//		    }
+				//		    LOG("\n");
+				GLfloat * mSaved = (GLfloat *) malloc(sizeof(GLfloat) * 16);
+				memcpy(mSaved, m, sizeof(GLfloat) * 16);
+				//float * m = (GLfloat *)iter->buffers[0].buffer;
 				if(currentMode == GL_PROJECTION) {
 					#ifdef SYMPHONY
 						//m[0]= whatever is is when we are given it * proportion that will be seen
-						m[0]= m[0] * (5/(8400/SYMPHONY_SCREEN_TOTAL_WIDTH));
+						mSaved[0]= mSaved[0] * (5/(8400/SYMPHONY_SCREEN_TOTAL_WIDTH));
 						//m[8] = (left + right)/(left-right) + screenOffset * bezel (from API)
-						m[8]=  -(2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/
+						mSaved[8]=  -(2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/
 							(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) 
 							+ displayNumber * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
 					#endif
-					glLoadMatrixf(m);
+					glLoadMatrixf(mSaved);
+					free(mSaved);
 				}
 				else {
 				glLoadMatrixf(m);

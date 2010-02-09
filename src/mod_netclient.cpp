@@ -166,7 +166,7 @@ bool NetClientModule::process(list<Instruction> &list){
 					}
 				}
 			}
-
+			
 			//if arguments and buffers match, the instruction is identical
 			if (same) {
 				sameCount++;

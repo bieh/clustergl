@@ -2514,7 +2514,6 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 
 //Hack! We let the native implementation handle this
 //TODO: implement these methods, so no hacks are required
-#ifdef NOHACK
 
 //275
 extern "C" const GLubyte * glGetString(GLenum name){
@@ -2528,6 +2527,8 @@ extern "C" const GLubyte * glGetString(GLenum name){
 	waitForReturn();
 	return ret;
 }
+
+#ifdef NOHACK
 
 
 
@@ -2634,6 +2635,13 @@ extern "C" void glLoadIdentity(){
 extern "C" void glLoadMatrixf(const GLfloat * m){
 	pushOp(291);
 	pushBuf(m, sizeof(const GLfloat) * 16);
+	//LOG("modApp Matrix!\n");
+	//for(int i = 0; i < 16; i++) {
+	//	LOG("%f ", m[i]);
+	//	if(i%4 == 0)
+	//		LOG("\n");
+	//}
+	//LOG("\n");
 }
 
 //292
