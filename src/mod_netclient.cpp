@@ -1,7 +1,23 @@
+/********************************************************
+	Headers
+********************************************************/
+
 #include "main.h"
 #include <zconf.h>
 #include <zlib.h>
 #include <netinet/tcp.h>
+
+/********************************************************
+	Main Globals (Loaded from config file)
+********************************************************/
+
+extern bool symphony;
+extern bool usingSendCompression;
+extern bool usingReplyCompression;
+extern bool useRepeat;
+extern int port;
+extern bool useSYMPHONYnodes[5];
+extern string addresses[5];
 
 /*********************************************************
 	Net Client Globals
@@ -11,9 +27,6 @@ int bufferSavings = 0;
 int incomingSize = 0;
 int outgoingSize = 0;
 NetCompressModule *compressor2;
-bool useSendCompression = false;
-bool useRecieveCompression = false;
-bool useCGLrepeat = false;
 
 const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iSendBufPos = 0;
@@ -21,46 +34,37 @@ uint32_t bytesLeft = sendBufferSize;
 
 //big buffer to store instructions before sending
 byte mSendBuf[sendBufferSize];
- 
-string addresses[5] = {"127.0.0.1", "192.168.22.102", "192.168.22.103", "192.168.22.104", "192.168.22.105"};
-
 
 /*********************************************************
 	Net Client Module
 *********************************************************/
 
-NetClientModule::NetClientModule(int port, bool sendCompression, bool recieveCompression, int compressMethod, bool repeatInstruction){
+NetClientModule::NetClientModule(){
 
 	//set the number of sockets to create/use
-	#ifdef SYMPHONY
-		numConnections = 5;
-	#else
-		numConnections = 1;
-	#endif
+	if(symphony) numConnections = 5;
+	else numConnections = 1;
 
         //Make each socket and connect
 	for(int i = 0; i < numConnections; i++) {
-		mSocket[i] = socket(PF_INET, SOCK_STREAM, 0);
+		if(useSYMPHONYnodes[i]) mSocket[i] = socket(PF_INET, SOCK_STREAM, 0);
 	}
-	
-	useSendCompression = sendCompression;
-	useRecieveCompression = recieveCompression;
 
-	useCGLrepeat = repeatInstruction;
-
-	if(useSendCompression | useRecieveCompression) {
+	if(usingSendCompression | usingReplyCompression) {
 		//make a compressor object (if required)
-		compressor2 = new NetCompressModule(compressMethod);
+		compressor2 = new NetCompressModule();
 	}
 	
 	//set TCP options for each socket
 	int one = 1;
 	for(int i = 0; i < numConnections; i++) {
-		setsockopt(mSocket[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-		setsockopt(mSocket[i], SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-		if(mSocket[i] == 0){
-			LOG("Couldn't make socket!\n");
-			return;
+		if(useSYMPHONYnodes[i]) {
+			setsockopt(mSocket[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+			setsockopt(mSocket[i], SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+			if(mSocket[i] == 0){
+				LOG("Couldn't make socket!\n");
+				return;
+			}
 		}
 	}
 
@@ -69,19 +73,21 @@ NetClientModule::NetClientModule(int port, bool sendCompression, bool recieveCom
 	
 	//connect each socket to server
 	for(int i = 0; i < numConnections; i++) {
-		memset(&mAddr[i], 0, sizeof(mAddr[i]));   
-		mAddr[i].sin_family = AF_INET;   
-		mAddr[i].sin_addr.s_addr = inet_addr(addresses[i].c_str()); 
-		mAddr[i].sin_port = htons(port);  
-		//Establish connection
-		if (connect(mSocket[i],
-		        (struct sockaddr *) &mAddr[i],
-		        sizeof(mAddr[i])) < 0) {
-			LOG("Failed to connect with server '%s:%d'\n", addresses[i].c_str(), port);
-			mSocket[i] = 0;
-			return;
+		if(useSYMPHONYnodes[i]) {
+			memset(&mAddr[i], 0, sizeof(mAddr[i]));   
+			mAddr[i].sin_family = AF_INET;   
+			mAddr[i].sin_addr.s_addr = inet_addr(addresses[i].c_str()); 
+			mAddr[i].sin_port = htons(port);  
+			//Establish connection
+			if (connect(mSocket[i],
+				(struct sockaddr *) &mAddr[i],
+				sizeof(mAddr[i])) < 0) {
+				LOG("Failed to connect with server '%s:%d'\n", addresses[i].c_str(), port);
+				mSocket[i] = 0;
+				return;
+			}
+			LOG("Connected to remote pipeline on %s:%d\n", addresses[i].c_str(), port);
 		}
-		LOG("Connected to remote pipeline on %s:%d\n", addresses[i].c_str(), port);
 	}
 	
 	//reset BPS calculations
@@ -100,8 +106,10 @@ bool NetClientModule::process(list<Instruction> &list){
 	//Send all the commands in the list down the socket
 	//LOG("processing:\n");
 	for(int i = 0; i < numConnections; i++) {
-		if(mSocket[i] == 0){
-			return false;
+		if(useSYMPHONYnodes[i]) {
+			if(mSocket[i] == 0){
+				return false;
+			}
 		}
 	}
 	
@@ -134,7 +142,7 @@ bool NetClientModule::process(list<Instruction> &list){
 
 	    if (i->id == pIter->id 	//if the instruction has the same id as previous	
 		&& !mustSend && i->id 	//mustSend is set when expecting a reply		
-		  && useCGLrepeat 	//value from config to enable/disable deltas
+		  && useRepeat 	//value from config to enable/disable deltas
 		  && sameCount < 100	//stops sameBuffer filling up indefinitely (is this needed?)
 		) {
 			//assume the instruction is the same
@@ -272,19 +280,22 @@ bool NetClientModule::sync(){
 	uint32_t * a = (uint32_t *)malloc(sizeof(uint32_t));
 	*a = 987654;
 	netBytes += sizeof(uint32_t) * numConnections;
+	netBytes2 += sizeof(uint32_t) * numConnections;
 	for(int i = 0; i < numConnections; i++) {
-		int fd = mSocket[i];
-		if(write(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)){
-			LOG("Connection problem NetClientModule (didn't send sync)!\n");
-			return false;
-		}
+		if(useSYMPHONYnodes[i]) {
+			int fd = mSocket[i];
+			if(write(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)){
+				LOG("Connection problem NetClientModule (didn't send sync)!\n");
+				return false;
+			}
 
-		if(read(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)){
-			LOG("Connection problem NetClientModule (didn't recv sync)!\n");
-			return false;
+			if(read(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)){
+				LOG("Connection problem NetClientModule (didn't recv sync)!\n");
+				return false;
+			}
+			if (*a!=987654)
+				return false;
 		}
-		if (*a!=987654)
-			return false;
 	}
 
 	free(a);
@@ -336,7 +347,7 @@ int NetClientModule::myWrite(void* buf, long unsigned nByte){
 void NetClientModule::sendBuffer() {
 
 	if(iSendBufPos > 0) {
-		if(useSendCompression) {
+		if(usingSendCompression) {
 			//create room for new compressed buffer
 			//TODO: change the size CompBuffSize according to compress method
 			uLongf CompBuffSize = (uLongf)(iSendBufPos + (iSendBufPos * 0.1) + 12);
@@ -345,22 +356,23 @@ void NetClientModule::sendBuffer() {
 
 			//send the compressed buffer to each socket
 			for(int i = 0; i < numConnections; i++) {
+				if(useSYMPHONYnodes[i]) {
+					uint32_t fd = mSocket[i];
 
-				uint32_t fd = mSocket[i];
+					//first write the original size of the buffer
+					if(!write(fd, &iSendBufPos, sizeof(uint32_t))){
+						LOG("Connection problem!\n");
+					}
 
-				//first write the original size of the buffer
-				if(!write(fd, &iSendBufPos, sizeof(uint32_t))){
-					LOG("Connection problem!\n");
-				}
+					//then write the compressed size of the buffer
+					if(!write(fd, &newSize, sizeof(uint32_t))){
+						LOG("Connection problem!\n");
+					}
 
-				//then write the compressed size of the buffer
-				if(!write(fd, &newSize, sizeof(uint32_t))){
-					LOG("Connection problem!\n");
-				}
-
-				//then write the actual buffer
-				if(!write(fd, out, newSize)){
-					LOG("Connection problem!\n");
+					//then write the actual buffer
+					if(!write(fd, out, newSize)){
+						LOG("Connection problem!\n");
+					}
 				}
 				
 			}
@@ -372,17 +384,18 @@ void NetClientModule::sendBuffer() {
 		else {
 			//send the buffer to each socket
 			for(int i = 0; i < numConnections; i++) {
+				if(useSYMPHONYnodes[i]) {
+					uint32_t fd = mSocket[i];
 
-				uint32_t fd = mSocket[i];
+					//first write the original size of the buffer
+					if(!write(fd, &iSendBufPos, sizeof(uint32_t))){
+						LOG("Connection problem!\n");
+					}
 
-				//first write the original size of the buffer
-				if(!write(fd, &iSendBufPos, sizeof(uint32_t))){
-					LOG("Connection problem!\n");
-				}
-
-				//then write the actual buffer
-				if(!write(fd, mSendBuf, iSendBufPos)){
-					LOG("Connection problem!\n");
+					//then write the actual buffer
+					if(!write(fd, mSendBuf, iSendBufPos)){
+						LOG("Connection problem!\n");
+					}
 				}
 			}
 		
@@ -401,51 +414,53 @@ int NetClientModule::myRead(void *buf, size_t count){
 	uint32_t ret[5];
 	//read in replys from each socket
 	for(int i = 0; i < numConnections; i++) {
-			int fd = mSocket[i];
+		if(useSYMPHONYnodes[i]) {
+				int fd = mSocket[i];
 
-		if(useRecieveCompression) {
-			size_t *a = &count;
-			//read the size of the compressed packet
-			uint32_t compressedSize = 0;
-			int c = read(fd, &compressedSize, sizeof(uint32_t));
+			if(usingReplyCompression) {
+				size_t *a = &count;
+				//read the size of the compressed packet
+				uint32_t compressedSize = 0;
+				int c = read(fd, &compressedSize, sizeof(uint32_t));
 
-			//read the size of the original packet
-			uint32_t origSize = 0;
-			int d = read(fd, &origSize, sizeof(uint32_t));
+				//read the size of the original packet
+				uint32_t origSize = 0;
+				int d = read(fd, &origSize, sizeof(uint32_t));
 
-			//read the size of the incoming packet
-			//then read the compressed packet data and uncompress
-			Bytef *in = (Bytef*) malloc(compressedSize);
-			ret[i] = read(fd, in, compressedSize);
-			if(ret[i] == compressedSize)
-				ret[i] = origSize;
-			else
-				return 0; //return error
-			//LOG("got buffer: %d\n", origSize);
-			if(i == 0)	//only bother to decompress/process the first one
-				compressor2->myDecompress(buf, count, in, compressedSize);
-			free(in);
-		}
-		else {
- 			//LOG("waiting for a message!\n");
-				if(i == 0) {
-					int remaining = count;
-					while(remaining > 0) {
-					ret[i] = read(fd, buf, remaining);
-					remaining -= ret[i];
+				//read the size of the incoming packet
+				//then read the compressed packet data and uncompress
+				Bytef *in = (Bytef*) malloc(compressedSize);
+				ret[i] = read(fd, in, compressedSize);
+				if(ret[i] == compressedSize)
+					ret[i] = origSize;
+				else
+					return 0; //return error
+				//LOG("got buffer: %d\n", origSize);
+				if(i == 0)	//only bother to decompress/process the first one
+					compressor2->myDecompress(buf, count, in, compressedSize);
+				free(in);
+			}
+			else {
+	 			//LOG("waiting for a message!\n");
+					if(i == 0) {
+						int remaining = count;
+						while(remaining > 0) {
+						ret[i] = read(fd, buf, remaining);
+						remaining -= ret[i];
+						}
+						ret[0] = count;
 					}
-					ret[0] = count;
-				}
- 				else {
- 					byte * tempBuf = (byte *) malloc(count);
-					int remaining = count;
-					while(remaining > 0) {
- 					ret[i] = read(fd, tempBuf, count);
-					remaining -= ret[i];
-					}
- 					free(tempBuf);
- 				}
-			//LOG("got buffer %d, expected %d\n", ret[i], count);
+	 				else {
+	 					byte * tempBuf = (byte *) malloc(count);
+						int remaining = count;
+						while(remaining > 0) {
+	 					ret[i] = read(fd, tempBuf, count);
+						remaining -= ret[i];
+						}
+	 					free(tempBuf);
+	 				}
+				//LOG("got buffer %d, expected %d\n", ret[i], count);
+			}
 		}
 	}
 	return ret[0];

@@ -1,7 +1,19 @@
+/********************************************************
+	Headers
+********************************************************/
+
 #include "main.h"
 #include <zconf.h>
 #include <zlib.h>
 #include <netinet/tcp.h>
+
+/********************************************************
+	Main Globals (Loaded from config file)
+********************************************************/
+
+extern bool usingSendCompression;
+extern bool usingReplyCompression;
+extern int port;
 
 /*********************************************************
 	Net Server Globals
@@ -9,8 +21,6 @@
 
 NetCompressModule *compressor;
 int prevInstruction = 0;
-bool useDecompression = false;
-bool useReplyCompression = false;
 
 const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iRecieveBufPos = 0;
@@ -23,7 +33,7 @@ byte mRecieveBuf[recieveBufferSize];
 	Net Server Module
 *********************************************************/
 
-NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression, int compressionMethod){
+NetSrvModule::NetSrvModule(){
 
 	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
 		LOG("Failed to create socket\n");
@@ -43,10 +53,8 @@ NetSrvModule::NetSrvModule(int port, bool decompression, bool replyCompression, 
 	netBytes = 0;   
 	netBytes2 = 0; 
 	
-	useDecompression = decompression;
-	useReplyCompression = replyCompression;
-	if(useDecompression || useReplyCompression) {
-		compressor = new NetCompressModule(compressionMethod);
+	if(usingSendCompression || usingReplyCompression) {
+		compressor = new NetCompressModule();
 	}
 
 	//set TCP options
@@ -180,7 +188,9 @@ void NetSrvModule::reply(Instruction *instr, int i) {
 *********************************************************/
 
 bool NetSrvModule::sync() {
-
+	
+	netBytes += sizeof(uint32_t);
+	netBytes2 += sizeof(uint32_t);
 	uint32_t a;
 	if(mClientSocket->read((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)){
 		LOG("Connection problem NetSrvModule (didn't recv sync)!\n");
@@ -209,7 +219,7 @@ int NetSrvModule::myRead(byte *input, int nByte) {
 }
 
 void NetSrvModule::recieveBuffer(void) {
-	if(useDecompression) {
+	if(usingSendCompression) {
 		//LOG("recieving buffer!\n");
 		//first read the original number of bytes coming
 		mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
@@ -244,7 +254,7 @@ void NetSrvModule::recieveBuffer(void) {
 
 int NetSrvModule::myWrite(byte *input, int nByte) {
 
-	if(useReplyCompression) {
+	if(usingReplyCompression) {
 		//create room for new compressed buffer
 		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 		Bytef *out = (Bytef*) malloc(CompBuffSize);

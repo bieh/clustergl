@@ -53,16 +53,8 @@ public:
 class ExecModule : public Module{
 	bool makeWindow();
 	
-	int iScreenX;
-	int iScreenY;
-	int iOffsetX;
-	int iOffsetY;
-	int origWidth;
-	int origHeight;
-	float iScaleX;
-	float iScaleY;
 public:
-	ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, float scaleX, float scaleY);
+	ExecModule();
 
 	bool init();	
 	bool process(list<Instruction> &i);
@@ -79,7 +71,7 @@ class NetSrvModule : public Module{
   int mSocket;
   BufferedFd *mClientSocket;
 public:
-	NetSrvModule(int port, bool decompression, bool replyCompression, int compressionMethod);
+	NetSrvModule();
 	
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);
@@ -98,7 +90,7 @@ class NetClientModule : public Module{
   int mSocket[5];
   int numConnections;
 public:
-	NetClientModule(int port, bool sendCompression, bool recieveCompression, int compressMethod, bool repeatInstruction);
+	NetClientModule();
 	
 	bool process(list<Instruction> &i);
 	bool sync();
@@ -116,7 +108,7 @@ public:
 **********************************************/
 class NetCompressModule : public Module{
 public:
-	NetCompressModule(int method);
+	NetCompressModule();
 	
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);
@@ -126,20 +118,24 @@ public:
 };
 
 /*********************************************
-Network keyboard module. Sends keyboard 
-instuctions to each screen.
+ InsertModule. Inserts additional instructions
+ into the list for adding text or pictures
+ over the top of the program. 
 **********************************************/
-class NetKeyboardModule : public Module{
+class InsertModule : public Module{
 public:
-	NetKeyboardModule();
+	InsertModule();
 	
+	bool init();
 	bool process(list<Instruction> &i);
 	void reply(Instruction *instr, int i);
 	bool sync();
 };
 
 /*********************************************
- Profiling Module
+ Profiling Module, calculates the top 5 
+ Instructions getting called, and the top 5
+ Instructions using the most buffer space
 **********************************************/
 class ProfileModule : public Module{
 public:

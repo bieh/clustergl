@@ -1,10 +1,22 @@
+/********************************************************
+	Headers
+********************************************************/
+
 #include "main.h"
+
+/********************************************************
+	Main Globals
+********************************************************/
+
+bool bHasInit = false;
+bool profileApp = false;
+ProfileModule *profile = NULL;
 
 /********************************************************
 	Main Globals (Loaded from config file)
 ********************************************************/
 
-bool bHasInit = false;
+bool symphony;
 int sizeX;
 int sizeY;
 int sizeSYMPHONYX;
@@ -13,6 +25,8 @@ int offsetX;
 int offsetY;
 float scaleX;
 float scaleY;
+int fakeWindowX;
+int fakeWindowY;
 string dnNumber;
 int port;
 int syncRate;
@@ -21,8 +35,7 @@ bool usingSendCompression;
 bool usingReplyCompression;
 bool useRepeat;
 bool useSYMPHONYnodes[5];
-bool profileApp = false;
-ProfileModule *profile = NULL;
+string addresses[5];
 			
 /********************************************************
 	Application Object
@@ -39,8 +52,9 @@ int App::run(int argc, char **argv){
 	init();
 	
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
-	mModules.push_back(new NetSrvModule(port, usingSendCompression, usingReplyCompression, compressingMethod));
-	mModules.push_back(new ExecModule(sizeX, sizeY, offsetX, offsetY, scaleX, scaleY));
+	mModules.push_back(new NetSrvModule());
+	//mModules.push_back(new InsertModule());
+	mModules.push_back(new ExecModule());
 	//mModules.push_back(new TextModule()); //output OpenGL method calls to console
 	
 	while( tick() ){ }
@@ -62,7 +76,7 @@ int App::run_shared(){
 		profile = new ProfileModule();
 		mModules.push_back(profile); //calculate instruction usage for the current program
 	}
-	mModules.push_back(new NetClientModule(port, usingSendCompression, usingReplyCompression, compressingMethod, useRepeat));
+	mModules.push_back(new NetClientModule());
 
 	//Return control to the parent process.
 	
@@ -72,12 +86,16 @@ int App::run_shared(){
 void App::init(){
 	//load values in from config file
     cfg_opt_t opts[] = {
-	CFG_SIMPLE_INT((char *)("sizeX"), &sizeX),
-	CFG_SIMPLE_INT((char *)("sizeY"), &sizeY),
 	CFG_SIMPLE_INT((char *)("sizeSYMPHONYX"), &sizeSYMPHONYX),
 	CFG_SIMPLE_INT((char *)("sizeSYMPHONYY"), &sizeSYMPHONYY),
+	CFG_BOOL_LIST((char *)("SYMPHONYnodes"), (char *)"{false}", CFGF_NONE),
+	CFG_STR_LIST((char *)("addresses"), (char *)"127.0.0.1", CFGF_NONE),
+	CFG_SIMPLE_INT((char *)("sizeX"), &sizeX),
+	CFG_SIMPLE_INT((char *)("sizeY"), &sizeY),
 	CFG_SIMPLE_INT((char *)("offsetX"), &offsetX),
         CFG_SIMPLE_INT((char *)("offsetY"), &offsetY),
+	CFG_SIMPLE_INT((char *)("fakeWindowX"), &fakeWindowX),
+        CFG_SIMPLE_INT((char *)("fakeWindowY"), &fakeWindowY),
         CFG_SIMPLE_INT((char *)("port"), &port),
 	CFG_FLOAT((char *)("scaleX"), 1.0f, CFGF_NONE),
         CFG_FLOAT((char *)("scaleY"), 1.0f, CFGF_NONE),
@@ -86,7 +104,6 @@ void App::init(){
 	CFG_SIMPLE_BOOL((char *)("usingSendCompression"), &usingSendCompression),
 	CFG_SIMPLE_BOOL((char *)("usingReplyCompression"), &usingReplyCompression),
 	CFG_SIMPLE_BOOL((char *)("useCGLRepeat"), &useRepeat),
-	CFG_BOOL_LIST((char *)("SYMPHONYnodes"), (char *)"{false}", CFGF_NONE),
         CFG_END()
     };
     cfg_t *cfg;
@@ -95,19 +112,24 @@ void App::init(){
     cfg_parse(cfg, "config.conf");
     for(uint32_t i = 0; i < cfg_size(cfg, "SYMPHONYnodes"); i++)
     	useSYMPHONYnodes[i] = cfg_getnbool(cfg, "SYMPHONYnodes", i);
-    
+
+    for(uint32_t i = 0; i < cfg_size(cfg, "addresses"); i++) {
+    	addresses[i] = string(cfg_getnstr(cfg, "addresses", i));
+	}
+
     scaleX = cfg_getfloat(cfg,(char *) "scaleX");
     scaleY = cfg_getfloat(cfg,(char *) "scaleY");
     cfg_free(cfg);
 
+	int dn = atoi(dnNumber.c_str());
+	if(dn > 0) symphony = true;
 
 	//adjust offset and size values for symphony display nodes
-	#ifdef SYMPHONY
-		int dn = atoi(dnNumber.c_str());
+	if(symphony) {
 		offsetX = (int) (SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * (dn - 1);
 		sizeX = sizeSYMPHONYX;
 		sizeY = sizeSYMPHONYY;
-	#endif
+	}
 
 	LOG("\n");
 	LOG("**********************************************\n");
@@ -156,13 +178,13 @@ bool App::tick(){
 			bytes2 += m->netBytes2;
 			m->netBytes = 0;
 			m->netBytes2 = 0;
-			if(i == (int)mModules.size() - 1 && bytes > 0){
+		}
+			if(bytes > 0){
 				LOG("ClusterGL2 Average KBPS:\t\t%lf\n",
 					(bytes/(curTime - prevTime))/1024.0);
 				LOG("ClusterGL2 Average compressed KBPS:\t%lf\n\n",
 					(bytes2/(curTime - prevTime))/1024.0);
 			}
-		}
 	        time(&prevTime);
 		if(profileApp) profile->output();
 	}

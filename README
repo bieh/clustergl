@@ -4,10 +4,8 @@
 
 - Multicast - do prevent sending the same data 5 times 
   (not so bad when runnng compression)
-- Make CGLRepeat handle buffers correctly
 - Code commenting and tidying
-- Fix reply buffers to be more reliable
-- Add actual FPS calculations/display
+- Add FPS display / 2D drawing over the top
 
 - Instruction size
 	- Simplest: size byte in packet header

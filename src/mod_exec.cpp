@@ -1,3 +1,7 @@
+/********************************************************
+	Headers
+********************************************************/
+
 #include "main.h"
 
 #include <GL/glew.h>
@@ -8,6 +12,18 @@
 typedef void (*ExecFunc)(byte *buf);
 
 /*********************************************************
+	External Main Globals
+*********************************************************/
+
+extern bool symphony;
+extern int sizeX;
+extern int sizeY;
+extern int offsetX;
+extern int offsetY;
+extern float scaleX;
+extern float scaleY;
+
+/*********************************************************
 	Execution Globals
 *********************************************************/
 
@@ -16,28 +32,21 @@ static Instruction *mCurrentInstruction = NULL;
 int currentBuffer = 0;
 int displayNumber = 0;
 GLenum currentMode = GL_MODELVIEW;
-uint32_t numFrames = 0;
+uint32_t *numFrames = NULL;
 
 /*********************************************************
 	Execute Module Stuff
 *********************************************************/
 
-ExecModule::ExecModule(int sizeX, int sizeY, int offsetX, int offsetY, float scaleX, float scaleY){
-	
+ExecModule::ExecModule(){
+	numFrames = &frames;
 	netBytes= 0;
 	netBytes2 = 0;
 	frames = 0;
+	
 	init();
 
-	iScreenX = sizeX;
-	iScreenY = sizeY;
-	iOffsetX = offsetX;
-	iOffsetY = offsetY;
-
-	iScaleX = scaleX;
-	iScaleY = scaleY;
-
-	displayNumber = iOffsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP);
+	displayNumber = offsetX/(SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP);
 
 	if(!makeWindow()){
 		LOG("failed to make window!\n");
@@ -82,8 +91,8 @@ bool ExecModule::makeWindow(){
 	height = dpy->current_h; //get screen height
 
 	// if the app res is less than the current screen size
-	if (iScreenX < width && iScreenY<height)
-		width = iScreenX, height = iScreenY;	
+	if (sizeX < width && sizeY<height)
+		width = sizeX, height = sizeY;	
 	
 	//get a SDL surface
 	SDL_Surface *surface = SDL_SetVideoMode(width, height, 32, videoFlags );
@@ -109,7 +118,6 @@ bool ExecModule::makeWindow(){
 *********************************************************/
 
 bool ExecModule::process(list<Instruction> &list){
-	numFrames++;
 	for(std::list<Instruction>::iterator iter = list.begin(); 
 	    iter != list.end(); iter++){
 	    	if(iter->id >= 1700 || !mFunctions[iter->id]){
@@ -144,12 +152,9 @@ bool ExecModule::process(list<Instruction> &list){
 			
 			//LOG("glScissor values %d %d %d %d\n", x, y, w, h);
 
-			#ifdef SYMPHONY
-				//could be smaller, but this is better than nothing
-				glScissor(0, 0, SYMPHONY_SCREEN_TOTAL_WIDTH, SYMPHONY_SCREEN_TOTAL_HEIGHT);
-			#else
-				glScissor(x, y, w, h);
-			#endif
+			if(symphony) glScissor(0, 0, SYMPHONY_SCREEN_TOTAL_WIDTH, SYMPHONY_SCREEN_TOTAL_HEIGHT);
+			else glScissor(x, y, w, h);
+
 
 		} else if (iter->id == 296) { //glOrtho
 			
@@ -163,18 +168,22 @@ bool ExecModule::process(list<Instruction> &list){
 			
 			//LOG("glOrtho values %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
 
-			#ifdef SYMPHONY
+			if(symphony) {
 				GLdouble totalWidth = right - left;
 				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
 				GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
 				GLdouble startingPoint = left + (displayNumber * (singleWidth + bezelWidth));
-				glOrtho(startingPoint, startingPoint + singleWidth, bottom, top, nearVal, farVal);
-			#else
-				if(right/bottom == (double) iScreenX/iScreenY)	//if ratio is correct, do nothing
+				if(right/bottom == (double) sizeX/sizeY)	//if ratio is correct, do nothing
+					glOrtho(startingPoint, startingPoint + singleWidth, bottom, top, nearVal, farVal);
+				else	//if ratio incorrect, adjust so things dont get stretched
+					glOrtho(startingPoint, startingPoint + singleWidth, right * SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH, top, nearVal, farVal);
+			}
+			else {
+				if(right/bottom == (double) sizeX/sizeY)	//if ratio is correct, do nothing
 					glOrtho(left, right, bottom, top, nearVal, farVal);
 				else	//if ratio incorrect, adjust so things dont get stretched
-					glOrtho(left, right, right * iScreenY/iScreenX, top, nearVal, farVal);
-			#endif
+					glOrtho(left, right, right * sizeY/sizeX, top, nearVal, farVal);
+			}
 
 		} else if (iter->id == 1539) { //gluPerspective
 
@@ -184,7 +193,7 @@ bool ExecModule::process(list<Instruction> &list){
 			GLdouble zNear = *((GLdouble*)(iter->args+ sizeof(GLdouble)*2));
 			GLdouble zFar = *((GLdouble*)(iter->args+ sizeof(GLdouble)*3));
 
-			LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
+			//LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
 			
 				/*      diagram to explain how frustum works (without bezels, ignoring fov)
 					(-1,-1)    (-0.6,-1)  (-0.2,-1)  (0.2,-1)   (0.6,-1)  (1,-1)
@@ -205,12 +214,12 @@ bool ExecModule::process(list<Instruction> &list){
 				const GLdouble pi = 3.1415926535897932384626433832795;
 				GLdouble fW, fH;
 
-			#ifdef SYMPHONY
+			if(symphony) {
 				//calculate height, then adjust according to how different the 
 				//programs aspect ratio and our ratio is
 				//fW and fH are the equivalent glFrustum calculations using the gluPerspective values
-				fH = tan( (fovy / 360.0) * pi ) * iScaleY * zNear * (1.0/((8880.0/4560.0) / aspect));
-				fW = tan( (fovy / 360.0) * pi ) * iScaleX * zNear * aspect;		
+				fH = tan( (fovy / 360.0) * pi ) * scaleY * zNear * (1.0/((8880.0/4560.0) / aspect));
+				fW = tan( (fovy / 360.0) * pi ) * scaleX * zNear * aspect;		
 				
 				GLdouble totalWidth = fW * 2;
 				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
@@ -218,12 +227,13 @@ bool ExecModule::process(list<Instruction> &list){
 				GLdouble startingPoint = -fW + (displayNumber * (singleWidth + bezelWidth));
 
 				glFrustum(startingPoint, startingPoint + singleWidth, -fH, fH, zNear, zFar);
-			#else
-				fH = tan( (fovy / 360.0) * pi ) * iScaleY * zNear * (1.0/((iScreenX * 1.0/iScreenY) / aspect));
-				fW = tan( (fovy / 360.0) * pi ) * iScaleX * zNear * aspect;
+				}
+			else {
+				fH = tan( (fovy / 360.0) * pi ) * scaleY * zNear * (1.0/((sizeX * 1.0/sizeY) / aspect));
+				fW = tan( (fovy / 360.0) * pi ) * scaleX * zNear * aspect;
 	
 				glFrustum(-fW, fW, -fH, fH, zNear, zFar);
-			#endif
+			}
 			
 		} else if (iter->id == 291) { //glLoadMatrixf
 				GLfloat * m = (GLfloat *)iter->buffers[0].buffer;
@@ -238,14 +248,14 @@ bool ExecModule::process(list<Instruction> &list){
 				memcpy(mSaved, m, sizeof(GLfloat) * 16);
 				//float * m = (GLfloat *)iter->buffers[0].buffer;
 				if(currentMode == GL_PROJECTION) {
-					#ifdef SYMPHONY
+					if(symphony) {
 						//m[0]= whatever is is when we are given it * proportion that will be seen
 						mSaved[0]= mSaved[0] * (5/(8400/SYMPHONY_SCREEN_TOTAL_WIDTH));
 						//m[8] = (left + right)/(left-right) + screenOffset * bezel (from API)
 						mSaved[8]=  -(2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/
 							(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) 
 							+ displayNumber * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
-					#endif
+					}
 					glLoadMatrixf(mSaved);
 					free(mSaved);
 				}
@@ -313,6 +323,7 @@ void pushRet(const GLchar * val){
 
 //1499
 void EXEC_CGLSwapBuffers(byte *commandbuf){
+	(*numFrames)++;
 	SDL_GL_SwapBuffers();
 }
 	
@@ -4165,11 +4176,8 @@ void EXEC_glMapBuffer(byte *commandbuf){
 	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLenum *access = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
-#ifdef SYMPHONY
 	pushRet((const GLubyte*)glMapBuffer(*target, *access));
-#else
-	pushRet((const GLubyte*)glMapBuffer(*target, *access));		/*compiler error*/
-#endif
+
 }
 
 //475
@@ -6297,11 +6305,7 @@ void EXEC_glMapBufferARB(byte *commandbuf){
 	GLenum *target = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLenum *access = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 
-#ifdef SYMPHONY
 	pushRet((const GLubyte*) glMapBufferARB(*target, *access));
-#else
-	pushRet((const GLubyte*) glMapBufferARB(*target, *access));
-#endif
 }
 
 //734

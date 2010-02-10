@@ -1,3 +1,7 @@
+/********************************************************
+	Headers
+********************************************************/
+
 #include "main.h"
 #include <iostream>
 
@@ -9,6 +13,13 @@
 #include <GL/glu.h>
 
 extern App *theApp;
+
+/*********************************************************
+	External Main Globals
+*********************************************************/
+
+extern int fakeWindowX;
+extern int fakeWindowY;
 
 /*********************************************************
 	Coloured Console Output (not used)
@@ -335,6 +346,8 @@ static int (*_SDL_Init)(unsigned int flags) = NULL;
 static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
 //Pointer to SDL_GL_GetProcAddress
 static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
+//Pointer to SDL_LoadLibrary
+static int (*_SDL_GL_LoadLibrary)(const char *) = NULL;
 //Pointer to SDL_ListModes
 static SDL_Rect ** (*_SDL_ListModes)(SDL_PixelFormat *format, Uint32 flags) = NULL;
 //handle to point to our own library
@@ -373,18 +386,20 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 		printf("Couldn't find SDL_SetVideoMode: %s\n", dlerror());
 		exit(0);
 	}
-	#ifdef SYMPHONY
-		//make a 1 * 1 window (that way it cannot be seen)
-		return (*_SDL_SetVideoMode)(100, 100, bpp, videoFlags );
-	#else
-		return (*_SDL_SetVideoMode)(200, 200, bpp, videoFlags );
-	#endif
+		//make a fake window
+		return (*_SDL_SetVideoMode)(fakeWindowX, fakeWindowY, bpp, videoFlags );
 }
 
 extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
 	//LOG("SDL_ListModes\n");
 	// -1 means any mode is supported (easier than adding symphony values to list)
 	return (SDL_Rect **) -1;
+}
+
+
+extern "C" int SDL_GL_LoadLibrary(const char *path) {
+	LOG("*SDL_GL_LoadLibrary called, searching for: %s!\n", path);
+	return -1;
 }
 
 extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
@@ -6286,11 +6301,7 @@ extern "C" void glBindBufferARB(GLenum target, GLuint buffer){
 extern "C" void glBufferDataARB(GLenum target, GLsizeiptrARB size, const GLvoid * data, GLenum usage){
 	pushOp(725);
 	pushParam(target);
-#ifdef SYMPHONY
-	pushParam((GLuint)size);
-#else
-	pushParam((GLuint)size);		/*compiler error TODO: fix me*/
-#endif
+	pushParam((GLuint)size);		
 	pushBuf(data, size);
 	pushParam(usage);
 }
@@ -6299,13 +6310,8 @@ extern "C" void glBufferDataARB(GLenum target, GLsizeiptrARB size, const GLvoid 
 extern "C" void glBufferSubDataARB(GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid * data){
 	pushOp(726);
 	pushParam(target);
-#ifdef SYMPHONY
 	pushParam((GLuint)offset);
 	pushParam((GLuint)size);
-#else
-	pushParam((GLuint)offset);		/*compiler error */
-	pushParam((GLuint)size);		/*compiler error */
-#endif
 	pushBuf(data, size);
 }
 
@@ -6343,13 +6349,8 @@ extern "C" void glGetBufferPointervARB(GLenum target, GLenum pname, GLvoid ** pa
 extern "C" void glGetBufferSubDataARB(GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid * data){
 	pushOp(731);
 	pushParam(target);
-#ifdef SYMPHONY
 	pushParam((GLuint)offset);
 	pushParam((GLuint)size);
-#else
-	pushParam((GLuint)offset);		/*compiler error */
-	pushParam((GLuint)size);		/*compiler error */
-#endif
 	pushBuf(data, size, true);
 	waitForReturn();
 }
