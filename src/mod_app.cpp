@@ -6,11 +6,9 @@
 #include <iostream>
 
 #include <GL/gl.h>
-
-//#define  NOHACK true
-
 #include <GL/glx.h>
 #include <GL/glu.h>
+//#define  NOHACK true
 
 extern App *theApp;
 
@@ -70,6 +68,7 @@ const GLvoid *pointer;
 storedPointer rpTex;
 storedPointer rpVert;
 storedPointer rpCol;
+storedPointer rpInter;
 
 /*********************************************************
 	Interception Globals
@@ -128,8 +127,7 @@ bool AppModule::sync(){
 *********************************************************/
 
 void pushOp(uint16_t opID){
-	//if(opID != 306)
-	//LOG("OP: %d\n", opID);
+	//LOG("pushed OP: %d\n", opID);
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
 		//force the frame
@@ -194,7 +192,6 @@ void waitForReturn(){
 	if(!theApp->tick()){
 		exit(1);
 	}
-
 }
 
 #define PUSHPARAM(type) \
@@ -302,37 +299,67 @@ void sendPointers(int length) {
 	//texture pointer
 	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
 	{
-	pushOp(320);
-	pushParam(rpTex.size);
-	pushParam(rpTex.type);
-	pushParam(rpTex.stride);
-	pushParam(false);
-	pushBuf(rpTex.pointer, (getTypeSize(rpTex.type) * rpTex.size * (length + rpTex.stride)));
-	rpTex.sent = true;
+		pushOp(320);
+		pushParam(rpTex.size);
+		pushParam(rpTex.type);
+		pushParam(rpTex.stride);
+		pushParam(false);
+		pushBuf(rpTex.pointer, (getTypeSize(rpTex.type) * rpTex.size * (length + rpTex.stride)));
+		rpTex.sent = true;
 	}
 
 	//vertex pointer
 	if(!rpVert.sent && rpVert.size)	//check if sent already, and not null
 	{
-	pushOp(321);
-	pushParam(rpVert.size);
-	pushParam(rpVert.type);
-	pushParam(rpVert.stride);
-	pushParam(false);
-	pushBuf(rpVert.pointer, (getTypeSize(rpVert.type)  * rpVert.size * (length + rpVert.stride)));
-	rpVert.sent = true;
+		pushOp(321);
+		pushParam(rpVert.size);
+		pushParam(rpVert.type);
+		pushParam(rpVert.stride);
+		pushParam(false);
+		pushBuf(rpVert.pointer, (getTypeSize(rpVert.type)  * rpVert.size * (length + rpVert.stride)));
+		rpVert.sent = true;
 	}
 	
 	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
 	{
-	//colour pointer
-	pushOp(308);
-	pushParam(rpCol.size);
-	pushParam(rpCol.type);
-	pushParam(rpCol.stride);
-	pushParam(false);
-	pushBuf(rpCol.pointer, (getTypeSize(rpCol.type) * rpCol.size * (length + rpCol.stride)));
-	rpCol.sent = true;
+		//colour pointer
+		pushOp(308);
+		pushParam(rpCol.size);
+		pushParam(rpCol.type);
+		pushParam(rpCol.stride);
+		pushParam(false);
+		pushBuf(rpCol.pointer, (getTypeSize(rpCol.type) * rpCol.size * (length + rpCol.stride)));
+		rpCol.sent = true;
+	}
+
+	if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
+	{
+		//interleaved arrays pointer
+		int size = 0;
+		switch (rpInter.type) 
+		{
+			case GL_V2F:			size = sizeof(float) * 2;
+		        case GL_V3F:			size = sizeof(float) * 3;
+		        case GL_C4UB_V2F:		size = sizeof(float) * 2 + sizeof(GLubyte) * 4;
+		        case GL_C4UB_V3F:		size = sizeof(float) * 3 + sizeof(GLubyte) * 4;
+		        case GL_C3F_V3F:		size = sizeof(float) * 6;
+		        case GL_N3F_V3F:		size = sizeof(float) * 6;
+		        case GL_C4F_N3F_V3F:		size = sizeof(float) * 10;
+		        case GL_T2F_V3F:		size = sizeof(float) * 5;
+		        case GL_T4F_V4F:		size = sizeof(float) * 8;
+		        case GL_T2F_C4UB_V3F:		size = sizeof(float) * 5 + sizeof(GLubyte) * 4;
+		        case GL_T2F_C3F_V3F:		size = sizeof(float) * 8;
+		        case GL_T2F_N3F_V3F:		size = sizeof(float) * 8;
+		        case GL_T2F_C4F_N3F_V3F:	size = sizeof(float) * 12;
+		        case GL_T4F_C4F_N3F_V4F:	size = sizeof(float) * 15;
+			default:LOG("DEFAULTED glInterleavedArrays lookup!\n"); size = 1;
+		}
+		pushOp(317);
+		pushParam(rpInter.type);
+		pushParam(rpInter.stride);
+		pushParam(false);
+		pushBuf(rpCol.pointer, (getTypeSize((size + rpInter.stride) * length)));
+		rpInter.sent = true;
 	}
 }
 
@@ -378,7 +405,6 @@ extern "C" int SDL_Init(unsigned int flags) {
 }
 
 extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigned int videoFlags) {
-	//LOG("SDL_SetVideoMode\n");
 	if (_SDL_SetVideoMode == NULL) {
 		_SDL_SetVideoMode = (SDL_Surface* (*)(int,int,int,unsigned int)) dlsym(RTLD_NEXT, "SDL_SetVideoMode");
 	}
@@ -391,19 +417,18 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 }
 
 extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
-	//LOG("SDL_ListModes\n");
 	// -1 means any mode is supported (easier than adding symphony values to list)
 	return (SDL_Rect **) -1;
 }
 
-
+/*
 extern "C" int SDL_GL_LoadLibrary(const char *path) {
 	LOG("*SDL_GL_LoadLibrary called, searching for: %s!\n", path);
 	return -1;
-}
+}*/
 
 extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
-	//LOG("*SDL_GL_GetProcAddress called, searching for: %s!\n", proc);
+	LOG("*SDL_GL_GetProcAddress finding: %s!\n", proc);
       if(!handle) {
 	      char *path = NULL;
 	      size_t size = 0;
@@ -1975,10 +2000,10 @@ extern "C" void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLbo
 	//disabled for openarena, as it screws things up (unsure why)
 	LOG("********210*********\n");	
 	/*pushOp(210);
-	pushParam(true);
-	pushParam(true);
-	pushParam(true);
-	pushParam(true);*/
+	pushParam(red);
+	pushParam(green);
+	pushParam(blue);
+	pushParam(alpha);*/
 }
 
 //211
@@ -2420,7 +2445,11 @@ extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 
 //263
 extern "C" void glGetIntegerv(GLenum pname, GLint * params){
-	LOG("Called unimplemted stub GetIntegerv!\n");
+	LOG("Called untested stub GetIntegerv!\n");
+	pushOp(263);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) *4, true);	//4 max num of params returned
+	waitForReturn();
 }
 
 #endif
@@ -2544,8 +2573,6 @@ extern "C" const GLubyte * glGetString(GLenum name){
 }
 
 #ifdef NOHACK
-
-
 
 //276
 extern "C" void glGetTexEnvfv(GLenum target, GLenum pname, GLfloat * params){
@@ -2860,7 +2887,18 @@ extern "C" void glIndexubv(const GLubyte * c){
 
 //317
 extern "C" void glInterleavedArrays(GLenum format, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub InterleavedArrays!\n");
+	LOG("Called untested stub InterleavedArrays!\n");
+	if(!pointer) {
+	pushOp(317);
+	pushParam(format);
+	pushParam(stride);
+	pushParam(!pointer);
+	}
+	else {
+		rpInter.type = format;
+		rpInter.stride = stride;
+		rpCol.sent = false;
+	}
 }
 
 //318
@@ -3071,6 +3109,7 @@ extern "C" void glBlendEquation(GLenum mode){
 //338
 extern "C" void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices){
 	LOG("Called untested stub DrawRangeElements!\n");
+	sendPointers(end);
 	pushOp(338);
 	pushParam(mode);
 	pushParam(start);
@@ -6759,6 +6798,7 @@ extern "C" void glGetObjectParameterivARB(GLhandleARB obj, GLenum pname, GLint *
 	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
 	waitForReturn();
 }
+
 
 //775
 extern "C" void glGetInfoLogARB(GLhandleARB obj, GLsizei maxLength, GLsizei * length, GLcharARB * infoLog){
@@ -10973,8 +11013,6 @@ extern "C" void glXUseXFont( Font font, int first, int count, int list ) {
 LOG("Called unimplemted stub glXUseXFont!\n");
 }
 
-
-
 //GLX 1.1 and later
 //1618
 extern "C" const char *glXQueryExtensionsString( Display *dpy, int screen ) {
@@ -10991,13 +11029,11 @@ extern "C" const char *glXGetClientString( Display *dpy, int name ) {
 LOG("Called unimplemted stub glXGetClientString!\n");
 }
 
-
 // GLX 1.2 and later
 //1621
 extern "C" Display *glXGetCurrentDisplay( void ) {
 LOG("Called unimplemted stub glXGetCurrentDisplay!\n");
 }
-
 
 // GLX 1.3 and later 
 //1622

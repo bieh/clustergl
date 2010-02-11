@@ -139,7 +139,7 @@ bool ExecModule::process(list<Instruction> &list){
 			GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 			
 			//LOG("glViewPort values %d %d %d %d\n", x, y, w, h);		
-		//	glViewport(x, y, w, h);
+			//glViewport(x, y, w, h);
 			
 
 		} else if (iter->id== 176) { //glScissor
@@ -218,7 +218,7 @@ bool ExecModule::process(list<Instruction> &list){
 				//calculate height, then adjust according to how different the 
 				//programs aspect ratio and our ratio is
 				//fW and fH are the equivalent glFrustum calculations using the gluPerspective values
-				fH = tan( (fovy / 360.0) * pi ) * scaleY * zNear * (1.0/((8880.0/4560.0) / aspect));
+				fH = tan( (fovy / 360.0) * pi ) * scaleY * zNear * (1.0/((SYMPHONY_SCREEN_TOTAL_WIDTH/SYMPHONY_SCREEN_TOTAL_HEIGHT) / aspect));
 				fW = tan( (fovy / 360.0) * pi ) * scaleX * zNear * aspect;		
 				
 				GLdouble totalWidth = fW * 2;
@@ -237,24 +237,17 @@ bool ExecModule::process(list<Instruction> &list){
 			
 		} else if (iter->id == 291) { //glLoadMatrixf
 				GLfloat * m = (GLfloat *)iter->buffers[0].buffer;
-				//LOG("modExec Matrix!\n");
-				//	for(int i = 0; i < 16; i++) {
-				//		        LOG("%f ", m[i]);
-				//				if(i%4 == 0)
-				//					LOG("\n");
-				//		    }
-				//		    LOG("\n");
 				GLfloat * mSaved = (GLfloat *) malloc(sizeof(GLfloat) * 16);
+				//copy matrix, otherwise CGLRepeat buffers doesn't work
 				memcpy(mSaved, m, sizeof(GLfloat) * 16);
-				//float * m = (GLfloat *)iter->buffers[0].buffer;
 				if(currentMode == GL_PROJECTION) {
 					if(symphony) {
-						//m[0]= whatever is is when we are given it * proportion that will be seen
-						mSaved[0]= mSaved[0] * (5/(8400/SYMPHONY_SCREEN_TOTAL_WIDTH));
+						//m[0]= (whatever is is when we are given it) * (proportion that will be seen_
+						mSaved[0]= mSaved[0] * (5/((SYMPHONY_SCREEN_WIDTH * 5)/SYMPHONY_SCREEN_TOTAL_WIDTH));
 						//m[8] = (left + right)/(left-right) + screenOffset * bezel (from API)
 						mSaved[8]=  -(2-(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH))/
 							(2*SYMPHONY_SCREEN_WIDTH/SYMPHONY_SCREEN_TOTAL_WIDTH) 
-							+ displayNumber * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/8400);
+							+ displayNumber * (2 * SYMPHONY_SCREEN_TOTAL_WIDTH/(SYMPHONY_SCREEN_WIDTH * 5));
 					}
 					glLoadMatrixf(mSaved);
 					free(mSaved);
@@ -264,9 +257,7 @@ bool ExecModule::process(list<Instruction> &list){
 				}
 
 		}else {
-			//LOG("ID: %d\n", iter->id); 
 		    	mFunctions[iter->id](iter->args);
-			//LOG("finished ID: %d\n", iter->id); 
 		}
 	}   
 	return true;
@@ -277,7 +268,6 @@ bool ExecModule::sync(){
 }
 
 byte *popBuf(){
-	//LOG("Popping buf %d for instruct %d\n", mCurrentInstruction->buffers[0].len, mCurrentInstruction->id);
 	currentBuffer++;
 	return mCurrentInstruction->buffers[currentBuffer-1].buffer;
 }
@@ -2803,8 +2793,13 @@ void EXEC_glIndexubv(byte *commandbuf){
 void EXEC_glInterleavedArrays(byte *commandbuf){
 	GLenum *format = (GLenum*)commandbuf;	 commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;	 commandbuf += sizeof(GLsizei);
-
-	glInterleavedArrays(*format, *stride, (const GLvoid *)popBuf());
+	GLboolean *null = (GLboolean*)commandbuf;	 commandbuf += sizeof(GLsizei);	
+	if(*null)
+		glInterleavedArrays(*format, *stride, (char *) NULL);
+	else {
+		const GLvoid * buf =  (const GLvoid *)popBuf();
+		glInterleavedArrays(*format, *stride, buf);
+	}
 }
 
 //318
@@ -2938,7 +2933,6 @@ void EXEC_glIsTexture(byte *commandbuf){
 
 	pushRet(glIsTexture(*texture));
 }
-
 
 //331
 void EXEC_glPrioritizeTextures(byte *commandbuf){
@@ -10784,7 +10778,6 @@ LOG("Called unimplemted stub gluPartialDisk!\n");
 //(GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops, GLdouble start, GLdouble sweep) 
 }
 
-
 //1539
 void EXEC_gluPerspective(byte *commandbuf) {
 	GLdouble *fovy = (GLdouble*)commandbuf;	 commandbuf += sizeof(GLdouble);
@@ -11030,8 +11023,6 @@ LOG("Called unimplemted stub glXUseXFont!\n");
 //( Font font, int first, int count, int list )
 }
 
-
-
 //GLX 1.1 and later
 //1618
 void EXEC_glXQueryExtensionsString(byte *commandbuf) {
@@ -11054,14 +11045,12 @@ LOG("Called unimplemted stub glXGetClientString!\n");
 //returns const char *
 }
 
-
 // GLX 1.2 and later
 //1621
 void EXEC_glXGetCurrentDisplay(byte *commandbuf) {
 LOG("Called unimplemted stub glXGetCurrentDisplay!\n");
 //returns Display *
 }
-
 
 // GLX 1.3 and later 
 //1622

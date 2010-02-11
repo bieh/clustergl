@@ -1,7 +1,0 @@
-gnome-terminal --command="./cgl 1";
-gnome-terminal --command="./cgl 2";
-gnome-terminal --command="./cgl 3";
-gnome-terminal --command="./cgl 4";
-gnome-terminal --command="./cgl 5";
-echo "$1";
-LD_PRELOAD=./libcgl.so "$1";

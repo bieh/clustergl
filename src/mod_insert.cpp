@@ -3,10 +3,10 @@
 ********************************************************/
 
 #include "main.h"
+
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
-
 
 /*********************************************************
 	Insertion Globals
@@ -30,18 +30,12 @@ InsertModule::InsertModule(){
 }
 
 bool InsertModule::init(){
-	//create the list we are going to add to each frame	
-	//
-
-	LOG("InsertModule!\n");
+	/* create the list we are going to add to each frame */
 	return true;
 }
 
 bool InsertModule::process(list<Instruction> &list){
-	LOG("InsertModule: Processing!\n");
-
 	Instruction lastInstruction = list.back();
-	
 	if(lastInstruction.id == 1499) {//i.e. swap buffers
 
 		//remove swap buffers

@@ -3,6 +3,7 @@
 ********************************************************/
 
 #include "main.h"
+
 #include <zconf.h>
 #include <zlib.h>
 #include <netinet/tcp.h>
@@ -101,13 +102,10 @@ bool NetSrvModule::process(list<Instruction> &list){
 		return false;
 	}
 
-	//LOG("Reading %d instructions!\n", num);
 	// Variables for processing Deltas
 	std::list<Instruction>::iterator pIter = (*prevFrame).begin();
 	
 	for(uint32_t x=0;x<num;x++){
-		//LOG("Reading instruction %d!\n", x);
-		
 		Instruction i;		
 		
 		int r = myRead((byte *)&i, sizeof(Instruction));
@@ -119,29 +117,24 @@ bool NetSrvModule::process(list<Instruction> &list){
 		}
 		else {
 		prevInstruction = i.id;
-		//LOG("Instruction %d\n", i.id);
 		}
 		//Now see if we're expecting any buffers
 		for(int n=0;n<3;n++){
 			int l = i.buffers[n].len;
 						
 			if(l > 0){
-				//LOG("Reading buffer of size %d (%d)\n", l, i.id);
 				i.buffers[n].buffer = (byte *) malloc(l);
-				//need clear was set at the other end
 				i.buffers[n].needClear = true;
 				myRead(i.buffers[n].buffer, l);
 			}			
 		}
 		if(i.id == CGL_REPEAT_INSTRUCTION){
-			//LOG("SKIP: %d\n", i.args[0]);
 			//decrease num, as we won't need to read these instructions from the socket
 			num -= i.args[0];
 			for (uint32_t a = 0;a <(uint32_t)i.args[0];a++){
 				Instruction p;
 				
-				p.id = pIter->id;
-				//LOG("SKIP INSTRUCT: %d\n", p.id);	
+				p.id = pIter->id;	
 				for (int j =0;j<MAX_ARG_LEN;j++)
 					p.args[j] = pIter->args[j];
 				
@@ -150,7 +143,6 @@ bool NetSrvModule::process(list<Instruction> &list){
 					uint32_t l = pIter->buffers[n].len;
 								
 					if(l > 0){
-						//LOG("%d SKIP with buffers!, %d\n", p.id, l);
 						p.buffers[n].buffer = (byte *) malloc(l);
 						p.buffers[n].needClear = true;
 						p.buffers[n].len = l;
@@ -162,7 +154,6 @@ bool NetSrvModule::process(list<Instruction> &list){
 					}			
 				}
 				list.push_back(p);
-				//LOG("INSTRUCTION: %d\n", p.id );
 				if (pIter != (*prevFrame).end())
 					pIter++;				
 			}
@@ -178,8 +169,6 @@ bool NetSrvModule::process(list<Instruction> &list){
 }
 
 void NetSrvModule::reply(Instruction *instr, int i) {
-
-	//LOG("reply size: %d, for instruction: %d\n", instr->buffers[i].len, instr->id);
 	myWrite(instr->buffers[i].buffer, instr->buffers[i].len);
 }
 
@@ -220,21 +209,17 @@ int NetSrvModule::myRead(byte *input, int nByte) {
 
 void NetSrvModule::recieveBuffer(void) {
 	if(usingSendCompression) {
-		//LOG("recieving buffer!\n");
 		//first read the original number of bytes coming
 		mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
-		//LOG("original size: %d!\n", bytesRemaining);
+
 		//read the size of the compressed packet
 		int compSize = 0;
 		mClientSocket->read((byte *)&compSize, sizeof(uint32_t));
-		//LOG("compressed size: %d!\n", compSize);
+
 		//LOG("recieving buffer of size: %d!\n", bytesRemaining);
 		//then read in that many bytes
-
 		Bytef *in = (Bytef*) malloc(compSize);
-
 		mClientSocket->read(in, compSize);
-
 
 		compressor->myDecompress(mRecieveBuf, bytesRemaining, in, compSize);
 		iRecieveBufPos = 0;
@@ -284,7 +269,6 @@ int NetSrvModule::myWrite(byte *input, int nByte) {
 		return ret;
 	}
 	else {
-		//LOG("sending a message!\n");
 		int ret = mClientSocket->write(input, nByte);
 		netBytes += nByte;
 		netBytes2 += nByte;

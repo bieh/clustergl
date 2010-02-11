@@ -40,6 +40,7 @@ string addresses[5];
 /********************************************************
 	Application Object
 ********************************************************/
+
 int App::run(int argc, char **argv){
     	if (argc != 2) {
        		fprintf(stderr,"usage: cgl <SYMPHONY number. Use 0 for testing, 1-5 for SYMPHONY>\n");
@@ -52,6 +53,7 @@ int App::run(int argc, char **argv){
 	init();
 	
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
+
 	mModules.push_back(new NetSrvModule());
 	//mModules.push_back(new InsertModule());
 	mModules.push_back(new ExecModule());
@@ -86,6 +88,7 @@ int App::run_shared(){
 void App::init(){
 	//load values in from config file
     cfg_opt_t opts[] = {
+	CFG_SIMPLE_BOOL((char *)("symphony"), &symphony),
 	CFG_SIMPLE_INT((char *)("sizeSYMPHONYX"), &sizeSYMPHONYX),
 	CFG_SIMPLE_INT((char *)("sizeSYMPHONYY"), &sizeSYMPHONYY),
 	CFG_BOOL_LIST((char *)("SYMPHONYnodes"), (char *)"{false}", CFGF_NONE),
@@ -110,22 +113,23 @@ void App::init(){
 
     cfg = cfg_init(opts, CFGF_NONE);
     cfg_parse(cfg, "config.conf");
+	//process lists in the config file
     for(uint32_t i = 0; i < cfg_size(cfg, "SYMPHONYnodes"); i++)
     	useSYMPHONYnodes[i] = cfg_getnbool(cfg, "SYMPHONYnodes", i);
 
     for(uint32_t i = 0; i < cfg_size(cfg, "addresses"); i++) {
     	addresses[i] = string(cfg_getnstr(cfg, "addresses", i));
 	}
-
+	
+	//process floats in the config file
     scaleX = cfg_getfloat(cfg,(char *) "scaleX");
     scaleY = cfg_getfloat(cfg,(char *) "scaleY");
     cfg_free(cfg);
 
-	int dn = atoi(dnNumber.c_str());
-	if(dn > 0) symphony = true;
-
 	//adjust offset and size values for symphony display nodes
+	// (saves having 5 unique config files)
 	if(symphony) {
+		int dn = atoi(dnNumber.c_str());
 		offsetX = (int) (SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * (dn - 1);
 		sizeX = sizeSYMPHONYX;
 		sizeY = sizeSYMPHONYY;
@@ -141,6 +145,10 @@ void App::init(){
 void App::debug(){
 	LOG("******************* %d modules ***************\n", mModules.size());
 } 
+
+/********************************************************
+	Tick (main loop)
+********************************************************/
 
 list<Instruction> *thisFrame = NULL; // pointer to the current frame
 uint32_t totFrames = 0; //used for Calculations
@@ -215,7 +223,6 @@ bool App::tick(){
 	    		mModules[0]->reply(&(*iter), i);
 	    	}
 	    }	    
-		//iter->clear();
 	}
 
 	//Sync frames
@@ -239,7 +246,9 @@ bool App::tick(){
 		thisFrame = &twoFrame;
 	else
 		thisFrame = &oneFrame;
-	for(std::list<Instruction>::iterator iter = thisFrame->begin(); // clear previous frame so this frame can be drawn
+
+	//clear previous frames
+	for(std::list<Instruction>::iterator iter = thisFrame->begin();
 	    iter != (*thisFrame).end(); iter++){
 		iter->clear();
 	}

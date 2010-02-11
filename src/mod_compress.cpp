@@ -3,10 +3,9 @@
 ********************************************************/
 
 #include "main.h"
+
 #include <zconf.h>
 #include <zlib.h>
-
-
 #include <lzo/lzo1b.h>
 #include <lzo/lzo1x.h>
 
@@ -14,32 +13,25 @@
 	Main Globals (Loaded from config file)
 ********************************************************/
 
-/* Compression methods:
-   1 = ZLib, best compression, but much slower
-   2 = LZO1b, best for large blocks, with redundant data
-   3 = LZO1x, best for most applications
+/* 
+  Compression methods:
+  1 = ZLib, best compression, but much slower
+  2 = LZO1b, best for large blocks, with redundant data
+  3 = LZO1x, best for most applications
 */
 
 extern int compressingMethod;
-
 
 /*********************************************************
 	Module Stuff
 *********************************************************/
 
 NetCompressModule::NetCompressModule() {
-	/*if(compressingMethod == 1)
-		LOG("using ZLIB!\n");
-	else if(compressingMethod == 2)
-		LOG("using lzo1b!\n");
-	else if(compressingMethod == 3)
-		LOG("using lzo1x!\n");*/
 	if(compressingMethod == 2 || compressingMethod == 3) {
 		if (lzo_init() != LZO_E_OK) {
 		    printf("LZO init failed!\n");
 		}
 	}
-
 }	
 
 bool NetCompressModule::process(list<Instruction> &i){
@@ -59,7 +51,7 @@ bool NetCompressModule::sync(){
 *********************************************************/
 
 int NetCompressModule::myCompress(void *input, int nByte, void *output){
-	uLongf CompBuffSize;
+	uLongf CompBuffSize = 0;
 	if(compressingMethod == 1)
 		CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	else

@@ -3,6 +3,7 @@
 ********************************************************/
 
 #include "main.h"
+
 #include <zconf.h>
 #include <zlib.h>
 #include <netinet/tcp.h>
@@ -140,9 +141,9 @@ bool NetClientModule::process(list<Instruction> &list){
 		}
 	    };
 
-	    if (i->id == pIter->id 	//if the instruction has the same id as previous	
+	    if (useRepeat 	//value from config to enable/disable deltas
+		&& i->id == pIter->id 	//if the instruction has the same id as previous	
 		&& !mustSend && i->id 	//mustSend is set when expecting a reply		
-		  && useRepeat 	//value from config to enable/disable deltas
 		  && sameCount < 100	//stops sameBuffer filling up indefinitely (is this needed?)
 		) {
 			//assume the instruction is the same
@@ -185,7 +186,6 @@ bool NetClientModule::process(list<Instruction> &list){
 	    }
 
 	    if (sameCount> 0){ // send a count of the duplicates before this instruction
-		//LOG("SKIP: %d\n", sameCount);
 		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
 		if (skip == 0){
 			LOG("ERROR: Out of memory\n");
@@ -219,7 +219,6 @@ bool NetClientModule::process(list<Instruction> &list){
 			int l = i->buffers[n].len;
 		
 			if(l > 0){
-				//LOG("buffer: %d\n", l);
 				netBytes += l * numConnections;	
 				if(myWrite(i->buffers[n].buffer, l) != l){
 					LOG("Connection problem (didn't write buffer %d)!\n", l);
@@ -229,7 +228,6 @@ bool NetClientModule::process(list<Instruction> &list){
 				if(i->buffers[n].needReply){
 					
 					sendBuffer();
-					//LOG("sent buffer!\n");
 					if(int x = myRead(i->buffers[n].buffer, l) != l){
 						LOG("Connection problem NetClient (didn't recv buffer %d got: %d)!\n", l, x);
 						return false;
@@ -244,7 +242,6 @@ bool NetClientModule::process(list<Instruction> &list){
 	
 	   //send any instructions that are remaining in the CGL_REPEAT_INSTRUCTION buffer
 	    if (sameCount> 0){ // send a count of the duplicates before this instruction
-		//LOG("SKIP: %d\n", sameCount);
 		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
 		if (skip == 0){
 			LOG("ERROR: Out of memory\n");
@@ -435,13 +432,11 @@ int NetClientModule::myRead(void *buf, size_t count){
 					ret[i] = origSize;
 				else
 					return 0; //return error
-				//LOG("got buffer: %d\n", origSize);
 				if(i == 0)	//only bother to decompress/process the first one
 					compressor2->myDecompress(buf, count, in, compressedSize);
 				free(in);
 			}
 			else {
-	 			//LOG("waiting for a message!\n");
 					if(i == 0) {
 						int remaining = count;
 						while(remaining > 0) {
@@ -459,7 +454,6 @@ int NetClientModule::myRead(void *buf, size_t count){
 						}
 	 					free(tempBuf);
 	 				}
-				//LOG("got buffer %d, expected %d\n", ret[i], count);
 			}
 		}
 	}
