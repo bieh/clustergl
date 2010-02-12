@@ -173,16 +173,18 @@ bool ExecModule::process(list<Instruction> &list){
 				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
 				GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
 				GLdouble startingPoint = left + (displayNumber * (singleWidth + bezelWidth));
-				if(right/bottom == (double) sizeX/sizeY)	//if ratio is correct, do nothing
+				if(right/bottom == (double) sizeX/sizeY || right/top == (double) sizeX/sizeY)	//if ratio is correct, do nothing
 					glOrtho(startingPoint, startingPoint + singleWidth, bottom, top, nearVal, farVal);
 				else	//if ratio incorrect, adjust so things dont get stretched
 					glOrtho(startingPoint, startingPoint + singleWidth, right * SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH, top, nearVal, farVal);
 			}
-			else {
-				if(right/bottom == (double) sizeX/sizeY)	//if ratio is correct, do nothing
+			else { 
+				if(right/bottom == (double) sizeX/sizeY || right/top == (double) sizeX/sizeY)	//if ratio is correct, do nothing
 					glOrtho(left, right, bottom, top, nearVal, farVal);
-				else	//if ratio incorrect, adjust so things dont get stretched
-					glOrtho(left, right, right * sizeY/sizeX, top, nearVal, farVal);
+				else	{//if ratio incorrect, adjust so things dont get stretched
+					if(bottom > 0) glOrtho(left, right, right * sizeY/sizeX, top, nearVal, farVal);
+					else glOrtho(left, right ,bottom,  right * sizeY/sizeX, nearVal, farVal);
+				}
 			}
 
 		} else if (iter->id == 1539) { //gluPerspective
@@ -233,6 +235,8 @@ bool ExecModule::process(list<Instruction> &list){
 				fW = tan( (fovy / 360.0) * pi ) * scaleX * zNear * aspect;
 	
 				glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+
+				//gluPerspective(fovy, aspect, zNear, zFar);
 			}
 			
 		} else if (iter->id == 291) { //glLoadMatrixf

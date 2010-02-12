@@ -9,6 +9,8 @@
 #include <GL/glx.h>
 #include <GL/glu.h>
 //#define  NOHACK true
+//#define  GLXFULL true
+//#define  GLUFULL true
 
 extern App *theApp;
 
@@ -101,6 +103,7 @@ AppModule::AppModule(string command){
 	rpTex.size = (GLint) NULL;
 	rpVert.size = (GLint) NULL;
 	rpCol.size = (GLint) NULL;
+	rpInter.size = (GLint) NULL;
 	init(command);
 }
 
@@ -127,7 +130,7 @@ bool AppModule::sync(){
 *********************************************************/
 
 void pushOp(uint16_t opID){
-	//LOG("pushed OP: %d\n", opID);
+
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
 		LOG("Out of instruction space (%d)!\n", iInstructionCount);
 		//force the frame
@@ -332,35 +335,35 @@ void sendPointers(int length) {
 		rpCol.sent = true;
 	}
 
-	if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
-	{
+	//if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
+	//{
 		//interleaved arrays pointer
 		int size = 0;
 		switch (rpInter.type) 
 		{
-			case GL_V2F:			size = sizeof(float) * 2;
-		        case GL_V3F:			size = sizeof(float) * 3;
-		        case GL_C4UB_V2F:		size = sizeof(float) * 2 + sizeof(GLubyte) * 4;
-		        case GL_C4UB_V3F:		size = sizeof(float) * 3 + sizeof(GLubyte) * 4;
-		        case GL_C3F_V3F:		size = sizeof(float) * 6;
-		        case GL_N3F_V3F:		size = sizeof(float) * 6;
-		        case GL_C4F_N3F_V3F:		size = sizeof(float) * 10;
-		        case GL_T2F_V3F:		size = sizeof(float) * 5;
-		        case GL_T4F_V4F:		size = sizeof(float) * 8;
-		        case GL_T2F_C4UB_V3F:		size = sizeof(float) * 5 + sizeof(GLubyte) * 4;
-		        case GL_T2F_C3F_V3F:		size = sizeof(float) * 8;
-		        case GL_T2F_N3F_V3F:		size = sizeof(float) * 8;
-		        case GL_T2F_C4F_N3F_V3F:	size = sizeof(float) * 12;
-		        case GL_T4F_C4F_N3F_V4F:	size = sizeof(float) * 15;
-			default:LOG("DEFAULTED glInterleavedArrays lookup!\n"); size = 1;
+			case GL_V2F:			size = sizeof(GLfloat) * 2; break;
+		        case GL_V3F:			size = sizeof(GLfloat) * 3; break;
+		        case GL_C4UB_V2F:		size = sizeof(GLfloat) * 2 + sizeof(GLubyte) * 4; break;
+		        case GL_C4UB_V3F:		size = sizeof(GLfloat) * 3 + sizeof(GLubyte) * 4; break;
+		        case GL_C3F_V3F:		size = sizeof(GLfloat) * 6; break;
+		        case GL_N3F_V3F:		size = sizeof(GLfloat) * 6; break;
+		        case GL_C4F_N3F_V3F:		size = sizeof(GLfloat) * 10; break;
+		        case GL_T2F_V3F:		size = sizeof(GLfloat) * 5; break;
+		        case GL_T4F_V4F:		size = sizeof(GLfloat) * 8; break;
+		        case GL_T2F_C4UB_V3F:		size = sizeof(GLfloat) * 5 + sizeof(GLubyte) * 4; break;
+		        case GL_T2F_C3F_V3F:		size = sizeof(GLfloat) * 8; break;
+		        case GL_T2F_N3F_V3F:		size = sizeof(GLfloat) * 8; break;
+		        case GL_T2F_C4F_N3F_V3F:	size = sizeof(GLfloat) * 12; break;
+		        case GL_T4F_C4F_N3F_V4F:	size = sizeof(GLfloat) * 15; break;
+			default:LOG("DEFAULTED glInterleavedArrays lookup %d should be %d!\n", rpInter.type, GL_T2F_C4UB_V3F); size = sizeof(GLfloat) * 15;
 		}
 		pushOp(317);
 		pushParam(rpInter.type);
 		pushParam(rpInter.stride);
 		pushParam(false);
-		pushBuf(rpCol.pointer, (getTypeSize((size + rpInter.stride) * length)));
+		pushBuf(rpInter.pointer, ((size + rpInter.stride) * length)); //drawing quads?
 		rpInter.sent = true;
-	}
+	//}
 }
 
 /********************************************************
@@ -1761,7 +1764,7 @@ extern "C" void glTexParameteriv(GLenum target, GLenum pname, const GLint * para
 	pushOp(181);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(*params));
+	pushBuf(params, sizeof(params));
 }
 
 //182
@@ -1811,7 +1814,7 @@ extern "C" void glTexEnvfv(GLenum target, GLenum pname, const GLfloat * params){
 	pushOp(185);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //186
@@ -1828,7 +1831,7 @@ extern "C" void glTexEnviv(GLenum target, GLenum pname, const GLint * params){
 	pushOp(187);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //188
@@ -1845,7 +1848,7 @@ extern "C" void glTexGendv(GLenum coord, GLenum pname, const GLdouble * params){
 	pushOp(189);
 	pushParam(coord);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(*params));
+	pushBuf(params, sizeof(GLdouble) * sizeof(params));
 }
 
 //190
@@ -1881,7 +1884,7 @@ extern "C" void glTexGeniv(GLenum coord, GLenum pname, const GLint * params){
 	pushOp(193);
 	pushParam(coord);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //194
@@ -2390,7 +2393,7 @@ extern "C" void glGetBooleanv(GLenum pname, GLboolean * params){
 	LOG("Called untested stub GetBooleanv!\n");
 	pushOp(258);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLboolean) * sizeof(*params));
+	pushBuf(params, sizeof(GLboolean) * sizeof(params));
 }
 
 //259
@@ -2448,7 +2451,7 @@ extern "C" void glGetIntegerv(GLenum pname, GLint * params){
 	LOG("Called untested stub GetIntegerv!\n");
 	pushOp(263);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) *4, true);	//4 max num of params returned
+	pushBuf(params, sizeof(GLint) *4, true);	//4 max num of params returned
 	waitForReturn();
 }
 
@@ -2508,7 +2511,7 @@ extern "C" void glGetMaterialfv(GLenum face, GLenum pname, GLfloat * params){
 	pushOp(269);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -2518,7 +2521,7 @@ extern "C" void glGetMaterialiv(GLenum face, GLenum pname, GLint * params){
 	pushOp(270);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -2556,12 +2559,9 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 	pushBuf(mask, sizeof(GLubyte) * 32 * 32, true); //32 x 32 stipple
 }
 
-//Hack! We let the native implementation handle this
-//TODO: implement these methods, so no hacks are required
-
 //275
 extern "C" const GLubyte * glGetString(GLenum name){
-	LOG("Called untested stub glGetString!\n");
+	//LOG("Called untested stub glGetString!\n");
 	pushOp(275);
 	pushParam(name);
 
@@ -2571,6 +2571,9 @@ extern "C" const GLubyte * glGetString(GLenum name){
 	waitForReturn();
 	return ret;
 }
+
+//Hack! We let the native implementation handle this
+//TODO: implement these methods, so no hacks are required
 
 #ifdef NOHACK
 
@@ -2865,7 +2868,7 @@ extern "C" void glEnableClientState(GLenum array){
 
 //314
 extern "C" void glIndexPointer(GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called untested stub IndexPointer!\n");
+	LOG("Called untested stub IndexPointer - will probably crash!\n");
 	pushOp(314);
 	pushParam(type);
 	pushParam(stride);
@@ -2887,7 +2890,6 @@ extern "C" void glIndexubv(const GLubyte * c){
 
 //317
 extern "C" void glInterleavedArrays(GLenum format, GLsizei stride, const GLvoid * pointer){
-	LOG("Called untested stub InterleavedArrays!\n");
 	if(!pointer) {
 	pushOp(317);
 	pushParam(format);
@@ -2897,7 +2899,9 @@ extern "C" void glInterleavedArrays(GLenum format, GLsizei stride, const GLvoid 
 	else {
 		rpInter.type = format;
 		rpInter.stride = stride;
-		rpCol.sent = false;
+		rpInter.pointer = pointer;
+		rpInter.size = 1;
+		rpInter.sent = false;
 	}
 }
 
@@ -3170,7 +3174,7 @@ extern "C" void glGetColorTableParameterfv(GLenum target, GLenum pname, GLfloat 
 	pushOp(344);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -3180,7 +3184,7 @@ extern "C" void glGetColorTableParameteriv(GLenum target, GLenum pname, GLint * 
 	pushOp(345);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -3305,7 +3309,7 @@ extern "C" void glGetConvolutionParameterfv(GLenum target, GLenum pname, GLfloat
 	pushOp(357);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -3315,7 +3319,7 @@ extern "C" void glGetConvolutionParameteriv(GLenum target, GLenum pname, GLint *
 	pushOp(358);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -3349,7 +3353,7 @@ extern "C" void glGetHistogramParameterfv(GLenum target, GLenum pname, GLfloat *
 	pushOp(362);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -3359,7 +3363,7 @@ extern "C" void glGetHistogramParameteriv(GLenum target, GLenum pname, GLint * p
 	pushOp(363);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -3936,7 +3940,7 @@ extern "C" void glPointParameterfv(GLenum pname, const GLfloat * params){
 	LOG("Called untested stub PointParameterfv!\n");
 	pushOp(429);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //430
@@ -3951,7 +3955,7 @@ extern "C" void glPointParameteriv(GLenum pname, const GLint * params){
 	LOG("Called untested stub PointParameteriv!\n");
 	pushOp(431);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //432
@@ -4232,7 +4236,7 @@ extern "C" void glGetBufferParameteriv(GLenum target, GLenum pname, GLint * para
 	pushOp(470);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -4336,7 +4340,7 @@ extern "C" void glGetQueryiv(GLenum target, GLenum pname, GLint * params){
 	pushOp(481);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -4346,7 +4350,7 @@ extern "C" void glGetQueryObjectiv(GLuint id, GLenum pname, GLint * params){
 	pushOp(482);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -4356,7 +4360,7 @@ extern "C" void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint * params){
 	pushOp(483);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLuint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLuint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -4566,7 +4570,7 @@ extern "C" void glGetUniformfv(GLuint program, GLint location, GLfloat * params)
 	pushOp(509);
 	pushParam(program);
 	pushParam(location);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -4576,7 +4580,7 @@ extern "C" void glGetUniformiv(GLuint program, GLint location, GLint * params){
 	pushOp(510);
 	pushParam(program);
 	pushParam(location);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -4586,7 +4590,7 @@ extern "C" void glGetVertexAttribdv(GLuint index, GLenum pname, GLdouble * param
 	pushOp(511);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLdouble) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -4596,7 +4600,7 @@ extern "C" void glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat * params
 	pushOp(512);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -4606,7 +4610,7 @@ extern "C" void glGetVertexAttribiv(GLuint index, GLenum pname, GLint * params){
 	pushOp(513);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -5597,7 +5601,7 @@ extern "C" void glPointParameterfvARB(GLenum pname, const GLfloat * params){
 	LOG("Called untested stub PointParameterfvARB!\n");
 	pushOp(630);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //631
@@ -5831,7 +5835,7 @@ extern "C" void glGetVertexAttribdvARB(GLuint index, GLenum pname, GLdouble * pa
 	pushOp(662);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLdouble) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -5841,7 +5845,7 @@ extern "C" void glGetVertexAttribfvARB(GLuint index, GLenum pname, GLfloat * par
 	pushOp(663);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -5851,7 +5855,7 @@ extern "C" void glGetVertexAttribivARB(GLuint index, GLenum pname, GLint * param
 	pushOp(664);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6315,7 +6319,7 @@ extern "C" void glGetProgramivARB(GLenum target, GLenum pname, GLint * params){
 	pushOp(721);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6375,7 +6379,7 @@ extern "C" void glGetBufferParameterivARB(GLenum target, GLenum pname, GLint * p
 	pushOp(729);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6477,7 +6481,7 @@ extern "C" void glGetQueryivARB(GLenum target, GLenum pname, GLint * params){
 	pushOp(740);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6487,7 +6491,7 @@ extern "C" void glGetQueryObjectivARB(GLuint id, GLenum pname, GLint * params){
 	pushOp(741);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6497,7 +6501,7 @@ extern "C" void glGetQueryObjectuivARB(GLuint id, GLenum pname, GLuint * params)
 	pushOp(742);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6785,7 +6789,7 @@ extern "C" void glGetObjectParameterfvARB(GLhandleARB obj, GLenum pname, GLfloat
 	pushOp(773);
 	pushParam(obj);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6795,7 +6799,7 @@ extern "C" void glGetObjectParameterivARB(GLhandleARB obj, GLenum pname, GLint *
 	pushOp(774);
 	pushParam(obj);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6842,7 +6846,7 @@ extern "C" void glGetUniformfvARB(GLhandleARB program, GLint location, GLfloat *
 	pushOp(779);
 	pushParam(program);
 	pushParam(location);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -6852,7 +6856,7 @@ extern "C" void glGetUniformivARB(GLhandleARB program, GLint location, GLint * p
 	pushOp(780);
 	pushParam(program);
 	pushParam(location);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7254,7 +7258,7 @@ extern "C" void glColorTableParameterfvSGI(GLenum target, GLenum pname, const GL
 	pushOp(823);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //824
@@ -7263,7 +7267,7 @@ extern "C" void glColorTableParameterivSGI(GLenum target, GLenum pname, const GL
 	pushOp(824);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //825
@@ -7287,7 +7291,7 @@ extern "C" void glGetColorTableParameterfvSGI(GLenum target, GLenum pname, GLflo
 	pushOp(827);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7297,7 +7301,7 @@ extern "C" void glGetColorTableParameterivSGI(GLenum target, GLenum pname, GLint
 	pushOp(828);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7313,7 +7317,7 @@ extern "C" void glPixelTexGenParameterivSGIS(GLenum pname, const GLint * params)
 	LOG("Called untested stub PixelTexGenParameterivSGIS!\n");
 	pushOp(830);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //831
@@ -7328,7 +7332,7 @@ extern "C" void glPixelTexGenParameterfvSGIS(GLenum pname, const GLfloat * param
 	LOG("Called untested stub PixelTexGenParameterfvSGIS!\n");
 	pushOp(832);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7337,7 +7341,7 @@ extern "C" void glGetPixelTexGenParameterivSGIS(GLenum pname, GLint * params){
 	LOG("Called untested stub GetPixelTexGenParameterivSGIS!\n");
 	pushOp(833);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7346,7 +7350,7 @@ extern "C" void glGetPixelTexGenParameterfvSGIS(GLenum pname, GLfloat * params){
 	LOG("Called untested stub GetPixelTexGenParameterfvSGIS!\n");
 	pushOp(834);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7587,7 +7591,7 @@ extern "C" void glSpriteParameterfvSGIX(GLenum pname, const GLfloat * params){
 	LOG("Called untested stub SpriteParameterfvSGIX!\n");
 	pushOp(860);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //861
@@ -7602,7 +7606,7 @@ extern "C" void glSpriteParameterivSGIX(GLenum pname, const GLint * params){
 	LOG("Called untested stub SpriteParameterivSGIX!\n");
 	pushOp(862);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //863
@@ -7617,7 +7621,7 @@ extern "C" void glPointParameterfvEXT(GLenum pname, const GLfloat * params){
 	LOG("Called untested stub PointParameterfvEXT!\n");
 	pushOp(864);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //865
@@ -7721,7 +7725,7 @@ extern "C" void glImageTransformParameterivHP(GLenum target, GLenum pname, const
 	pushOp(879);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //880
@@ -7730,7 +7734,7 @@ extern "C" void glImageTransformParameterfvHP(GLenum target, GLenum pname, const
 	pushOp(880);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //881
@@ -7739,7 +7743,7 @@ extern "C" void glGetImageTransformParameterivHP(GLenum target, GLenum pname, GL
 	pushOp(881);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7749,7 +7753,7 @@ extern "C" void glGetImageTransformParameterfvHP(GLenum target, GLenum pname, GL
 	pushOp(882);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7805,7 +7809,7 @@ extern "C" void glGetColorTableParameterivEXT(GLenum target, GLenum pname, GLint
 	pushOp(888);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7815,7 +7819,7 @@ extern "C" void glGetColorTableParameterfvEXT(GLenum target, GLenum pname, GLflo
 	pushOp(889);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7825,7 +7829,7 @@ extern "C" void glGetListParameterfvSGIX(GLuint list, GLenum pname, GLfloat * pa
 	pushOp(890);
 	pushParam(list);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7835,7 +7839,7 @@ extern "C" void glGetListParameterivSGIX(GLuint list, GLenum pname, GLint * para
 	pushOp(891);
 	pushParam(list);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -7853,7 +7857,7 @@ extern "C" void glListParameterfvSGIX(GLuint list, GLenum pname, const GLfloat *
 	pushOp(891);
 	pushParam(list);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //894
@@ -7870,7 +7874,7 @@ extern "C" void glListParameterivSGIX(GLuint list, GLenum pname, const GLint * p
 	pushOp(895);
 	pushParam(list);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //896
@@ -7904,7 +7908,7 @@ extern "C" void glCullParameterdvEXT(GLenum pname, GLdouble * params){
 	LOG("Called untested stub CullParameterdvEXT!\n");
 	pushOp(900);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(*params));
+	pushBuf(params, sizeof(GLdouble) * sizeof(params));
 }
 
 //901
@@ -7912,7 +7916,7 @@ extern "C" void glCullParameterfvEXT(GLenum pname, GLfloat * params){
 	LOG("Called untested stub CullParameterfvEXT!\n");
 	pushOp(901);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //902
@@ -7936,7 +7940,7 @@ extern "C" void glFragmentLightfvSGIX(GLenum light, GLenum pname, const GLfloat 
 	pushOp(904);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //905
@@ -7953,7 +7957,7 @@ extern "C" void glFragmentLightivSGIX(GLenum light, GLenum pname, const GLint * 
 	pushOp(906);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //907
@@ -7968,7 +7972,7 @@ extern "C" void glFragmentLightModelfvSGIX(GLenum pname, const GLfloat * params)
 	LOG("Called untested stub FragmentLightModelfvSGIX!\n");
 	pushOp(908);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //909
@@ -7983,7 +7987,7 @@ extern "C" void glFragmentLightModelivSGIX(GLenum pname, const GLint * params){
 	LOG("Called untested stub FragmentLightModelivSGIX!\n");
 	pushOp(910);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //911
@@ -8000,7 +8004,7 @@ extern "C" void glFragmentMaterialfvSGIX(GLenum face, GLenum pname, const GLfloa
 	pushOp(912);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //913
@@ -8017,7 +8021,7 @@ extern "C" void glFragmentMaterialivSGIX(GLenum face, GLenum pname, const GLint 
 	pushOp(914);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(const GLint) * sizeof(*params));
+	pushBuf(params, sizeof(const GLint) * sizeof(params));
 }
 
 //915
@@ -8026,7 +8030,7 @@ extern "C" void glGetFragmentLightfvSGIX(GLenum light, GLenum pname, GLfloat * p
 	pushOp(915);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //916
@@ -8035,7 +8039,7 @@ extern "C" void glGetFragmentLightivSGIX(GLenum light, GLenum pname, GLint * par
 	pushOp(916);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //917
@@ -8044,7 +8048,7 @@ extern "C" void glGetFragmentMaterialfvSGIX(GLenum face, GLenum pname, GLfloat *
 	pushOp(917);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //918
@@ -8053,7 +8057,7 @@ extern "C" void glGetFragmentMaterialivSGIX(GLenum face, GLenum pname, GLint * p
 	pushOp(918);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //919
@@ -8192,7 +8196,7 @@ extern "C" void glPixelTransformParameterivEXT(GLenum target, GLenum pname, cons
 	pushOp(936);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //937
@@ -8201,7 +8205,7 @@ extern "C" void glPixelTransformParameterfvEXT(GLenum target, GLenum pname, cons
 	pushOp(937);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //938
@@ -9044,7 +9048,7 @@ extern "C" void glCombinerParameterfvNV(GLenum pname, const GLfloat * params){
 	LOG("Called untested stub CombinerParameterfvNV!\n");
 	pushOp(1048);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //1049
@@ -9059,7 +9063,7 @@ extern "C" void glCombinerParameterivNV(GLenum pname, const GLint * params){
 	LOG("Called untested stub CombinerParameterivNV!\n");
 	pushOp(1050);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //1051
@@ -9112,7 +9116,7 @@ extern "C" void glGetCombinerInputParameterfvNV(GLenum stage, GLenum portion, GL
 	pushParam(portion);
 	pushParam(variable);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9124,7 +9128,7 @@ extern "C" void glGetCombinerInputParameterivNV(GLenum stage, GLenum portion, GL
 	pushParam(portion);
 	pushParam(variable);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9135,7 +9139,7 @@ extern "C" void glGetCombinerOutputParameterfvNV(GLenum stage, GLenum portion, G
 	pushParam(stage);
 	pushParam(portion);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 
 }
@@ -9147,7 +9151,7 @@ extern "C" void glGetCombinerOutputParameterivNV(GLenum stage, GLenum portion, G
 	pushParam(stage);
 	pushParam(portion);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9157,7 +9161,7 @@ extern "C" void glGetFinalCombinerInputParameterfvNV(GLenum variable, GLenum pna
 	pushOp(1059);
 	pushParam(variable);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9167,7 +9171,7 @@ extern "C" void glGetFinalCombinerInputParameterivNV(GLenum variable, GLenum pna
 	pushOp(1060);
 	pushParam(variable);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9474,7 +9478,7 @@ extern "C" void glGetFenceivNV(GLuint fence, GLenum pname, GLint * params){
 	pushOp(1104);
 	pushParam(fence);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9513,7 +9517,7 @@ extern "C" void glMapParameterivNV(GLenum target, GLenum pname, const GLint * pa
 	pushOp(1108);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //1109
@@ -9522,7 +9526,7 @@ extern "C" void glMapParameterfvNV(GLenum target, GLenum pname, const GLfloat * 
 	pushOp(1109);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //1110
@@ -9544,7 +9548,7 @@ extern "C" void glGetMapParameterivNV(GLenum target, GLenum pname, GLint * param
 	pushOp(1111);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //1112
@@ -9553,7 +9557,7 @@ extern "C" void glGetMapParameterfvNV(GLenum target, GLenum pname, GLfloat * par
 	pushOp(1112);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9564,7 +9568,7 @@ extern "C" void glGetMapAttribParameterivNV(GLenum target, GLuint index, GLenum 
 	pushParam(target);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9575,7 +9579,7 @@ extern "C" void glGetMapAttribParameterfvNV(GLenum target, GLuint index, GLenum 
 	pushParam(target);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9592,7 +9596,7 @@ extern "C" void glCombinerStageParameterfvNV(GLenum stage, GLenum pname, const G
 	pushOp(1116);
 	pushParam(stage);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(GLfloat) * sizeof(params));
 }
 
 //1117
@@ -9601,7 +9605,7 @@ extern "C" void glGetCombinerStageParameterfvNV(GLenum stage, GLenum pname, GLfl
 	pushOp(1117);
 	pushParam(stage);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9675,7 +9679,7 @@ extern "C" void glGetProgramivNV(GLuint id, GLenum pname, GLint * params){
 	pushOp(1125);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9704,7 +9708,7 @@ extern "C" void glGetVertexAttribdvNV(GLuint index, GLenum pname, GLdouble * par
 	pushOp(1128);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLdouble) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9714,7 +9718,7 @@ extern "C" void glGetVertexAttribfvNV(GLuint index, GLenum pname, GLfloat * para
 	pushOp(1129);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9724,7 +9728,7 @@ extern "C" void glGetVertexAttribivNV(GLuint index, GLenum pname, GLint * params
 	pushOp(1130);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params), true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9771,7 +9775,7 @@ extern "C" void glProgramParameter4dvNV(GLenum target, GLuint index, const GLdou
 	pushOp(1135);
 	pushParam(target);
 	pushParam(index);
-	pushBuf(params, sizeof(const GLdouble) * sizeof(*params), true);
+	pushBuf(params, sizeof(const GLdouble) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -9792,7 +9796,7 @@ extern "C" void glProgramParameter4fvNV(GLenum target, GLuint index, const GLflo
 	pushOp(1137);
 	pushParam(target);
 	pushParam(index);
-	pushBuf(params, sizeof(const GLfloat) * sizeof(*params), true);
+	pushBuf(params, sizeof(const GLfloat) * sizeof(params), true);
 	waitForReturn();
 }
 
@@ -10308,7 +10312,7 @@ extern "C" void glPointParameterivNV(GLenum pname, const GLint * params){
 	LOG("Called untested stub PointParameterivNV!\n");
 	pushOp(1198);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(*params));
+	pushBuf(params, sizeof(GLint) * sizeof(params));
 }
 
 //1199
@@ -10447,7 +10451,7 @@ extern "C" void glProgramEnvParameters4fvEXT(GLenum target, GLuint index, GLsize
 	pushParam(target);
 	pushParam(index);
 	pushParam(count);
-	pushBuf(params, sizeof(const GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(const GLfloat) * sizeof(params));
 }
 
 //1214
@@ -10457,7 +10461,7 @@ extern "C" void glProgramLocalParameters4fvEXT(GLenum target, GLuint index, GLsi
 	pushParam(target);
 	pushParam(index);
 	pushParam(count);
-	pushBuf(params, sizeof(const GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(const GLfloat) * sizeof(params));
 }
 
 //1215
@@ -10539,7 +10543,7 @@ extern "C" void glPointParameterfvSGIS(GLenum pname, const GLfloat * params){
 	LOG("Called untested stub PointParameterfvSGIS!\n");
 	pushOp(1223);
 	pushParam(pname);
-	pushBuf(params, sizeof(const GLfloat) * sizeof(*params));
+	pushBuf(params, sizeof(const GLfloat) * sizeof(params));
 }
 
 //1224
@@ -10603,7 +10607,7 @@ extern "C" void glLoadIdentityDeformationMapSGIX(GLenum mask){
 	GLU Intercepts
 ********************************************************/
 
-#ifdef NOHACK
+#ifdef GLUFULL
 
 //1501
 extern "C" void gluBeginCurve (GLUnurbs* nurb) {
@@ -10806,7 +10810,7 @@ extern "C" void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, 
 	pushParam(zFar);
 }
 
-#ifdef NOHACK
+#ifdef GLUFULL
 
 //1540
 extern "C" void gluPickMatrix (GLdouble x, GLdouble y, GLdouble delX, GLdouble delY, GLint *viewport) {
@@ -10914,7 +10918,7 @@ LOG("Called unimplemted stub gluUnProject4!\n");
 	GLX Intercepts
 ********************************************************/
 
-#ifdef NOHACK
+#ifdef GLXFULL
 
 //Pointer to glXChooseVisual
 static XVisualInfo* (*_glXChooseVisual)(Display*, int, int*) = NULL;

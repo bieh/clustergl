@@ -30,9 +30,8 @@ bool TextModule::process(list<Instruction> &list){
 	for(std::list<Instruction>::iterator iter = list.begin(); 
 	    iter != list.end(); iter++){
 		counter++;
-	    	mFunctions[iter->id](iter->args);
-	//if(counter == 10)
-	//	sleep(1);	
+		if(iter->id < 1500)
+	    		mFunctions[iter->id](iter->args);
 	}
 	
 	LOG("*** End of frame\n\n");
