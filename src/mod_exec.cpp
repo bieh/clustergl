@@ -176,7 +176,8 @@ bool ExecModule::process(list<Instruction> &list){
 				if(right/bottom == (double) sizeX/sizeY || right/top == (double) sizeX/sizeY)	//if ratio is correct, do nothing
 					glOrtho(startingPoint, startingPoint + singleWidth, bottom, top, nearVal, farVal);
 				else	//if ratio incorrect, adjust so things dont get stretched
-					glOrtho(startingPoint, startingPoint + singleWidth, right * SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH, top, nearVal, farVal);
+					if(bottom > 0)glOrtho(startingPoint, startingPoint + singleWidth, right * SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH, top, nearVal, farVal);
+					else glOrtho(startingPoint, startingPoint + singleWidth, bottom, right * SYMPHONY_SCREEN_TOTAL_HEIGHT/SYMPHONY_SCREEN_TOTAL_WIDTH, nearVal, farVal);
 			}
 			else { 
 				if(right/bottom == (double) sizeX/sizeY || right/top == (double) sizeX/sizeY)	//if ratio is correct, do nothing
