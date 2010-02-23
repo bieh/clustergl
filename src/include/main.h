@@ -24,22 +24,24 @@ const float SYMPHONY_SCREEN_GAP = 120.0;
 /********************************************************
 	Main application object
 ********************************************************/
-class App{
-	vector<Module *> mModules;  
-	
-	void init();
-public:
-	list<Instruction> oneFrame; //space to hold Instructions for current and previous frames
-	list<Instruction> twoFrame; 
+class App
+{
+	vector<Module *> mModules;
 
-	//called when we're invoked from the command line
-	int run(int argc, char **argv);
-	
-	//called when we're invoked from LD_PRELOAD
-	int run_shared();
-	
-	bool tick();
-	
-	void debug();
-	
+	void init();
+	public:
+								 //space to hold Instructions for current and previous frames
+		list<Instruction> oneFrame;
+		list<Instruction> twoFrame;
+
+		//called when we're invoked from the command line
+		int run(int argc, char **argv);
+
+		//called when we're invoked from LD_PRELOAD
+		int run_shared();
+
+		bool tick();
+
+		void debug();
+
 };

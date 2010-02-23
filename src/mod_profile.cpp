@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-
 int instructionCounts[1700];
 int instructionBufferSizes[1700];
 const char * strings[1700];
@@ -11,10 +10,11 @@ const char * strings[1700];
 	Module Stuff
 *********************************************************/
 
-ProfileModule::ProfileModule() {
+ProfileModule::ProfileModule()
+{
 	LOG("ProfileModule!\n");
 	//reset BPS calculations
-	netBytes = 0;   
+	netBytes = 0;
 	netBytes2 = 0;
 	frames = 0;
 	//GL functions
@@ -1247,10 +1247,10 @@ ProfileModule::ProfileModule() {
 	strings[1226] = "glDeformationMap3fSGIX";
 	strings[1227] = "glDeformSGIX";
 	strings[1228] = "glLoadIdentityDeformationMapSGIX";
-	
+
 	//CGL functions
 	strings[1499] = "CGLSwapBuffers";
-	
+
 	//GLU functions
 	strings[1501] = "gluBeginCurve";
 	strings[1502] = "gluBeginPolygon";
@@ -1311,7 +1311,7 @@ ProfileModule::ProfileModule() {
 	strings[1557] = "gluTessVertex";
 	strings[1558] = "gluUnProject";
 	strings[1559] = "gluUnProject4";
-	
+
 	//GLX functions
 	strings[1601] = "glXChooseVisual";
 	strings[1602] = "glXCreateContext";
@@ -1358,56 +1358,66 @@ ProfileModule::ProfileModule() {
 	strings[1643] = "glXAllocateMemoryMESA";
 	strings[1644] = "glXFreeMemoryMESA";
 	strings[1645] = "glXGetMemoryOffsetMESA";
-	strings[1646] = "glXBindTexImageARB"; 
-	strings[1647] = "glXReleaseTexImageARB"; 
+	strings[1646] = "glXBindTexImageARB";
+	strings[1647] = "glXReleaseTexImageARB";
 	strings[1648] = "glXDrawableAttribARB";
 	strings[1649] = "glXGetFrameUsageMESA";
 	strings[1650] = "glXBeginFrameTrackingMESA";
-	strings[1651] = "glXEndFrameTrackingMESA"; 
+	strings[1651] = "glXEndFrameTrackingMESA";
 	strings[1652] = "glXQueryFrameTrackingMESA";
 	strings[1653] = "glXSwapIntervalMESA";
 	strings[1654] = "glXGetSwapIntervalMESA";
 	strings[1655] = "glXBindTexImageEXT";
 	strings[1656] = "glXReleaseTexImageEXT";
 	resetCounts();
-}	
+}
 
-bool ProfileModule::process(list<Instruction> &list){
 
-	for(std::list<Instruction>::iterator iter = list.begin(); 
-	    iter != list.end(); iter++){
-		   instructionCounts[iter->id]++;
-		   for(int n=0;n<3;n++){		
+bool ProfileModule::process(list<Instruction> &list)
+{
+
+	for(std::list<Instruction>::iterator iter = list.begin();
+	iter != list.end(); iter++) {
+		instructionCounts[iter->id]++;
+		for(int n=0;n<3;n++) {
 			instructionBufferSizes[iter->id] += iter->buffers[n].len;
-		    }
+		}
 	}
-	   
+
 	return true;
 }
 
-void ProfileModule::reply(Instruction *instr, int i){
+
+void ProfileModule::reply(Instruction *instr, int i)
+{
 	LOG("ProfileModule::reply: Shouldn't happen!\n");
 }
 
-bool ProfileModule::sync(){
+
+bool ProfileModule::sync()
+{
 	return true;
 }
 
-void ProfileModule::resetCounts(){
-	for(int i = 0; i < 1700; i++){
-	    	instructionCounts[i] = 0;
-		for(int n=0;n<3;n++){		
+
+void ProfileModule::resetCounts()
+{
+	for(int i = 0; i < 1700; i++) {
+		instructionCounts[i] = 0;
+		for(int n=0;n<3;n++) {
 			instructionBufferSizes[i] = 0;
-		    }
+		}
 	}
 }
 
-void ProfileModule::output(){
+
+void ProfileModule::output()
+{
 	int values[5] = {0, 0, 0, 0, 0};
 	int instructions[5] = {0, 0, 0, 0, 0};
-	for(int i = 0; i < 1700; i++){
+	for(int i = 0; i < 1700; i++) {
 		int count = instructionCounts[i];
-	    	if(count > 0) {
+		if(count > 0) {
 			if(count > values[4]) {
 				values[0] = values[1];
 				values[1] = values[2];
@@ -1448,23 +1458,26 @@ void ProfileModule::output(){
 				values[0] = count;
 				instructions[0] = i;
 			}
-		}	
+		}
 	}
 	int count = 1;
 	LOG("\n");
-	for(int i = 4; i >= 0; i--){
-	LOG("%d. Instruction: %s called %d times!\n", count, strings[instructions[i]], values[i]);
-	count++;
+	for(int i = 4; i >= 0; i--) {
+		LOG("%d. Instruction: %s called %d times!\n", count, strings[instructions[i]], values[i]);
+		count++;
 	}
 	LOG("\n");
 	outputBuffers();
 }
-void ProfileModule::outputBuffers(){
+
+
+void ProfileModule::outputBuffers()
+{
 	int values[5] = {0, 0, 0, 0, 0};
 	int instructions[5] = {0, 0, 0, 0, 0};
-	for(int i = 0; i < 1700; i++){
+	for(int i = 0; i < 1700; i++) {
 		int count = instructionBufferSizes[i];
-	    	if(count > 0) {
+		if(count > 0) {
 			if(count > values[4]) {
 				values[0] = values[1];
 				values[1] = values[2];
@@ -1505,14 +1518,13 @@ void ProfileModule::outputBuffers(){
 				values[0] = count;
 				instructions[0] = i;
 			}
-		}	
+		}
 	}
 	int count = 1;
-	for(int i = 4; i >= 0; i--){
-	if(values[i] > 0) LOG("%d. Instruction: %s used %lf KBytes!\n", count, strings[instructions[i]], (values[i]/1024.0));
-	count++;
+	for(int i = 4; i >= 0; i--) {
+		if(values[i] > 0) LOG("%d. Instruction: %s used %lf KBytes!\n", count, strings[instructions[i]], (values[i]/1024.0));
+		count++;
 	}
 	LOG("\n");
 	resetCounts();
 }
-

@@ -19,7 +19,6 @@
 #include <fstream>
 #include <cctype>
 
-
 using std::string;
 using std::vector;
 using std::list;
@@ -34,7 +33,6 @@ using std::map;
 #include <stdlib.h>
 #include <math.h>
 
-
 #ifdef _WINDOWS
 #include <Winsock2.h>
 #include <time.h>
@@ -47,7 +45,6 @@ using std::map;
 
 //libconfuse
 #include <confuse.h>
-
 
 /*********************************************
 					OpenGL
@@ -73,4 +70,3 @@ using std::map;
 #endif
 
 typedef unsigned char byte;
-

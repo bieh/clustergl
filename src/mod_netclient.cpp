@@ -40,13 +40,14 @@ byte mSendBuf[sendBufferSize];
 	Net Client Module
 *********************************************************/
 
-NetClientModule::NetClientModule(){
+NetClientModule::NetClientModule()
+{
 
 	//set the number of sockets to create/use
 	if(symphony) numConnections = 5;
 	else numConnections = 1;
 
-        //Make each socket and connect
+	//Make each socket and connect
 	for(int i = 0; i < numConnections; i++) {
 		if(useSYMPHONYnodes[i]) mSocket[i] = socket(PF_INET, SOCK_STREAM, 0);
 	}
@@ -55,34 +56,33 @@ NetClientModule::NetClientModule(){
 		//make a compressor object (if required)
 		compressor2 = new NetCompressModule();
 	}
-	
+
 	//set TCP options for each socket
 	int one = 1;
 	for(int i = 0; i < numConnections; i++) {
 		if(useSYMPHONYnodes[i]) {
 			setsockopt(mSocket[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 			setsockopt(mSocket[i], SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-			if(mSocket[i] == 0){
+			if(mSocket[i] == 0) {
 				LOG("Couldn't make socket!\n");
 				return;
 			}
 		}
 	}
 
-	
 	struct sockaddr_in mAddr[5];
-	
+
 	//connect each socket to server
 	for(int i = 0; i < numConnections; i++) {
 		if(useSYMPHONYnodes[i]) {
-			memset(&mAddr[i], 0, sizeof(mAddr[i]));   
-			mAddr[i].sin_family = AF_INET;   
-			mAddr[i].sin_addr.s_addr = inet_addr(addresses[i].c_str()); 
-			mAddr[i].sin_port = htons(port);  
+			memset(&mAddr[i], 0, sizeof(mAddr[i]));
+			mAddr[i].sin_family = AF_INET;
+			mAddr[i].sin_addr.s_addr = inet_addr(addresses[i].c_str());
+			mAddr[i].sin_port = htons(port);
 			//Establish connection
 			if (connect(mSocket[i],
 				(struct sockaddr *) &mAddr[i],
-				sizeof(mAddr[i])) < 0) {
+			sizeof(mAddr[i])) < 0) {
 				LOG("Failed to connect with server '%s:%d'\n", addresses[i].c_str(), port);
 				mSocket[i] = 0;
 				return;
@@ -90,36 +90,37 @@ NetClientModule::NetClientModule(){
 			LOG("Connected to remote pipeline on %s:%d\n", addresses[i].c_str(), port);
 		}
 	}
-	
+
 	//reset BPS calculations
 	frames = 0;
-	netBytes = 0;   
-	netBytes2 = 0; 
+	netBytes = 0;
+	netBytes2 = 0;
 
-	
 }
+
 
 /*********************************************************
 	Net Client Process Instrctions
 *********************************************************/
 
-bool NetClientModule::process(list<Instruction> &list){
+bool NetClientModule::process(list<Instruction> &list)
+{
 	//Send all the commands in the list down the socket
 	//LOG("processing:\n");
 	for(int i = 0; i < numConnections; i++) {
 		if(useSYMPHONYnodes[i]) {
-			if(mSocket[i] == 0){
+			if(mSocket[i] == 0) {
 				return false;
 			}
 		}
 	}
-	
+
 	//First send the total number
 	uint32_t num = list.size();
 	//LOG("num instructions netClient: %d!\n", num);
 	fflush(stdout);
 	netBytes += sizeof(uint32_t) * numConnections;
-	if(!myWrite(&num, sizeof(uint32_t))){
+	if(!myWrite(&num, sizeof(uint32_t))) {
 		LOG("Connection problem!\n");
 		return false;
 	}
@@ -129,106 +130,107 @@ bool NetClientModule::process(list<Instruction> &list){
 
 	//Now send the instructions
 	int counter = 0;
-	for(std::list<Instruction>::iterator iter = list.begin(), pIter = (*prevFrame).begin(); 
-	    iter != list.end(); iter++){
-	    Instruction *i = &(*iter); //yuck
-	    bool mustSend = false;
+	for(std::list<Instruction>::iterator iter = list.begin(), pIter = (*prevFrame).begin();
+	iter != list.end(); iter++) {
+								 //yuck
+		Instruction *i = &(*iter);
+		bool mustSend = false;
 
-	    for(int n=0;n<3;n++){		
-		if(i->buffers[n].len > 0){
-			//If we expect a buffer back then we must send Instruction
-			if(i->buffers[n].needReply) mustSend = true;
-		}
-	    };
+		for(int n=0;n<3;n++) {
+			if(i->buffers[n].len > 0) {
+				//If we expect a buffer back then we must send Instruction
+				if(i->buffers[n].needReply) mustSend = true;
+			}
+		};
 
-	    if (useRepeat 	//value from config to enable/disable deltas
-		&& i->id == pIter->id 	//if the instruction has the same id as previous	
-		&& !mustSend && i->id 	//mustSend is set when expecting a reply		
-		  && sameCount < 100	//stops sameBuffer filling up indefinitely (is this needed?)
+		if (useRepeat			 //value from config to enable/disable deltas
+			&& i->id == pIter->id//if the instruction has the same id as previous
+			&& !mustSend && i->id//mustSend is set when expecting a reply
+			&& sameCount < 100	 //stops sameBuffer filling up indefinitely (is this needed?)
 		) {
 			//assume the instruction is the same
 			bool same = true;
 			//compare all arguments
-			for (int a=0;a<MAX_ARG_LEN;a++){
-				if (i->args[a]!=pIter->args[a]){
+			for (int a=0;a<MAX_ARG_LEN;a++) {
+				if (i->args[a]!=pIter->args[a]) {
 					same = false;
 					break;
 				}
 			}
-			
+
 			//if arguments the same, compare all buffers
-			if (same){
-				for (int a=0;a<3;a++) {						
-					if (i->buffers[a].len > 0){
-						if(i->buffers[a].len != pIter->buffers[a].len){
+			if (same) {
+				for (int a=0;a<3;a++) {
+					if (i->buffers[a].len > 0) {
+						if(i->buffers[a].len != pIter->buffers[a].len) {
 							same = false;
 							break;
 						}
-						else if (i->buffers[a].needClear != pIter->buffers[a].needClear){
+						else if (i->buffers[a].needClear != pIter->buffers[a].needClear) {
 							same = false;
 							break;
 						}
-						else if (memcmp(i->buffers[a].buffer,pIter->buffers[a].buffer,i->buffers[a].len) != 0){
+						else if (memcmp(i->buffers[a].buffer,pIter->buffers[a].buffer,i->buffers[a].len) != 0) {
 							same = false;
 							break;
 						}
 					}
 				}
 			}
-			
+
 			//if arguments and buffers match, the instruction is identical
 			if (same) {
 				sameCount++;
-				if (pIter != (*prevFrame).end()) 
+				if (pIter != (*prevFrame).end())
 					pIter++;
-				continue; 
-			}	
-	    }
+				continue;
+			}
+		}
 
-	    if (sameCount> 0){ // send a count of the duplicates before this instruction
-		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
-		if (skip == 0){
-			LOG("ERROR: Out of memory\n");
-			exit(-1);	
+		if (sameCount> 0) {		 // send a count of the duplicates before this instruction
+			Instruction * skip = (Instruction *)malloc(sizeof(Instruction));
+			if (skip == 0) {
+				LOG("ERROR: Out of memory\n");
+				exit(-1);
+			}
+			skip->id = CGL_REPEAT_INSTRUCTION;
+			skip->args[0] = (uint32_t) sameCount;
+			for(int i=0;i<3;i++) {
+				skip->buffers[i].buffer = NULL;
+				skip->buffers[i].len = 0;
+				skip->buffers[i].needClear = false;
+			}
+			netBytes += sizeof(Instruction) * numConnections;
+			if(myWrite(skip, sizeof(Instruction))!= sizeof(Instruction)) {
+				LOG("Connection problem (didn't send instruction)!\n");
+				return false;
+			}
+			sameCount = 0;		 // reset the count and free the memory
+			free(skip);
 		}
-		skip->id = CGL_REPEAT_INSTRUCTION;
-		skip->args[0] = (uint32_t) sameCount;
-		for(int i=0;i<3;i++){
-			skip->buffers[i].buffer = NULL;
-			skip->buffers[i].len = 0;
-			skip->buffers[i].needClear = false;
-		}
+
+		// now send the new instruction
 		netBytes += sizeof(Instruction) * numConnections;
-		if(myWrite(skip, sizeof(Instruction))!= sizeof(Instruction)){
-		    	LOG("Connection problem (didn't send instruction)!\n");
-		    	return false;
+		if(myWrite(i, sizeof(Instruction)) != sizeof(Instruction)) {
+			LOG("Connection problem (didn't send instruction)!\n");
+			return false;
 		}
-		sameCount = 0; // reset the count and free the memory
-		free(skip);
-	    }
-	   
-	    // now send the new instruction
-		netBytes += sizeof(Instruction) * numConnections;
-	    if(myWrite(i, sizeof(Instruction)) != sizeof(Instruction)){
-	    		LOG("Connection problem (didn't send instruction)!\n");
-	    		return false;
-	    }
-	    
-	    //Now see if we need to send any buffers
-		for(int n=0;n<3;n++){
+
+		//Now see if we need to send any buffers
+		for(int n=0;n<3;n++) {
 			int l = i->buffers[n].len;
-		
-			if(l > 0){
-				netBytes += l * numConnections;	
-				if(myWrite(i->buffers[n].buffer, l) != l){
+
+			if(l > 0) {
+				netBytes += l * numConnections;
+				if(myWrite(i->buffers[n].buffer, l) != l) {
 					LOG("Connection problem (didn't write buffer %d)!\n", l);
 					return false;
 				}
 				//And check if we're expecting a buffer back in response
-				if(i->buffers[n].needReply){
-					
+				if(i->buffers[n].needReply) {
+
 					sendBuffer();
-					if(int x = myRead(i->buffers[n].buffer, l) != l){
+					if(int x = myRead(i->buffers[n].buffer, l) != l) {
 						LOG("Connection problem NetClient (didn't recv buffer %d got: %d)!\n", l, x);
 						return false;
 					}
@@ -237,41 +239,43 @@ bool NetClientModule::process(list<Instruction> &list){
 			}
 		}
 		if (pIter != (*prevFrame).end()) pIter++;
-	    counter++;
+		counter++;
 	}
-	
-	   //send any instructions that are remaining in the CGL_REPEAT_INSTRUCTION buffer
-	    if (sameCount> 0){ // send a count of the duplicates before this instruction
-		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));		
-		if (skip == 0){
+
+	//send any instructions that are remaining in the CGL_REPEAT_INSTRUCTION buffer
+	if (sameCount> 0) {			 // send a count of the duplicates before this instruction
+		Instruction * skip = (Instruction *)malloc(sizeof(Instruction));
+		if (skip == 0) {
 			LOG("ERROR: Out of memory\n");
-			exit(-1);	
+			exit(-1);
 		}
 		skip->id = CGL_REPEAT_INSTRUCTION;
 		skip->args[0] = (uint32_t) sameCount;
-		for(int i=0;i<3;i++){
+		for(int i=0;i<3;i++) {
 			skip->buffers[i].buffer = NULL;
 			skip->buffers[i].len = 0;
 			skip->buffers[i].needClear = false;
 		}
 		netBytes += sizeof(Instruction) * numConnections;
-		if(myWrite(skip, sizeof(Instruction))!= sizeof(Instruction)){
-		    	LOG("Connection problem (didn't send instruction)!\n");
-		    	return false;
+		if(myWrite(skip, sizeof(Instruction))!= sizeof(Instruction)) {
+			LOG("Connection problem (didn't send instruction)!\n");
+			return false;
 		}
-		sameCount = 0; // reset the count and free the memory
+		sameCount = 0;			 // reset the count and free the memory
 		free(skip);
-	    }
-	    sendBuffer();
+	}
+	sendBuffer();
 
 	return true;
 }
+
 
 /*********************************************************
 	Net Client Sync
 *********************************************************/
 
-bool NetClientModule::sync(){
+bool NetClientModule::sync()
+{
 	//ensure all remaining messages are sent instantly
 	sendBuffer();
 	uint32_t * a = (uint32_t *)malloc(sizeof(uint32_t));
@@ -281,12 +285,12 @@ bool NetClientModule::sync(){
 	for(int i = 0; i < numConnections; i++) {
 		if(useSYMPHONYnodes[i]) {
 			int fd = mSocket[i];
-			if(write(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)){
+			if(write(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)) {
 				LOG("Connection problem NetClientModule (didn't send sync)!\n");
 				return false;
 			}
 
-			if(read(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)){
+			if(read(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)) {
 				LOG("Connection problem NetClientModule (didn't recv sync)!\n");
 				return false;
 			}
@@ -299,24 +303,13 @@ bool NetClientModule::sync(){
 	return true;
 }
 
+
 /*********************************************************
 	Net Client Run Compression
 *********************************************************/
 
-int NetClientModule::myWrite(void* buf, int nByte){
-	
-	if(bytesLeft - nByte > 0) {
-		memcpy(mSendBuf + iSendBufPos, buf, nByte);
-		iSendBufPos += nByte;
-		bytesLeft -= nByte;
-	}
-	else {
-		sendBuffer();
-	}
-	return nByte;
-}
-
-int NetClientModule::myWrite(void* buf, unsigned nByte){
+int NetClientModule::myWrite(void* buf, int nByte)
+{
 
 	if(bytesLeft - nByte > 0) {
 		memcpy(mSendBuf + iSendBufPos, buf, nByte);
@@ -329,7 +322,10 @@ int NetClientModule::myWrite(void* buf, unsigned nByte){
 	return nByte;
 }
 
-int NetClientModule::myWrite(void* buf, long unsigned nByte){
+
+int NetClientModule::myWrite(void* buf, unsigned nByte)
+{
+
 	if(bytesLeft - nByte > 0) {
 		memcpy(mSendBuf + iSendBufPos, buf, nByte);
 		iSendBufPos += nByte;
@@ -341,7 +337,23 @@ int NetClientModule::myWrite(void* buf, long unsigned nByte){
 	return nByte;
 }
 
-void NetClientModule::sendBuffer() {
+
+int NetClientModule::myWrite(void* buf, long unsigned nByte)
+{
+	if(bytesLeft - nByte > 0) {
+		memcpy(mSendBuf + iSendBufPos, buf, nByte);
+		iSendBufPos += nByte;
+		bytesLeft -= nByte;
+	}
+	else {
+		sendBuffer();
+	}
+	return nByte;
+}
+
+
+void NetClientModule::sendBuffer()
+{
 
 	if(iSendBufPos > 0) {
 		if(usingSendCompression) {
@@ -357,21 +369,21 @@ void NetClientModule::sendBuffer() {
 					uint32_t fd = mSocket[i];
 
 					//first write the original size of the buffer
-					if(!write(fd, &iSendBufPos, sizeof(uint32_t))){
+					if(!write(fd, &iSendBufPos, sizeof(uint32_t))) {
 						LOG("Connection problem!\n");
 					}
 
 					//then write the compressed size of the buffer
-					if(!write(fd, &newSize, sizeof(uint32_t))){
+					if(!write(fd, &newSize, sizeof(uint32_t))) {
 						LOG("Connection problem!\n");
 					}
 
 					//then write the actual buffer
-					if(!write(fd, out, newSize)){
+					if(!write(fd, out, newSize)) {
 						LOG("Connection problem!\n");
 					}
 				}
-				
+
 			}
 			free(out);
 			iSendBufPos = 0;
@@ -385,34 +397,37 @@ void NetClientModule::sendBuffer() {
 					uint32_t fd = mSocket[i];
 
 					//first write the original size of the buffer
-					if(!write(fd, &iSendBufPos, sizeof(uint32_t))){
+					if(!write(fd, &iSendBufPos, sizeof(uint32_t))) {
 						LOG("Connection problem!\n");
 					}
 
 					//then write the actual buffer
-					if(!write(fd, mSendBuf, iSendBufPos)){
+					if(!write(fd, mSendBuf, iSendBufPos)) {
 						LOG("Connection problem!\n");
 					}
 				}
 			}
-		
-			netBytes2 += iSendBufPos * numConnections;	//should + sizeof(int) * numConnections overhead
+
+								 //should + sizeof(int) * numConnections overhead
+			netBytes2 += iSendBufPos * numConnections;
 			bytesLeft = sendBufferSize;
 			iSendBufPos = 0;
 		}
-	}	
+	}
 }
+
 
 /*********************************************************
 	Net Client Run Decompression
 *********************************************************/
 
-int NetClientModule::myRead(void *buf, size_t count){
+int NetClientModule::myRead(void *buf, size_t count)
+{
 	uint32_t ret[5];
 	//read in replys from each socket
 	for(int i = 0; i < numConnections; i++) {
 		if(useSYMPHONYnodes[i]) {
-				int fd = mSocket[i];
+			int fd = mSocket[i];
 
 			if(usingReplyCompression) {
 				size_t *a = &count;
@@ -431,32 +446,31 @@ int NetClientModule::myRead(void *buf, size_t count){
 				if(ret[i] == compressedSize)
 					ret[i] = origSize;
 				else
-					return 0; //return error
-				if(i == 0)	//only bother to decompress/process the first one
+					return 0;	 //return error
+				if(i == 0)		 //only bother to decompress/process the first one
 					compressor2->myDecompress(buf, count, in, compressedSize);
 				free(in);
 			}
 			else {
-					if(i == 0) {
-						int remaining = count;
-						while(remaining > 0) {
+				if(i == 0) {
+					int remaining = count;
+					while(remaining > 0) {
 						ret[i] = read(fd, buf, remaining);
 						remaining -= ret[i];
-						}
-						ret[0] = count;
 					}
-	 				else {
-	 					byte * tempBuf = (byte *) malloc(count);
-						int remaining = count;
-						while(remaining > 0) {
-	 					ret[i] = read(fd, tempBuf, count);
+					ret[0] = count;
+				}
+				else {
+					byte * tempBuf = (byte *) malloc(count);
+					int remaining = count;
+					while(remaining > 0) {
+						ret[i] = read(fd, tempBuf, count);
 						remaining -= ret[i];
-						}
-	 					free(tempBuf);
-	 				}
+					}
+					free(tempBuf);
+				}
 			}
 		}
 	}
 	return ret[0];
 }
-

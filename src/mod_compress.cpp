@@ -26,31 +26,40 @@ extern int compressingMethod;
 	Module Stuff
 *********************************************************/
 
-NetCompressModule::NetCompressModule() {
+NetCompressModule::NetCompressModule()
+{
 	if(compressingMethod == 2 || compressingMethod == 3) {
 		if (lzo_init() != LZO_E_OK) {
-		    printf("LZO init failed!\n");
+			printf("LZO init failed!\n");
 		}
 	}
-}	
+}
 
-bool NetCompressModule::process(list<Instruction> &i){
+
+bool NetCompressModule::process(list<Instruction> &i)
+{
 	LOG("NetCompressModule::process: Shouldn't happen!\n");
 }
 
-void NetCompressModule::reply(Instruction *instr, int i){
+
+void NetCompressModule::reply(Instruction *instr, int i)
+{
 	LOG("NetCompressModule::reply: Shouldn't happen!\n");
 }
 
-bool NetCompressModule::sync(){
+
+bool NetCompressModule::sync()
+{
 	LOG("NetCompressModule::sync: Shouldn't happen!\n");
 }
+
 
 /*********************************************************
 	Compress Method
 *********************************************************/
 
-int NetCompressModule::myCompress(void *input, int nByte, void *output){
+int NetCompressModule::myCompress(void *input, int nByte, void *output)
+{
 	uLongf CompBuffSize = 0;
 	if(compressingMethod == 1)
 		CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
@@ -63,8 +72,7 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 	else if(compressingMethod == 3)
 		workingMemory = (unsigned char*)malloc(LZO1X_1_15_MEM_COMPRESS);
 	int ret = 0;
-	if(nByte > 4)
-	{	
+	if(nByte > 4) {
 		int compressLevel = 1;
 		if(compressingMethod == 1)
 			ret = compress2((Bytef *) output, &CompBuffSize, (Bytef *) input, nByte, compressLevel);
@@ -72,10 +80,9 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 			ret = lzo1b_compress((Bytef *) input, nByte, (Bytef *) output, &CompBuffSize, workingMemory, compressLevel);
 		else if(compressingMethod == 3)
 			ret = lzo1x_1_15_compress((Bytef *) input, nByte, (Bytef *) output, &CompBuffSize, workingMemory);
-		
+
 		if(compressingMethod == 1) {
-			if(ret != Z_OK)
-			{
+			if(ret != Z_OK) {
 				if(ret == Z_MEM_ERROR)
 					LOG("ERROR compressing: memory error\n");
 				else if(ret == Z_BUF_ERROR)
@@ -85,36 +92,35 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output){
 			}
 		}
 	}
-	else
-	{
-	memcpy(output, input, nByte);
-	CompBuffSize = nByte;
+	else {
+		memcpy(output, input, nByte);
+		CompBuffSize = nByte;
 	}
 	if(compressingMethod == 2 || compressingMethod == 3)
 		free(workingMemory);
 	return CompBuffSize;
 }
 
+
 /*********************************************************
 	Decompress Method
 *********************************************************/
 
-int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int sourceLen){
+int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int sourceLen)
+{
 	uLongf newSource = sourceLen;
 	uLongf newDest = destLen;
-	int ret = 0;		
-	if(sourceLen > 4)
-	{
+	int ret = 0;
+	if(sourceLen > 4) {
 		if(compressingMethod == 1)
 			ret = uncompress((Bytef*) dest, (uLongf*) &newDest, (const Bytef*)source, newSource);
 		else if(compressingMethod == 2)
 			ret = lzo1b_decompress((const Bytef*)source, newSource, (Bytef*) dest, &newDest, NULL);
 		else if(compressingMethod == 3)
 			ret = lzo1x_decompress((const Bytef*)source, newSource, (Bytef*) dest, &newDest, NULL);
-		
+
 		if(compressingMethod == 1) {
-			if(ret != Z_OK)
-			{
+			if(ret != Z_OK) {
 				if(ret == Z_MEM_ERROR)
 					LOG("ERROR decompressing: memory error\n");
 				else if(ret == Z_BUF_ERROR)
@@ -124,8 +130,7 @@ int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int s
 			}
 		}
 	}
-	else
-	{
+	else {
 		memcpy(dest, source, sourceLen);
 	}
 	return ret;
