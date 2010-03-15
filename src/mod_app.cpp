@@ -8,9 +8,9 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
-//#define  NOHACK true
-//#define  GLXFULL true
-//#define  GLUFULL true
+#define  NOHACK true
+#define  GLXFULL true
+#define  GLUFULL true
 
 extern App *theApp;
 
@@ -363,7 +363,7 @@ void sendPointers(int length)
 	//if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
 	//{
 	//interleaved arrays pointer
-	int size = 0;
+	/*int size = 0;
 	switch (rpInter.type) {
 		case GL_V2F:            size = sizeof(GLfloat) * 2; break;
 		case GL_V3F:            size = sizeof(GLfloat) * 3; break;
@@ -387,7 +387,7 @@ void sendPointers(int length)
 	pushParam(false);
 								 //drawing quads?
 	pushBuf(rpInter.pointer, ((size + rpInter.stride) * length));
-	rpInter.sent = true;
+	rpInter.sent = true;*/
 	//}
 }
 
@@ -395,7 +395,7 @@ void sendPointers(int length)
 /********************************************************
 	SDL Intercepts
 ********************************************************/
-
+/*
 //Pointer to SDL_INIT
 static int (*_SDL_Init)(unsigned int flags) = NULL;
 //Pointer to SDL_SetVideoMode
@@ -460,7 +460,7 @@ extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags)
 extern "C" int SDL_GL_LoadLibrary(const char *path) {
 	LOG("*SDL_GL_LoadLibrary called, searching for: %s!\n", path);
 	return -1;
-}*/
+}
 
 extern "C" void *SDL_GL_GetProcAddress(const char* proc)
 {
@@ -497,6 +497,7 @@ extern "C" void SDL_GL_SwapBuffers( )
 		exit(1);
 	}
 }
+*/
 
 
 /********************************************************
@@ -3012,7 +3013,7 @@ extern "C" void glGetIntegerv(GLenum pname, GLint * params)
 	pushOp(263);
 	pushParam(pname);
 								 //4 max num of params returned
-	pushBuf(params, sizeof(GLint) *4, true);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
 #endif
@@ -13537,27 +13538,55 @@ extern "C" GLint gluUnProject4 (GLdouble winX, GLdouble winY, GLdouble winZ, GLd
 
 //Pointer to glXChooseVisual
 static XVisualInfo* (*_glXChooseVisual)(Display*, int, int*) = NULL;
+//Pointer to glXCreateContext
+static GLXContext (*_glXCreateContext)( Display*, XVisualInfo*, GLXContext, Bool) = NULL;
+//Pointer to glXMakeCurrent
+static Bool (*_glXMakeCurrent)( Display*, GLXDrawable, GLXContext) = NULL;
+//Pointer to glXQueryExtensionsString
+static const char * (*_glXQueryExtensionsString)( Display*, int) = NULL;
+//Pointer to glXGetProcAddressARB
+static __GLXextFuncPtr (*_glXGetProcAddressARB)(const GLubyte *) = NULL;
 
+
+
+
+void * dlhandle;
 //1601
 extern "C" XVisualInfo* glXChooseVisual( Display *dpy, int screen, int *attribList )
 {
-	LOG("Called untested stub glXChooseVisual!\n");
+	//Set up our internals
+	if(!theApp) {
+		theApp = new App();
+		theApp->run_shared();
+	}
+
 	if (_glXChooseVisual == NULL) {
-		_glXChooseVisual = (XVisualInfo* (*)(Display*, int, int*))  dlsym(RTLD_NEXT, "glXChooseVisual");
+		dlhandle = dlopen("//usr/lib/libGL.so", RTLD_LAZY);
+               if (dlhandle==NULL) {
+			printf("//usr/lib/xorg/modules/extensions/libglx.so: %s\n", dlerror());
+			exit(0);
+               }
+		_glXChooseVisual = (XVisualInfo* (*)(Display*, int, int*))  dlsym(dlhandle, "glXChooseVisual");
 	}
 	if(!_glXChooseVisual) {
 		printf("Couldn't find glXChooseVisual: %s\n", dlerror());
 		exit(0);
 	}
 	return  (*_glXChooseVisual) (dpy ,screen, attribList);
-
 }
 
 
 //1602
 extern "C" GLXContext glXCreateContext( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct )
 {
-	LOG("Called unimplemted stub glXCreateContext!\n");
+	if (_glXCreateContext == NULL) {
+		_glXCreateContext = (GLXContext (*)(Display*, XVisualInfo*, GLXContext, Bool))  dlsym(dlhandle, "glXCreateContext");
+	}
+	if(!_glXCreateContext) {
+		printf("Couldn't find glXCreateContext: %s\n", dlerror());
+		exit(0);
+	}
+	return  (*_glXCreateContext) (dpy, vis, shareList, direct);
 }
 
 
@@ -13571,7 +13600,14 @@ extern "C" void glXDestroyContext( Display *dpy, GLXContext ctx )
 //1604
 extern "C" Bool glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
-	LOG("Called unimplemted stub glXMakeCurrent!\n");
+	if (_glXMakeCurrent == NULL) {
+		_glXMakeCurrent = (Bool (*)( Display*, GLXDrawable, GLXContext))  dlsym(dlhandle, "glXMakeCurrent");
+	}
+	if(!_glXMakeCurrent) {
+		printf("Couldn't find glXMakeCurrent: %s\n", dlerror());
+		exit(0);
+	}
+	return  (*_glXMakeCurrent) (dpy, drawable, ctx);
 }
 
 
@@ -13585,7 +13621,13 @@ extern "C" void glXCopyContext( Display *dpy, GLXContext src, GLXContext dst, un
 //1606
 extern "C" void glXSwapBuffers( Display *dpy, GLXDrawable drawable )
 {
-	LOG("Called unimplemted stub glXSwapBuffers!\n");
+	//LOG("Called untested stub glXSwapBuffers!\n");
+	pushOp(1499);				 //Swap buffers
+	(*iFrames)++;
+	if(!theApp->tick()) {
+		LOG("end swapping\n");
+		exit(1);
+	}
 }
 
 
@@ -13670,7 +13712,15 @@ extern "C" void glXUseXFont( Font font, int first, int count, int list )
 //1618
 extern "C" const char *glXQueryExtensionsString( Display *dpy, int screen )
 {
-	LOG("Called unimplemted stub glXQueryExtensionsString!\n");
+	if (_glXQueryExtensionsString == NULL) {
+		_glXQueryExtensionsString = (const char * (*)( Display*, int))  dlsym(dlhandle, "glXQueryExtensionsString");
+	}
+	if(!_glXQueryExtensionsString) {
+		printf("Couldn't find glXQueryExtensionsString: %s\n", dlerror());
+		exit(0);
+	}
+	return  (*_glXQueryExtensionsString) (dpy, screen);
+
 }
 
 
@@ -13817,9 +13867,16 @@ extern "C" void glXGetSelectedEvent( Display *dpy, GLXDrawable drawable, unsigne
 
 
 //1639
-extern "C" __GLXextFuncPtr glXGetProcAddressARB (const GLubyte *)
+extern "C" __GLXextFuncPtr glXGetProcAddressARB (const GLubyte * str)
 {
-	LOG("Called unimplemted stub glXGetProcAddressARB!\n");
+	if (_glXGetProcAddressARB == NULL) {
+		_glXGetProcAddressARB = (__GLXextFuncPtr (*)(const GLubyte *))  dlsym(dlhandle, "glXGetProcAddressARB");
+	}
+	if(!_glXGetProcAddressARB) {
+		printf("Couldn't find glXGetProcAddressARB: %s\n", dlerror());
+		exit(0);
+	}
+	return  (*_glXGetProcAddressARB) (str);
 }
 
 
