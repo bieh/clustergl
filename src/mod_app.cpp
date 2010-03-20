@@ -8,9 +8,11 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
-#define  NOHACK true
-#define  GLXFULL true
-#define  GLUFULL true
+
+#include <X11/extensions/xf86vmode.h>
+#include <X11/keysym.h>
+
+#define MAX_STRING_LENGTH 4096
 
 extern App *theApp;
 
@@ -2102,8 +2104,7 @@ extern "C" void glPolygonMode(GLenum face, GLenum mode)
 extern "C" void glPolygonStipple(const GLubyte * mask)
 {
 	LOG("Called untested stub PolygonStipple!\n");
-								 //stipple = 32 x 32
-	pushBuf(mask, sizeof(GLubyte) * 32 * 32);
+	pushBuf(mask, sizeof(GLubyte) * 32 * 32);	 //stipple = 32 x 32
 }
 
 
@@ -2139,7 +2140,7 @@ extern "C" void glTexParameterf(GLenum target, GLenum pname, GLfloat param)
 //179
 extern "C" void glTexParameterfv(GLenum target, GLenum pname, const GLfloat * params)
 {
-	LOG("Called untested stub TexParameterfv!\n");
+	LOG("Called broken stub TexParameterfv!\n");
 	pushOp(179);
 	pushParam(target);
 	pushParam(pname);
@@ -2160,7 +2161,7 @@ extern "C" void glTexParameteri(GLenum target, GLenum pname, GLint param)
 //181
 extern "C" void glTexParameteriv(GLenum target, GLenum pname, const GLint * params)
 {
-	LOG("Called untested stub TexParameteriv!\n");
+	LOG("Called broken stub TexParameteriv!\n");
 	pushOp(181);
 	pushParam(target);
 	pushParam(pname);
@@ -2218,7 +2219,7 @@ extern "C" void glTexEnvf(GLenum target, GLenum pname, GLfloat param)
 //185
 extern "C" void glTexEnvfv(GLenum target, GLenum pname, const GLfloat * params)
 {
-	LOG("Called untested stub TexEnvfv!\n");
+	LOG("Called broken stub TexEnvfv!\n");
 	pushOp(185);
 	pushParam(target);
 	pushParam(pname);
@@ -2239,7 +2240,7 @@ extern "C" void glTexEnvi(GLenum target, GLenum pname, GLint param)
 //187
 extern "C" void glTexEnviv(GLenum target, GLenum pname, const GLint * params)
 {
-	LOG("Called untested stub TexEnviv!\n");
+	LOG("Called broken stub TexEnviv!\n");
 	pushOp(187);
 	pushParam(target);
 	pushParam(pname);
@@ -2260,7 +2261,7 @@ extern "C" void glTexGend(GLenum coord, GLenum pname, GLdouble param)
 //189
 extern "C" void glTexGendv(GLenum coord, GLenum pname, const GLdouble * params)
 {
-	LOG("Called untested stub TexGendv!\n");
+	LOG("Called broken stub TexGendv!\n");
 	pushOp(189);
 	pushParam(coord);
 	pushParam(pname);
@@ -2285,8 +2286,7 @@ extern "C" void glTexGenfv(GLenum coord, GLenum pname, const GLfloat * params)
 	pushParam(coord);
 	pushParam(pname);
 	int size = sizeof(const GLfloat);
-								 //GL_EYE_PLANE or GL_OBJECT_PLANE
-	if (pname == 9473 || pname == 9474)
+	if (pname == GL_EYE_PLANE || pname == GL_OBJECT_PLANE)
 		size *= 4;
 	pushBuf(params, size);
 }
@@ -2309,7 +2309,10 @@ extern "C" void glTexGeniv(GLenum coord, GLenum pname, const GLint * params)
 	pushOp(193);
 	pushParam(coord);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	int size = sizeof(const GLint);
+	if (pname == GL_EYE_PLANE || pname == GL_OBJECT_PLANE)
+		size *= 4;
+	pushBuf(params, size);
 }
 
 
@@ -2943,9 +2946,10 @@ extern "C" void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenu
 //258
 extern "C" void glGetBooleanv(GLenum pname, GLboolean * params)
 {
-	LOG("Called untested stub GetBooleanv!\n");
+	LOG("Called broken stub GetBooleanv!\n");
 	pushOp(258);
 	pushParam(pname);
+	int size = sizeof(GLboolean); //needs to * by size. List of pname is huge!
 	pushBuf(params, sizeof(GLboolean) * sizeof(params));
 }
 
@@ -2959,15 +2963,12 @@ extern "C" void glGetClipPlane(GLenum plane, GLdouble * equation)
 	waitForReturn();
 }
 
-
-#ifdef NOHACK
-
 //260
 extern "C" void glGetDoublev(GLenum pname, GLdouble * params)
 {
 	LOG("Called unimplemted stub GetDoublev!\n");
+	//List of pname is huge!
 }
-#endif
 
 //261
 extern "C" GLenum glGetError()
@@ -2996,9 +2997,6 @@ extern "C" GLenum glGetError()
 	return ret;
 }
 
-
-#ifdef NOHACK
-
 //262
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params)
 {
@@ -3016,7 +3014,6 @@ extern "C" void glGetIntegerv(GLenum pname, GLint * params)
 	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
-#endif
 
 //264
 extern "C" void glGetLightfv(GLenum light, GLenum pname, GLfloat * params)
@@ -3083,7 +3080,20 @@ extern "C" void glGetMaterialfv(GLenum face, GLenum pname, GLfloat * params)
 	pushOp(269);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	int size = sizeof(GLfloat);
+	if(pname == GL_SHININESS)
+	{
+	//one
+	}
+	else if(pname == GL_COLOR_INDEXES)
+	{
+	size *= 3;
+	}
+	else
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -3095,7 +3105,20 @@ extern "C" void glGetMaterialiv(GLenum face, GLenum pname, GLint * params)
 	pushOp(270);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	int size = sizeof(GLint);
+	if(pname == GL_SHININESS)
+	{
+	//one
+	}
+	else if(pname == GL_COLOR_INDEXES)
+	{
+	size *= 3;
+	}
+	else
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -3103,10 +3126,11 @@ extern "C" void glGetMaterialiv(GLenum face, GLenum pname, GLint * params)
 //271
 extern "C" void glGetPixelMapfv(GLenum map, GLfloat * values)
 {
-	LOG("Called untested stub GetPixelMapfv!\n");
+	LOG("Called broken stub GetPixelMapfv!\n");
 	pushOp(271);
 	pushParam(map);
-	pushBuf(values, sizeof(GLfloat) * sizeof(*values), true);
+	//"To determine the required size of map, call glGet with the appropriate symbolic constant."  
+	pushBuf(values, sizeof(GLfloat) * sizeof(values), true);
 	waitForReturn();
 }
 
@@ -3114,10 +3138,10 @@ extern "C" void glGetPixelMapfv(GLenum map, GLfloat * values)
 //272
 extern "C" void glGetPixelMapuiv(GLenum map, GLuint * values)
 {
-	LOG("Called untested stub GetPixelMapuiv!\n");
+	LOG("Called broken stub GetPixelMapuiv!\n");
 	pushOp(272);
 	pushParam(map);
-	pushBuf(values, sizeof(GLuint) * sizeof(*values), true);
+	pushBuf(values, sizeof(GLuint) * sizeof(values), true);
 	waitForReturn();
 }
 
@@ -3125,10 +3149,10 @@ extern "C" void glGetPixelMapuiv(GLenum map, GLuint * values)
 //273
 extern "C" void glGetPixelMapusv(GLenum map, GLushort * values)
 {
-	LOG("Called untested stub GetPixelMapusv!\n");
+	LOG("Called broken stub GetPixelMapusv!\n");
 	pushOp(273);
 	pushParam(map);
-	pushBuf(values, sizeof(GLushort) * sizeof(*values), true);
+	pushBuf(values, sizeof(GLushort) * sizeof(values), true);
 	waitForReturn();
 }
 
@@ -3138,63 +3162,108 @@ extern "C" void glGetPolygonStipple(GLubyte * mask)
 {
 	LOG("Called untested stub GetPolygonStipple!\n");
 	pushOp(274);
-								 //32 x 32 stipple
-	pushBuf(mask, sizeof(GLubyte) * 32 * 32, true);
+	pushBuf(mask, sizeof(GLubyte) * 32 * 32, true); //32 x 32 stipple
 }
 
 
 //275
 extern "C" const GLubyte * glGetString(GLenum name)
 {
-	//LOG("Called untested stub glGetString!\n");
 	pushOp(275);
 	pushParam(name);
 
-	//currently glGetString returns 3379 characters on my machine
-	const GLubyte * ret = (GLubyte *)malloc(sizeof(GLubyte *)*4096);
-	pushBuf(ret, sizeof(GLubyte *)*4096, true);
+	const GLubyte * ret = (GLubyte *)malloc(sizeof(GLubyte *) * MAX_STRING_LENGTH);
+	pushBuf(ret, sizeof(GLubyte *) * MAX_STRING_LENGTH, true);
 	waitForReturn();
 	return ret;
 }
 
-
-//Hack! We let the native implementation handle this
-//TODO: implement these methods, so no hacks are required
-
-#ifdef NOHACK
-
 //276
 extern "C" void glGetTexEnvfv(GLenum target, GLenum pname, GLfloat * params)
 {
-	LOG("Called unimplemted stub GetTexEnvfv!\n");
+	LOG("Called untested stub GetTexEnvfv!\n");
+	pushOp(276);
+	pushParam(target);
+	pushParam(pname);
+	int size = sizeof(GLfloat);
+	if(pname == GL_TEXTURE_ENV_COLOR)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
+	waitForReturn();
 }
 
 
 //277
 extern "C" void glGetTexEnviv(GLenum target, GLenum pname, GLint * params)
 {
-	LOG("Called unimplemted stub GetTexEnviv!\n");
+	LOG("Called untested stub GetTexEnviv!\n");
+	pushOp(277);
+	pushParam(target);
+	pushParam(pname);
+	int size = sizeof(GLint);
+	if(pname == GL_TEXTURE_ENV_COLOR)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
+	waitForReturn();
 }
 
 
 //278
 extern "C" void glGetTexGendv(GLenum coord, GLenum pname, GLdouble * params)
 {
-	LOG("Called unimplemted stub GetTexGendv!\n");
+	LOG("Called untested stub GetTexGendv!\n");
+	pushOp(278);
+	pushParam(coord);
+	pushParam(pname);
+	int size = sizeof(GLdouble) * 4;
+	//all size 4 minus GL_TEXTURE_GEN_MODE
+	if(pname == GL_TEXTURE_GEN_MODE)
+	{
+	size = sizeof(GLdouble);
+	}
+	pushBuf(params, size, true);
+	waitForReturn();
+
 }
 
 
 //279
 extern "C" void glGetTexGenfv(GLenum coord, GLenum pname, GLfloat * params)
 {
-	LOG("Called unimplemted stub GetTexGenfv!\n");
+	LOG("Called untested stub GetTexGenfv!\n");
+	pushOp(279);
+	pushParam(coord);
+	pushParam(pname);
+	int size = sizeof(GLfloat) * 4;
+	//all size 4 minus GL_TEXTURE_GEN_MODE
+	if(pname == GL_TEXTURE_GEN_MODE)
+	{
+	size = sizeof(GLfloat);
+	}
+	pushBuf(params, size, true);
+	waitForReturn();
 }
 
 
 //280
 extern "C" void glGetTexGeniv(GLenum coord, GLenum pname, GLint * params)
 {
-	LOG("Called unimplemted stub GetTexGeniv!\n");
+	LOG("Called untested stub GetTexGeniv!\n");
+	pushOp(280);
+	pushParam(coord);
+	pushParam(pname);
+	int size = sizeof(GLint) * 4;
+	//all size 4 minus GL_TEXTURE_GEN_MODE
+	if(pname == GL_TEXTURE_GEN_MODE)
+	{
+	size = sizeof(GLint);
+	}
+	pushBuf(params, size, true);
+	waitForReturn();
 }
 
 
@@ -3208,14 +3277,34 @@ extern "C" void glGetTexImage(GLenum target, GLint level, GLenum format, GLenum 
 //282
 extern "C" void glGetTexParameterfv(GLenum target, GLenum pname, GLfloat * params)
 {
-	LOG("Called unimplemted stub GetTexParameterfv!\n");
+	LOG("Called untested stub GetTexParameterfv!\n");
+	pushOp(282);
+	pushParam(target);
+	pushParam(pname);
+	int size = sizeof(GLfloat);
+	if(pname == GL_TEXTURE_BORDER_COLOR)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
+	waitForReturn();	
 }
 
 
 //283
 extern "C" void glGetTexParameteriv(GLenum target, GLenum pname, GLint * params)
 {
-	LOG("Called unimplemted stub GetTexParameteriv!\n");
+	LOG("Called untested stub GetTexParameteriv!\n");
+	pushOp(283);
+	pushParam(target);
+	pushParam(pname);
+	int size = sizeof(GLint);
+	if(pname == GL_TEXTURE_BORDER_COLOR)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
+	waitForReturn();
 }
 
 
@@ -3231,7 +3320,6 @@ extern "C" void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pnam
 {
 	LOG("Called unimplemted stub GetTexLevelParameteriv!\n");
 }
-#endif
 
 //286
 extern "C" GLboolean glIsEnabled(GLenum cap)
@@ -3273,6 +3361,8 @@ extern "C" void glDepthRange(GLclampd zNear, GLclampd zFar)
 //289
 extern "C" void glFrustum(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar)
 {
+	LOG("Called unimplemted stub glFrustum!\n");
+	LOG("fix me!\n");
 	/*pushOp(289);			disabled, for now - due to viewport calculation
 	pushParam(left);
 	pushParam(right);
@@ -3295,13 +3385,6 @@ extern "C" void glLoadMatrixf(const GLfloat * m)
 {
 	pushOp(291);
 	pushBuf(m, sizeof(const GLfloat) * 16);
-	//LOG("modApp Matrix!\n");
-	//for(int i = 0; i < 16; i++) {
-	//	LOG("%f ", m[i]);
-	//	if(i%4 == 0)
-	//		LOG("\n");
-	//}
-	//LOG("\n");
 }
 
 
@@ -3448,7 +3531,6 @@ extern "C" void glArrayElement(GLint i)
 //307
 extern "C" void glBindTexture(GLenum target, GLuint texture)
 {
-	//sendPointers(1024); //quake III no extensions hack, horribly slow
 	pushOp(307);
 	pushParam(target);
 	pushParam(texture);
@@ -3529,11 +3611,11 @@ extern "C" void glEnableClientState(GLenum array)
 //314
 extern "C" void glIndexPointer(GLenum type, GLsizei stride, const GLvoid * pointer)
 {
-	LOG("Called untested stub IndexPointer - will probably crash!\n");
+	LOG("Called broken stub IndexPointer!\n");
 	pushOp(314);
 	pushParam(type);
 	pushParam(stride);
-	int arraySize = 1;			 //TODO: find size of Array
+	int arraySize = 1;			 //TODO: use pointer structure
 	pushBuf(pointer, arraySize * (getTypeSize(type) + stride));
 }
 
@@ -3727,6 +3809,7 @@ extern "C" void glGenTextures(GLsizei n, GLuint * textures)
 extern "C" void glGetPointerv(GLenum pname, GLvoid ** params)
 {
 	LOG("Called unimplemted stub GetPointerv!\n");
+	//return pointer information?
 }
 
 
@@ -3895,7 +3978,12 @@ extern "C" void glGetColorTableParameterfv(GLenum target, GLenum pname, GLfloat 
 	pushOp(344);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	int size = sizeof(GLfloat);
+	if(target == GL_COLOR_TABLE || target == GL_POST_CONVOLUTION_COLOR_TABLE || target == GL_POST_COLOR_MATRIX_COLOR_TABLE)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -3907,7 +3995,12 @@ extern "C" void glGetColorTableParameteriv(GLenum target, GLenum pname, GLint * 
 	pushOp(345);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	int size = sizeof(GLint);
+	if(target == GL_COLOR_TABLE || target == GL_POST_CONVOLUTION_COLOR_TABLE || target == GL_POST_COLOR_MATRIX_COLOR_TABLE)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -4077,22 +4170,25 @@ extern "C" void glGetConvolutionParameteriv(GLenum target, GLenum pname, GLint *
 extern "C" void glGetSeparableFilter(GLenum target, GLenum format, GLenum type, GLvoid * row, GLvoid * column, GLvoid * span)
 {
 	LOG("Called unimplemted stub GetSeparableFilter!\n");
+	//return 2 buffers?	
+	//span unused
+	
 }
 
 
 //360
 extern "C" void glSeparableFilter2D(GLenum target, GLenum internalformat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * row, const GLvoid * column)
 {
-	LOG("Called unimplemted stub SeparableFilter2D!\n");
-	/*pushOp(360);
+	LOG("Called untested stub SeparableFilter2D!\n");
+	pushOp(360);
 	pushParam(target);
 	pushParam(internalformat);
 	pushParam(width);
 	pushParam(height);
 	pushParam(format);
 	pushParam(type);
-	pushBuf(row, getTypeSize(type) * width);					2 buffers?
-	pushBuf(column, getFormatSize(format) * getTypeSize(type) * height);*/
+	pushBuf(row, getTypeSize(type) * width);
+	pushBuf(column, getFormatSize(format) * getTypeSize(type) * height);
 }
 
 
@@ -4110,7 +4206,7 @@ extern "C" void glGetHistogramParameterfv(GLenum target, GLenum pname, GLfloat *
 	pushOp(362);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true);
 	waitForReturn();
 }
 
@@ -4122,7 +4218,7 @@ extern "C" void glGetHistogramParameteriv(GLenum target, GLenum pname, GLint * p
 	pushOp(363);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -4136,8 +4232,8 @@ extern "C" void glGetMinmax(GLenum target, GLboolean reset, GLenum format, GLenu
 	pushParam(reset);
 	pushParam(format);
 	pushParam(type);
-								 //returns 2 values (min, max)
 	pushBuf(values, getFormatSize(format) * getTypeSize(type) * 2, true);
+	waitForReturn();	//returns 2 values (min, max)
 }
 
 
@@ -4149,7 +4245,7 @@ extern "C" void glGetMinmaxParameterfv(GLenum target, GLenum pname, GLfloat * pa
 	pushParam(target);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLfloat) * 2, true);
-	waitForReturn();			 //returns 2 values (min, max)
+	waitForReturn();	//returns 2 values (min, max)
 }
 
 
@@ -4161,7 +4257,7 @@ extern "C" void glGetMinmaxParameteriv(GLenum target, GLenum pname, GLint * para
 	pushParam(target);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLint) * 2, true);
-	waitForReturn();			 //returns 2 values (min, max)
+	waitForReturn();	//returns 2 values (min, max)
 }
 
 
@@ -4736,11 +4832,11 @@ extern "C" void glCompressedTexSubImage1D(GLenum target, GLint level, GLint xoff
 //419
 extern "C" void glGetCompressedTexImage(GLenum target, GLint level, GLvoid * img)
 {
-	LOG("Called unimplemted stub GetCompressedTexImage!\n");
-	//pushOp(419);
-	//pushParam(target);
-	//pushParam(level);
-	//pushBuf(img, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, true);	//will this work?
+	LOG("Called untested stub GetCompressedTexImage!\n");
+	pushOp(419);
+	pushParam(target);
+	pushParam(level);
+	pushBuf(img, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, true);	//will this work?
 }
 
 
@@ -4836,7 +4932,12 @@ extern "C" void glPointParameterfv(GLenum pname, const GLfloat * params)
 	LOG("Called untested stub PointParameterfv!\n");
 	pushOp(429);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	int size = sizeof(GLfloat);
+	if(pname == GL_POINT_DISTANCE_ATTENUATION)
+	{
+	size *= 3;
+	}
+	pushBuf(params, size);
 }
 
 
@@ -4855,7 +4956,12 @@ extern "C" void glPointParameteriv(GLenum pname, const GLint * params)
 	LOG("Called untested stub PointParameteriv!\n");
 	pushOp(431);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	int size = sizeof(GLint);
+	if(pname == GL_POINT_DISTANCE_ATTENUATION)
+	{
+	size *= 3;
+	}
+	pushBuf(params, size);
 }
 
 
@@ -5006,7 +5112,7 @@ extern "C" void glSecondaryColor3usv(const GLushort * v)
 //448
 extern "C" void glSecondaryColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer)
 {
-	LOG("Called untested stub SecondaryColorPointer!\n");
+	LOG("Called broken stub SecondaryColorPointer!\n");
 	pushOp(448);
 	pushParam(size);
 	pushParam(type);
@@ -5214,7 +5320,7 @@ extern "C" void glGetBufferParameteriv(GLenum target, GLenum pname, GLint * para
 	pushOp(470);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -5340,7 +5446,7 @@ extern "C" void glGetQueryiv(GLenum target, GLenum pname, GLint * params)
 	pushOp(481);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -5352,7 +5458,7 @@ extern "C" void glGetQueryObjectiv(GLuint id, GLenum pname, GLint * params)
 	pushOp(482);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -5364,7 +5470,7 @@ extern "C" void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint * params)
 	pushOp(483);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLuint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLuint), true);
 	waitForReturn();
 }
 
@@ -5518,6 +5624,7 @@ extern "C" void glEnableVertexAttribArray(GLuint index)
 extern "C" void glGetActiveAttrib(GLuint program, GLuint index, GLsizei  bufSize, GLsizei * length, GLint * size, GLenum * type, GLchar * name)
 {
 	LOG("Called unimplemted stub GetActiveAttrib!\n");
+	//3 buffers + set length
 }
 
 
@@ -5525,6 +5632,7 @@ extern "C" void glGetActiveAttrib(GLuint program, GLuint index, GLsizei  bufSize
 extern "C" void glGetActiveUniform(GLuint program, GLuint index, GLsizei bufSize, GLsizei * length, GLint * size, GLenum * type, GLchar * name)
 {
 	LOG("Called unimplemted stub GetActiveUniform!\n");
+	//3 buffers + set length
 }
 
 
@@ -5532,28 +5640,49 @@ extern "C" void glGetActiveUniform(GLuint program, GLuint index, GLsizei bufSize
 extern "C" void glGetAttachedShaders(GLuint program, GLsizei maxCount, GLsizei * count, GLuint * obj)
 {
 	LOG("Called unimplemted stub GetAttachedShaders!\n");
+	pushOp(501);
+	pushParam(program);
+	pushParam(maxCount);
+	pushBuf(count, sizeof(GLsizei));
+	pushBuf(obj, sizeof(GLuint) * maxCount, true);
+	waitForReturn();
 }
 
 
 //502
 extern "C" GLint glGetAttribLocation(GLuint program, const GLchar * name)
 {
-	LOG("Called unimplemted stub GetAttribLocation!\n");
+	LOG("Called untested stub GetAttribLocation!\n");
+	pushOp(502);
+	pushParam(program);
+	pushBuf(name, sizeof(GLchar) * MAX_STRING_LENGTH, true);
+	waitForReturn();
 }
 
 
 //503
 extern "C" void glGetProgramiv(GLuint program, GLenum pname, GLint * params)
 {
-	LOG("Called unimplemted stub GetProgramiv!\n");
+	LOG("Called untested stub GetProgramiv!\n");
+	pushOp(503);
+	pushParam(program);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint), true);
+	waitForReturn();
 }
 
 
 //504
 extern "C" void glGetProgramInfoLog(GLuint program, GLsizei bufSize, GLsizei * length, GLchar * infoLog)
 {
-	LOG("Called unimplemted stub GetProgramInfoLog!\n");
-
+	LOG("Called untested stub GetProgramInfoLog!\n");
+	pushOp(504);
+	pushParam(program);
+	pushParam(bufSize);
+	pushBuf(length, sizeof(GLsizei));
+	pushBuf(infoLog, sizeof(GLchar) * bufSize, true);
+	waitForReturn();
+	*length = strlen(infoLog);
 }
 
 
@@ -5583,6 +5712,7 @@ extern "C" void glGetShaderInfoLog(GLuint shader, GLsizei bufSize, GLsizei * len
 	}
 	pushBuf(infoLog, sizeof(GLchar) * bufSize, true);
 	waitForReturn();
+	*length = strlen(infoLog);
 }
 
 
@@ -5602,6 +5732,7 @@ extern "C" void glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei * leng
 	}
 	pushBuf(source, sizeof(GLchar) * bufSize, true);
 	waitForReturn();
+	*length = strlen(source);
 }
 
 
@@ -5626,7 +5757,7 @@ extern "C" void glGetUniformfv(GLuint program, GLint location, GLfloat * params)
 	pushOp(509);
 	pushParam(program);
 	pushParam(location);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true);
 	waitForReturn();
 }
 
@@ -5638,7 +5769,7 @@ extern "C" void glGetUniformiv(GLuint program, GLint location, GLint * params)
 	pushOp(510);
 	pushParam(program);
 	pushParam(location);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -5650,7 +5781,12 @@ extern "C" void glGetVertexAttribdv(GLuint index, GLenum pname, GLdouble * param
 	pushOp(511);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(params), true);
+	int size = sizeof(GLdouble);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -5662,7 +5798,12 @@ extern "C" void glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat * params
 	pushOp(512);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	int size = sizeof(GLfloat);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -5674,7 +5815,12 @@ extern "C" void glGetVertexAttribiv(GLuint index, GLenum pname, GLint * params)
 	pushOp(513);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	int size = sizeof(GLint);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -6907,7 +7053,12 @@ extern "C" void glPointParameterfvARB(GLenum pname, const GLfloat * params)
 	LOG("Called untested stub PointParameterfvARB!\n");
 	pushOp(630);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	int size = sizeof(GLfloat);
+	if(pname == GL_POINT_DISTANCE_ATTENUATION)
+	{
+	size *= 3;
+	}
+	pushBuf(params, size);
 }
 
 
@@ -7205,7 +7356,12 @@ extern "C" void glGetVertexAttribdvARB(GLuint index, GLenum pname, GLdouble * pa
 	pushOp(662);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(params), true);
+	int size = sizeof(GLdouble);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -7217,7 +7373,12 @@ extern "C" void glGetVertexAttribfvARB(GLuint index, GLenum pname, GLfloat * par
 	pushOp(663);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	int size = sizeof(GLfloat);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -7229,7 +7390,12 @@ extern "C" void glGetVertexAttribivARB(GLuint index, GLenum pname, GLint * param
 	pushOp(664);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	int size = sizeof(GLint);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -7807,7 +7973,7 @@ extern "C" void glGetProgramivARB(GLenum target, GLenum pname, GLint * params)
 	pushOp(721);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -7815,7 +7981,12 @@ extern "C" void glGetProgramivARB(GLenum target, GLenum pname, GLint * params)
 //722
 extern "C" void glGetProgramStringARB(GLenum target, GLenum pname, GLvoid * string)
 {
-	LOG("Called unimplemted stub GetProgramStringARB!\n");
+	LOG("Called untested stub GetProgramStringARB!\n");
+	pushOp(722);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(string, sizeof(GLchar) * MAX_STRING_LENGTH, true);
+	waitForReturn();
 }
 
 
@@ -7883,7 +8054,7 @@ extern "C" void glGetBufferParameterivARB(GLenum target, GLenum pname, GLint * p
 	pushOp(729);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -8007,7 +8178,7 @@ extern "C" void glGetQueryivARB(GLenum target, GLenum pname, GLint * params)
 	pushOp(740);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -8019,7 +8190,7 @@ extern "C" void glGetQueryObjectivARB(GLuint id, GLenum pname, GLint * params)
 	pushOp(741);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -8031,7 +8202,7 @@ extern "C" void glGetQueryObjectuivARB(GLuint id, GLenum pname, GLuint * params)
 	pushOp(742);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLuint), true);
 	waitForReturn();
 }
 
@@ -8380,7 +8551,7 @@ extern "C" void glGetObjectParameterfvARB(GLhandleARB obj, GLenum pname, GLfloat
 	pushOp(773);
 	pushParam(obj);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true);
 	waitForReturn();
 }
 
@@ -8392,7 +8563,7 @@ extern "C" void glGetObjectParameterivARB(GLhandleARB obj, GLenum pname, GLint *
 	pushOp(774);
 	pushParam(obj);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -8449,7 +8620,7 @@ extern "C" void glGetUniformfvARB(GLhandleARB program, GLint location, GLfloat *
 	pushOp(779);
 	pushParam(program);
 	pushParam(location);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true);
 	waitForReturn();
 }
 
@@ -8461,7 +8632,7 @@ extern "C" void glGetUniformivARB(GLhandleARB program, GLint location, GLint * p
 	pushOp(780);
 	pushParam(program);
 	pushParam(location);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -8712,35 +8883,62 @@ extern "C" void glGetHistogramEXT(GLenum target, GLboolean reset, GLenum format,
 //800
 extern "C" void glGetHistogramParameterfvEXT(GLenum target, GLenum pname, GLfloat * params)
 {
-	LOG("Called unimplemted stub GetHistogramParameterfvEXT!\n");
+	LOG("Called untested stub GetHistogramParameterfvEXT!\n");
+	pushOp(800);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat), true);
+	waitForReturn();
 }
 
 
 //801
 extern "C" void glGetHistogramParameterivEXT(GLenum target, GLenum pname, GLint * params)
 {
-	LOG("Called unimplemted stub GetHistogramParameterivEXT!\n");
+	LOG("Called untested stub GetHistogramParameterivEXT!\n");
+	pushOp(801);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint), true);
+	waitForReturn();
 }
 
 
 //802
 extern "C" void glGetMinmaxEXT(GLenum target, GLboolean reset, GLenum format, GLenum type, GLvoid * values)
 {
-	LOG("Called unimplemted stub GetMinmaxEXT!\n");
+	LOG("Called untested stub GetMinmaxEXT!\n");
+	pushOp(802);
+	pushParam(target);
+	pushParam(reset);
+	pushParam(format);
+	pushParam(type);
+	pushBuf(values, getFormatSize(format) * getTypeSize(type) * 2, true);
+	waitForReturn();	//returns 2 values (min, max)
 }
 
 
 //803
 extern "C" void glGetMinmaxParameterfvEXT(GLenum target, GLenum pname, GLfloat * params)
 {
-	LOG("Called unimplemted stub GetMinmaxParameterfvEXT!\n");
+	LOG("Called untested stub GetMinmaxParameterfvEXT!\n");
+	pushOp(803);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) * 2, true);
+	waitForReturn();	//returns 2 values (min, max)
 }
 
 
 //804
 extern "C" void glGetMinmaxParameterivEXT(GLenum target, GLenum pname, GLint * params)
 {
-	LOG("Called unimplemted stub GetMinmaxParameterivEXT!\n");
+	LOG("Called untested stub GetMinmaxParameterivEXT!\n");
+	pushOp(804);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint) * 2, true);
+	waitForReturn();	//returns 2 values (min, max)
 }
 
 
@@ -8894,14 +9092,24 @@ extern "C" void glGetConvolutionFilterEXT(GLenum target, GLenum format, GLenum t
 //818
 extern "C" void glGetConvolutionParameterfvEXT(GLenum target, GLenum pname, GLfloat * params)
 {
-	LOG("Called unimplemted stub GetConvolutionParameterfvEXT!\n");
+	LOG("Called untested stub GetConvolutionParameterfvEXT!\n");
+	pushOp(818);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	waitForReturn();
 }
 
 
 //819
 extern "C" void glGetConvolutionParameterivEXT(GLenum target, GLenum pname, GLint * params)
 {
-	LOG("Called unimplemted stub GetConvolutionParameterivEXT!\n");
+	LOG("Called untested stub GetConvolutionParameterivEXT!\n");
+	pushOp(819);
+	pushParam(target);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	waitForReturn();
 }
 
 
@@ -8949,7 +9157,7 @@ extern "C" void glColorTableParameterfvSGI(GLenum target, GLenum pname, const GL
 	pushOp(823);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat) * 4);
 }
 
 
@@ -8960,7 +9168,7 @@ extern "C" void glColorTableParameterivSGI(GLenum target, GLenum pname, const GL
 	pushOp(824);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint) * 4);
 }
 
 
@@ -8990,7 +9198,12 @@ extern "C" void glGetColorTableParameterfvSGI(GLenum target, GLenum pname, GLflo
 	pushOp(827);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	int size = sizeof(GLfloat);
+	if(target == GL_COLOR_TABLE || target == GL_POST_CONVOLUTION_COLOR_TABLE || target == GL_POST_COLOR_MATRIX_COLOR_TABLE)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -9002,7 +9215,12 @@ extern "C" void glGetColorTableParameterivSGI(GLenum target, GLenum pname, GLint
 	pushOp(828);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	int size = sizeof(GLint);
+	if(target == GL_COLOR_TABLE || target == GL_POST_CONVOLUTION_COLOR_TABLE || target == GL_POST_COLOR_MATRIX_COLOR_TABLE)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -9022,7 +9240,7 @@ extern "C" void glPixelTexGenParameterivSGIS(GLenum pname, const GLint * params)
 	LOG("Called untested stub PixelTexGenParameterivSGIS!\n");
 	pushOp(830);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint));
 }
 
 
@@ -9041,7 +9259,7 @@ extern "C" void glPixelTexGenParameterfvSGIS(GLenum pname, const GLfloat * param
 	LOG("Called untested stub PixelTexGenParameterfvSGIS!\n");
 	pushOp(832);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true);
 	waitForReturn();
 }
 
@@ -9052,7 +9270,7 @@ extern "C" void glGetPixelTexGenParameterivSGIS(GLenum pname, GLint * params)
 	LOG("Called untested stub GetPixelTexGenParameterivSGIS!\n");
 	pushOp(833);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -9063,7 +9281,7 @@ extern "C" void glGetPixelTexGenParameterfvSGIS(GLenum pname, GLfloat * params)
 	LOG("Called untested stub GetPixelTexGenParameterfvSGIS!\n");
 	pushOp(834);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true);
 	waitForReturn();
 }
 
@@ -9194,7 +9412,7 @@ extern "C" void glGetDetailTexFuncSGIS(GLenum target, GLfloat * points)
 	LOG("Called untested stub GetDetailTexFuncSGIS!\n");
 	pushOp(844);
 	pushParam(target);
-	pushBuf(points, sizeof(GLfloat) * sizeof(*points), true);
+	pushBuf(points, sizeof(GLfloat), true);	//need size
 	waitForReturn();
 }
 
@@ -9212,7 +9430,11 @@ extern "C" void glSharpenTexFuncSGIS(GLenum target, GLsizei n, const GLfloat * p
 //846
 extern "C" void glGetSharpenTexFuncSGIS(GLenum target, GLfloat * points)
 {
-	LOG("Called unimplemted stub GetSharpenTexFuncSGIS!\n");
+	LOG("Called untested stub GetSharpenTexFuncSGIS!\n");
+	pushOp(846);
+	pushParam(target);
+	pushBuf(points, sizeof(GLfloat), true); //need size
+	waitForReturn();
 }
 
 
@@ -9356,7 +9578,7 @@ extern "C" void glSpriteParameterfvSGIX(GLenum pname, const GLfloat * params)
 	LOG("Called untested stub SpriteParameterfvSGIX!\n");
 	pushOp(860);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -9375,7 +9597,7 @@ extern "C" void glSpriteParameterivSGIX(GLenum pname, const GLint * params)
 	LOG("Called untested stub SpriteParameterivSGIX!\n");
 	pushOp(862);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint)); //need size
 }
 
 
@@ -9394,7 +9616,12 @@ extern "C" void glPointParameterfvEXT(GLenum pname, const GLfloat * params)
 	LOG("Called untested stub PointParameterfvEXT!\n");
 	pushOp(864);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	int size = sizeof(GLfloat);
+	if(pname == GL_POINT_DISTANCE_ATTENUATION)
+	{
+	size *= 3;
+	}
+	pushBuf(params, size);
 }
 
 
@@ -9426,7 +9653,7 @@ extern "C" GLint glPollInstrumentsSGIX(GLint * marker_p)
 {
 	LOG("Called untested stub PollInstrumentsSGIX!\n");
 	pushOp(867);
-	pushBuf(marker_p, sizeof(GLint) * sizeof(*marker_p));
+	pushBuf(marker_p, sizeof(GLint)); //need size
 }
 
 
@@ -9497,7 +9724,7 @@ extern "C" void glGetFogFuncSGIS(GLfloat * points)
 {
 	LOG("Called untested stub GetFogFuncSGIS!\n");
 	pushOp(876);
-	pushBuf(points, sizeof(GLfloat) * sizeof(*points));
+	pushBuf(points, sizeof(GLfloat)); //need size
 }
 
 
@@ -9528,7 +9755,7 @@ extern "C" void glImageTransformParameterivHP(GLenum target, GLenum pname, const
 	pushOp(879);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint)); //need size
 }
 
 
@@ -9539,7 +9766,7 @@ extern "C" void glImageTransformParameterfvHP(GLenum target, GLenum pname, const
 	pushOp(880);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -9550,7 +9777,7 @@ extern "C" void glGetImageTransformParameterivHP(GLenum target, GLenum pname, GL
 	pushOp(881);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true); //need size
 	waitForReturn();
 }
 
@@ -9562,7 +9789,7 @@ extern "C" void glGetImageTransformParameterfvHP(GLenum target, GLenum pname, GL
 	pushOp(882);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true); //need size
 	waitForReturn();
 }
 
@@ -9630,7 +9857,12 @@ extern "C" void glGetColorTableParameterivEXT(GLenum target, GLenum pname, GLint
 	pushOp(888);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	int size = sizeof(GLint);
+	if(target == GL_COLOR_TABLE || target == GL_POST_CONVOLUTION_COLOR_TABLE || target == GL_POST_COLOR_MATRIX_COLOR_TABLE)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -9642,7 +9874,12 @@ extern "C" void glGetColorTableParameterfvEXT(GLenum target, GLenum pname, GLflo
 	pushOp(889);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	int size = sizeof(GLfloat);
+	if(target == GL_COLOR_TABLE || target == GL_POST_CONVOLUTION_COLOR_TABLE || target == GL_POST_COLOR_MATRIX_COLOR_TABLE)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -9654,7 +9891,7 @@ extern "C" void glGetListParameterfvSGIX(GLuint list, GLenum pname, GLfloat * pa
 	pushOp(890);
 	pushParam(list);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true); //need size
 	waitForReturn();
 }
 
@@ -9666,7 +9903,7 @@ extern "C" void glGetListParameterivSGIX(GLuint list, GLenum pname, GLint * para
 	pushOp(891);
 	pushParam(list);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true); //need size
 	waitForReturn();
 }
 
@@ -9688,7 +9925,7 @@ extern "C" void glListParameterfvSGIX(GLuint list, GLenum pname, const GLfloat *
 	pushOp(891);
 	pushParam(list);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -9709,7 +9946,7 @@ extern "C" void glListParameterivSGIX(GLuint list, GLenum pname, const GLint * p
 	pushOp(895);
 	pushParam(list);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint)); //need size
 }
 
 
@@ -9753,7 +9990,7 @@ extern "C" void glCullParameterdvEXT(GLenum pname, GLdouble * params)
 	LOG("Called untested stub CullParameterdvEXT!\n");
 	pushOp(900);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(params));
+	pushBuf(params, sizeof(GLdouble)); //need size
 }
 
 
@@ -9763,7 +10000,7 @@ extern "C" void glCullParameterfvEXT(GLenum pname, GLfloat * params)
 	LOG("Called untested stub CullParameterfvEXT!\n");
 	pushOp(901);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -9793,7 +10030,7 @@ extern "C" void glFragmentLightfvSGIX(GLenum light, GLenum pname, const GLfloat 
 	pushOp(904);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -9814,7 +10051,7 @@ extern "C" void glFragmentLightivSGIX(GLenum light, GLenum pname, const GLint * 
 	pushOp(906);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint)); //need size
 }
 
 
@@ -9833,7 +10070,7 @@ extern "C" void glFragmentLightModelfvSGIX(GLenum pname, const GLfloat * params)
 	LOG("Called untested stub FragmentLightModelfvSGIX!\n");
 	pushOp(908);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -9852,7 +10089,7 @@ extern "C" void glFragmentLightModelivSGIX(GLenum pname, const GLint * params)
 	LOG("Called untested stub FragmentLightModelivSGIX!\n");
 	pushOp(910);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint)); //need size
 }
 
 
@@ -9873,7 +10110,7 @@ extern "C" void glFragmentMaterialfvSGIX(GLenum face, GLenum pname, const GLfloa
 	pushOp(912);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -9894,7 +10131,7 @@ extern "C" void glFragmentMaterialivSGIX(GLenum face, GLenum pname, const GLint 
 	pushOp(914);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(const GLint) * sizeof(params));
+	pushBuf(params, sizeof(const GLint)); //need size
 }
 
 
@@ -9905,7 +10142,8 @@ extern "C" void glGetFragmentLightfvSGIX(GLenum light, GLenum pname, GLfloat * p
 	pushOp(915);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat), true); //need size
+	waitForReturn();
 }
 
 
@@ -9916,7 +10154,8 @@ extern "C" void glGetFragmentLightivSGIX(GLenum light, GLenum pname, GLint * par
 	pushOp(916);
 	pushParam(light);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint), true); //need size
+	waitForReturn();
 }
 
 
@@ -9927,7 +10166,8 @@ extern "C" void glGetFragmentMaterialfvSGIX(GLenum face, GLenum pname, GLfloat *
 	pushOp(917);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat), true); //need size
+	waitForReturn();
 }
 
 
@@ -9938,7 +10178,8 @@ extern "C" void glGetFragmentMaterialivSGIX(GLenum face, GLenum pname, GLint * p
 	pushOp(918);
 	pushParam(face);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint), true); //need size
+	waitForReturn();
 }
 
 
@@ -10003,7 +10244,8 @@ extern "C" GLint glFinishAsyncSGIX(GLuint * markerp)
 {
 	LOG("Called untested stub FinishAsyncSGIX!\n");
 	pushOp(925);
-	pushBuf(markerp, sizeof(GLuint) * sizeof(*markerp));
+	pushBuf(markerp, sizeof(GLuint)); //need size
+	//returns a value
 }
 
 
@@ -10012,7 +10254,8 @@ extern "C" GLint glPollAsyncSGIX(GLuint * markerp)
 {
 	LOG("Called untested stub PollAsyncSGIX!\n");
 	pushOp(926);
-	pushBuf(markerp, sizeof(GLuint) * sizeof(*markerp));
+	pushBuf(markerp, sizeof(GLuint)); //need size
+	//returns a value
 }
 
 
@@ -10113,7 +10356,7 @@ extern "C" void glPixelTransformParameterivEXT(GLenum target, GLenum pname, cons
 	pushOp(936);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint)); //need size
 }
 
 
@@ -10124,7 +10367,7 @@ extern "C" void glPixelTransformParameterfvEXT(GLenum target, GLenum pname, cons
 	pushOp(937);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -10298,10 +10541,9 @@ extern "C" void glMultiDrawArraysEXT(GLenum mode, GLint * first, GLsizei * count
 	LOG("Called untested stub MultiDrawArraysEXT!\n");
 	pushOp(956);
 	pushParam(mode);
+	pushParam(primcount);
 	pushBuf(first, primcount);
 	pushBuf(count, primcount) ;
-	pushParam(primcount);
-
 }
 
 
@@ -10653,7 +10895,7 @@ extern "C" void glReplacementCodeuivSUN(const GLuint * code)
 {
 	LOG("Called untested stub ReplacementCodeuivSUN!\n");
 	pushOp(998);
-	pushBuf(code, sizeof(GLuint) * sizeof(*code));
+	pushBuf(code, sizeof(GLuint)); //need size
 }
 
 
@@ -10662,7 +10904,7 @@ extern "C" void glReplacementCodeusvSUN(const GLushort * code)
 {
 	LOG("Called untested stub ReplacementCodeusvSUN!\n");
 	pushOp(999);
-	pushBuf(code, sizeof(GLushort) * sizeof(*code));
+	pushBuf(code, sizeof(GLushort)); //need size
 }
 
 
@@ -10671,7 +10913,7 @@ extern "C" void glReplacementCodeubvSUN(const GLubyte * code)
 {
 	LOG("Called untested stub ReplacementCodeubvSUN!\n");
 	pushOp(1000);
-	pushBuf(code, sizeof(GLubyte) * sizeof(*code));
+	pushBuf(code, sizeof(GLubyte)); //need size
 }
 
 
@@ -10698,7 +10940,10 @@ extern "C" void glColor4ubVertex2fSUN(GLubyte r, GLubyte g, GLubyte b, GLubyte a
 //1003
 extern "C" void glColor4ubVertex2fvSUN(const GLubyte * c, const GLfloat * v)
 {
-	LOG("Called unimplemted stub Color4ubVertex2fvSUN!\n");
+	LOG("Called untested stub Color4ubVertex2fvSUN!\n");
+	pushOp(1003);
+	pushBuf(c, sizeof(GLubyte) * 4);
+	pushBuf(v, sizeof(GLfloat) * 2);
 }
 
 
@@ -10719,7 +10964,10 @@ extern "C" void glColor4ubVertex3fSUN(GLubyte r, GLubyte g, GLubyte b, GLubyte a
 //1005
 extern "C" void glColor4ubVertex3fvSUN(const GLubyte * c, const GLfloat * v)
 {
-	LOG("Called unimplemted stub Color4ubVertex3fvSUN!\n");
+	LOG("Called untested stub Color4ubVertex3fvSUN!\n");
+	pushOp(1005);
+	pushBuf(c, sizeof(GLubyte) * 4);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10739,7 +10987,10 @@ extern "C" void glColor3fVertex3fSUN(GLfloat r, GLfloat g, GLfloat b, GLfloat x,
 //1007
 extern "C" void glColor3fVertex3fvSUN(const GLfloat * c, const GLfloat * v)
 {
-	LOG("Called unimplemted stub Color3fVertex3fvSUN!\n");
+	LOG("Called untested stub Color3fVertex3fvSUN!\n");
+	pushOp(1007);
+	pushBuf(c, sizeof(GLfloat) * 3);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10759,7 +11010,10 @@ extern "C" void glNormal3fVertex3fSUN(GLfloat nx, GLfloat ny, GLfloat nz, GLfloa
 //1009
 extern "C" void glNormal3fVertex3fvSUN(const GLfloat * n, const GLfloat * v)
 {
-	LOG("Called unimplemted stub Normal3fVertex3fvSUN!\n");
+	LOG("Called untested stub Normal3fVertex3fvSUN!\n");
+	pushOp(1003);
+	pushBuf(n, sizeof(GLfloat) * 3);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10783,7 +11037,11 @@ extern "C" void glColor4fNormal3fVertex3fSUN(GLfloat r, GLfloat g, GLfloat b, GL
 //1011
 extern "C" void glColor4fNormal3fVertex3fvSUN(const GLfloat * c, const GLfloat * n, const GLfloat * v)
 {
-	LOG("Called unimplemted stub Color4fNormal3fVertex3fvSUN!\n");
+	LOG("Called untested stub Color4fNormal3fVertex3fvSUN!\n");
+	pushOp(1003);
+	pushBuf(c, sizeof(GLfloat) * 4);
+	pushBuf(n, sizeof(GLfloat) * 3);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10802,7 +11060,10 @@ extern "C" void glTexCoord2fVertex3fSUN(GLfloat s, GLfloat t, GLfloat x, GLfloat
 //1013
 extern "C" void glTexCoord2fVertex3fvSUN(const GLfloat * tc, const GLfloat * v)
 {
-	LOG("Called unimplemted stub TexCoord2fVertex3fvSUN!\n");
+	LOG("Called untested stub TexCoord2fVertex3fvSUN!\n");
+	pushOp(1013);
+	pushBuf(tc, sizeof(GLfloat) * 2);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10824,7 +11085,10 @@ extern "C" void glTexCoord4fVertex4fSUN(GLfloat s, GLfloat t, GLfloat p, GLfloat
 //1015
 extern "C" void glTexCoord4fVertex4fvSUN(const GLfloat * tc, const GLfloat * v)
 {
-	LOG("Called unimplemted stub TexCoord4fVertex4fvSUN!\n");
+	LOG("Called untested stub TexCoord4fVertex4fvSUN!\n");
+	pushOp(1015);
+	pushBuf(tc, sizeof(GLfloat) * 4);
+	pushBuf(v, sizeof(GLfloat) * 4);
 }
 
 
@@ -10847,7 +11111,11 @@ extern "C" void glTexCoord2fColor4ubVertex3fSUN(GLfloat s, GLfloat t, GLubyte r,
 //1017
 extern "C" void glTexCoord2fColor4ubVertex3fvSUN(const GLfloat * tc, const GLubyte * c, const GLfloat * v)
 {
-	LOG("Called unimplemted stub TexCoord2fColor4ubVertex3fvSUN!\n");
+	LOG("Called untested stub TexCoord2fColor4ubVertex3fvSUN!\n");
+	pushOp(1017);
+	pushBuf(tc, sizeof(GLfloat) * 2);
+	pushBuf(c, sizeof(GLubyte) * 4);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10869,7 +11137,11 @@ extern "C" void glTexCoord2fColor3fVertex3fSUN(GLfloat s, GLfloat t, GLfloat r, 
 //1019
 extern "C" void glTexCoord2fColor3fVertex3fvSUN(const GLfloat * tc, const GLfloat * c, const GLfloat * v)
 {
-	LOG("Called unimplemted stub TexCoord2fColor3fVertex3fvSUN!\n");
+	LOG("Called untested stub TexCoord2fColor3fVertex3fvSUN!\n");
+	pushOp(1019);
+	pushBuf(tc, sizeof(GLfloat) * 2);
+	pushBuf(c, sizeof(GLfloat) * 3);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10891,7 +11163,11 @@ extern "C" void glTexCoord2fNormal3fVertex3fSUN(GLfloat s, GLfloat t, GLfloat nx
 //1021
 extern "C" void glTexCoord2fNormal3fVertex3fvSUN(const GLfloat * tc, const GLfloat * n, const GLfloat * v)
 {
-	LOG("Called unimplemted stub TexCoord2fNormal3fVertex3fvSUN!\n");
+	LOG("Called untested stub TexCoord2fNormal3fVertex3fvSUN!\n");
+	pushOp(1021);
+	pushBuf(tc, sizeof(GLfloat) * 2);
+	pushBuf(n, sizeof(GLfloat) * 3);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10918,6 +11194,7 @@ extern "C" void glTexCoord2fColor4fNormal3fVertex3fSUN(GLfloat s, GLfloat t, GLf
 extern "C" void glTexCoord2fColor4fNormal3fVertex3fvSUN(const GLfloat * tc, const GLfloat * c, const GLfloat * n, const GLfloat * v)
 {
 	LOG("Called unimplemted stub TexCoord2fColor4fNormal3fVertex3fvSUN!\n");
+	//4 buffers
 }
 
 
@@ -10947,6 +11224,7 @@ extern "C" void glTexCoord4fColor4fNormal3fVertex4fSUN(GLfloat s, GLfloat t, GLf
 extern "C" void glTexCoord4fColor4fNormal3fVertex4fvSUN(const GLfloat * tc, const GLfloat * c, const GLfloat * n, const GLfloat * v)
 {
 	LOG("Called unimplemted stub TexCoord4fColor4fNormal3fVertex4fvSUN!\n");
+	//4 buffers
 }
 
 
@@ -10964,7 +11242,10 @@ extern "C" void glReplacementCodeuiVertex3fSUN(GLuint rc, GLfloat x, GLfloat y, 
 //1027
 extern "C" void glReplacementCodeuiVertex3fvSUN(const GLuint * rc, const GLfloat * v)
 {
-	LOG("Called unimplemted stub ReplacementCodeuiVertex3fvSUN!\n");
+	LOG("Called untested stub ReplacementCodeuiVertex3fvSUN!\n");
+	pushOp(1027);
+	pushBuf(rc, sizeof(GLuint));
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -10986,7 +11267,11 @@ extern "C" void glReplacementCodeuiColor4ubVertex3fSUN(GLuint rc, GLubyte r, GLu
 //1029
 extern "C" void glReplacementCodeuiColor4ubVertex3fvSUN(const GLuint * rc, const GLubyte * c, const GLfloat * v)
 {
-	LOG("Called unimplemted stub ReplacementCodeuiColor4ubVertex3fvSUN!\n");
+	LOG("Called untested stub ReplacementCodeuiColor4ubVertex3fvSUN!\n");
+	pushOp(1029);
+	pushBuf(rc, sizeof(GLuint));
+	pushBuf(c, sizeof(GLubyte) * 4);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -11007,7 +11292,11 @@ extern "C" void glReplacementCodeuiColor3fVertex3fSUN(GLuint rc, GLfloat r, GLfl
 //1031
 extern "C" void glReplacementCodeuiColor3fVertex3fvSUN(const GLuint * rc, const GLfloat * c, const GLfloat * v)
 {
-	LOG("Called unimplemted stub ReplacementCodeuiColor3fVertex3fvSUN!\n");
+	LOG("Called untested stub ReplacementCodeuiColor3fVertex3fvSUN!\n");
+	pushOp(1031);
+	pushBuf(rc, sizeof(GLuint));
+	pushBuf(c, sizeof(GLfloat) * 3);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -11028,7 +11317,11 @@ extern "C" void glReplacementCodeuiNormal3fVertex3fSUN(GLuint rc, GLfloat nx, GL
 //1033
 extern "C" void glReplacementCodeuiNormal3fVertex3fvSUN(const GLuint * rc, const GLfloat * n, const GLfloat * v)
 {
-	LOG("Called unimplemted stub ReplacementCodeuiNormal3fVertex3fvSUN!\n");
+	LOG("Called untested stub ReplacementCodeuiNormal3fVertex3fvSUN!\n");
+	pushOp(1029);
+	pushBuf(rc, sizeof(GLuint));
+	pushBuf(n, sizeof(GLfloat) * 3);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -11054,6 +11347,7 @@ extern "C" void glReplacementCodeuiColor4fNormal3fVertex3fSUN(GLuint rc, GLfloat
 extern "C" void glReplacementCodeuiColor4fNormal3fVertex3fvSUN(const GLuint * rc, const GLfloat * c, const GLfloat * n, const GLfloat * v)
 {
 	LOG("Called unimplemted stub ReplacementCodeuiColor4fNormal3fVertex3fvSUN!\n");
+	//4 buffers
 }
 
 
@@ -11073,7 +11367,11 @@ extern "C" void glReplacementCodeuiTexCoord2fVertex3fSUN(GLuint rc, GLfloat s, G
 //1037
 extern "C" void glReplacementCodeuiTexCoord2fVertex3fvSUN(const GLuint * rc, const GLfloat * tc, const GLfloat * v)
 {
-	LOG("Called unimplemted stub ReplacementCodeuiTexCoord2fVertex3fvSUN!\n");
+	LOG("Called untested stub ReplacementCodeuiTexCoord2fVertex3fvSUN!\n");
+	pushOp(1037);
+	pushBuf(rc, sizeof(GLuint));
+	pushBuf(tc, sizeof(GLfloat) * 2);
+	pushBuf(v, sizeof(GLfloat) * 3);
 }
 
 
@@ -11097,6 +11395,7 @@ extern "C" void glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN(GLuint rc, GLfl
 extern "C" void glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN(const GLuint * rc, const GLfloat * tc, const GLfloat * n, const GLfloat * v)
 {
 	LOG("Called unimplemted stub ReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN!\n");
+	//4 buffers
 }
 
 
@@ -11124,6 +11423,7 @@ extern "C" void glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN(GLuint r
 extern "C" void glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN(const GLuint * rc, const GLfloat * tc, const GLfloat * c, const GLfloat * n, const GLfloat * v)
 {
 	LOG("Called unimplemted stub ReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN!\n");
+	//5 buffers
 }
 
 
@@ -11189,7 +11489,7 @@ extern "C" void glCombinerParameterfvNV(GLenum pname, const GLfloat * params)
 	LOG("Called untested stub CombinerParameterfvNV!\n");
 	pushOp(1048);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -11208,7 +11508,7 @@ extern "C" void glCombinerParameterivNV(GLenum pname, const GLint * params)
 	LOG("Called untested stub CombinerParameterivNV!\n");
 	pushOp(1050);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint)); //need size
 }
 
 
@@ -11271,7 +11571,7 @@ extern "C" void glGetCombinerInputParameterfvNV(GLenum stage, GLenum portion, GL
 	pushParam(portion);
 	pushParam(variable);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true); //need size
 	waitForReturn();
 }
 
@@ -11285,7 +11585,7 @@ extern "C" void glGetCombinerInputParameterivNV(GLenum stage, GLenum portion, GL
 	pushParam(portion);
 	pushParam(variable);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true); //need size
 	waitForReturn();
 }
 
@@ -11298,7 +11598,7 @@ extern "C" void glGetCombinerOutputParameterfvNV(GLenum stage, GLenum portion, G
 	pushParam(stage);
 	pushParam(portion);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true); //need size
 	waitForReturn();
 
 }
@@ -11312,7 +11612,7 @@ extern "C" void glGetCombinerOutputParameterivNV(GLenum stage, GLenum portion, G
 	pushParam(stage);
 	pushParam(portion);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true); //need size
 	waitForReturn();
 }
 
@@ -11324,7 +11624,7 @@ extern "C" void glGetFinalCombinerInputParameterfvNV(GLenum variable, GLenum pna
 	pushOp(1059);
 	pushParam(variable);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true); //need size
 	waitForReturn();
 }
 
@@ -11336,7 +11636,7 @@ extern "C" void glGetFinalCombinerInputParameterivNV(GLenum variable, GLenum pna
 	pushOp(1060);
 	pushParam(variable);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true); //need size
 	waitForReturn();
 }
 
@@ -11569,11 +11869,12 @@ extern "C" void glMultiModeDrawArraysIBM(const GLenum * mode, const GLint * firs
 {
 	LOG("Called untested stub MultiModeDrawArraysIBM!\n");
 	pushOp(1086);
+	pushParam(primcount);
+	pushParam(modestride);
 	pushBuf(mode, sizeof(GLenum) * (primcount + modestride));
 	pushBuf(first, sizeof(GLenum) * primcount);
 	pushBuf(count, sizeof(GLenum) * primcount);
-	pushParam(primcount);
-	pushParam(modestride);
+
 }
 
 
@@ -11581,6 +11882,7 @@ extern "C" void glMultiModeDrawArraysIBM(const GLenum * mode, const GLint * firs
 extern "C" void glMultiModeDrawElementsIBM(const GLenum * mode, const GLsizei * count, GLenum type, const GLvoid * const * indices, GLsizei primcount, GLint modestride)
 {
 	LOG("Called unimplemted stub MultiModeDrawElementsIBM!\n");
+	//4 buffers
 }
 
 
@@ -11731,7 +12033,7 @@ extern "C" void glGetFenceivNV(GLuint fence, GLenum pname, GLint * params)
 	pushOp(1104);
 	pushParam(fence);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true); //need size
 	waitForReturn();
 }
 
@@ -11778,7 +12080,7 @@ extern "C" void glMapParameterivNV(GLenum target, GLenum pname, const GLint * pa
 	pushOp(1108);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint)); //need size
 }
 
 
@@ -11789,7 +12091,7 @@ extern "C" void glMapParameterfvNV(GLenum target, GLenum pname, const GLfloat * 
 	pushOp(1109);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -11815,7 +12117,8 @@ extern "C" void glGetMapParameterivNV(GLenum target, GLenum pname, GLint * param
 	pushOp(1111);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	pushBuf(params, sizeof(GLint), true); //need size
+	waitForReturn();
 }
 
 
@@ -11826,7 +12129,7 @@ extern "C" void glGetMapParameterfvNV(GLenum target, GLenum pname, GLfloat * par
 	pushOp(1112);
 	pushParam(target);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true); //need size
 	waitForReturn();
 }
 
@@ -11839,7 +12142,7 @@ extern "C" void glGetMapAttribParameterivNV(GLenum target, GLuint index, GLenum 
 	pushParam(target);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true); //need size
 	waitForReturn();
 }
 
@@ -11852,7 +12155,7 @@ extern "C" void glGetMapAttribParameterfvNV(GLenum target, GLuint index, GLenum 
 	pushParam(target);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true); //need size
 	waitForReturn();
 }
 
@@ -11873,7 +12176,7 @@ extern "C" void glCombinerStageParameterfvNV(GLenum stage, GLenum pname, const G
 	pushOp(1116);
 	pushParam(stage);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(GLfloat)); //need size
 }
 
 
@@ -11884,7 +12187,7 @@ extern "C" void glGetCombinerStageParameterfvNV(GLenum stage, GLenum pname, GLfl
 	pushOp(1117);
 	pushParam(stage);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(GLfloat), true); //need size
 	waitForReturn();
 }
 
@@ -11974,7 +12277,7 @@ extern "C" void glGetProgramivNV(GLuint id, GLenum pname, GLint * params)
 	pushOp(1125);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	pushBuf(params, sizeof(GLint), true);
 	waitForReturn();
 }
 
@@ -11986,7 +12289,7 @@ extern "C" void glGetProgramStringNV(GLuint id, GLenum pname, GLubyte * program)
 	pushOp(1126);
 	pushParam(id);
 	pushParam(pname);
-	pushBuf(program, sizeof(GLubyte) * sizeof(*program), true);
+	pushBuf(program, sizeof(GLchar) * MAX_STRING_LENGTH, true);
 	waitForReturn();
 }
 
@@ -12009,7 +12312,12 @@ extern "C" void glGetVertexAttribdvNV(GLuint index, GLenum pname, GLdouble * par
 	pushOp(1128);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * sizeof(params), true);
+	int size = sizeof(GLdouble);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -12021,7 +12329,12 @@ extern "C" void glGetVertexAttribfvNV(GLuint index, GLenum pname, GLfloat * para
 	pushOp(1129);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) * sizeof(params), true);
+	int size = sizeof(GLfloat);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -12033,7 +12346,12 @@ extern "C" void glGetVertexAttribivNV(GLuint index, GLenum pname, GLint * params
 	pushOp(1130);
 	pushParam(index);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params), true);
+	int size = sizeof(GLint);
+	if(pname == GL_CURRENT_VERTEX_ATTRIB)
+	{
+	size *= 4;
+	}
+	pushBuf(params, size, true);
 	waitForReturn();
 }
 
@@ -12090,7 +12408,7 @@ extern "C" void glProgramParameter4dvNV(GLenum target, GLuint index, const GLdou
 	pushOp(1135);
 	pushParam(target);
 	pushParam(index);
-	pushBuf(params, sizeof(const GLdouble) * sizeof(params), true);
+	pushBuf(params, sizeof(const GLdouble) * 4, true);
 	waitForReturn();
 }
 
@@ -12115,7 +12433,7 @@ extern "C" void glProgramParameter4fvNV(GLenum target, GLuint index, const GLflo
 	pushOp(1137);
 	pushParam(target);
 	pushParam(index);
-	pushBuf(params, sizeof(const GLfloat) * sizeof(params), true);
+	pushBuf(params, sizeof(const GLfloat) * 4, true);
 	waitForReturn();
 }
 
@@ -12723,7 +13041,7 @@ extern "C" void glSetFragmentShaderConstantATI(GLuint dst, const GLfloat * value
 	LOG("Called untested stub SetFragmentShaderConstantATI!\n");
 	pushOp(1195);
 	pushParam(dst);
-	pushBuf(value, sizeof(GLfloat) * sizeof(*value));
+	pushBuf(value, sizeof(GLfloat)); //need size
 }
 
 
@@ -12753,7 +13071,12 @@ extern "C" void glPointParameterivNV(GLenum pname, const GLint * params)
 	LOG("Called untested stub PointParameterivNV!\n");
 	pushOp(1198);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) * sizeof(params));
+	int size = sizeof(GLint);
+	if(pname == GL_POINT_DISTANCE_ATTENUATION)
+	{
+	size *= 3;
+	}
+	pushBuf(params, size);
 }
 
 
@@ -12922,7 +13245,7 @@ extern "C" void glProgramEnvParameters4fvEXT(GLenum target, GLuint index, GLsize
 	pushParam(target);
 	pushParam(index);
 	pushParam(count);
-	pushBuf(params, sizeof(const GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(const GLfloat) * 4);
 }
 
 
@@ -12934,7 +13257,7 @@ extern "C" void glProgramLocalParameters4fvEXT(GLenum target, GLuint index, GLsi
 	pushParam(target);
 	pushParam(index);
 	pushParam(count);
-	pushBuf(params, sizeof(const GLfloat) * sizeof(params));
+	pushBuf(params, sizeof(const GLfloat) * 4);
 }
 
 
@@ -13034,7 +13357,12 @@ extern "C" void glPointParameterfvSGIS(GLenum pname, const GLfloat * params)
 	LOG("Called untested stub PointParameterfvSGIS!\n");
 	pushOp(1223);
 	pushParam(pname);
-	pushBuf(params, sizeof(const GLfloat) * sizeof(params));
+	int size = sizeof(GLfloat);
+	if(pname == GL_POINT_DISTANCE_ATTENUATION)
+	{
+	size *= 3;
+	}
+	pushBuf(params, size);
 }
 
 
@@ -13108,8 +13436,6 @@ extern "C" void glLoadIdentityDeformationMapSGIX(GLenum mask)
 /********************************************************
 	GLU Intercepts
 ********************************************************/
-
-#ifdef GLUFULL
 
 //1501
 extern "C" void gluBeginCurve (GLUnurbs* nurb)
@@ -13375,7 +13701,6 @@ extern "C" void gluPartialDisk (GLUquadric* quad, GLdouble inner, GLdouble outer
 {
 	LOG("Called unimplemted stub gluPartialDisk!\n");
 }
-#endif
 
 //1539
 extern "C" void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
@@ -13386,9 +13711,6 @@ extern "C" void gluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, 
 	pushParam(zNear);
 	pushParam(zFar);
 }
-
-
-#ifdef GLUFULL
 
 //1540
 extern "C" void gluPickMatrix (GLdouble x, GLdouble y, GLdouble delX, GLdouble delY, GLint *viewport)
@@ -13528,13 +13850,10 @@ extern "C" GLint gluUnProject4 (GLdouble winX, GLdouble winY, GLdouble winZ, GLd
 {
 	LOG("Called unimplemted stub gluUnProject4!\n");
 }
-#endif
 
 /********************************************************
 	GLX Intercepts
 ********************************************************/
-
-#ifdef GLXFULL
 
 //Pointer to glXChooseVisual
 static XVisualInfo* (*_glXChooseVisual)(Display*, int, int*) = NULL;
@@ -13600,6 +13919,7 @@ extern "C" void glXDestroyContext( Display *dpy, GLXContext ctx )
 //1604
 extern "C" Bool glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
+	LOG("Called stub glXMakeCurrent!\n");
 	if (_glXMakeCurrent == NULL) {
 		_glXMakeCurrent = (Bool (*)( Display*, GLXDrawable, GLXContext))  dlsym(dlhandle, "glXMakeCurrent");
 	}
@@ -13607,7 +13927,9 @@ extern "C" Bool glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext c
 		printf("Couldn't find glXMakeCurrent: %s\n", dlerror());
 		exit(0);
 	}
-	return  (*_glXMakeCurrent) (dpy, drawable, ctx);
+	Bool temp = (*_glXMakeCurrent) (dpy, drawable, ctx);
+	
+	return  temp;
 }
 
 
@@ -13997,4 +14319,29 @@ extern "C" void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int bu
 {
 	LOG("Called unimplemted stub glXReleaseTexImageEXT!\n");
 }
-#endif
+
+/*extern "C" Window XCreateWindow(Display *display, Window parent, int x,
+	  int y, unsigned int width, unsigned int height,
+	  unsigned int border_width, int depth, unsigned int
+	  aclass, Visual *visual, unsigned long valuemask,
+	  XSetWindowAttributes *attributes)
+{
+LOG("Called untested stub XCreateWindow!\n");
+	if (_XCreateWindow == NULL) {
+		_XCreateWindow = (Window (*)(Display, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual, unsigned long, XSetWindowAttributes))  dlsym(dlhandle, "glXQueryExtensionsString");
+	}
+	if(!_glXQueryExtensionsString) {
+		printf("Couldn't find glXQueryExtensionsString: %s\n", dlerror());
+		exit(0);
+	}
+	return  (*_glXQueryExtensionsString) (dpy, screen);
+}
+
+extern "C" Window XCreateSimpleWindow(Display *display, Window parent,
+	  int x, int y, unsigned int width, unsigned int height,
+	  unsigned int border_width, unsigned long border,
+	  unsigned long background)
+{
+LOG("Called unimplemted stub XCreateSimpleWindow!\n");
+}*/
+
