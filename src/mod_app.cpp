@@ -397,12 +397,12 @@ void sendPointers(int length)
 /********************************************************
 	SDL Intercepts
 ********************************************************/
-/*
+
 //Pointer to SDL_INIT
 static int (*_SDL_Init)(unsigned int flags) = NULL;
 //Pointer to SDL_SetVideoMode
 static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
-//Pointer to SDL_GL_GetProcAddress
+/*//Pointer to SDL_GL_GetProcAddress
 static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
 //Pointer to SDL_LoadLibrary
 static int (*_SDL_GL_LoadLibrary)(const char *) = NULL;
@@ -436,9 +436,17 @@ extern "C" int SDL_Init(unsigned int flags)
 	return r;
 }
 
+*/
 
 extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigned int videoFlags)
 {
+	//Set up our internals
+	if(!theApp) {
+		theApp = new App();
+		theApp->run_shared();
+	}
+
+
 	if (_SDL_SetVideoMode == NULL) {
 		_SDL_SetVideoMode = (SDL_Surface* (*)(int,int,int,unsigned int)) dlsym(RTLD_NEXT, "SDL_SetVideoMode");
 	}
@@ -450,7 +458,7 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 	return (*_SDL_SetVideoMode)(fakeWindowX, fakeWindowY, bpp, videoFlags );
 }
 
-
+/*
 extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags)
 {
 	// -1 means any mode is supported (easier than adding symphony values to list)
@@ -13866,6 +13874,8 @@ static const char * (*_glXQueryExtensionsString)( Display*, int) = NULL;
 //Pointer to glXGetProcAddressARB
 static __GLXextFuncPtr (*_glXGetProcAddressARB)(const GLubyte *) = NULL;
 
+static void (*_glXSwapBuffers) ( Display*, GLXDrawable) = NULL;
+
 
 
 
@@ -13919,7 +13929,6 @@ extern "C" void glXDestroyContext( Display *dpy, GLXContext ctx )
 //1604
 extern "C" Bool glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
-	LOG("Called stub glXMakeCurrent!\n");
 	if (_glXMakeCurrent == NULL) {
 		_glXMakeCurrent = (Bool (*)( Display*, GLXDrawable, GLXContext))  dlsym(dlhandle, "glXMakeCurrent");
 	}
@@ -13928,7 +13937,18 @@ extern "C" Bool glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext c
 		exit(0);
 	}
 	Bool temp = (*_glXMakeCurrent) (dpy, drawable, ctx);
-	
+	//make camoflaged window appear
+	if (_glXSwapBuffers == NULL) {
+		_glXSwapBuffers = (void (*)(Display*, GLXDrawable))  dlsym(dlhandle, "glXSwapBuffers");
+		if(!_glXSwapBuffers) {
+			printf("Couldn't find glXSwapBuffers: %s\n", dlerror());
+			exit(0);
+		}
+	}
+	for(int i = 0; i < 3; i++)
+	{
+	(*_glXSwapBuffers) (dpy, drawable);
+	}
 	return  temp;
 }
 
@@ -13939,11 +13959,9 @@ extern "C" void glXCopyContext( Display *dpy, GLXContext src, GLXContext dst, un
 	LOG("Called unimplemted stub glXCopyContext!\n");
 }
 
-
 //1606
 extern "C" void glXSwapBuffers( Display *dpy, GLXDrawable drawable )
 {
-	//LOG("Called untested stub glXSwapBuffers!\n");
 	pushOp(1499);				 //Swap buffers
 	(*iFrames)++;
 	if(!theApp->tick()) {
@@ -13985,6 +14003,7 @@ extern "C" Bool glXQueryVersion( Display *dpy, int *maj, int *min )
 extern "C" Bool glXIsDirect( Display *dpy, GLXContext ctx )
 {
 	LOG("Called unimplemted stub glXIsDirect!\n");
+	return false;
 }
 
 
@@ -14320,21 +14339,19 @@ extern "C" void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int bu
 	LOG("Called unimplemted stub glXReleaseTexImageEXT!\n");
 }
 
-/*extern "C" Window XCreateWindow(Display *display, Window parent, int x,
-	  int y, unsigned int width, unsigned int height,
-	  unsigned int border_width, int depth, unsigned int
-	  aclass, Visual *visual, unsigned long valuemask,
-	  XSetWindowAttributes *attributes)
+static Window (*_XCreateWindow)(Display*, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual*, unsigned long, XSetWindowAttributes*) = NULL;
+
+extern "C" Window XCreateWindow(Display *display, Window parent, int x, int y, unsigned int width, unsigned int height, unsigned int border_width, int depth, unsigned int aclass, Visual *visual, unsigned long valuemask, XSetWindowAttributes *attributes)
 {
 LOG("Called untested stub XCreateWindow!\n");
 	if (_XCreateWindow == NULL) {
-		_XCreateWindow = (Window (*)(Display, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual, unsigned long, XSetWindowAttributes))  dlsym(dlhandle, "glXQueryExtensionsString");
+		_XCreateWindow = (Window (*)(Display*, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual*, unsigned long, XSetWindowAttributes*))  dlsym(dlhandle, "XCreateWindow");
 	}
-	if(!_glXQueryExtensionsString) {
-		printf("Couldn't find glXQueryExtensionsString: %s\n", dlerror());
+	if(!_XCreateWindow) {
+		printf("Couldn't find XCreateWindow: %s\n", dlerror());
 		exit(0);
 	}
-	return  (*_glXQueryExtensionsString) (dpy, screen);
+	return  (*_XCreateWindow) (display, parent, x, y, fakeWindowX, fakeWindowY, border_width, depth, aclass, visual, valuemask, attributes);
 }
 
 extern "C" Window XCreateSimpleWindow(Display *display, Window parent,
@@ -14343,5 +14360,5 @@ extern "C" Window XCreateSimpleWindow(Display *display, Window parent,
 	  unsigned long background)
 {
 LOG("Called unimplemted stub XCreateSimpleWindow!\n");
-}*/
+}
 
