@@ -28,6 +28,8 @@ bool Presentation::init(vector<string> files){
 	
 	iCurrentSlide = 0;
 	
+	mTransition = new SimpleTransition();
+	
 	return true;	
 }
 

@@ -1,3 +1,4 @@
+class Transition;
 
 /*******************************************************************************
 						Holds slides
@@ -16,6 +17,8 @@ public:
 	void next();
 	void prev();
 	void start();
+	
+	Transition *mTransition;
 };
 
 /*******************************************************************************
@@ -23,7 +26,7 @@ public:
 *******************************************************************************/
 class Transition{
 public:
-	virtual void init()=0;
+	virtual void init(Presentation *p)=0;
 	virtual void render()=0;
 	virtual bool update()=0;
 	virtual void shutdown()=0;
@@ -31,8 +34,8 @@ public:
 
 class SimpleTransition : public Transition{
 public:
-	virtual void init()=0;
-	virtual void render()=0;
-	virtual bool update()=0;
-	virtual void shutdown()=0;
+	void init(Presentation *p);
+	void render();
+	bool update();
+	void shutdown();	
 };
