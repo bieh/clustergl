@@ -3,13 +3,19 @@
 #include "misc.h"
 #include "glutil.h"
 #include "surface.h"
-
+#include "texture.h"
+#include "presentation.h"
 
 //global configuration
 extern int iScreenX;
 extern int iScreenY;
 extern bool bFullscreen;
+
+//global functions
 extern void requestShutdown();
+
+//other global objects
+extern GLUtil mGLU;
 
 #define LOG printf
 #define ERR printf
@@ -31,10 +37,10 @@ public:
 private:
 
 	Surface mSurface;	
-	GLUtil mGLU;
+	Presentation mPresentation;
 	
 	//mainloop functions
-	bool init();
+	bool init(vector<string> args);
 	bool update();
 	void render();
 	bool shutdown();

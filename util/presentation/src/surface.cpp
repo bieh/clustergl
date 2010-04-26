@@ -200,8 +200,22 @@ bool Surface::init(int sizeX, int sizeY, bool fullscreen){
 
 	//resize the initial window   
 	resizeWindow( sizeX, sizeY );
-	
+
 	LOG("Made a %d/%d window @ %d bpp\n", sizeX, sizeY, bpp );
+	
+	
+	
+	if (ilGetInteger(IL_VERSION_NUM) < IL_VERSION || 
+		iluGetInteger(ILU_VERSION_NUM) < ILU_VERSION || 
+		ilutGetInteger(ILUT_VERSION_NUM) < ILUT_VERSION) 
+	{
+		LOG("DevIL version is different...exiting!\n");
+		return false;
+	}
+	
+	ilInit();
+	ilutRenderer(ILUT_OPENGL);
+	
 	
 	return true;
 }

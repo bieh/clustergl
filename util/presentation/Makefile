@@ -6,4 +6,4 @@ clean:
 	
 		
 run-app:
-	cd runtime && ./presentation
+	cd runtime && ./presentation /home/paul/Desktop/presentation/*.png

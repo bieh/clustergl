@@ -9,7 +9,7 @@ void requestShutdown(){
 
 int Application::run(vector<string> args){
 
-	if(!init()){
+	if(!init(args)){
 		return 1;
 	}
 	
@@ -35,9 +35,13 @@ int main(int argc, char **argv){
 	Application *a = new Application();
 	
 	vector<string> args;
-	for(int i=0;i<argc;i++){
+	for(int i=1;i<argc;i++){
 		args.push_back(argv[i]);
 	}
 	
-	return a->run(args);
+	int ret = a->run(args);
+	
+	delete a;
+	
+	return ret;
 }	

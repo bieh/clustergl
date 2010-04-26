@@ -1,19 +1,3 @@
-/*******************************************************************************
-							BSOD2 Client - libs.h
-							
- This file includes all the common standard libraries that the client uses. It's
- nice to have them all in one place
- 
- You'll need: SDL, DevIL, SDL_ttf, libconfuse, SDL_net, CEGUI, libGLEW
-*******************************************************************************/
-
-
-/*********************************************
-					CEGUI
-**********************************************/
-#ifdef ENABLE_GUI
-#include <CEGUI.h>
-#endif
 
 /*********************************************
 					STL
@@ -86,4 +70,13 @@ using std::map;
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
 #endif
+
+
+#define ILUT_USE_OPENGL
+
+//DevIL
+#include <IL/il.h>
+#include <IL/ilu.h>
+#include <IL/ilut.h>
+
 
