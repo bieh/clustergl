@@ -19,6 +19,9 @@ public:
 	void start();
 	
 	//transitions
-	void doSimpleTransition();
+	void doSimpleTransition(bool init);
+	
+	bool isTransition;
+	bool transitionInit;
 };
 

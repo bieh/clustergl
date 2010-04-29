@@ -20,9 +20,7 @@ bool Texture::load(string filename, int flags){
 					
 	iSizeX = ilGetInteger(IL_IMAGE_WIDTH);
 	iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
-	
-	LOG("%d/%d\n", iSizeX, iSizeY);
-	
+		
 	//if(flags != TEXTURE_NO_GL){	
 						
 		mHandle = ilutGLBindTexImage(); //

@@ -27,29 +27,40 @@ bool Presentation::init(vector<string> files){
 	LOG("Done presentation init (%d slides)\n", mSlides.size());
 	
 	iCurrentSlide = 0;
+	isTransition = false;
 		
 	return true;	
 }
 
 void Presentation::render(){
 
-	mSlides[iCurrentSlide]->bind();
+	if(isTransition){
+		doSimpleTransition(transitionInit);
+		transitionInit = false;
+	}else{
 		
-	float h = 0.67f;
-	float w = 0.93f;
-	
-	glBegin(GL_QUADS);
-		// Front Face
-		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
-		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
-		glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
-		glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
-		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
-	glEnd();
+		gluLookAt(	0, 0, 1, 
+				0, 0, 0, 
+				0, 1, 0	);
 
+		mSlides[iCurrentSlide]->bind();
+		
+		float h = 0.67f;
+		float w = 0.93f;
+	
+		glBegin(GL_QUADS);
+			// Front Face
+			glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
+		glEnd();
+	}
 }
 
 void Presentation::update(){
+	
 	
 }
 
@@ -61,6 +72,9 @@ void Presentation::next(){
 	}
 	
 	LOG("Next! (%d)\n", iCurrentSlide);
+	
+	isTransition = true;
+	transitionInit = true;
 }
 
 void Presentation::prev(){
