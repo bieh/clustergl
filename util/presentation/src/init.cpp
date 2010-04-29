@@ -2,7 +2,7 @@
 
 bool Application::init(vector<string> args){
 
-	if(!mSurface.init(640, 480, false)){
+	if(!mSurface.init(840, 420, false)){
 		return false;
 	}
 	

@@ -13,6 +13,17 @@ void Application::onMouseEvent(int button, int event){
 }
 
 void Application::onKeyEvent(int keycode, int event){
-	requestShutdown();
+
+	if(event != SDL_KEYUP){
+		return;
+	}
+
+	if(keycode == SDLK_ESCAPE){
+		requestShutdown();
+	}
+	
+	if(keycode == SDLK_SPACE){
+		mPresentation.next();
+	}
 }
 

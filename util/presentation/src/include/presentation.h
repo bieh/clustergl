@@ -18,24 +18,7 @@ public:
 	void prev();
 	void start();
 	
-	Transition *mTransition;
+	//transitions
+	void doSimpleTransition();
 };
 
-/*******************************************************************************
-						Transition between slides
-*******************************************************************************/
-class Transition{
-public:
-	virtual void init(Presentation *p)=0;
-	virtual void render()=0;
-	virtual bool update()=0;
-	virtual void shutdown()=0;
-};
-
-class SimpleTransition : public Transition{
-public:
-	void init(Presentation *p);
-	void render();
-	bool update();
-	void shutdown();	
-};

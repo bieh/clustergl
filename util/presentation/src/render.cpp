@@ -4,7 +4,7 @@ void Application::render(){
 
 	mSurface.beginRender();
 	
-	gluLookAt(	5, 5, 5, 
+	gluLookAt(	0, 0, 1, 
 				0, 0, 0, 
 				0, 1, 0	);
 	

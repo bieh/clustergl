@@ -27,23 +27,46 @@ bool Presentation::init(vector<string> files){
 	LOG("Done presentation init (%d slides)\n", mSlides.size());
 	
 	iCurrentSlide = 0;
-	
-	mTransition = new SimpleTransition();
-	
+		
 	return true;	
 }
 
 void Presentation::render(){
 
-	mSlides[0]->bind();
+	mSlides[iCurrentSlide]->bind();
+		
+	float h = 0.67f;
+	float w = 0.93f;
 	
-	mGLU.cube(1,1,1);	
+	glBegin(GL_QUADS);
+		// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
+	glEnd();
 
 }
 
 void Presentation::update(){
 	
 }
+
+void Presentation::next(){
+	iCurrentSlide++;
+	
+	if(iCurrentSlide >= mSlides.size()){
+		iCurrentSlide = 0;
+	}
+	
+	LOG("Next! (%d)\n", iCurrentSlide);
+}
+
+void Presentation::prev(){
+
+}
+
 
 void Presentation::shutdown(){
 

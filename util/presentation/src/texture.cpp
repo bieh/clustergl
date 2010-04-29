@@ -10,7 +10,7 @@ bool Texture::load(string filename, int flags){
 
 	ilGenImages(1, &iDevilID);    
 	ilBindImage(iDevilID);
-	
+			
 	//Load the data	
 	if(!ilLoadImage((char *)filename.c_str())){
 		int err = ilGetError();
@@ -21,16 +21,17 @@ bool Texture::load(string filename, int flags){
 	iSizeX = ilGetInteger(IL_IMAGE_WIDTH);
 	iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
 	
-	if(flags != TEXTURE_NO_GL){	
-		//mData = ilGetData();
+	LOG("%d/%d\n", iSizeX, iSizeY);
+	
+	//if(flags != TEXTURE_NO_GL){	
 						
-		mHandle = ilutGLBindMipmaps();		//ilutGLBindTexImage(); //
-		
+		mHandle = ilutGLBindTexImage(); //
+				
 		if(mHandle == 0){
 			LOG("Failed to get handle!\n");
 			return false;
 		}
-	}	
+	//}	
 	
 	bIsLoaded = true;
 		
@@ -45,7 +46,7 @@ void Texture::bind(){
 	}	
 
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(mHandle, GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, mHandle);
 }
 
 void Texture::destroy(){

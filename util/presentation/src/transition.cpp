@@ -1,17 +1,6 @@
 #include "main.h"
 
-void SimpleTransition::init(Presentation *p){
+void Presentation::doSimpleTransition(){
 
-}
-
-void SimpleTransition::render(){
-
-}
-
-bool SimpleTransition::update(){
-
-}
-
-void SimpleTransition::shutdown(){
 
 }
