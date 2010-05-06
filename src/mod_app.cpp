@@ -9,7 +9,7 @@
 #include <GL/glx.h>
 #include <GL/glu.h>
 
-#include <X11/extensions/xf86vmode.h>
+//#include <X11/extensions/xf86vmode.h>
 #include <X11/keysym.h>
 
 #define MAX_STRING_LENGTH 4096
