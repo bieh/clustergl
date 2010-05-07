@@ -51,7 +51,7 @@ int App::run(int argc, char **argv)
 	if(bHasInit) {
 		return 1;
 	}
-	init();
+	init(false);
 
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
 
@@ -72,7 +72,7 @@ int App::run_shared()
 	if(bHasInit) {
 		return 1;
 	}
-	init();
+	init(true);
 
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
@@ -90,7 +90,7 @@ int App::run_shared()
 }
 
 
-void App::init()
+void App::init(bool shared)
 {
 	//load values in from config file
 	cfg_opt_t opts[] = {
@@ -143,7 +143,7 @@ void App::init()
 
 	LOG("\n");
 	LOG("**********************************************\n");
-	LOG("                 ClusterGL\n");
+	LOG("                 ClusterGL(%s)\n", shared ? "intercept" : "renderer");
 	LOG("**********************************************\n");
 	bHasInit = true;
 }

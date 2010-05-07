@@ -14339,19 +14339,39 @@ extern "C" void glXReleaseTexImageEXT(Display *dpy, GLXDrawable drawable, int bu
 	LOG("Called unimplemted stub glXReleaseTexImageEXT!\n");
 }
 
-static Window (*_XCreateWindow)(Display*, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual*, unsigned long, XSetWindowAttributes*) = NULL;
+static Window (*_XCreateWindow)(Display*, Window, int, int, unsigned int, 
+								unsigned int, unsigned int, int, unsigned int, 
+								Visual*, unsigned long, XSetWindowAttributes*) = NULL;
 
-extern "C" Window XCreateWindow(Display *display, Window parent, int x, int y, unsigned int width, unsigned int height, unsigned int border_width, int depth, unsigned int aclass, Visual *visual, unsigned long valuemask, XSetWindowAttributes *attributes)
+extern "C" Window XCreateWindow(Display *display, Window parent, int x, int y, 
+								unsigned int width, unsigned int height, 
+								unsigned int border_width, int depth, 
+								unsigned int aclass, Visual *visual, 
+								unsigned long valuemask, 
+								XSetWindowAttributes *attributes)
 {
-LOG("Called untested stub XCreateWindow!\n");
+	LOG("Called untested stub XCreateWindow (%d/%d)!\n", width, height);
 	if (_XCreateWindow == NULL) {
-		_XCreateWindow = (Window (*)(Display*, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual*, unsigned long, XSetWindowAttributes*))  dlsym(dlhandle, "XCreateWindow");
+		_XCreateWindow = (Window (*)(Display*, Window, int, int, unsigned int, 
+									unsigned int, unsigned int, int, 
+									unsigned int, Visual*, unsigned long, 
+									XSetWindowAttributes*))  
+									dlsym(RTLD_NEXT, "XCreateWindow");
 	}
 	if(!_XCreateWindow) {
 		printf("Couldn't find XCreateWindow: %s\n", dlerror());
 		exit(0);
 	}
-	return  (*_XCreateWindow) (display, parent, x, y, fakeWindowX, fakeWindowY, border_width, depth, aclass, visual, valuemask, attributes);
+	
+	//Set up our internals
+	if(!theApp) {
+		theApp = new App();
+		theApp->run_shared();
+	}
+	
+	return  (*_XCreateWindow) (display, parent, x, y, fakeWindowX, 
+								fakeWindowY, border_width, depth, aclass, 
+								visual, valuemask, attributes);
 }
 
 extern "C" Window XCreateSimpleWindow(Display *display, Window parent,

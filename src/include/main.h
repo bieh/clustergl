@@ -28,7 +28,7 @@ class App
 {
 	vector<Module *> mModules;
 
-	void init();
+	void init(bool shared);
 	public:
 								 //space to hold Instructions for current and previous frames
 		list<Instruction> oneFrame;
