@@ -1,4 +1,4 @@
-#include "main.h"
+#include "include/multicast.h"
 
 unsigned char *textFileRead(const char *filename) 
 	{
@@ -40,7 +40,17 @@ unsigned char * fileContents = textFileRead("171.png");
 Server* s = new Server();
 
 /* send the file */
-s->send(fileContents, 5108195);
+s->writeData(fileContents, 5108195);
+
+/* read reply */
+char reply[1024];
+s->readData(reply, strlen("my reply!"));
+printf("reply: %s\n", reply);
+
+/* send the file */
+//s->write(fileContents, 5108195);
+/* send the file */
+//s->write(fileContents, 5108195);
 
 /* close the connection */
 

@@ -3,6 +3,7 @@
 ********************************************************/
 
 #include "main.h"
+#include "multicast.h"
 
 #include <zconf.h>
 #include <zlib.h>
@@ -28,6 +29,8 @@ int bufferSavings = 0;
 int incomingSize = 0;
 int outgoingSize = 0;
 NetCompressModule *compressor2;
+Server *server;
+bool multicast = true;
 
 const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iSendBufPos = 0;
@@ -47,47 +50,52 @@ NetClientModule::NetClientModule()
 	if(symphony) numConnections = 5;
 	else numConnections = 1;
 
-	//Make each socket and connect
-	for(int i = 0; i < numConnections; i++) {
-		if(useSYMPHONYnodes[i]) mSocket[i] = socket(PF_INET, SOCK_STREAM, 0);
-	}
-
 	if(usingSendCompression | usingReplyCompression) {
 		//make a compressor object (if required)
 		compressor2 = new NetCompressModule();
 	}
+	
+	if(multicast) {
+		server = new Server();
+	}
+	else {
+		//Make each socket and connect
+		for(int i = 0; i < numConnections; i++) {
+			if(useSYMPHONYnodes[i]) mSocket[i] = socket(PF_INET, SOCK_STREAM, 0);
+		}
 
-	//set TCP options for each socket
-	int one = 1;
-	for(int i = 0; i < numConnections; i++) {
-		if(useSYMPHONYnodes[i]) {
-			setsockopt(mSocket[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-			setsockopt(mSocket[i], SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-			if(mSocket[i] == 0) {
-				LOG("Couldn't make socket!\n");
-				return;
+		//set TCP options for each socket
+		int one = 1;
+		for(int i = 0; i < numConnections; i++) {
+			if(useSYMPHONYnodes[i]) {
+				setsockopt(mSocket[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+				setsockopt(mSocket[i], SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+				if(mSocket[i] == 0) {
+					LOG("Couldn't make socket!\n");
+					return;
+				}
 			}
 		}
-	}
 
-	struct sockaddr_in mAddr[5];
+		struct sockaddr_in mAddr[5];
 
-	//connect each socket to server
-	for(int i = 0; i < numConnections; i++) {
-		if(useSYMPHONYnodes[i]) {
-			memset(&mAddr[i], 0, sizeof(mAddr[i]));
-			mAddr[i].sin_family = AF_INET;
-			mAddr[i].sin_addr.s_addr = inet_addr(addresses[i].c_str());
-			mAddr[i].sin_port = htons(port);
-			//Establish connection
-			if (connect(mSocket[i],
-				(struct sockaddr *) &mAddr[i],
-			sizeof(mAddr[i])) < 0) {
-				LOG("Failed to connect with server '%s:%d'\n", addresses[i].c_str(), port);
-				mSocket[i] = 0;
-				return;
+		//connect each socket to server
+		for(int i = 0; i < numConnections; i++) {
+			if(useSYMPHONYnodes[i]) {
+				memset(&mAddr[i], 0, sizeof(mAddr[i]));
+				mAddr[i].sin_family = AF_INET;
+				mAddr[i].sin_addr.s_addr = inet_addr(addresses[i].c_str());
+				mAddr[i].sin_port = htons(port);
+				//Establish connection
+				if (connect(mSocket[i],
+					(struct sockaddr *) &mAddr[i],
+				sizeof(mAddr[i])) < 0) {
+					LOG("Failed to connect with server '%s:%d'\n", addresses[i].c_str(), port);
+					mSocket[i] = 0;
+					return;
+				}
+				LOG("Connected to remote pipeline on %s:%d\n", addresses[i].c_str(), port);
 			}
-			LOG("Connected to remote pipeline on %s:%d\n", addresses[i].c_str(), port);
 		}
 	}
 
@@ -107,10 +115,12 @@ bool NetClientModule::process(list<Instruction> &list)
 {
 	//Send all the commands in the list down the socket
 	//LOG("processing:\n");
-	for(int i = 0; i < numConnections; i++) {
-		if(useSYMPHONYnodes[i]) {
-			if(mSocket[i] == 0) {
-				return false;
+	if(!multicast) {
+		for(int i = 0; i < numConnections; i++) {
+			if(useSYMPHONYnodes[i]) {
+				if(mSocket[i] == 0) {
+					return false;
+				}
 			}
 		}
 	}
@@ -280,25 +290,39 @@ bool NetClientModule::sync()
 	sendBuffer();
 	uint32_t * a = (uint32_t *)malloc(sizeof(uint32_t));
 	*a = 987654;
-	netBytes += sizeof(uint32_t) * numConnections;
-	netBytes2 += sizeof(uint32_t) * numConnections;
-	for(int i = 0; i < numConnections; i++) {
-		if(useSYMPHONYnodes[i]) {
-			int fd = mSocket[i];
-			if(write(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)) {
-				LOG("Connection problem NetClientModule (didn't send sync)!\n");
-				return false;
-			}
+	if(multicast) {
+		if(server->writeData(a, sizeof(uint32_t)) != sizeof(uint32_t)) {
+			LOG("Connection problem NetClientModule (didn't send sync)!\n");
+			return false;
+		}
 
-			if(read(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)) {
-				LOG("Connection problem NetClientModule (didn't recv sync)!\n");
-				return false;
+		if(server->readData(a, sizeof(uint32_t)) != sizeof(uint32_t)) {
+			LOG("Connection problem NetClientModule (didn't recv sync)!\n");
+			return false;
+		}
+		if (*a!=987654)
+			return false;
+	}
+	else {
+		netBytes += sizeof(uint32_t) * numConnections;
+		netBytes2 += sizeof(uint32_t) * numConnections;
+		for(int i = 0; i < numConnections; i++) {
+			if(useSYMPHONYnodes[i]) {
+				int fd = mSocket[i];
+				if(write(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)) {
+					LOG("Connection problem NetClientModule (didn't send sync)!\n");
+					return false;
+				}
+
+				if(read(fd, a, sizeof(uint32_t)) != sizeof(uint32_t)) {
+					LOG("Connection problem NetClientModule (didn't recv sync)!\n");
+					return false;
+				}
+				if (*a!=987654)
+					return false;
 			}
-			if (*a!=987654)
-				return false;
 		}
 	}
-
 	free(a);
 	return true;
 }
@@ -362,28 +386,45 @@ void NetClientModule::sendBuffer()
 			uLongf CompBuffSize = (uLongf)(iSendBufPos + (iSendBufPos * 0.1) + 12);
 			Bytef *out = (Bytef*) malloc(CompBuffSize);
 			uint32_t newSize = compressor2->myCompress(mSendBuf, iSendBufPos, out);
-
-			//send the compressed buffer to each socket
-			for(int i = 0; i < numConnections; i++) {
-				if(useSYMPHONYnodes[i]) {
-					uint32_t fd = mSocket[i];
-
-					//first write the original size of the buffer
-					if(!write(fd, &iSendBufPos, sizeof(uint32_t))) {
-						LOG("Connection problem!\n");
-					}
-
-					//then write the compressed size of the buffer
-					if(!write(fd, &newSize, sizeof(uint32_t))) {
-						LOG("Connection problem!\n");
-					}
-
-					//then write the actual buffer
-					if(!write(fd, out, newSize)) {
-						LOG("Connection problem!\n");
-					}
+			if(multicast) {
+				//first write the original size of the buffer
+				if(!server->writeData(&iSendBufPos, sizeof(uint32_t))) {
+					LOG("Connection problem!\n");
 				}
 
+				//then write the compressed size of the buffer
+				if(!server->writeData(&newSize, sizeof(uint32_t))) {
+					LOG("Connection problem!\n");
+				}
+
+				//then write the actual buffer
+				if(!server->writeData(out, newSize)) {
+					LOG("Connection problem!\n");
+				}
+			}
+			else {
+				//send the compressed buffer to each socket
+				for(int i = 0; i < numConnections; i++) {
+					if(useSYMPHONYnodes[i]) {
+						uint32_t fd = mSocket[i];
+
+						//first write the original size of the buffer
+						if(!write(fd, &iSendBufPos, sizeof(uint32_t))) {
+							LOG("Connection problem!\n");
+						}
+
+						//then write the compressed size of the buffer
+						if(!write(fd, &newSize, sizeof(uint32_t))) {
+							LOG("Connection problem!\n");
+						}
+
+						//then write the actual buffer
+						if(!write(fd, out, newSize)) {
+							LOG("Connection problem!\n");
+						}
+					}
+
+				}
 			}
 			free(out);
 			iSendBufPos = 0;
@@ -391,24 +432,36 @@ void NetClientModule::sendBuffer()
 			netBytes2 += (newSize + (sizeof(uint32_t) * 2)) * numConnections;
 		}
 		else {
-			//send the buffer to each socket
-			for(int i = 0; i < numConnections; i++) {
-				if(useSYMPHONYnodes[i]) {
-					uint32_t fd = mSocket[i];
+			if(multicast) {
+				//first write the original size of the buffer
+				if(!server->writeData(&iSendBufPos, sizeof(uint32_t))) {
+					LOG("Connection problem!\n");
+				}
 
-					//first write the original size of the buffer
-					if(!write(fd, &iSendBufPos, sizeof(uint32_t))) {
-						LOG("Connection problem!\n");
-					}
+				//then write the actual buffer
+				if(!server->writeData(mSendBuf, iSendBufPos)) {
+					LOG("Connection problem!\n");
+				}		
+			}
+			else {
+				//send the buffer to each socket
+				for(int i = 0; i < numConnections; i++) {
+					if(useSYMPHONYnodes[i]) {
+						uint32_t fd = mSocket[i];
 
-					//then write the actual buffer
-					if(!write(fd, mSendBuf, iSendBufPos)) {
-						LOG("Connection problem!\n");
+						//first write the original size of the buffer
+						if(!write(fd, &iSendBufPos, sizeof(uint32_t))) {
+							LOG("Connection problem!\n");
+						}
+
+						//then write the actual buffer
+						if(!write(fd, mSendBuf, iSendBufPos)) {
+							LOG("Connection problem!\n");
+						}
 					}
 				}
 			}
-
-								 //should + sizeof(int) * numConnections overhead
+			 //should + sizeof(int) * numConnections overhead
 			netBytes2 += iSendBufPos * numConnections;
 			bytesLeft = sendBufferSize;
 			iSendBufPos = 0;
@@ -423,51 +476,72 @@ void NetClientModule::sendBuffer()
 
 int NetClientModule::myRead(void *buf, size_t count)
 {
+	size_t *a = &count;
+	uint32_t compressedSize = 0;
+	uint32_t origSize = 0;
+	Bytef *in = (Bytef*) malloc(compressedSize);
 	uint32_t ret[5];
-	//read in replys from each socket
-	for(int i = 0; i < numConnections; i++) {
-		if(useSYMPHONYnodes[i]) {
-			int fd = mSocket[i];
+	if(multicast) {
+		if(usingReplyCompression) {
+			//read the size of the compressed packet
+			int c = server->readData(&compressedSize, sizeof(uint32_t));
+			//read the size of the original packet
+			int d = server->readData(&origSize, sizeof(uint32_t));
 
-			if(usingReplyCompression) {
-				size_t *a = &count;
-				//read the size of the compressed packet
-				uint32_t compressedSize = 0;
-				int c = read(fd, &compressedSize, sizeof(uint32_t));
+			//read the size of the incoming packet
+			//then read the compressed packet data and uncompress
+				
+			ret[0] = server->readData(in, compressedSize);
+		}
+		else {
+			ret[0] = server->readData(buf, count);
+		}
+	}
+	else {
+		//read in replys from each socket
+		for(int i = 0; i < numConnections; i++) {
+			if(useSYMPHONYnodes[i]) {
+				int fd = mSocket[i];
 
-				//read the size of the original packet
-				uint32_t origSize = 0;
-				int d = read(fd, &origSize, sizeof(uint32_t));
+				if(usingReplyCompression) {
 
-				//read the size of the incoming packet
-				//then read the compressed packet data and uncompress
-				Bytef *in = (Bytef*) malloc(compressedSize);
-				ret[i] = read(fd, in, compressedSize);
-				if(ret[i] == compressedSize)
-					ret[i] = origSize;
-				else
-					return 0;	 //return error
-				if(i == 0)		 //only bother to decompress/process the first one
-					compressor2->myDecompress(buf, count, in, compressedSize);
-				free(in);
-			}
-			else {
-				if(i == 0) {
-					int remaining = count;
-					while(remaining > 0) {
-						ret[i] = read(fd, buf, remaining);
-						remaining -= ret[i];
-					}
-					ret[0] = count;
+					//read the size of the compressed packet
+					int c = read(fd, &compressedSize, sizeof(uint32_t));
+					//read the size of the original packet
+					int d = read(fd, &origSize, sizeof(uint32_t));
+
+					//read the size of the incoming packet
+					//then read the compressed packet data and uncompress
+				
+					ret[i] = read(fd, in, compressedSize);
+
+
+					if(ret[i] == compressedSize)
+						ret[i] = origSize;
+					else
+						return 0;	 //return error
+					if(i == 0)		 //only bother to decompress/process the first one
+						compressor2->myDecompress(buf, count, in, compressedSize);
+					free(in);
 				}
 				else {
-					byte * tempBuf = (byte *) malloc(count);
-					int remaining = count;
-					while(remaining > 0) {
-						ret[i] = read(fd, tempBuf, count);
-						remaining -= ret[i];
+					if(i == 0) {
+						int remaining = count;
+						while(remaining > 0) {
+							ret[i] = read(fd, buf, remaining);
+							remaining -= ret[i];
+						}
+						ret[0] = count;
 					}
-					free(tempBuf);
+					else {
+						byte * tempBuf = (byte *) malloc(count);
+						int remaining = count;
+						while(remaining > 0) {
+							ret[i] = read(fd, tempBuf, count);
+							remaining -= ret[i];
+						}
+						free(tempBuf);
+					}
 				}
 			}
 		}

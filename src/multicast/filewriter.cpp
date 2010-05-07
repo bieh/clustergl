@@ -1,4 +1,4 @@
-#include "main.h"
+#include "include/multicast.h"
 
 void textFileWrite(const char *filename, const char *contents) 
 	{
@@ -62,10 +62,22 @@ int main(int argc, char *argv[])
 
 	/* read the file from multicast */
 	unsigned char * fileContents = (unsigned char *) malloc(5108195);
-	c->read(fileContents, 5108195);
+	/* read the file from multicast */
+	//unsigned char * fileContents1 = (unsigned char *) malloc(5108195);
+	/* read the file from multicast */
+	//unsigned char * fileContents2 = (unsigned char *) malloc(5108195);
+	c->readData(fileContents, 5108195);
+
+	/* read reply */
+	char * reply = (char *) "my reply!";
+	c->writeData(reply, strlen(reply));
+	//c->read(fileContents1, 5108195);
+	//c->read(fileContents2, 5108195);
 
 	/* compare vs. original */
 	int cmp = memcmp(origFileContents, fileContents, 5108195);
+	//int cmp1 = memcmp(origFileContents, fileContents1, 5108195);
+	//int cmp2 = memcmp(origFileContents, fileContents2, 5108195);
 	printf("contents: %d\n", cmp);
 	gettimeofday(&end, NULL);
 	seconds  = end.tv_sec  - start.tv_sec;
@@ -74,8 +86,6 @@ int main(int argc, char *argv[])
 	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
 
 	printf("Elapsed time: %ld milliseconds\n", mtime);
-	
-
 
 /* close the connection */
 

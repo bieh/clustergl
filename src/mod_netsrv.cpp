@@ -3,6 +3,7 @@
 ********************************************************/
 
 #include "main.h"
+#include "multicast.h"
 
 #include <zconf.h>
 #include <zlib.h>
@@ -21,11 +22,14 @@ extern int port;
 *********************************************************/
 
 NetCompressModule *compressor;
+Client *client;
 int prevInstruction = 0;
 
 const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iRecieveBufPos = 0;
 uint32_t bytesRemaining = 0;;
+
+bool multi = true;
 
 //big buffer
 byte mRecieveBuf[recieveBufferSize];
@@ -36,20 +40,6 @@ byte mRecieveBuf[recieveBufferSize];
 
 NetSrvModule::NetSrvModule()
 {
-
-	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-		LOG("Failed to create socket\n");
-		exit(1);
-	}
-
-	struct sockaddr_in addr, clientaddr;
-
-	//Construct the server sockaddr_in structure
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(port);
-
 	//reset BPS calculations
 	frames = 0;
 	netBytes = 0;
@@ -59,32 +49,50 @@ NetSrvModule::NetSrvModule()
 		compressor = new NetCompressModule();
 	}
 
-	//set TCP options
-	int one = 1;
-	setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-	setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+	if(multi) {
+	client = new Client();
+	}
+	else {
+		if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+			LOG("Failed to create socket\n");
+			exit(1);
+		}
 
-	//Bind the server socket
-	if (bind(mSocket, (struct sockaddr *) &addr,
-	sizeof(addr)) < 0) {
-		LOG("Failed to bind the server socket\n");
-		exit(1);
-	}
-	//Listen
-	if (listen(mSocket, 1) < 0) {
-		LOG("Failed to listen on server socket\n");
-		exit(1);
-	}
+		struct sockaddr_in addr, clientaddr;
 
-	unsigned int clientlen = sizeof(clientaddr);
-	int client = 0;
-	// Wait for client connection
-	if ((client = accept(mSocket, (struct sockaddr *) &clientaddr, &clientlen)) < 0) {
-		LOG("Failed to accept client connection\n");
-		exit(1);
+		//Construct the server sockaddr_in structure
+		memset(&addr, 0, sizeof(addr));
+		addr.sin_family = AF_INET;
+		addr.sin_addr.s_addr = htonl(INADDR_ANY);
+		addr.sin_port = htons(port);
+
+		//set TCP options
+		int one = 1;
+		setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+		setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+
+		//Bind the server socket
+		if (bind(mSocket, (struct sockaddr *) &addr,
+		sizeof(addr)) < 0) {
+			LOG("Failed to bind the server socket NetSrvModule\n");
+			exit(1);
+		}
+		//Listen
+		if (listen(mSocket, 1) < 0) {
+			LOG("Failed to listen on server socket\n");
+			exit(1);
+		}
+
+		unsigned int clientlen = sizeof(clientaddr);
+		int client = 0;
+		// Wait for client connection
+		if ((client = accept(mSocket, (struct sockaddr *) &clientaddr, &clientlen)) < 0) {
+			LOG("Failed to accept client connection\n");
+			exit(1);
+		}
+		mClientSocket = new BufferedFd(client);
+		LOG("%s connected\n", string(inet_ntoa(clientaddr.sin_addr)).c_str() );
 	}
-	mClientSocket = new BufferedFd(client);
-	LOG("%s connected\n", string(inet_ntoa(clientaddr.sin_addr)).c_str() );
 }
 
 
@@ -184,18 +192,30 @@ void NetSrvModule::reply(Instruction *instr, int i)
 
 bool NetSrvModule::sync()
 {
-
 	netBytes += sizeof(uint32_t);
 	netBytes2 += sizeof(uint32_t);
 	uint32_t a;
-	if(mClientSocket->read((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
-		LOG("Connection problem NetSrvModule (didn't recv sync)!\n");
-		return false;
+	if(multi) {
+		if(client->readData((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
+			LOG("Connection problem NetSrvModule (didn't recv sync)!\n");
+			return false;
+		}
+		if(client->writeData((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
+			LOG("Connection problem NetSrvModule (didn't send sync)!\n");
+			return false;
+		}
 	}
-	if(mClientSocket->write((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
-		LOG("Connection problem NetSrvModule (didn't send sync)!\n");
-		return false;
+	else {
+		if(mClientSocket->read((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
+			LOG("Connection problem NetSrvModule (didn't recv sync)!\n");
+			return false;
+		}
+		if(mClientSocket->write((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
+			LOG("Connection problem NetSrvModule (didn't send sync)!\n");
+			return false;
+		}
 	}
+
 	return true;
 }
 
@@ -218,30 +238,49 @@ int NetSrvModule::myRead(byte *input, int nByte)
 
 
 void NetSrvModule::recieveBuffer(void)
-{
-	if(usingSendCompression) {
-		//first read the original number of bytes coming
-		mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
-
-		//read the size of the compressed packet
-		int compSize = 0;
-		mClientSocket->read((byte *)&compSize, sizeof(uint32_t));
-
-		//LOG("recieving buffer of size: %d!\n", bytesRemaining);
-		//then read in that many bytes
-		Bytef *in = (Bytef*) malloc(compSize);
-		mClientSocket->read(in, compSize);
-
-		compressor->myDecompress(mRecieveBuf, bytesRemaining, in, compSize);
-		iRecieveBufPos = 0;
-		free(in);
+{	
+	int compSize = 0;	
+	if(multi) {
+		if(usingSendCompression) {
+			client->readData((byte *)&bytesRemaining, sizeof(uint32_t));
+			client->readData((byte *)&compSize, sizeof(uint32_t));
+			Bytef *in = (Bytef*) malloc(compSize);	
+			client->readData(in, compSize);
+			compressor->myDecompress(mRecieveBuf, bytesRemaining, in, compSize);
+			iRecieveBufPos = 0;
+			free(in);
+		}
+		else {
+			client->readData((byte *)&bytesRemaining, sizeof(uint32_t));
+			client->readData(mRecieveBuf, bytesRemaining);
+			iRecieveBufPos = 0;
+		}
 	}
 	else {
-		//first read the original number of bytes coming
-		mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
-		//read the buffer
-		mClientSocket->read(mRecieveBuf, bytesRemaining);
-		iRecieveBufPos = 0;
+		if(usingSendCompression) {
+			//first read the original number of bytes coming
+			mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
+
+			//read the size of the compressed packet
+
+			mClientSocket->read((byte *)&compSize, sizeof(uint32_t));
+
+			//LOG("recieving buffer of size: %d!\n", bytesRemaining);
+			//then read in that many bytes
+			Bytef *in = (Bytef*) malloc(compSize);
+			mClientSocket->read(in, compSize);
+
+			compressor->myDecompress(mRecieveBuf, bytesRemaining, in, compSize);
+			iRecieveBufPos = 0;
+			free(in);
+		}
+		else {
+			//first read the original number of bytes coming
+			mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
+			//read the buffer
+			mClientSocket->read(mRecieveBuf, bytesRemaining);
+			iRecieveBufPos = 0;
+		}
 	}
 }
 
@@ -253,39 +292,78 @@ void NetSrvModule::recieveBuffer(void)
 int NetSrvModule::myWrite(byte *input, int nByte)
 {
 
-	if(usingReplyCompression) {
-		//create room for new compressed buffer
-		uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
-		Bytef *out = (Bytef*) malloc(CompBuffSize);
-		int newSize = compressor->myCompress(input, nByte, out);
+	if(multi) {
+		if(usingReplyCompression) {
+			//create room for new compressed buffer
+			uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
+			Bytef *out = (Bytef*) malloc(CompBuffSize);
+			int newSize = compressor->myCompress(input, nByte, out);
 
-		//write the size of the next instruction
-		if(!mClientSocket->write( (byte*)&newSize, sizeof(uint32_t))) {
-			LOG("Connection problem!\n");
+			//write the size of the next instruction
+			if(!client->writeData((byte*)&newSize, sizeof(uint32_t))) {
+				LOG("Connection problem!\n");
+			}
+			//write the old size of the next instruction
+			if(!client->writeData( (byte*)&nByte, sizeof(uint32_t))) {
+				LOG("Connection problem!\n");
+			}
+
+			//write the compressed instruction
+			int ret =client->writeData(out, newSize);
+			//cheack and set return value to keep caller happy
+			if(ret == newSize)
+				ret = nByte;
+
+			//calculate bandwidth requirements
+			netBytes += nByte;
+			netBytes2 += sizeof(uint32_t) * 2;
+			netBytes2 += newSize;
+			free(out);
+
+			return ret;
 		}
-		//write the old size of the next instruction
-		if(!mClientSocket->write( (byte*)&nByte, sizeof(uint32_t))) {
-			LOG("Connection problem!\n");
+		else {
+			int ret = client->writeData(input, nByte);
+			netBytes += nByte;
+			netBytes2 += nByte;
+			return ret;
 		}
-
-		//write the compressed instruction
-		int ret =mClientSocket->write(out, newSize);
-		//cheack and set return value to keep caller happy
-		if(ret == newSize)
-			ret = nByte;
-
-		//calculate bandwidth requirements
-		netBytes += nByte;
-		netBytes2 += sizeof(uint32_t) * 2;
-		netBytes2 += newSize;
-		free(out);
-
-		return ret;
 	}
 	else {
-		int ret = mClientSocket->write(input, nByte);
-		netBytes += nByte;
-		netBytes2 += nByte;
-		return ret;
+		if(usingReplyCompression) {
+			//create room for new compressed buffer
+			uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
+			Bytef *out = (Bytef*) malloc(CompBuffSize);
+			int newSize = compressor->myCompress(input, nByte, out);
+
+			//write the size of the next instruction
+			if(!mClientSocket->write( (byte*)&newSize, sizeof(uint32_t))) {
+				LOG("Connection problem!\n");
+			}
+			//write the old size of the next instruction
+			if(!mClientSocket->write( (byte*)&nByte, sizeof(uint32_t))) {
+				LOG("Connection problem!\n");
+			}
+
+			//write the compressed instruction
+			int ret =mClientSocket->write(out, newSize);
+			//cheack and set return value to keep caller happy
+			if(ret == newSize)
+				ret = nByte;
+
+			//calculate bandwidth requirements
+			netBytes += nByte;
+			netBytes2 += sizeof(uint32_t) * 2;
+			netBytes2 += newSize;
+			free(out);
+
+			return ret;
+		}
+		else {
+			int ret = mClientSocket->write(input, nByte);
+			netBytes += nByte;
+			netBytes2 += nByte;
+			return ret;
+		}
 	}
 }
