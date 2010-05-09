@@ -196,6 +196,7 @@ bool NetSrvModule::sync()
 	netBytes2 += sizeof(uint32_t);
 	uint32_t a;
 	if(multi) {
+		LOG("syncing NetSrvModule::sync\n");
 		if(client->readData((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
 			LOG("Connection problem NetSrvModule (didn't recv sync)!\n");
 			return false;

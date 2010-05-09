@@ -18,18 +18,20 @@ struct group_source_req
 
 #endif
 
-/*********************************************************
-	Client Globals
+extern string addresses[5];
+
+/*******************************************************n
+Client Globals
 *********************************************************/
 
 /* multicast socket */
 int multi_fd;
-char* hostAddress = (char *) "10.1.18.243";
+char* hostAddress = (char *) "192.168.22.101";
 
 /* TCP socket */
 int mSocket;
 int tcp_fd;
-int client_tcp_port = 1234;
+int client_tcp_port = 1313;
 
 /* packet counting variables */
 uint32_t clientFrameNumber = 0;
@@ -73,7 +75,7 @@ void Client::createMulticastSocket()
 		bind(multi_fd,(struct sockaddr*)&bindaddr,sizeof(bindaddr));
 
 		/* Set up the connection to the group */
-		group_source_req.gsr_interface = 0;
+		group_source_req.gsr_interface = 2;
 		group=(struct sockaddr_in*)&group_source_req.gsr_group;
 		source=(struct sockaddr_in*)&group_source_req.gsr_source;
 
@@ -85,13 +87,13 @@ void Client::createMulticastSocket()
 		group->sin_port = 0;
 		source->sin_family = AF_INET;
 		if (inet_aton(hostAddress,&source->sin_addr) == 0) {
-		  //printf("error: %s\n", (hostAddress));					  ;
+		  printf("error: %s\n", (hostAddress));					  ;
 		}
 		source->sin_port = 0;
 
 		setsockopt(multi_fd,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req, sizeof(group_source_req));
 
-		//printf("listening to multicast group 232.1.1.1 on port 9991!\n");
+		printf("listening to multicast group 232.1.1.1 on port 9991!\n");
 
 }
 
@@ -103,7 +105,7 @@ void Client::createTCPSocket()
 {
 	/* create TCP socket */
 	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-		//printf("Failed to create socket\n");
+		printf("Failed to create socket\n");
 		exit(1);
 	}
 
@@ -124,13 +126,13 @@ void Client::createTCPSocket()
 	/* Bind the server socket */
 	if (bind(mSocket, (struct sockaddr *) &addr,
 	sizeof(addr)) < 0) {
-		//printf("Client: Failed to bind the server socket \n");
+		printf("Client: Failed to bind the server socket \n");
 		exit(1);
 	}
 
 	/* Listen */
 	if (listen(mSocket, 1) < 0) {
-		//printf("Client: Failed to listen on server socket\n");
+		printf("Client: Failed to listen on server socket\n");
 		exit(1);
 	}
 
@@ -138,13 +140,13 @@ void Client::createTCPSocket()
 	int client = 0;
 
 	/* Wait for connection */
-	//printf("waiting for tcp connection!\n");
+	printf("waiting for tcp connection!\n");
 	if ((client = accept(mSocket, (struct sockaddr *) &clientaddr, &clientlen)) < 0) {
-		//printf("Failed to accept client connection\n");
+		printf("Failed to accept client connection\n");
 		exit(1);
 	}
 	tcp_fd = client;
-	//printf("tcp connected!\n");
+	printf("tcp connected!\n");
 }
 
 /*********************************************************
@@ -164,7 +166,7 @@ int Client::readData(void *buf, size_t count)
 	/* Now read packets */
 	while(clientOffsetNumber < count) 
 	{
-		////printf("receiving packet!\n");
+		//printf("receiving packet!\n");
 		int packetSize = count-clientOffsetNumber;
  		if(packetSize > MAX_CONTENT) packetSize = MAX_CONTENT;
 		readMulticastPacket((unsigned char *) buf+clientOffsetNumber, packetSize);	

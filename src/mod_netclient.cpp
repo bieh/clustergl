@@ -291,6 +291,7 @@ bool NetClientModule::sync()
 	uint32_t * a = (uint32_t *)malloc(sizeof(uint32_t));
 	*a = 987654;
 	if(multicast) {
+		LOG("syncing!\n");
 		if(server->writeData(a, sizeof(uint32_t)) != sizeof(uint32_t)) {
 			LOG("Connection problem NetClientModule (didn't send sync)!\n");
 			return false;

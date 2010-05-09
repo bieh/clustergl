@@ -110,7 +110,7 @@ public:
 	int writeData(void *buf, size_t count);
 	int readData(void *buf, size_t count);
 	int writeMulticastPacket(void *buf, size_t count, bool requiresACK);
-	bool readTCP_packet(int timeout);
+	int readTCP_packet(int timeout);
 	bool readTCPPacket(void *buf, size_t count, int timeout);
 	bool checkACKList();
 };

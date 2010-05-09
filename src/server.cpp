@@ -18,14 +18,16 @@ struct group_source_req
 
 #endif
 
+extern string addresses[5];
+
 /*********************************************************
 	Server Globals
 *********************************************************/
 
 int multicastSocket;
 int mSockets[5];
-int numConnections = 1;
-char* address = (char *) "127.0.0.1";
+int numConnections = 5;
+//char* address = (char *) "127.0.0.1";
 bool ackList[5];
 
 /* NACK checking values */
@@ -46,7 +48,7 @@ braden_packet * serverPacket = (braden_packet *)malloc(sizeof(braden_packet));
 
 uint32_t serverFrameNumber = 0;
 uint32_t serverOffsetNumber = 0;
-int server_tcp_port = 1234;
+int server_tcp_port = 1313;
 struct sockaddr_in *group;
 struct group_source_req group_source_req;
 struct sockaddr_in *source;
@@ -80,7 +82,7 @@ void Server::createMulticastSocket()
 		bind(multicastSocket,(struct sockaddr*)&bindaddr,sizeof(bindaddr));
 
 		/* Now set up the SSM request */
-		group_source_req.gsr_interface = 0; /* "any" interface */
+		group_source_req.gsr_interface = 2; /* "any" interface */
 		group=(struct sockaddr_in*)&group_source_req.gsr_group;
 		source=(struct sockaddr_in*)&group_source_req.gsr_source;
 
@@ -97,7 +99,7 @@ void Server::createMulticastSocket()
 
 		/* Enable reception of our own multicast */
 		loop = 1;
-		//setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof(loop));
+		setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof(loop));
 
 		/* Set the TTL on packets to 1, so the internet is not destroyed */
 		loop=1;
@@ -106,7 +108,7 @@ void Server::createMulticastSocket()
 		/* Now we care about the port we send to */
 		group->sin_port = htons(9991);
 		
-		//printf("multicast socket created group 232.1.1.1 on port 9991!\n");
+		printf("multicast socket created group 232.1.1.1 on port 9991!\n");
 }
 
 /*********************************************************
@@ -131,16 +133,16 @@ void Server::connectTCPSockets()
 	
 	/* connect socket(s) to server */
 	for(int i = 0; i < numConnections; i++) {
-		memset(&mAddr[i], 0, sizeof(mAddr));
+		memset(&mAddr[i], 0, sizeof(mAddr[i]));
 		mAddr[i].sin_family = AF_INET;
-		mAddr[i].sin_addr.s_addr = inet_addr(address);
+		mAddr[i].sin_addr.s_addr = inet_addr(addresses[i].c_str());
 		mAddr[i].sin_port = htons(server_tcp_port);
 
 		/* Establish connection */
 		if (connect(mSockets[i],	(struct sockaddr *) &mAddr[i],sizeof(mAddr[i])) < 0) {
-			//printf("Failed to connect with server\n");
+			printf("Failed to connect with server %s\n", addresses[i].c_str());
 			mSockets[i] = 0;
-			return;
+			//return;
 		}
 	}
 	//printf("Connected to tcp socket!\n");
@@ -199,14 +201,22 @@ int Server::writeData(void *buf, size_t count)
 			}
 		}
 		/* now wait for acks, with longer timeout val */
-		readTCP_packet(100000);
+		int rec = 0;
+		rec += readTCP_packet(1000);
+		if(rec < numConnections) {
+			rec += readTCP_packet(2000);
+		}
+		if(rec < numConnections) {
+		    rec += readTCP_packet(2000);
+		}
+
 	
 		if(checkACKList()) {
 		}
 		else {
 			/* if no ACK received (timed out), resend the previous packet 
 			to hopefully flush the ACK (or force a NACK) through */
-			printf("resending data!\n");	
+			//printf("%d frame, resending data, got %d so far!\n", serverFrameNumber, rec);	
 			serverOffsetNumber -= previousPacketSize;
 		}
 	}
@@ -275,7 +285,7 @@ bool Server::checkACKList() {
 	TCP Control messaging
 *********************************************************/
 
-bool Server::readTCP_packet(int timeout) {
+int Server::readTCP_packet(int timeout) {
 	
 	for(int i = 0; i < numConnections; i++) {
 		/* macro to set each socket to listen to */
@@ -298,8 +308,8 @@ bool Server::readTCP_packet(int timeout) {
 		//printf("%d socket(s) to read from!\n", valReady);
 		for(int i = 0; i < numConnections; i++) 
 		{
-			/* if the socket to read is mSockets[i]*/
-			if(FD_ISSET(mSockets[i],&rfds)) {
+			/* if the socket still hasn't acked and read is mSockets[i]*/
+			if(!ackList[i] && FD_ISSET(mSockets[i],&rfds)) {
 				int remaining = sizeof(braden_packet);
 				int ret = 0;
 					while(remaining > 0) {
@@ -313,22 +323,22 @@ bool Server::readTCP_packet(int timeout) {
 					}
 					else {
 						if(CHECK_BIT(serverPacket->packetFlags, NACKPOS)) {
-							//printf("got a NACK! %d offset now %d\n", serverOffsetNumber, serverPacket->offsetNumber);
+							printf("got a NACK! %d offset now %d\n", serverOffsetNumber, serverPacket->offsetNumber);
 
 							/* its a NACK, so reset offsetNumber */
 							serverOffsetNumber = serverPacket->offsetNumber;
 						}
 						else if(CHECK_BIT(serverPacket->packetFlags, ACKPOS)){
-							//printf("got an ACK!\n");
+							//printf("got an ACK! %d\n", i);
 							ackList[i] =  true;		
 						}
 						else{
-							//printf("got something weird!\n");	
+							printf("got something weird!\n");	
 						}
 					}
 			}
 		}
 	}
-	return false;
+	return valReady;
 }
 
