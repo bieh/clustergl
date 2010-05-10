@@ -1,4 +1,5 @@
 #include "include/multicast.h"
+#include <assert.h>
 
 /* Not everyone has the headers for this so improvise */
 #ifndef MCAST_JOIN_SOURCE_GROUP
@@ -53,9 +54,24 @@ struct sockaddr_in *group;
 struct group_source_req group_source_req;
 struct sockaddr_in *source;
 
+int curbuffer = 0;
+struct buffer_t {
+	char buffer[16*1024*1024];
+	unsigned int length;
+};
+buffer_t buffers[2];
+
 /*********************************************************
 	Server
 *********************************************************/
+
+void write_to_buffer(void *data, unsigned int len)
+{
+	buffer_t *buf = &buffers[curbuffer];
+	assert(buf->length + len < sizeof(buf->buffer));
+	memcpy(static_cast<void*>(&buf->buffer[buf->length]), data, len);
+	buf->length+=len;
+}
 
 Server::Server()
 {
@@ -165,57 +181,50 @@ void Server::connectTCPSockets()
 
 int Server::writeData(void *buf, size_t count)
 {
-	serverFrameNumber++;
-	serverOffsetNumber = 0;
+	write_to_buffer(buf,count);
+}
+
+bool Server::flushData(void)
+{
 	int previousPacketSize = 0;
 
+	buffer_t *buf = &buffers[curbuffer];
+	int lastoffset = 0;
+
+	serverFrameNumber++;
+	serverOffsetNumber = 0;
+
+	/* Now we wait for acks */
 	for(int i = 0; i < numConnections; i++) {
 		ackList[i] = false;	
 	}
-	
-	//printf("frame: %d sending %d total bytes!\n", serverFrameNumber, count);	
-	
-	while(!checkACKList()) 
-	{
 
-		/* Now send all packets */
-		while(serverOffsetNumber < count) 
-		{
-
-			/* set the size of packet to send */
-			int packetSize = count-serverOffsetNumber;
-			if(packetSize > MAX_CONTENT) packetSize = MAX_CONTENT;
-
-			//if(packetCount != 100 && packetCount != 102 && packetCount != 104)
-			writeMulticastPacket((unsigned char *)buf+serverOffsetNumber, packetSize, 
-									serverOffsetNumber + packetSize == count);
-			packetCount++;	
-
-			/* change counters to reflect the packet that has been sent */
-			serverOffsetNumber += packetSize;
-			previousPacketSize = packetSize;
-
-			/* if this is not the last packet, check for NACKS */
-			if(serverOffsetNumber < count && packetCount % checkNacksFreq == 0) {
-				readTCP_packet(0);
-			}
+	/* Send the data, then wait for an ACK or a NAK.  If we get a NAK, revisit sending all the
+         * data. 
+         */
+	do {
+		while(serverOffsetNumber < buf->length) {
+			int to_write = (int)buf->length-(int)serverOffsetNumber < MAX_CONTENT 
+					? (int)buf->length-serverOffsetNumber 
+					: MAX_CONTENT;
+			writeMulticastPacket(static_cast<void*>(&buf->buffer[serverOffsetNumber]), 
+				to_write, 
+				serverOffsetNumber+to_write == buf->length);
+			lastoffset = serverOffsetNumber;
+			serverOffsetNumber += to_write;
 		}
-		/* now wait for acks, with longer timeout val */
-		int rec = 0;
-		while(rec < 5) {
-			rec+= readTCP_packet(100);
+
+		/* If we hit a timeout, then resend the last packet. */
+		if (readTCP_packet(1000) == 0) {
+			serverOffsetNumber = lastoffset;
 		}
-	
-		if(checkACKList()) {
-		}
-		else {
-			/* if no ACK received (timed out), resend the previous packet 
-			to hopefully flush the ACK (or force a NACK) through */
-			//printf("%d frame, resending data, got %d so far!\n", serverFrameNumber, rec);	
-			serverOffsetNumber -= previousPacketSize;
-		}
-	}
-	return count;
+
+	} while (checkACKList());
+
+	/* Reset the buffer position to 0 so we can start adding new data to it. */
+	buf->length = 0;
+
+	return true; /* Success */
 }
 
 int Server::writeMulticastPacket(void *buf, size_t count, bool requiresACK)

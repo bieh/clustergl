@@ -468,6 +468,7 @@ void NetClientModule::sendBuffer()
 			iSendBufPos = 0;
 		}
 	}
+	server->flushData();
 }
 
 

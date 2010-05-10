@@ -108,6 +108,7 @@ public:
 	void createMulticastSocket();
 	void connectTCPSockets();
 	int writeData(void *buf, size_t count);
+	bool flushData(void);
 	int readData(void *buf, size_t count);
 	int writeMulticastPacket(void *buf, size_t count, bool requiresACK);
 	int readTCP_packet(int timeout);
