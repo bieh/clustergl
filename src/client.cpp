@@ -210,7 +210,7 @@ int Client::readMulticastPacket(void *buf, size_t count)
 		if(CHECK_BIT(clientPacket->packetFlags, RQAPOS)) {
 			sendTCP_ACK();
 		}
-		
+		free(fullPacket);
 		return count;
 	}
 	else
@@ -227,6 +227,7 @@ int Client::readMulticastPacket(void *buf, size_t count)
 		}
 
 	/* packet is not the next in the sequence, so return 0 bytes */
+	free(fullPacket);
 	return 0;
 	}
 }

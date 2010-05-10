@@ -32,7 +32,7 @@ bool ackList[5];
 
 /* NACK checking values */
 uint32_t packetCount = 0;
-uint32_t checkNacksFreq = 10;
+uint32_t checkNacksFreq = 100;
 
 /* select timer */
 timeval mytime;
@@ -197,19 +197,14 @@ int Server::writeData(void *buf, size_t count)
 
 			/* if this is not the last packet, check for NACKS */
 			if(serverOffsetNumber < count && packetCount % checkNacksFreq == 0) {
-				readTCP_packet(1);
+				readTCP_packet(0);
 			}
 		}
 		/* now wait for acks, with longer timeout val */
 		int rec = 0;
-		rec += readTCP_packet(1000);
-		if(rec < numConnections) {
-			rec += readTCP_packet(2000);
+		while(rec < 5) {
+			rec+= readTCP_packet(100);
 		}
-		if(rec < numConnections) {
-		    rec += readTCP_packet(2000);
-		}
-
 	
 		if(checkACKList()) {
 		}
@@ -252,6 +247,7 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool requiresACK)
 	if(sendto(multicastSocket,fullPacket,sizeof(braden_packet)+count,0,(struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
     		fprintf(stderr, "sendto() failed\n");
 	}
+	free(fullPacket);
 }
 
 /*********************************************************
@@ -308,6 +304,9 @@ int Server::readTCP_packet(int timeout) {
 		//printf("%d socket(s) to read from!\n", valReady);
 		for(int i = 0; i < numConnections; i++) 
 		{
+			if(ackList[i] && FD_ISSET(mSockets[i],&rfds)){
+			valReady--;
+			}
 			/* if the socket still hasn't acked and read is mSockets[i]*/
 			if(!ackList[i] && FD_ISSET(mSockets[i],&rfds)) {
 				int remaining = sizeof(braden_packet);

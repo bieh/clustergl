@@ -3016,7 +3016,7 @@ extern "C" GLenum glGetError()
 }
 
 //262
-extern "C" void glGetFloatv(GLenum pname, GLfloat * params)
+/*extern "C" void glGetFloatv(GLenum pname, GLfloat * params)
 {
 	LOG("Called unimplemted stub GetFloatv!\n");
 }
@@ -3032,7 +3032,7 @@ extern "C" void glGetIntegerv(GLenum pname, GLint * params)
 	pushBuf(params, sizeof(GLint) * sizeof(params), true);
 	waitForReturn();
 }
-
+*/
 //264
 extern "C" void glGetLightfv(GLenum light, GLenum pname, GLfloat * params)
 {
