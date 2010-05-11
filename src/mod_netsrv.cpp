@@ -50,7 +50,7 @@ NetSrvModule::NetSrvModule()
 	}
 
 	if(multi) {
-	client = new Client();
+		client = new Client();
 	}
 	else {
 		if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -197,6 +197,7 @@ bool NetSrvModule::sync()
 	uint32_t a;
 	if(multi) {
 		LOG("syncing NetSrvModule::sync\n");
+		client->pullData();
 		if(client->readData((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
 			LOG("Connection problem NetSrvModule (didn't recv sync)!\n");
 			return false;

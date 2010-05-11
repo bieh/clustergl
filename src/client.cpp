@@ -202,11 +202,20 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
 	
 	/* copy over to correct places */
  	memcpy(clientPacket, fullPacket, sizeof(braden_packet));
-	
+
 	if(clientPacket->frameNumber != clientFrameNumber) {
-		printf("frame number: %d expecting %d ret %d\n", clientPacket->frameNumber, clientFrameNumber, ret);
+		printf("frame number: %d expecting %d offset %d\n", clientPacket->frameNumber, clientFrameNumber, clientPacket->offsetNumber);
 		free(fullPacket);
 		return false;
+	}
+
+	if (clientOffsetNumber < clientPacket->offsetNumber) {
+		fprintf(stderr,"frame number: %d expecting offset %d, got %d\n", 
+				clientFrameNumber,
+				clientOffsetNumber,
+				clientPacket->offsetNumber);
+		sendTCP_NACK();
+		return false; /* Fail. */
 	}
 
 	if(clientPacket->offsetNumber != clientOffsetNumber) {
@@ -230,7 +239,6 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
 		last_packet = true;
 		//fprintf(stderr,"Sending ACK\n");
 	}
-
 	free(fullPacket);
 
 	/* Return the amount of payload */

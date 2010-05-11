@@ -192,6 +192,10 @@ bool Server::flushData(void)
 	buffer_t *buf = &buffers[curbuffer];
 	int lastoffset = 0;
 
+	if (buf->length == 0)
+			return true; /* ignore zero byte frames, this won't work, but paulh says it will. */
+				/* 2 minutes later: Ok, that worked.  Sorry to blame you paulh. */
+
 	serverFrameNumber++;
 	serverOffsetNumber = 0;
 
@@ -218,11 +222,20 @@ bool Server::flushData(void)
 
 		/* If we hit a timeout, then resend the last packet. */
 		if (readTCP_packet(500000) == 0) {
+			fprintf(stderr,"Frame %d: Timeout, retransmitting last packet (offset %d of %d): Waiting on",
+					serverFrameNumber,
+					serverOffsetNumber, 
+					buf->length);
+			for(int i=0;i<numConnections; ++i) {
+				if (!ackList[i])
+					fprintf(stderr," %d",i);
+			}
+			fprintf(stderr,"\n");
 			serverOffsetNumber = lastoffset;
 		}
 	} while (!checkACKList());
 
-	//fprintf(stderr,"Flushed %d bytes\n", buf->length);
+	//fprintf(stderr,"Frame %d: Flushed %d bytes\n", serverFrameNumber, buf->length);
 	/* Reset the buffer position to 0 so we can start adding new data to it. */
 	buf->length = 0;
 
@@ -293,7 +306,8 @@ int Server::readTCP_packet(int timeout) {
 	FD_ZERO(&rfds);
 	for(int i = 0; i < numConnections; i++) {
 		/* macro to set each socket to listen to */
-		FD_SET(mSockets[i],&rfds);
+		if (!ackList[i])
+			FD_SET(mSockets[i],&rfds);
 	}
 	
 	/* wait for 0 seconds, timeout microseconds */
@@ -331,20 +345,20 @@ int Server::readTCP_packet(int timeout) {
 				
 				/*check if from the current frame */
 				if(serverPacket->frameNumber != serverFrameNumber) {
-					printf("unexpected packet for frame number: %d expecting %d\n", 
+					fprintf(stderr,"unexpected packet for frame number: %d expecting %d\n", 
 							serverPacket->frameNumber, 
 							serverFrameNumber);
 				}
 				else {
 					if(CHECK_BIT(serverPacket->packetFlags, NACKPOS)) {
-						printf("got a NACK! %d offset now %d\n", serverOffsetNumber, serverPacket->offsetNumber);
+						fprintf(stderr,"got a NACK! %d offset now %d\n", serverOffsetNumber, serverPacket->offsetNumber);
 
 						/* its a NACK, so reset offsetNumber */
 						serverOffsetNumber = serverPacket->offsetNumber;
 					}
 					else if(CHECK_BIT(serverPacket->packetFlags, ACKPOS)){
 						//printf("got an ACK! %d\n", i);
-						ackList[i] =  true;		
+						ackList[i] = true;		
 					}
 					else{
 						printf("got something weird!\n");	
