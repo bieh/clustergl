@@ -182,6 +182,7 @@ void Server::connectTCPSockets()
 int Server::writeData(void *buf, size_t count)
 {
 	write_to_buffer(buf,count);
+	return count;
 }
 
 bool Server::flushData(void)
@@ -199,15 +200,16 @@ bool Server::flushData(void)
 		ackList[i] = false;	
 	}
 
-	/* Send the data, then wait for an ACK or a NAK.  If we get a NAK, revisit sending all the
-         * data. 
+	/* Send the data, then wait for an ACK or a NAK.  If we get a NAK, revisit
+	 * sending all the data. 
          */
 	do {
 		while(serverOffsetNumber < buf->length) {
 			int to_write = (int)buf->length-(int)serverOffsetNumber < MAX_CONTENT 
 					? (int)buf->length-serverOffsetNumber 
 					: MAX_CONTENT;
-			writeMulticastPacket(static_cast<void*>(&buf->buffer[serverOffsetNumber]), 
+			writeMulticastPacket(
+				static_cast<void*>(&buf->buffer[serverOffsetNumber]), 
 				to_write, 
 				serverOffsetNumber+to_write == buf->length);
 			lastoffset = serverOffsetNumber;
@@ -221,6 +223,7 @@ bool Server::flushData(void)
 
 	} while (checkACKList());
 
+	fprintf(stderr,"Flushed %d bytes\n", buf->length);
 	/* Reset the buffer position to 0 so we can start adding new data to it. */
 	buf->length = 0;
 
@@ -244,16 +247,12 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool requiresACK)
  	memcpy(fullPacket, serverPacket, sizeof(braden_packet));
 	memcpy(fullPacket+ sizeof(braden_packet), buf, count);
 
-	/* send them 
-	if(sendto(fd,serverPacket,sizeof(braden_packet),0,(struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
-    		f//printf(stderr, "sendto() failed\n");
-	}
-	if(sendto(fd,buf,count,0,(struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
-    		f//printf(stderr, "sendto() failed\n");
-	}*/
-	////printf("sending %d bytes!\n", count);
 	/* send the full packet */
-	if(sendto(multicastSocket,fullPacket,sizeof(braden_packet)+count,0,(struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
+	if(sendto(multicastSocket,
+				fullPacket,sizeof(braden_packet)+count,
+				0,
+				(struct sockaddr*)group,sizeof(struct sockaddr_in)
+				) == -1) {
     		fprintf(stderr, "sendto() failed\n");
 	}
 	free(fullPacket);
@@ -280,7 +279,7 @@ bool Server::checkACKList() {
 	bool allACKS = true;
 	for(int i = 0; i < numConnections; i++) {
 		if(!ackList[i]) {
-		allACKS = false;		
+			allACKS = false;		
 		}	
 	}
 	return allACKS;

@@ -201,6 +201,7 @@ bool NetSrvModule::sync()
 			LOG("Connection problem NetSrvModule (didn't recv sync)!\n");
 			return false;
 		}
+		
 		if(client->writeData((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
 			LOG("Connection problem NetSrvModule (didn't send sync)!\n");
 			return false;
@@ -241,6 +242,7 @@ int NetSrvModule::myRead(byte *input, int nByte)
 void NetSrvModule::recieveBuffer(void)
 {	
 	int compSize = 0;	
+	client->pullData();
 	if(multi) {
 		if(usingSendCompression) {
 			client->readData((byte *)&bytesRemaining, sizeof(uint32_t));

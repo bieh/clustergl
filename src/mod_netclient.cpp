@@ -296,13 +296,15 @@ bool NetClientModule::sync()
 			LOG("Connection problem NetClientModule (didn't send sync)!\n");
 			return false;
 		}
-
+		server->flushData();
 		if(server->readData(a, sizeof(uint32_t)) != sizeof(uint32_t)) {
 			LOG("Connection problem NetClientModule (didn't recv sync)!\n");
 			return false;
 		}
-		if (*a!=987654)
+		if (*a!=987654) {
+			LOG("Sync returned unexpected magic (%08x)\n",*a);
 			return false;
+		}
 	}
 	else {
 		netBytes += sizeof(uint32_t) * numConnections;
@@ -482,7 +484,7 @@ int NetClientModule::myRead(void *buf, size_t count)
 	uint32_t compressedSize = 0;
 	uint32_t origSize = 0;
 	Bytef *in = (Bytef*) malloc(compressedSize);
-	uint32_t ret[5];
+	uint32_t ret[5]={0,};
 	if(multicast) {
 		if(usingReplyCompression) {
 			//read the size of the compressed packet

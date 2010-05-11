@@ -1,4 +1,5 @@
 #include "include/multicast.h"
+#include <assert.h>
 
 /* Not everyone has the headers for this, so improvise */
 #ifndef MCAST_JOIN_SOURCE_GROUP
@@ -153,9 +154,15 @@ void Client::createTCPSocket()
 	Multicast Reading
 *********************************************************/
 
-int Client::readData(void *buf, size_t count) 
-{
+char buffer[16*1024*1024];
+int offset;
+int length;
 
+bool last_packet = false;
+
+bool Client::pullData(void)
+{
+	last_packet = false;
 	/* reset counter values */
 	clientFrameNumber++;
 	clientOffsetNumber = 0;
@@ -164,14 +171,23 @@ int Client::readData(void *buf, size_t count)
 	//printf("frame: %d reading %d total bytes!\n", clientFrameNumber, count);
 
 	/* Now read packets */
-	while(clientOffsetNumber < count) 
+	while(!last_packet)
 	{
-		//printf("receiving packet!\n");
-		int packetSize = count-clientOffsetNumber;
- 		if(packetSize > MAX_CONTENT) packetSize = MAX_CONTENT;
-		readMulticastPacket((unsigned char *) buf+clientOffsetNumber, packetSize);	
+		//int packetSize = count-clientOffsetNumber;
+ 		//if(packetSize > MAX_CONTENT) packetSize = MAX_CONTENT;
+		int packetSize = MAX_CONTENT;
+		length+=readMulticastPacket(&buffer[length], packetSize);	
 	}
+	offset=0;
 	//printf("all packets arrived!\n");
+	return true;
+}
+
+int Client::readData(void *buf, size_t count) 
+{
+	assert(offset+(int)count < length);
+	memcpy(buf,&buffer[offset],count);
+	offset+=count;
 	return count;
 }
 
@@ -179,7 +195,7 @@ int Client::readMulticastPacket(void *buf, size_t count)
 {
 	/* storage for full packet to read one datagram */
 	unsigned char * fullPacket = (unsigned char *) malloc(MAX_PACKET_SIZE);
-	int ret=recv(multi_fd, fullPacket,sizeof(braden_packet)+count,0);
+	int ret=recv(multi_fd, fullPacket, sizeof(braden_packet)+MAX_PACKET_SIZE,0);
 	
 	/* copy over to correct places */
  	memcpy(clientPacket, fullPacket, sizeof(braden_packet));
@@ -203,19 +219,22 @@ int Client::readMulticastPacket(void *buf, size_t count)
 	if(correctHeader)
 	{
 		/* copy data and return */
+		count = ret - sizeof(braden_packet);
 		memcpy(buf, fullPacket+ sizeof(braden_packet), count);
 		clientOffsetNumber += count;
 
 		/* check if ACK needs to be sent */
 		if(CHECK_BIT(clientPacket->packetFlags, RQAPOS)) {
 			sendTCP_ACK();
+			last_packet = true;
 		}
 		free(fullPacket);
 		return count;
 	}
 	else
 	{
-		if(clientPacket->frameNumber == clientFrameNumber && clientPacket->offsetNumber > clientOffsetNumber)
+		if(clientPacket->frameNumber == clientFrameNumber 
+				&& clientPacket->offsetNumber > clientOffsetNumber)
 		{
 			/* send a NACK, as a packet is missing */
 			sendTCP_NACK();
@@ -226,9 +245,9 @@ int Client::readMulticastPacket(void *buf, size_t count)
 			//printf("ignoring packet!\n");
 		}
 
-	/* packet is not the next in the sequence, so return 0 bytes */
-	free(fullPacket);
-	return 0;
+		/* packet is not the next in the sequence, so return 0 bytes */
+		free(fullPacket);
+		return 0;
 	}
 }
 

@@ -95,6 +95,7 @@ public:
 	int readMulticastPacket(void *buf, size_t count);
 	int writeData(void *buf, size_t count);
 	int readData(void *buf, size_t count);
+	bool pullData();
 };
 
 /*********************************************
