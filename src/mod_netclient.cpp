@@ -287,7 +287,7 @@ bool NetClientModule::process(list<Instruction> &list)
 bool NetClientModule::sync()
 {
 	//ensure all remaining messages are sent instantly
-	sendBuffer();
+//	sendBuffer(); TODO FIXME TESTING
 	uint32_t * a = (uint32_t *)malloc(sizeof(uint32_t));
 	*a = 987654;
 	if(multicast) {
