@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPTNAME=rungl
+SCRIPTNAME=runcgl
 
 DIR=$(dirname $0)
 if [ ! -x ${DIR}/${SCRIPTNAME} ]; then
