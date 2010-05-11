@@ -4,7 +4,7 @@ SCRIPTNAME=rungl
 
 DIR=$(dirname $0)
 if [ ! -x ${DIR}/${SCRIPTNAME} ]; then
-	DIR=$(dirname $(which symphony.sh))
+	DIR=$(dirname $(which ${SCRIPTNAME}))
 fi
 
 if [ ! -x ${DIR}/${SCRIPTNAME} ]; then
