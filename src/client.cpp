@@ -125,8 +125,8 @@ void Client::createTCPSocket()
 	setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
 
 	/* Bind the server socket */
-	if (bind(mSocket, (struct sockaddr *) &addr,
-	sizeof(addr)) < 0) {
+	if (bind(mSocket, 
+			(struct sockaddr *) &addr, sizeof(addr)) < 0) {
 		printf("Client: Failed to bind the server socket \n");
 		exit(1);
 	}
@@ -168,30 +168,33 @@ bool Client::pullData(void)
 	clientOffsetNumber = 0;
 	gettimeofday(&start, NULL);
 
+	length=0;
 	//printf("frame: %d reading %d total bytes!\n", clientFrameNumber, count);
 
 	/* Now read packets */
 	while(!last_packet)
 	{
-		//int packetSize = count-clientOffsetNumber;
- 		//if(packetSize > MAX_CONTENT) packetSize = MAX_CONTENT;
-		int packetSize = MAX_CONTENT;
-		length+=readMulticastPacket(&buffer[length], packetSize);	
+		length+=readMulticastPacket(&buffer[length], MAX_CONTENT);	
 	}
 	offset=0;
-	//printf("all packets arrived!\n");
+	//fprintf(stderr,"Frame: %d Size: %d\n", clientFrameNumber, length);
 	return true;
 }
 
 int Client::readData(void *buf, size_t count) 
 {
-	assert(offset+(int)count < length);
+	if (offset+(int)count > length) {
+			fprintf(stderr,"Trying to read %d bytes from %d @%d\n",
+					count, length-offset, offset);
+	}
+	assert(offset+(int)count <= length);
+
 	memcpy(buf,&buffer[offset],count);
 	offset+=count;
 	return count;
 }
 
-int Client::readMulticastPacket(void *buf, size_t count)
+int Client::readMulticastPacket(void *buf, size_t maxsize)
 {
 	/* storage for full packet to read one datagram */
 	unsigned char * fullPacket = (unsigned char *) malloc(MAX_PACKET_SIZE);
@@ -200,55 +203,38 @@ int Client::readMulticastPacket(void *buf, size_t count)
 	/* copy over to correct places */
  	memcpy(clientPacket, fullPacket, sizeof(braden_packet));
 	
-	/* check header */
-	bool correctHeader = true;
-
 	if(clientPacket->frameNumber != clientFrameNumber) {
-		//printf("frame number: %d expecting %d ret %d\n", clientPacket->frameNumber, clientFrameNumber, ret);
-		correctHeader = false;
+		printf("frame number: %d expecting %d ret %d\n", clientPacket->frameNumber, clientFrameNumber, ret);
+		free(fullPacket);
+		return false;
 	}
 
 	if(clientPacket->offsetNumber != clientOffsetNumber) {
-		//printf("readOffset number: %d expecting %d ret %d\n", clientPacket->offsetNumber, clientOffsetNumber, ret);
-		correctHeader = false;
-	}
-	if(clientPacket->packetSize != count) {
-		//printf("packetSize number: %d expecting %d ret %d\n", clientPacket->packetSize, count, ret);
+		printf("frame number: %d readOffset number: %d expecting %d ret %d\n", 
+			clientPacket->frameNumber, 
+			clientPacket->offsetNumber, 
+			clientOffsetNumber, 
+			ret);
+		free(fullPacket);
+		return false;
 	}
 	
-	if(correctHeader)
-	{
-		/* copy data and return */
-		count = ret - sizeof(braden_packet);
-		memcpy(buf, fullPacket+ sizeof(braden_packet), count);
-		clientOffsetNumber += count;
+	/* copy payload data */
+	memcpy(buf, fullPacket+ sizeof(braden_packet), ret-sizeof(braden_packet));
+	clientOffsetNumber += ret-sizeof(braden_packet);
 
-		/* check if ACK needs to be sent */
-		if(CHECK_BIT(clientPacket->packetFlags, RQAPOS)) {
-			sendTCP_ACK();
-			last_packet = true;
-		}
-		free(fullPacket);
-		return count;
+	/* check if ACK needs to be sent */
+	if(CHECK_BIT(clientPacket->packetFlags, RQAPOS)) {
+		sendTCP_ACK();
+		/* If this asks for an ACK, then this is last packet. */
+		last_packet = true;
+		//fprintf(stderr,"Sending ACK\n");
 	}
-	else
-	{
-		if(clientPacket->frameNumber == clientFrameNumber 
-				&& clientPacket->offsetNumber > clientOffsetNumber)
-		{
-			/* send a NACK, as a packet is missing */
-			sendTCP_NACK();
-		}
-		else
-		{
-			/* do nothing, someone else NACKed and is catching up */
-			//printf("ignoring packet!\n");
-		}
 
-		/* packet is not the next in the sequence, so return 0 bytes */
-		free(fullPacket);
-		return 0;
-	}
+	free(fullPacket);
+
+	/* Return the amount of payload */
+	return ret-sizeof(braden_packet);
 }
 
 /*********************************************************

@@ -217,13 +217,12 @@ bool Server::flushData(void)
 		}
 
 		/* If we hit a timeout, then resend the last packet. */
-		if (readTCP_packet(1000) == 0) {
+		if (readTCP_packet(500000) == 0) {
 			serverOffsetNumber = lastoffset;
 		}
+	} while (!checkACKList());
 
-	} while (checkACKList());
-
-	fprintf(stderr,"Flushed %d bytes\n", buf->length);
+	//fprintf(stderr,"Flushed %d bytes\n", buf->length);
 	/* Reset the buffer position to 0 so we can start adding new data to it. */
 	buf->length = 0;
 
@@ -276,13 +275,12 @@ int Server::readData(void *buf, size_t count)
 *********************************************************/
 
 bool Server::checkACKList() {
-	bool allACKS = true;
 	for(int i = 0; i < numConnections; i++) {
 		if(!ackList[i]) {
-			allACKS = false;		
+			return false;
 		}	
 	}
-	return allACKS;
+	return true;
 }
 
 /*********************************************************
@@ -291,6 +289,8 @@ bool Server::checkACKList() {
 
 int Server::readTCP_packet(int timeout) {
 	
+	fd_set rfds;
+	FD_ZERO(&rfds);
 	for(int i = 0; i < numConnections; i++) {
 		/* macro to set each socket to listen to */
 		FD_SET(mSockets[i],&rfds);
@@ -303,7 +303,7 @@ int Server::readTCP_packet(int timeout) {
 	/* attempt to read from select sockets */
 	int valReady = select(sd_max+1,&rfds,(fd_set *)0,(fd_set *)0,&mytime);
 	if(valReady < 0) {
-		//printf("select error!\n");
+		printf("select error!\n");
 	}
 	else if(valReady == 0) {
 		////printf("select timeout!\n");
@@ -313,36 +313,43 @@ int Server::readTCP_packet(int timeout) {
 		for(int i = 0; i < numConnections; i++) 
 		{
 			if(ackList[i] && FD_ISSET(mSockets[i],&rfds)){
-			valReady--;
+				fprintf(stderr,"Ignoring packet on unexpected socket #%d (%d)\n",i,mSockets[i]);
+				valReady--;
 			}
 			/* if the socket still hasn't acked and read is mSockets[i]*/
 			if(!ackList[i] && FD_ISSET(mSockets[i],&rfds)) {
 				int remaining = sizeof(braden_packet);
 				int ret = 0;
-					while(remaining > 0) {
-						ret = read(mSockets[i], serverPacket, sizeof(braden_packet));
-						remaining -= ret;
-					}
+				/* FIXME: This won't work. because if you get half of a
+				 * braden_packet, you'll overwrite the first half with the
+				 * second half when the second half turns up
+				 */
+				while(remaining > 0) {
+					ret = read(mSockets[i], serverPacket, sizeof(braden_packet));
+					remaining -= ret;
+				}
 				
-					/*check if from the current frame */
-					if(serverPacket->frameNumber != serverFrameNumber) {
-						//printf("frame number: %d expecting %d\n", serverPacket->frameNumber, serverFrameNumber);
-					}
-					else {
-						if(CHECK_BIT(serverPacket->packetFlags, NACKPOS)) {
-							printf("got a NACK! %d offset now %d\n", serverOffsetNumber, serverPacket->offsetNumber);
+				/*check if from the current frame */
+				if(serverPacket->frameNumber != serverFrameNumber) {
+					printf("unexpected packet for frame number: %d expecting %d\n", 
+							serverPacket->frameNumber, 
+							serverFrameNumber);
+				}
+				else {
+					if(CHECK_BIT(serverPacket->packetFlags, NACKPOS)) {
+						printf("got a NACK! %d offset now %d\n", serverOffsetNumber, serverPacket->offsetNumber);
 
-							/* its a NACK, so reset offsetNumber */
-							serverOffsetNumber = serverPacket->offsetNumber;
-						}
-						else if(CHECK_BIT(serverPacket->packetFlags, ACKPOS)){
-							//printf("got an ACK! %d\n", i);
-							ackList[i] =  true;		
-						}
-						else{
-							printf("got something weird!\n");	
-						}
+						/* its a NACK, so reset offsetNumber */
+						serverOffsetNumber = serverPacket->offsetNumber;
 					}
+					else if(CHECK_BIT(serverPacket->packetFlags, ACKPOS)){
+						//printf("got an ACK! %d\n", i);
+						ackList[i] =  true;		
+					}
+					else{
+						printf("got something weird!\n");	
+					}
+				}
 			}
 		}
 	}
