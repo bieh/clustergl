@@ -365,8 +365,8 @@ void sendPointers(int length)
 		rpCol.sent = true;
 	}
 
-	//if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
-	//{
+	if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
+	{
 	//interleaved arrays pointer
 	/*int size = 0;
 	switch (rpInter.type) {
@@ -393,7 +393,7 @@ void sendPointers(int length)
 								 //drawing quads?
 	pushBuf(rpInter.pointer, ((size + rpInter.stride) * length));
 	rpInter.sent = true;*/
-	//}
+	}
 }
 
 
