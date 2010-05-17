@@ -27,13 +27,20 @@ extern string addresses[5];
 
 int multicastSocket;
 int mSockets[5];
-int numConnections = 5;
+int numConnections = 4;
+
+int tokens = 125000000;
+/* timers to not transmit lots of NACKS */
+struct timeval tokenStart, tokenEnd;
+long tokenSeconds, tokenuSeconds;
+
+
 //char* address = (char *) "127.0.0.1";
 bool ackList[5];
 
 /* NACK checking values */
 uint32_t packetCount = 0;
-uint32_t checkNacksFreq = 100;
+uint32_t checkNacksFreq = 800;
 
 /* select timer */
 timeval mytime;
@@ -49,7 +56,7 @@ braden_packet * serverPacket = (braden_packet *)malloc(sizeof(braden_packet));
 
 uint32_t serverFrameNumber = 0;
 uint32_t serverOffsetNumber = 0;
-int server_tcp_port = 1313;
+int server_tcp_port = 1414;
 struct sockaddr_in *group;
 struct group_source_req group_source_req;
 struct sockaddr_in *source;
@@ -75,6 +82,8 @@ void write_to_buffer(void *data, unsigned int len)
 
 Server::Server()
 {
+	/* set the start time */
+	gettimeofday(&tokenStart, NULL);
 	createMulticastSocket();
 	connectTCPSockets();
 }
@@ -92,7 +101,7 @@ void Server::createMulticastSocket()
 
 		/* First bind to the port */
 		bindaddr.sin_family = AF_INET;
-		bindaddr.sin_port = htons(9990);
+		bindaddr.sin_port = htons(8990);
 		bindaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 		bind(multicastSocket,(struct sockaddr*)&bindaddr,sizeof(bindaddr));
@@ -122,9 +131,9 @@ void Server::createMulticastSocket()
 		setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_TTL, &loop, sizeof(loop));
 
 		/* Now we care about the port we send to */
-		group->sin_port = htons(9991);
+		group->sin_port = htons(8991);
 		
-		printf("multicast socket created group 232.1.1.1 on port 9991!\n");
+		printf("multicast socket created group 232.1.1.1 on port 8991!\n");
 }
 
 /*********************************************************
@@ -198,12 +207,12 @@ bool Server::flushData(void)
 
 	serverFrameNumber++;
 	serverOffsetNumber = 0;
-
+	int packets = 0;
 	/* Now we wait for acks */
 	for(int i = 0; i < numConnections; i++) {
 		ackList[i] = false;	
 	}
-
+	//fprintf(stderr,"Frame %d: Flushing %d bytes\n", serverFrameNumber, buf->length);
 	/* Send the data, then wait for an ACK or a NAK.  If we get a NAK, revisit
 	 * sending all the data. 
          */
@@ -212,26 +221,50 @@ bool Server::flushData(void)
 			int to_write = (int)buf->length-(int)serverOffsetNumber < MAX_CONTENT 
 					? (int)buf->length-serverOffsetNumber 
 					: MAX_CONTENT;
-			writeMulticastPacket(
-				static_cast<void*>(&buf->buffer[serverOffsetNumber]), 
-				to_write, 
-				serverOffsetNumber+to_write == buf->length);
-			lastoffset = serverOffsetNumber;
-			serverOffsetNumber += to_write;
+					//if(tokens - to_write > 0) {
+						packets++;
+						writeMulticastPacket(
+							static_cast<void*>(&buf->buffer[serverOffsetNumber]), 
+							to_write, 
+							serverOffsetNumber+to_write == buf->length);
+							lastoffset = serverOffsetNumber;
+						serverOffsetNumber += to_write;
+						tokens -= to_write;
+						if(packets % checkNacksFreq == 0) {
+							readTCP_packet(0);
+						}
+					//	if(packets == 62) {
+					//		usleep(1);
+					//	}
+					//}
+					//else {
+					    /* add to the token bucket */
+						/*gettimeofday(&tokenEnd, NULL);
+
+						tokenSeconds  = tokenEnd.tv_sec  - tokenStart.tv_sec;
+						tokenuSeconds = tokenEnd.tv_usec - tokenStart.tv_usec;
+						
+						tokens += (tokenSeconds * 125000000) + (tokenuSeconds * 900);
+						if(tokens > 125000000) {
+							tokens = 125000000;
+						}
+						gettimeofday(&tokenStart, NULL);
+						//usleep(1);
+					}*/
 		}
 
 		/* If we hit a timeout, then resend the last packet. */
-		if (readTCP_packet(500000) == 0) {
-			fprintf(stderr,"Frame %d: Timeout, retransmitting last packet (offset %d of %d): Waiting on",
-					serverFrameNumber,
-					serverOffsetNumber, 
-					buf->length);
-			for(int i=0;i<numConnections; ++i) {
-				if (!ackList[i])
-					fprintf(stderr," %d",i);
-			}
-			fprintf(stderr,"\n");
-			serverOffsetNumber = lastoffset;
+		if (readTCP_packet(12000) == 0) {
+				fprintf(stderr,"Frame %d: Timeout, retransmitting last packet (offset %d of %d): Waiting on",
+						serverFrameNumber,
+						serverOffsetNumber, 
+						buf->length);
+				for(int i=0;i<numConnections; ++i) {
+					if (!ackList[i])
+						fprintf(stderr," %d",i);
+				}
+				fprintf(stderr,"\n");
+				serverOffsetNumber = lastoffset;
 		}
 	} while (!checkACKList());
 
@@ -278,7 +311,12 @@ int Server::readData(void *buf, size_t count)
 {
 	//printf("reading data!\n");
 	for(int i = 0; i < numConnections; i++) {
-		int ret = read(mSockets[i], buf, count);
+		int remaining = count;
+		int ret = 0;
+		while(remaining > 0) {
+			ret = read(mSockets[i], (char *) buf + count - remaining, count);
+			remaining -= ret;
+		}
 	}
 	return count;
 }
@@ -330,24 +368,28 @@ int Server::readTCP_packet(int timeout) {
 				fprintf(stderr,"Ignoring packet on unexpected socket #%d (%d)\n",i,mSockets[i]);
 				valReady--;
 			}
+			int ret = 0;
 			/* if the socket still hasn't acked and read is mSockets[i]*/
 			if(!ackList[i] && FD_ISSET(mSockets[i],&rfds)) {
 				int remaining = sizeof(braden_packet);
-				int ret = 0;
 				/* FIXME: This won't work. because if you get half of a
 				 * braden_packet, you'll overwrite the first half with the
 				 * second half when the second half turns up
 				 */
 				while(remaining > 0) {
-					ret = read(mSockets[i], serverPacket, sizeof(braden_packet));
+					ret = read(mSockets[i], serverPacket + sizeof(braden_packet)-remaining, remaining);
 					remaining -= ret;
 				}
 				
 				/*check if from the current frame */
 				if(serverPacket->frameNumber != serverFrameNumber) {
-					fprintf(stderr,"unexpected packet for frame number: %d expecting %d\n", 
+					fprintf(stderr,"unexpected packet for frame number: %d expecting %d, from client #%d, ret %d\n", 
 							serverPacket->frameNumber, 
-							serverFrameNumber);
+							serverFrameNumber,
+							i,
+							ret
+							);
+					usleep(100000);
 				}
 				else {
 					if(CHECK_BIT(serverPacket->packetFlags, NACKPOS)) {
@@ -357,7 +399,7 @@ int Server::readTCP_packet(int timeout) {
 						serverOffsetNumber = serverPacket->offsetNumber;
 					}
 					else if(CHECK_BIT(serverPacket->packetFlags, ACKPOS)){
-						//printf("got an ACK! %d\n", i);
+						//printf("got an ACK! from: %d frame: \n", i, serverFrameNumber);
 						ackList[i] = true;		
 					}
 					else{

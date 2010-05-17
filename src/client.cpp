@@ -27,12 +27,12 @@ Client Globals
 
 /* multicast socket */
 int multi_fd;
-char* hostAddress = (char *) "192.168.22.101";
+char* hostAddress = (char *) "192.168.22.105";
 
 /* TCP socket */
 int mSocket;
 int tcp_fd;
-int client_tcp_port = 1313;
+int client_tcp_port = 1414;
 
 /* packet counting variables */
 uint32_t clientFrameNumber = 0;
@@ -71,7 +71,7 @@ void Client::createMulticastSocket()
 
 		/* Setup the socket to listen on */
 		bindaddr.sin_family = AF_INET;
-		bindaddr.sin_port = htons(9991);
+		bindaddr.sin_port = htons(8991);
 		bindaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		bind(multi_fd,(struct sockaddr*)&bindaddr,sizeof(bindaddr));
 
@@ -94,7 +94,7 @@ void Client::createMulticastSocket()
 
 		setsockopt(multi_fd,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req, sizeof(group_source_req));
 
-		printf("listening to multicast group 232.1.1.1 on port 9991!\n");
+		printf("listening to multicast group 232.1.1.1 on port 8991!\n");
 
 }
 
@@ -204,26 +204,26 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
  	memcpy(clientPacket, fullPacket, sizeof(braden_packet));
 
 	if(clientPacket->frameNumber != clientFrameNumber) {
-		printf("frame number: %d expecting %d offset %d\n", clientPacket->frameNumber, clientFrameNumber, clientPacket->offsetNumber);
+	//	printf("frame number: %d expecting %d offset %d\n", clientPacket->frameNumber, clientFrameNumber, clientPacket->offsetNumber);
 		free(fullPacket);
 		return false;
 	}
 
 	if (clientOffsetNumber < clientPacket->offsetNumber) {
-		fprintf(stderr,"frame number: %d expecting offset %d, got %d\n", 
-				clientFrameNumber,
-				clientOffsetNumber,
-				clientPacket->offsetNumber);
+	//	fprintf(stderr,"frame number: %d expecting offset %d, got %d\n", 
+//				clientFrameNumber,
+//				clientOffsetNumber,
+//				clientPacket->offsetNumber);
 		sendTCP_NACK();
 		return false; /* Fail. */
 	}
 
 	if(clientPacket->offsetNumber != clientOffsetNumber) {
-		printf("frame number: %d readOffset number: %d expecting %d ret %d\n", 
-			clientPacket->frameNumber, 
-			clientPacket->offsetNumber, 
-			clientOffsetNumber, 
-			ret);
+	//	printf("frame number: %d readOffset number: %d expecting %d ret %d\n", 
+//			clientPacket->frameNumber, 
+//			clientPacket->offsetNumber, 
+//			clientOffsetNumber, 
+//			ret);
 		free(fullPacket);
 		return false;
 	}
@@ -252,7 +252,7 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
 
 void Client::sendTCP_ACK()
 {
-	//printf("sending ACK!\n");
+	//printf("got: %d bytes, sending ACK for frame: %d!\n", clientOffsetNumber, clientFrameNumber);
 	
 	/* set flags */
 	short flags = 0;

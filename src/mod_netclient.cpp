@@ -129,7 +129,12 @@ bool NetClientModule::process(list<Instruction> &list)
 	uint32_t num = list.size();
 	//LOG("num instructions netClient: %d!\n", num);
 	fflush(stdout);
-	netBytes += sizeof(uint32_t) * numConnections;
+	if(multicast) {
+		netBytes += sizeof(uint32_t);
+	} 
+	else {
+		netBytes += sizeof(uint32_t) * numConnections;
+	}
 	if(!myWrite(&num, sizeof(uint32_t))) {
 		LOG("Connection problem!\n");
 		return false;
@@ -210,7 +215,12 @@ bool NetClientModule::process(list<Instruction> &list)
 				skip->buffers[i].len = 0;
 				skip->buffers[i].needClear = false;
 			}
-			netBytes += sizeof(Instruction) * numConnections;
+			if(multicast) {
+				netBytes += sizeof(Instruction);
+			}
+			else {
+				netBytes += sizeof(Instruction) * numConnections;
+			}
 			if(myWrite(skip, sizeof(Instruction))!= sizeof(Instruction)) {
 				LOG("Connection problem (didn't send instruction)!\n");
 				return false;
