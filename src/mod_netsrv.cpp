@@ -16,6 +16,7 @@
 extern bool usingSendCompression;
 extern bool usingReplyCompression;
 extern int port;
+extern bool multicast;
 
 /*********************************************************
 	Net Server Globals
@@ -29,7 +30,7 @@ const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iRecieveBufPos = 0;
 uint32_t bytesRemaining = 0;;
 
-bool multi = true;
+
 
 //big buffer
 byte mRecieveBuf[recieveBufferSize];
@@ -49,7 +50,7 @@ NetSrvModule::NetSrvModule()
 		compressor = new NetCompressModule();
 	}
 
-	if(multi) {
+	if(multicast) {
 		client = new Client();
 	}
 	else {
@@ -195,7 +196,7 @@ bool NetSrvModule::sync()
 	netBytes += sizeof(uint32_t);
 	netBytes2 += sizeof(uint32_t);
 	uint32_t a;
-	if(multi) {
+	if(multicast) {
 		LOG("syncing NetSrvModule::sync\n");
 		client->pullData();
 		if(client->readData((byte *)&a, sizeof(uint32_t)) != sizeof(uint32_t)) {
@@ -244,7 +245,7 @@ void NetSrvModule::recieveBuffer(void)
 {	
 	int compSize = 0;	
 	client->pullData();
-	if(multi) {
+	if(multicast) {
 		if(usingSendCompression) {
 			client->readData((byte *)&bytesRemaining, sizeof(uint32_t));
 			client->readData((byte *)&compSize, sizeof(uint32_t));
@@ -296,7 +297,7 @@ void NetSrvModule::recieveBuffer(void)
 int NetSrvModule::myWrite(byte *input, int nByte)
 {
 
-	if(multi) {
+	if(multicast) {
 		if(usingReplyCompression) {
 			//create room for new compressed buffer
 			uLongf CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);

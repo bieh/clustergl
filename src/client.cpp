@@ -18,8 +18,12 @@ struct group_source_req
 };
 
 #endif
+/********************************************************
+	Main Globals (Loaded from config file)
+********************************************************/
 
 extern string addresses[5];
+extern char * multicastServer;
 
 /*******************************************************n
 Client Globals
@@ -27,7 +31,6 @@ Client Globals
 
 /* multicast socket */
 int multi_fd;
-char* hostAddress = (char *) "192.168.22.105";
 
 /* TCP socket */
 int mSocket;
@@ -87,8 +90,8 @@ void Client::createMulticastSocket()
 		/* Source is [ip address] */
 		group->sin_port = 0;
 		source->sin_family = AF_INET;
-		if (inet_aton(hostAddress,&source->sin_addr) == 0) {
-		  printf("error: %s\n", (hostAddress));					  ;
+		if (inet_aton(multicastServer,&source->sin_addr) == 0) {
+		  printf("error: %s\n", (multicastServer));					  ;
 		}
 		source->sin_port = 0;
 
@@ -197,9 +200,9 @@ int Client::readData(void *buf, size_t count)
 int Client::readMulticastPacket(void *buf, size_t maxsize)
 {
 	/* storage for full packet to read one datagram */
-	unsigned char * fullPacket = (unsigned char *) malloc(MAX_PACKET_SIZE);
+	unsigned char * fullPacket = (unsigned char *) malloc(sizeof(braden_packet)+MAX_PACKET_SIZE);
 	int ret=recv(multi_fd, fullPacket, sizeof(braden_packet)+MAX_PACKET_SIZE,0);
-	
+
 	/* copy over to correct places */
  	memcpy(clientPacket, fullPacket, sizeof(braden_packet));
 

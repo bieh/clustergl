@@ -27,7 +27,7 @@ extern string addresses[5];
 
 int multicastSocket;
 int mSockets[5];
-int numConnections = 4;
+int numConnections = 1;
 
 int tokens = 125000000;
 /* timers to not transmit lots of NACKS */
@@ -288,7 +288,7 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool requiresACK)
 	serverPacket->packetSize = count;
 
 	/* storage for full packet to send one datagram */
-	unsigned char * fullPacket = (unsigned char *) malloc(MAX_PACKET_SIZE);
+	unsigned char * fullPacket = (unsigned char *) malloc(sizeof(braden_packet)+MAX_PACKET_SIZE);
  	memcpy(fullPacket, serverPacket, sizeof(braden_packet));
 	memcpy(fullPacket+ sizeof(braden_packet), buf, count);
 

@@ -20,6 +20,7 @@ extern bool useRepeat;
 extern int port;
 extern bool useSYMPHONYnodes[5];
 extern string addresses[5];
+extern bool multicast;
 
 /*********************************************************
 	Net Client Globals
@@ -30,7 +31,7 @@ int incomingSize = 0;
 int outgoingSize = 0;
 NetCompressModule *compressor2;
 Server *server;
-bool multicast = true;
+
 
 const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iSendBufPos = 0;
@@ -506,6 +507,8 @@ int NetClientModule::myRead(void *buf, size_t count)
 			//then read the compressed packet data and uncompress
 				
 			ret[0] = server->readData(in, compressedSize);
+			compressor2->myDecompress(buf, count, in, compressedSize);
+			free(in);
 		}
 		else {
 			ret[0] = server->readData(buf, count);

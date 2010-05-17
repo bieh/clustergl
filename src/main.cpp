@@ -16,7 +16,12 @@ ProfileModule *profile = NULL;
 	Main Globals (Loaded from config file)
 ********************************************************/
 
+/* testing or display wall */
 bool symphony;
+bool useSYMPHONYnodes[5];
+
+
+/* screen sizes */
 int sizeX;
 int sizeY;
 int sizeSYMPHONYX;
@@ -27,15 +32,22 @@ float scaleX;
 float scaleY;
 int fakeWindowX;
 int fakeWindowY;
+
+/* connection */
+string addresses[5];
 string dnNumber;
 int port;
+bool multicast;
+char * multicastServer;
+
+/* clusterGL configs */
 int syncRate;
 int compressingMethod;
 bool usingSendCompression;
 bool usingReplyCompression;
 bool useRepeat;
-bool useSYMPHONYnodes[5];
-string addresses[5];
+
+
 
 /********************************************************
 	Application Object
@@ -106,6 +118,8 @@ void App::init(bool shared)
 		CFG_SIMPLE_INT((char *)("fakeWindowX"), &fakeWindowX),
 		CFG_SIMPLE_INT((char *)("fakeWindowY"), &fakeWindowY),
 		CFG_SIMPLE_INT((char *)("port"), &port),
+		CFG_SIMPLE_BOOL((char *)("multicast"), &multicast),
+		CFG_SIMPLE_STR((char *)("multicastServer"), &multicastServer),
 		CFG_FLOAT((char *)("scaleX"), 1.0f, CFGF_NONE),
 		CFG_FLOAT((char *)("scaleY"), 1.0f, CFGF_NONE),
 		CFG_SIMPLE_INT((char *)("syncRate"), &syncRate),
