@@ -1,4 +1,31 @@
 ********************************************************************************
+	TODO from the board
+********************************************************************************
+Tidy up multicast
+SDL
+Intercept malloc
+threads
+client side
+test suite
+config files
+autoconfig
+launch scripts
+auto generation of APIs
+buffer handling improvements
+clean pipeline
+persistant renderers
+seperate client/server builds
+app side IO allocation
+hot adding renderers
+input events
+no magic scale stuff
+
+
+
+
+
+
+********************************************************************************
 	Libs Required
 ********************************************************************************
 
