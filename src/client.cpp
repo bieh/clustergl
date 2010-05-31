@@ -102,7 +102,7 @@ void Client::createMulticastSocket()
 		}
 		source->sin_port = 0;
 
-		setsockopt(multi_fd,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req_local, sizeof(group_source_req_local));
+		setsockopt(multi_fd,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req_local, sizeof(group_source_req));
 
 		printf("listening to multicast group 232.1.1.1 on port 8991!\n");
 
