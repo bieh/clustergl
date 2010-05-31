@@ -162,7 +162,7 @@ bool NetClientModule::process(list<Instruction> &list)
 		if (useRepeat			 //value from config to enable/disable deltas
 			&& i->id == pIter->id//if the instruction has the same id as previous
 			&& !mustSend && i->id//mustSend is set when expecting a reply
-			&& sameCount < 100	 //stops sameBuffer filling up indefinitely (is this needed?)
+			&& sameCount < 150//stops sameBuffer filling up indefinitely (is this needed?)
 		) {
 			//assume the instruction is the same
 			bool same = true;

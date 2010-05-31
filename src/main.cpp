@@ -18,8 +18,6 @@ ProfileModule *profile = NULL;
 
 /* testing or display wall */
 bool symphony;
-bool useSYMPHONYnodes[5];
-
 
 /* screen sizes */
 int sizeX;
@@ -34,7 +32,7 @@ int fakeWindowX;
 int fakeWindowY;
 
 /* connection */
-string addresses[5];
+//string addresses[5];
 string dnNumber;
 int port;
 bool multicast;
@@ -47,7 +45,8 @@ bool usingSendCompression;
 bool usingReplyCompression;
 bool useRepeat;
 
-
+bool useSYMPHONYnodes[5];
+string addresses[5];
 
 /********************************************************
 	Application Object

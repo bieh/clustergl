@@ -27,7 +27,7 @@ extern string addresses[5];
 
 int multicastSocket;
 int mSockets[5];
-int numConnections = 1;
+int numConnections = 4;
 
 int tokens = 125000000;
 /* timers to not transmit lots of NACKS */
