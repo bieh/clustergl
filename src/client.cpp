@@ -1,5 +1,6 @@
 #include "include/multicast.h"
 #include <assert.h>
+#include <lzo/lzo1x.h>
 
 /* Not everyone has the headers for this, so improvise */
 #ifndef MCAST_JOIN_SOURCE_GROUP
@@ -46,7 +47,7 @@ struct timeval start, end;
 long mtime, seconds, useconds;    
 
 /* packet header to reuse*/
-braden_packet * clientPacket = (braden_packet *)malloc(sizeof(braden_packet));
+multicast_header * clientPacket = (multicast_header *)malloc(sizeof(multicast_header));
 
 /*********************************************************
 	Client
@@ -65,8 +66,14 @@ Client::Client()
 
 void Client::createMulticastSocket()
 {
+
+		/* init lzo for crc32 checksum calculation */
+		if (lzo_init() != LZO_E_OK) {
+			printf("LZO init failed!\n");
+		}
+
 		/* create required structures */
-		struct group_source_req group_source_req;
+		struct group_source_req group_source_req_local;
 		struct sockaddr_in *group;
 		struct sockaddr_in *source;
 		multi_fd = socket(AF_INET,SOCK_DGRAM,getprotobyname("udp")->p_proto);
@@ -79,9 +86,9 @@ void Client::createMulticastSocket()
 		bind(multi_fd,(struct sockaddr*)&bindaddr,sizeof(bindaddr));
 
 		/* Set up the connection to the group */
-		group_source_req.gsr_interface = 2;
-		group=(struct sockaddr_in*)&group_source_req.gsr_group;
-		source=(struct sockaddr_in*)&group_source_req.gsr_source;
+		group_source_req_local.gsr_interface = 2;
+		group=(struct sockaddr_in*)&group_source_req_local.gsr_group;
+		source=(struct sockaddr_in*)&group_source_req_local.gsr_source;
 
 		/* Group is 232.1.1.1 */
 		group->sin_family = AF_INET;
@@ -91,11 +98,11 @@ void Client::createMulticastSocket()
 		group->sin_port = 0;
 		source->sin_family = AF_INET;
 		if (inet_aton(multicastServer,&source->sin_addr) == 0) {
-		  printf("error: %s\n", (multicastServer));					  ;
+		  printf("error: %s\n", (multicastServer));
 		}
 		source->sin_port = 0;
 
-		setsockopt(multi_fd,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req, sizeof(group_source_req));
+		setsockopt(multi_fd,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req_local, sizeof(group_source_req_local));
 
 		printf("listening to multicast group 232.1.1.1 on port 8991!\n");
 
@@ -200,14 +207,14 @@ int Client::readData(void *buf, size_t count)
 int Client::readMulticastPacket(void *buf, size_t maxsize)
 {
 	/* storage for full packet to read one datagram */
-	unsigned char * fullPacket = (unsigned char *) malloc(sizeof(braden_packet)+MAX_PACKET_SIZE);
-	int ret=recv(multi_fd, fullPacket, sizeof(braden_packet)+MAX_PACKET_SIZE,0);
+	unsigned char * fullPacket = (unsigned char *) malloc(sizeof(multicast_header)+MAX_PACKET_SIZE);
+	int ret=recv(multi_fd, fullPacket, sizeof(multicast_header)+MAX_PACKET_SIZE,0);
 
 	/* copy over to correct places */
- 	memcpy(clientPacket, fullPacket, sizeof(braden_packet));
+ 	memcpy(clientPacket, fullPacket, sizeof(multicast_header));
 
 	if(clientPacket->frameNumber != clientFrameNumber) {
-	//	printf("frame number: %d expecting %d offset %d\n", clientPacket->frameNumber, clientFrameNumber, clientPacket->offsetNumber);
+		printf("frame number: %d expecting %d offset %d\n", clientPacket->frameNumber, clientFrameNumber, clientPacket->offsetNumber);
 		free(fullPacket);
 		return false;
 	}
@@ -230,22 +237,31 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
 		free(fullPacket);
 		return false;
 	}
-	
-	/* copy payload data */
-	memcpy(buf, fullPacket+ sizeof(braden_packet), ret-sizeof(braden_packet));
-	clientOffsetNumber += ret-sizeof(braden_packet);
 
+	int crcClientVal = lzo_crc32(0, (unsigned char *)fullPacket+ sizeof(multicast_header), ret-sizeof(multicast_header));
+	if(clientPacket->checksum != crcClientVal) {
+		printf("checksum failed!\n");
+		/* NACK the packet, to get a fresh copy */
+		sendTCP_NACK();
+		return false;	
+	}
+
+	/* copy payload data */
+	memcpy(buf, fullPacket+ sizeof(multicast_header), ret-sizeof(multicast_header));
+	clientOffsetNumber += ret-sizeof(multicast_header);
+	/* check if final packet */
+	if(CHECK_BIT(clientPacket->packetFlags, FINPOS)) {
+		last_packet = true;
+	}
 	/* check if ACK needs to be sent */
 	if(CHECK_BIT(clientPacket->packetFlags, RQAPOS)) {
 		sendTCP_ACK();
-		/* If this asks for an ACK, then this is last packet. */
-		last_packet = true;
-		//fprintf(stderr,"Sending ACK\n");
+		/* If this asks for an ACK, then send it. */
 	}
 	free(fullPacket);
 
 	/* Return the amount of payload */
-	return ret-sizeof(braden_packet);
+	return ret-sizeof(multicast_header);
 }
 
 /*********************************************************
@@ -267,7 +283,7 @@ void Client::sendTCP_ACK()
 	clientPacket->offsetNumber = clientOffsetNumber;
 
 	/* send it */
-	writeData(clientPacket, sizeof(braden_packet));
+	writeData(clientPacket, sizeof(multicast_header));
 }
 
 void Client::sendTCP_NACK()
@@ -294,7 +310,7 @@ void Client::sendTCP_NACK()
 		clientPacket->offsetNumber = clientOffsetNumber;
 
 		/* send it */
-		writeData(clientPacket, sizeof(braden_packet));
+		writeData(clientPacket, sizeof(multicast_header));
 
 		gettimeofday(&start, NULL);
 	}

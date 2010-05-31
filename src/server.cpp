@@ -1,5 +1,5 @@
 #include "include/multicast.h"
-#include <assert.h>
+#include <lzo/lzo1x.h>
 
 /* Not everyone has the headers for this so improvise */
 #ifndef MCAST_JOIN_SOURCE_GROUP
@@ -29,55 +29,71 @@ int multicastSocket;
 int mSockets[5];
 int numConnections = 4;
 
-int tokens = 125000000;
-/* timers to not transmit lots of NACKS */
-struct timeval tokenStart, tokenEnd;
-long tokenSeconds, tokenuSeconds;
-
-
-//char* address = (char *) "127.0.0.1";
-bool ackList[5];
-
-/* NACK checking values */
-uint32_t packetCount = 0;
-uint32_t checkNacksFreq = 800;
-
 /* select timer */
 timeval mytime;
 
+/* timers */
+struct timeval tokenStart, tokenEnd;
+long tokenSeconds, tokenuSeconds;
+
 /* array of bits which you set or clear to indicate events of interest */
 fd_set rfds;
+
+bool ackList[5];
 
 /* max number of sockets to listen to */
 int sd_max;
 
 /* packet to read headers into */
-braden_packet * serverPacket = (braden_packet *)malloc(sizeof(braden_packet));
+multicast_header * serverPacket = (multicast_header *)malloc(sizeof(multicast_header));
 
 uint32_t serverFrameNumber = 0;
 uint32_t serverOffsetNumber = 0;
-int server_tcp_port = 1414;
+
 struct sockaddr_in *group;
 struct group_source_req group_source_req;
 struct sockaddr_in *source;
 
-int curbuffer = 0;
 struct buffer_t {
 	char buffer[16*1024*1024];
 	unsigned int length;
 };
-buffer_t buffers[2];
+buffer_t storedBuffer;
+
+/*********************************************************
+	Server Configuration
+*********************************************************/
+/* number of tokens per second that can be sent 
+ * e.g. 1Gbps = 125000000			*/
+
+int tokens = 125000000;
+
+/* NACK checking values */
+uint32_t packetCount = 0;
+
+/* check NACKS frequency */
+uint32_t checkNacksFreq = 800;
+
+/* port number */
+int server_tcp_port = 1414;
+
+/* acknowledge every n number of packets */
+uint32_t requireAcksFreq = 10;
 
 /*********************************************************
 	Server
 *********************************************************/
 
-void write_to_buffer(void *data, unsigned int len)
+void addToBuffer(void *data, unsigned int len)
 {
-	buffer_t *buf = &buffers[curbuffer];
-	assert(buf->length + len < sizeof(buf->buffer));
-	memcpy(static_cast<void*>(&buf->buffer[buf->length]), data, len);
-	buf->length+=len;
+	/* ensure the data being added will not overflow the buffer */
+	if(storedBuffer.length + len < sizeof(storedBuffer.buffer)) {
+		memcpy(static_cast<void*>(&storedBuffer.buffer[storedBuffer.length]), data, len);
+		storedBuffer.length+=len;
+	}
+	else {
+		printf("storedBuffer too small!\n");
+	}
 }
 
 Server::Server()
@@ -93,7 +109,16 @@ Server::Server()
 *********************************************************/
 
 void Server::createMulticastSocket()
-{
+{		
+		/* init lzo for crc32 checksum calculation */
+		if (lzo_init() != LZO_E_OK) {
+			printf("LZO init failed!\n");
+		}
+
+		/* set the size of the current buffer to zero */
+		storedBuffer.length = 0;
+		
+		/* create the socket */
 		multicastSocket = socket(AF_INET,SOCK_DGRAM,getprotobyname("udp")->p_proto);
 		socklen_t socklen = sizeof(struct sockaddr_storage);
 		struct sockaddr_in bindaddr;
@@ -120,7 +145,6 @@ void Server::createMulticastSocket()
 		setsockopt(multicastSocket,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req,
 										sizeof(group_source_req));
 		
-
 
 		/* Enable reception of our own multicast */
 		loop = 1;
@@ -170,7 +194,6 @@ void Server::connectTCPSockets()
 			//return;
 		}
 	}
-	//printf("Connected to tcp socket!\n");
 
 	/* macro to clear events of interest */
 	FD_ZERO(&rfds);
@@ -190,7 +213,8 @@ void Server::connectTCPSockets()
 
 int Server::writeData(void *buf, size_t count)
 {
-	write_to_buffer(buf,count);
+	/* simply add the data to the buffer, which will be flushed later */
+	addToBuffer(buf,count);
 	return count;
 }
 
@@ -198,10 +222,9 @@ bool Server::flushData(void)
 {
 	int previousPacketSize = 0;
 
-	buffer_t *buf = &buffers[curbuffer];
 	int lastoffset = 0;
 
-	if (buf->length == 0)
+	if (storedBuffer.length == 0)
 			return true; /* ignore zero byte frames, this won't work, but paulh says it will. */
 				/* 2 minutes later: Ok, that worked.  Sorry to blame you paulh. */
 
@@ -217,29 +240,30 @@ bool Server::flushData(void)
 	 * sending all the data. 
          */
 	do {
-		while(serverOffsetNumber < buf->length) {
-			int to_write = (int)buf->length-(int)serverOffsetNumber < MAX_CONTENT 
-					? (int)buf->length-serverOffsetNumber 
+		while(serverOffsetNumber < storedBuffer.length) {
+			int to_write = (int)storedBuffer.length-(int)serverOffsetNumber < MAX_CONTENT 
+					? (int)storedBuffer.length-serverOffsetNumber 
 					: MAX_CONTENT;
-					//if(tokens - to_write > 0) {
+					if(tokens - to_write > 0) {
 						packets++;
 						writeMulticastPacket(
-							static_cast<void*>(&buf->buffer[serverOffsetNumber]), 
+							static_cast<void*>(&storedBuffer.buffer[serverOffsetNumber]), 
 							to_write, 
-							serverOffsetNumber+to_write == buf->length);
+							(packets+1) % requireAcksFreq == 0,
+							serverOffsetNumber+to_write == storedBuffer.length);
 							lastoffset = serverOffsetNumber;
 						serverOffsetNumber += to_write;
 						tokens -= to_write;
 						if(packets % checkNacksFreq == 0) {
 							readTCP_packet(0);
 						}
-					//	if(packets == 62) {
-					//		usleep(1);
-					//	}
-					//}
-					//else {
-					    /* add to the token bucket */
-						/*gettimeofday(&tokenEnd, NULL);
+						if(packets == 62) {
+							usleep(1);
+						}
+					}
+					else {
+					    	/* add to the token bucket */
+						gettimeofday(&tokenEnd, NULL);
 
 						tokenSeconds  = tokenEnd.tv_sec  - tokenStart.tv_sec;
 						tokenuSeconds = tokenEnd.tv_usec - tokenStart.tv_usec;
@@ -250,7 +274,7 @@ bool Server::flushData(void)
 						}
 						gettimeofday(&tokenStart, NULL);
 						//usleep(1);
-					}*/
+					}
 		}
 
 		/* If we hit a timeout, then resend the last packet. */
@@ -258,7 +282,7 @@ bool Server::flushData(void)
 				fprintf(stderr,"Frame %d: Timeout, retransmitting last packet (offset %d of %d): Waiting on",
 						serverFrameNumber,
 						serverOffsetNumber, 
-						buf->length);
+						storedBuffer.length);
 				for(int i=0;i<numConnections; ++i) {
 					if (!ackList[i])
 						fprintf(stderr," %d",i);
@@ -268,33 +292,35 @@ bool Server::flushData(void)
 		}
 	} while (!checkACKList());
 
-	//fprintf(stderr,"Frame %d: Flushed %d bytes\n", serverFrameNumber, buf->length);
+	//fprintf(stderr,"Frame %d: Flushed %d bytes\n", serverFrameNumber, storedBuffer.length);
 	/* Reset the buffer position to 0 so we can start adding new data to it. */
-	buf->length = 0;
+	storedBuffer.length = 0;
 
 	return true; /* Success */
 }
 
-int Server::writeMulticastPacket(void *buf, size_t count, bool requiresACK)
+int Server::writeMulticastPacket(void *buf, size_t count, bool requiresACK, bool finalPacket)
 {
 	/* set flags */
 	short flags = 0;
-	flags |= requiresACK << RQAPOS;
+	flags |= (requiresACK | finalPacket) << RQAPOS;
+	flags |= finalPacket << FINPOS;
 
 	/* fill in header values */
 	serverPacket->frameNumber = serverFrameNumber;
 	serverPacket->offsetNumber = serverOffsetNumber;
 	serverPacket->packetFlags = flags;
 	serverPacket->packetSize = count;
+	serverPacket->checksum = lzo_crc32(0, (unsigned char *)buf, count);
 
 	/* storage for full packet to send one datagram */
-	unsigned char * fullPacket = (unsigned char *) malloc(sizeof(braden_packet)+MAX_PACKET_SIZE);
- 	memcpy(fullPacket, serverPacket, sizeof(braden_packet));
-	memcpy(fullPacket+ sizeof(braden_packet), buf, count);
+	unsigned char * fullPacket = (unsigned char *) malloc(sizeof(multicast_header)+MAX_PACKET_SIZE);
+ 	memcpy(fullPacket, serverPacket, sizeof(multicast_header));
+	memcpy(fullPacket+ sizeof(multicast_header), buf, count);
 
 	/* send the full packet */
 	if(sendto(multicastSocket,
-				fullPacket,sizeof(braden_packet)+count,
+				fullPacket,sizeof(multicast_header)+count,
 				0,
 				(struct sockaddr*)group,sizeof(struct sockaddr_in)
 				) == -1) {
@@ -371,13 +397,9 @@ int Server::readTCP_packet(int timeout) {
 			int ret = 0;
 			/* if the socket still hasn't acked and read is mSockets[i]*/
 			if(!ackList[i] && FD_ISSET(mSockets[i],&rfds)) {
-				int remaining = sizeof(braden_packet);
-				/* FIXME: This won't work. because if you get half of a
-				 * braden_packet, you'll overwrite the first half with the
-				 * second half when the second half turns up
-				 */
+				int remaining = sizeof(multicast_header);
 				while(remaining > 0) {
-					ret = read(mSockets[i], serverPacket + sizeof(braden_packet)-remaining, remaining);
+					ret = read(mSockets[i], serverPacket + sizeof(multicast_header)-remaining, remaining);
 					remaining -= ret;
 				}
 				

@@ -34,7 +34,7 @@ const int HEADER_SIZE = 16;
 const int MAX_PACKET_SIZE = MAX_CONTENT + HEADER_SIZE;
 
 /* macro to check if a given bit pos is set or not */
-#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
+#define CHECK_BIT(var,pos) ((var >> pos) & 1)
 
 /* positions of various bits */
 #define ACKPOS 9
@@ -71,7 +71,7 @@ const int MAX_PACKET_SIZE = MAX_CONTENT + HEADER_SIZE;
 			RQA = if the packet requires an ACK of not (send messages)
 */
 
-struct braden_packet
+struct multicast_header
 {
 	uint32_t frameNumber;
 	uint32_t offsetNumber;
@@ -111,7 +111,7 @@ public:
 	int writeData(void *buf, size_t count);
 	bool flushData(void);
 	int readData(void *buf, size_t count);
-	int writeMulticastPacket(void *buf, size_t count, bool requiresACK);
+	int writeMulticastPacket(void *buf, size_t count, bool requiresACK, bool finalPacket);
 	int readTCP_packet(int timeout);
 	bool readTCPPacket(void *buf, size_t count, int timeout);
 	bool checkACKList();
