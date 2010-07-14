@@ -2,45 +2,51 @@
 	Libraries
 **********************************************/
 
-/* select Libs */
-#include <sys/types.h>
-#include <sys/time.h>
+/* Not everyone has the headers for this, so improvise */
+#ifndef MCAST_JOIN_SOURCE_GROUP
+#define MCAST_JOIN_SOURCE_GROUP 46
 
-/* socket Libs */
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <dlfcn.h>
-#include <netinet/tcp.h>
+struct group_source_req
+{
+	/* Interface index.  */
+	uint32_t gsr_interface;
 
-#include <iostream>
-#include <string>
-using std::string;
+	/* Group address.  */
+	struct sockaddr_storage gsr_group;
 
-/* C Libs*/
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+	/* Source address.  */
+	struct sockaddr_storage gsr_source;
+};
+
+#endif
 
 /*********************************************
-	Global Constants
+	Global Multicast Header Structure
 **********************************************/
-/* max sizes */
-const int MAX_CONTENT = 1280;
-const int HEADER_SIZE = 16;
-const int MAX_PACKET_SIZE = MAX_CONTENT + HEADER_SIZE;
 
-/* macro to check if a given bit pos is set or not */
-#define CHECK_BIT(var,pos) ((var >> pos) & 1)
+struct multicast_header
+{
+	uint32_t frameNumber;
+	uint32_t offsetNumber;
+	uint16_t packetSize;
+	uint16_t packetFlags;
+};
 
 /* positions of various bits */
 #define ACKPOS 9
 #define NACKPOS 8
 #define FINPOS 1
 #define RQAPOS 0
+
+/*********************************************
+	Global Constants
+**********************************************/
+/* max sizes */
+const int MAX_CONTENT = 1280;
+const int MAX_PACKET_SIZE = MAX_CONTENT + sizeof(multicast_header);
+
+/* macro to check if a given bit pos is set or not */
+#define CHECK_BIT(var,pos) ((var >> pos) & 1)
 
 /*********************************************
 	Header Layout
@@ -60,9 +66,9 @@ const int MAX_PACKET_SIZE = MAX_CONTENT + HEADER_SIZE;
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                             Checksum                          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |															   |
+   |								   |
    /                             data                              /
-   |															   |
+   |								   |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	
 	Where 	ACK = if this is an ack message (reply messages)
@@ -70,15 +76,6 @@ const int MAX_PACKET_SIZE = MAX_CONTENT + HEADER_SIZE;
 			FIN = if this is the last packet of the frame (send messages)
 			RQA = if the packet requires an ACK of not (send messages)
 */
-
-struct multicast_header
-{
-	uint32_t frameNumber;
-	uint32_t offsetNumber;
-	uint16_t packetSize;
-	uint16_t packetFlags;
-	int checksum;
-};
 
 /*********************************************
 	Client

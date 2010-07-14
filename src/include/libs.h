@@ -41,6 +41,12 @@ using std::map;
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <dlfcn.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <netinet/tcp.h>
+/* select Libs */
+#include <sys/types.h>
+#include <sys/time.h>
 #endif
 
 //libconfuse

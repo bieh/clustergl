@@ -1,24 +1,7 @@
+#include "include/main.h"
 #include "include/multicast.h"
 #include <assert.h>
-#include <lzo/lzo1x.h>
 
-/* Not everyone has the headers for this, so improvise */
-#ifndef MCAST_JOIN_SOURCE_GROUP
-#define MCAST_JOIN_SOURCE_GROUP 46
-
-struct group_source_req
-{
-		/* Interface index.  */
-		uint32_t gsr_interface;
-
-		/* Group address.  */
-		struct sockaddr_storage gsr_group;
-
-		/* Source address.  */
-		struct sockaddr_storage gsr_source;
-};
-
-#endif
 /********************************************************
 	Main Globals (Loaded from config file)
 ********************************************************/
@@ -66,11 +49,6 @@ Client::Client()
 
 void Client::createMulticastSocket()
 {
-
-		/* init lzo for crc32 checksum calculation */
-		if (lzo_init() != LZO_E_OK) {
-			printf("LZO init failed!\n");
-		}
 
 		/* create required structures */
 		struct group_source_req group_source_req_local;
@@ -236,14 +214,6 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
 //			ret);
 		free(fullPacket);
 		return false;
-	}
-
-	int crcClientVal = lzo_crc32(0, (unsigned char *)fullPacket+ sizeof(multicast_header), ret-sizeof(multicast_header));
-	if(clientPacket->checksum != crcClientVal) {
-		printf("checksum failed!\n");
-		/* NACK the packet, to get a fresh copy */
-		sendTCP_NACK();
-		return false;	
 	}
 
 	/* copy payload data */

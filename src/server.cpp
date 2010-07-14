@@ -1,23 +1,5 @@
+#include "include/main.h"
 #include "include/multicast.h"
-#include <lzo/lzo1x.h>
-
-/* Not everyone has the headers for this so improvise */
-#ifndef MCAST_JOIN_SOURCE_GROUP
-#define MCAST_JOIN_SOURCE_GROUP 46
-
-struct group_source_req
-{
-		/* Interface index.  */
-		uint32_t gsr_interface;
-
-		/* Group address.  */
-		struct sockaddr_storage gsr_group;
-
-		/* Source address.  */
-		struct sockaddr_storage gsr_source;
-};
-
-#endif
 
 extern string addresses[5];
 
@@ -110,10 +92,6 @@ Server::Server()
 
 void Server::createMulticastSocket()
 {		
-		/* init lzo for crc32 checksum calculation */
-		if (lzo_init() != LZO_E_OK) {
-			printf("LZO init failed!\n");
-		}
 
 		/* set the size of the current buffer to zero */
 		storedBuffer.length = 0;
@@ -312,12 +290,11 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool requiresACK, bool
 	flags |= (requiresACK | finalPacket) << RQAPOS;
 	flags |= finalPacket << FINPOS;
 
-	/* fill in header values */
+	/* fill in header values */	
 	serverPacket->frameNumber = serverFrameNumber;
 	serverPacket->offsetNumber = serverOffsetNumber;
 	serverPacket->packetFlags = flags;
 	serverPacket->packetSize = count;
-	serverPacket->checksum = lzo_crc32(0, (unsigned char *)buf, count);
 
 	/* storage for full packet to send one datagram */
 	unsigned char * fullPacket = (unsigned char *) malloc(sizeof(multicast_header)+MAX_PACKET_SIZE);
