@@ -243,8 +243,9 @@ int NetSrvModule::myRead(byte *input, int nByte)
 void NetSrvModule::recieveBuffer(void)
 {	
 	int compSize = 0;	
-	client->pullData();
+	//client->pullData();
 	if(multicast) {
+		client->pullData();
 		if(usingSendCompression) {
 			client->readData((byte *)&bytesRemaining, sizeof(uint32_t));
 			client->readData((byte *)&compSize, sizeof(uint32_t));

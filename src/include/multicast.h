@@ -35,6 +35,7 @@ struct multicast_header
 /* positions of various bits */
 #define ACKPOS 9
 #define NACKPOS 8
+#define DATAPOS 4
 #define FINPOS 1
 #define RQAPOS 0
 
@@ -89,6 +90,7 @@ public:
 	void createTCPSocket();
 	void sendTCP_ACK();
 	void sendTCP_NACK();
+	int sendTCP_DATA(void *data, size_t size);
 	int readMulticastPacket(void *buf, size_t count);
 	int writeData(void *buf, size_t count);
 	int readData(void *buf, size_t count);
@@ -108,8 +110,9 @@ public:
 	int writeData(void *buf, size_t count);
 	bool flushData(void);
 	int readData(void *buf, size_t count);
-	int writeMulticastPacket(void *buf, size_t count, bool requiresACK, bool finalPacket);
+	int writeMulticastPacket(void *buf, size_t count, bool finalPacket);
 	int readTCP_packet(int timeout);
 	bool readTCPPacket(void *buf, size_t count, int timeout);
 	bool checkACKList();
+	bool checkDATAList();
 };

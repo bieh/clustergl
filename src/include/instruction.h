@@ -3,7 +3,7 @@
 *******************************************************************************/
 
 //TODO: will this be enough?
-#define MAX_ARG_LEN 128
+#define MAX_ARG_LEN 48
 
 class InstructionBuffer
 {

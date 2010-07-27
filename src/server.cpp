@@ -9,7 +9,7 @@ extern string addresses[5];
 
 int multicastSocket;
 int mSockets[5];
-int numConnections = 1;
+int numConnections = 3;
 
 /* select timer */
 timeval mytime;
@@ -50,17 +50,8 @@ buffer_t storedBuffer;
 
 int tokens = 125000000;
 
-/* NACK checking values */
-uint32_t packetCount = 0;
-
-/* check NACKS frequency */
-uint32_t checkNacksFreq = 800;
-
 /* port number */
 int server_tcp_port = 1414;
-
-/* acknowledge every n number of packets */
-uint32_t requireAcksFreq = 100000;
 
 /*********************************************************
 	Server
@@ -208,44 +199,36 @@ bool Server::flushData(void)
 
 	serverFrameNumber++;
 	serverOffsetNumber = 0;
-	int packets = 0;
-	
 
 	//fprintf(stderr,"Frame %d: Flushing %d bytes\n", serverFrameNumber, buf->length);
 	/* Send the data, then wait for an ACK or a NAK.  If we get a NAK, revisit
 	 * sending all the data. 
          */
 	while(serverOffsetNumber < storedBuffer.length) {
-		int ackPackets = 1;
 		/* Now we wait for acks */
 		for(int i = 0; i < numConnections; i++) {
 		ackList[i] = false;	
 		}
 		do {
-			while((ackPackets) % requireAcksFreq != 0 && serverOffsetNumber < storedBuffer.length){
+			while(serverOffsetNumber < storedBuffer.length){
 				int to_write = (int)storedBuffer.length-(int)serverOffsetNumber < MAX_CONTENT 
 						? (int)storedBuffer.length-serverOffsetNumber 
 						: MAX_CONTENT;
-						if(tokens - to_write > 0) {
-							packets++;
+						//if(tokens - to_write > 0) {
 							writeMulticastPacket(
 								static_cast<void*>(&storedBuffer.buffer[serverOffsetNumber]), 
 								to_write, 
-								(ackPackets+1) % requireAcksFreq == 0,
 								serverOffsetNumber+to_write == storedBuffer.length);
-							ackPackets++;
 							lastoffset = serverOffsetNumber;
 							serverOffsetNumber += to_write;
 							tokens -= to_write;
-							if(packets % checkNacksFreq == 0) {
-								readTCP_packet(0);
-							}
-							if(packets == 62) {
-								usleep(1);
-							}
-						}
-						else {
-						    	/* add to the token bucket */
+							
+							//if(packets == 62) {
+							//	usleep(1);
+							//}
+						//}
+						/*else {
+						    	/* add to the token bucket 
 							gettimeofday(&tokenEnd, NULL);
 
 							tokenSeconds  = tokenEnd.tv_sec  - tokenStart.tv_sec;
@@ -257,10 +240,10 @@ bool Server::flushData(void)
 							}
 							gettimeofday(&tokenStart, NULL);
 							//usleep(1);
-						}
+						}*/
 			}
 			/* If we hit a timeout, then resend the last packet. */
-			if (readTCP_packet(12000) == 0) {
+			if (readTCP_packet(10800) == 0) {
 					//fprintf(stderr,"Frame %d: Timeout, retransmitting last packet (offset %d of %d): Waiting on",
 					//		serverFrameNumber,
 					//		serverOffsetNumber, 
@@ -271,7 +254,6 @@ bool Server::flushData(void)
 					//}
 					//fprintf(stderr,"\n");
 					serverOffsetNumber = lastoffset;
-					ackPackets--;
 			}
 		} while (!checkACKList());
 	}
@@ -283,11 +265,11 @@ bool Server::flushData(void)
 	return true; /* Success */
 }
 
-int Server::writeMulticastPacket(void *buf, size_t count, bool requiresACK, bool finalPacket)
+int Server::writeMulticastPacket(void *buf, size_t count, bool finalPacket)
 {
 	/* set flags */
 	short flags = 0;
-	flags |= (requiresACK | finalPacket) << RQAPOS;
+	flags |= finalPacket << RQAPOS;
 	flags |= finalPacket << FINPOS;
 
 	/* fill in header values */	
@@ -394,7 +376,6 @@ int Server::readTCP_packet(int timeout) {
 							i,
 							ret
 							);
-					usleep(100000);
 				}
 				else {
 					if(CHECK_BIT(serverPacket->packetFlags, NACKPOS)) {

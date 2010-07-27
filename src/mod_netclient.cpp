@@ -48,7 +48,7 @@ NetClientModule::NetClientModule()
 {
 
 	//set the number of sockets to create/use
-	if(symphony) numConnections = 5;
+	if(symphony) numConnections = 4;
 	else numConnections = 1;
 
 	if(usingSendCompression | usingReplyCompression) {
