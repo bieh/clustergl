@@ -40,7 +40,11 @@ struct buffer_t {
 	char buffer[16*1024*1024];
 	unsigned int length;
 };
-buffer_t storedBuffer;
+
+/* buffer storage and info */
+buffer_t storedBuffers[2];
+int curBuffer = 0;
+int framesStored[2];
 
 /*********************************************************
 	Server Configuration
@@ -60,9 +64,9 @@ int server_tcp_port = 1414;
 void addToBuffer(void *data, unsigned int len)
 {
 	/* ensure the data being added will not overflow the buffer */
-	if(storedBuffer.length + len < sizeof(storedBuffer.buffer)) {
-		memcpy(static_cast<void*>(&storedBuffer.buffer[storedBuffer.length]), data, len);
-		storedBuffer.length+=len;
+	if(storedBuffers[curBuffer].length + len < sizeof(storedBuffers[curBuffer].buffer)) {
+		memcpy(static_cast<void*>(&storedBuffers[curBuffer].buffer[storedBuffers[curBuffer].length]), data, len);
+		storedBuffers[curBuffer].length+=len;
 	}
 	else {
 		printf("storedBuffer too small!\n");
@@ -85,7 +89,7 @@ void Server::createMulticastSocket()
 {		
 
 		/* set the size of the current buffer to zero */
-		storedBuffer.length = 0;
+		storedBuffers[curBuffer].length = 0;
 		
 		/* create the socket */
 		multicastSocket = socket(AF_INET,SOCK_DGRAM,getprotobyname("udp")->p_proto);
@@ -193,7 +197,7 @@ bool Server::flushData(void)
 
 	int lastoffset = 0;
 
-	if (storedBuffer.length == 0)
+	if (storedBuffers[curBuffer].length == 0)
 			return true; /* ignore zero byte frames, this won't work, but paulh says it will. */
 				/* 2 minutes later: Ok, that worked.  Sorry to blame you paulh. */
 
@@ -204,21 +208,21 @@ bool Server::flushData(void)
 	/* Send the data, then wait for an ACK or a NAK.  If we get a NAK, revisit
 	 * sending all the data. 
          */
-	while(serverOffsetNumber < storedBuffer.length) {
+	while(serverOffsetNumber < storedBuffers[curBuffer].length) {
 		/* Now we wait for acks */
 		for(int i = 0; i < numConnections; i++) {
 		ackList[i] = false;	
 		}
 		do {
-			while(serverOffsetNumber < storedBuffer.length){
-				int to_write = (int)storedBuffer.length-(int)serverOffsetNumber < MAX_CONTENT 
-						? (int)storedBuffer.length-serverOffsetNumber 
+			while(serverOffsetNumber < storedBuffers[curBuffer].length){
+				int to_write = (int)storedBuffers[curBuffer].length-(int)serverOffsetNumber < MAX_CONTENT 
+						? (int)storedBuffers[curBuffer].length-serverOffsetNumber 
 						: MAX_CONTENT;
 						//if(tokens - to_write > 0) {
 							writeMulticastPacket(
-								static_cast<void*>(&storedBuffer.buffer[serverOffsetNumber]), 
+								static_cast<void*>(&storedBuffers[curBuffer].buffer[serverOffsetNumber]), 
 								to_write, 
-								serverOffsetNumber+to_write == storedBuffer.length);
+								serverOffsetNumber+to_write == storedBuffers[curBuffer].length);
 							lastoffset = serverOffsetNumber;
 							serverOffsetNumber += to_write;
 							tokens -= to_write;
@@ -260,7 +264,7 @@ bool Server::flushData(void)
 
 	//fprintf(stderr,"Frame %d: Flushed %d bytes\n", serverFrameNumber, storedBuffer.length);
 	/* Reset the buffer position to 0 so we can start adding new data to it. */
-	storedBuffer.length = 0;
+	storedBuffers[curBuffer].length = 0;
 
 	return true; /* Success */
 }
