@@ -197,7 +197,7 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
 		return false;
 	}
 
-	if (clientOffsetNumber < clientPacket->offsetNumber) {
+	if (clientOffsetNumber < clientPacket->offsetNumber /*|| rand() % 100 == 12*/) {
 	//	fprintf(stderr,"frame number: %d expecting offset %d, got %d\n", 
 //				clientFrameNumber,
 //				clientOffsetNumber,

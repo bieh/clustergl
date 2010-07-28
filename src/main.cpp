@@ -65,7 +65,6 @@ int App::run(int argc, char **argv)
 	init(false);
 
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
-
 	mModules.push_back(new NetSrvModule());
 	//mModules.push_back(new InsertModule());
 	mModules.push_back(new ExecModule());
@@ -84,13 +83,12 @@ int App::run_shared()
 		return 1;
 	}
 	init(true);
-
 	LOG("Loading modules for application intercept\n");
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule()); //output OpenGL method calls to console
 	if(profileApp) {
 		profile = new ProfileModule();
-								 //calculate instruction usage for the current program
+		//calculate instruction usage for the current program
 		mModules.push_back(profile);
 	}
 	mModules.push_back(new NetClientModule());
@@ -99,7 +97,6 @@ int App::run_shared()
 
 	return 0;
 }
-
 
 void App::init(bool shared)
 {
@@ -167,12 +164,11 @@ void App::debug()
 	LOG("******************* %d modules ***************\n", mModules.size());
 }
 
-
 /********************************************************
 	Tick (main loop)
 ********************************************************/
 
-								 // pointer to the current frame
+// pointer to the current frame
 list<Instruction> *thisFrame = NULL;
 uint32_t totFrames = 0;			 //used for Calculations
 time_t totalTime = 0, prevTime = 0;

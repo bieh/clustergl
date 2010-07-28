@@ -109,10 +109,11 @@ public:
 	void connectTCPSockets();
 	int writeData(void *buf, size_t count);
 	bool flushData(void);
+	bool flushDataWorker(uint32_t startingOffset, int bufNum);
 	int readData(void *buf, size_t count);
-	int writeMulticastPacket(void *buf, size_t count, bool finalPacket);
-	int readTCP_packet(int timeout);
+	int writeMulticastPacket(void *buf, size_t count, bool finalPacket, int offset);
+	int readTCP_packet(int timeout, uint32_t expectedFrame);
 	bool readTCPPacket(void *buf, size_t count, int timeout);
-	bool checkACKList();
+	bool checkACKList(int list);
 	bool checkDATAList();
 };

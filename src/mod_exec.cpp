@@ -2110,8 +2110,14 @@ void EXEC_glTexImage2D(byte *commandbuf)
 	GLint *border = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
-
-	glTexImage2D(*target, *level, *internalformat, *width, *height, *border, *format, *type, (const GLvoid *)popBuf());
+	GLboolean *null = (GLboolean*)commandbuf;  commandbuf += sizeof(GLboolean);
+	//if(*null) {
+		glTexImage2D(*target, *level, *internalformat, *width, *height, *border, *format, *type, (const GLvoid *)popBuf());
+	//}
+	//else {
+	//	LOG("183 no pixels!\n");
+	//	glTexImage2D(*target, *level, *internalformat, *width, *height, *border, *format, *type, NULL);
+	//}
 }
 
 
