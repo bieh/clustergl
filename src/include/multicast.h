@@ -111,7 +111,7 @@ public:
 	bool flushData(void);
 	bool flushDataWorker(uint32_t startingOffset, int bufNum);
 	int readData(void *buf, size_t count);
-	int writeMulticastPacket(void *buf, size_t count, bool finalPacket, int offset);
+	int writeMulticastPacket(void *buf, size_t count, bool finalPacket, int offset, uint32_t frame);
 	int readTCP_packet(int timeout, uint32_t expectedFrame);
 	bool readTCPPacket(void *buf, size_t count, int timeout);
 	bool checkACKList(int list);

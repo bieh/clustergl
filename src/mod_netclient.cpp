@@ -48,7 +48,7 @@ NetClientModule::NetClientModule()
 {
 
 	//set the number of sockets to create/use
-	if(symphony) numConnections = 4;
+	if(symphony) numConnections = 5;
 	else numConnections = 1;
 
 	if(usingSendCompression | usingReplyCompression) {
@@ -414,6 +414,7 @@ void NetClientModule::sendBuffer()
 				if(!server->writeData(out, newSize)) {
 					LOG("Connection problem!\n");
 				}
+				server->flushData();
 			}
 			else {
 				//send the compressed buffer to each socket
@@ -455,6 +456,7 @@ void NetClientModule::sendBuffer()
 				if(!server->writeData(mSendBuf, iSendBufPos)) {
 					LOG("Connection problem!\n");
 				}		
+				server->flushData();
 			}
 			else {
 				//send the buffer to each socket
@@ -479,8 +481,9 @@ void NetClientModule::sendBuffer()
 			bytesLeft = sendBufferSize;
 			iSendBufPos = 0;
 		}
+		
 	}
-	server->flushData();
+	//server->flushData();
 }
 
 

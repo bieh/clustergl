@@ -9,7 +9,7 @@ extern string addresses[5];
 
 int multicastSocket;
 int mSockets[5];
-int numConnections = 1;
+int numConnections = 3;
 
 /* select timer */
 timeval mytime;
@@ -45,6 +45,7 @@ struct buffer_t {
 buffer_t storedBuffers[2];
 int curBuffer = 1;
 uint32_t framesStored[2];
+bool firstPacket[2];
 
 /*********************************************************
 	Server Configuration
@@ -98,6 +99,8 @@ void Server::createMulticastSocket()
 		storedBuffers[1].length = 0;
 		framesStored[1] = -1;
 		framesStored[0] = 0;
+		firstPacket[0] = true;
+		firstPacket[1] = true;
 		
 		/* create the socket */
 		multicastSocket = socket(AF_INET,SOCK_DGRAM,getprotobyname("udp")->p_proto);
@@ -200,12 +203,17 @@ int Server::writeData(void *buf, size_t count)
 	/* check for new ACKs, block until the data we are writing over has been ACKed */
 	while (!checkACKList(serverFrameNumber & 1)) {
 		//printf("readTCP_packet(100, framesStored[curBuffer]! %d %d\n", serverFrameNumber, serverFrameNumber & 1);
-		readTCP_packet(12000, framesStored[curBuffer]);	
+		readTCP_packet(12000, framesStored[curBuffer]);
+		if(!checkACKList(serverFrameNumber & 1)) {
+			printf("timeout occured!! %d \n", serverFrameNumber);
+		}
 	}
 	
 	/* if this is the first chunk of data, save it */
-	if(framesStored[curBuffer] + 2 == serverFrameNumber) {
+	if(firstPacket[curBuffer]) {
+		firstPacket[curBuffer] = false;
 		framesStored[curBuffer] = serverFrameNumber;
+		//printf("frame number in %d is now %d\n", curBuffer, serverFrameNumber);
 		storedBuffers[curBuffer].length = 0;
 	}
 
@@ -236,6 +244,7 @@ bool Server::flushData(void)
 	}
 
 	flushDataWorker(0, curBuffer);
+	firstPacket[curBuffer] = true;
 	serverFrameNumber++;
 	curBuffer = serverFrameNumber & 1;
 
@@ -244,8 +253,10 @@ bool Server::flushData(void)
 
 bool Server::flushDataWorker(uint32_t startingOffset, int bufNum)
 {
+	int packets = 0;
 	//printf("flushDataWorker: %d %d\n", startingOffset, storedBuffers[bufNum].length);
 	while(startingOffset < storedBuffers[bufNum].length){
+		packets++;
 		int to_write = (int)storedBuffers[bufNum].length-(int)startingOffset < MAX_CONTENT 
 			? (int)storedBuffers[bufNum].length-startingOffset 
 			: MAX_CONTENT;
@@ -253,13 +264,9 @@ bool Server::flushDataWorker(uint32_t startingOffset, int bufNum)
 				writeMulticastPacket(
 					static_cast<void*>(&storedBuffers[bufNum].buffer[startingOffset]), 
 					to_write, 
-					startingOffset+to_write == storedBuffers[bufNum].length, startingOffset);
+					startingOffset+to_write == storedBuffers[bufNum].length, startingOffset, framesStored[bufNum]);
 				startingOffset += to_write;
 				tokens -= to_write;
-				
-				//if(packets == 62) {
-				//	usleep(1);
-				//}
 			//}
 			/*else {
 			    	/* add to the token bucket 
@@ -278,7 +285,7 @@ bool Server::flushDataWorker(uint32_t startingOffset, int bufNum)
 	return true; /* Success */
 }
 
-int Server::writeMulticastPacket(void *buf, size_t count, bool finalPacket, int offset)
+int Server::writeMulticastPacket(void *buf, size_t count, bool finalPacket, int offset, uint32_t frame)
 {
 	/* set flags */
 	short flags = 0;
@@ -286,7 +293,7 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool finalPacket, int 
 	flags |= finalPacket << FINPOS;
 
 	/* fill in header values */	
-	serverPacket->frameNumber = framesStored[curBuffer];
+	serverPacket->frameNumber = frame;
 	serverPacket->offsetNumber = offset;
 	serverPacket->packetFlags = flags;
 	serverPacket->packetSize = count;
@@ -314,13 +321,17 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool finalPacket, int 
 
 int Server::readData(void *buf, size_t count)
 {
+//	printf("reading Data!: %d\n", count);
 	/* block until all outstanding data is ACKed */
 	while (!checkACKList((serverFrameNumber -2) & 1)) {
 		readTCP_packet(12000, (serverFrameNumber - 2));
 	}
+	//printf("halfway ACK\n");
 	while (!checkACKList((serverFrameNumber-1) & 1)) {
 		readTCP_packet(12000, serverFrameNumber - 1);
 	}
+	//printf("all ACKS up to date\n");
+
 	
 	for(int i = 0; i < numConnections; i++) {
 		int remaining = count;
@@ -328,8 +339,10 @@ int Server::readData(void *buf, size_t count)
 		while(remaining > 0) {
 			ret = read(mSockets[i], (char *) buf + count - remaining, count);
 			remaining -= ret;
+			//printf("reading %d, read this time: %d!\n", count, ret);
 		}
 	}
+	//printf("data READ!\n");
 	return count;
 }
 

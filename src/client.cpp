@@ -157,7 +157,7 @@ bool Client::pullData(void)
 	gettimeofday(&start, NULL);
 
 	length=0;
-	//printf("frame: %d reading %d total bytes!\n", clientFrameNumber, count);
+	//printf("frame: %d reading unknown total bytes!\n", clientFrameNumber);
 
 	/* Now read packets */
 	while(!last_packet)
@@ -192,26 +192,26 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
  	memcpy(clientPacket, fullPacket, sizeof(multicast_header));
 
 	if(clientPacket->frameNumber != clientFrameNumber) {
-		printf("frame number: %d expecting %d offset %d\n", clientPacket->frameNumber, clientFrameNumber, clientPacket->offsetNumber);
+		printf("got frame number: %d with offset: %d. Expecting %d with offset %d\n", clientPacket->frameNumber, clientPacket->offsetNumber, clientFrameNumber, clientOffsetNumber);
 		free(fullPacket);
 		return false;
 	}
 
 	if (clientOffsetNumber < clientPacket->offsetNumber /*|| rand() % 100 == 12*/) {
-	//	fprintf(stderr,"frame number: %d expecting offset %d, got %d\n", 
-//				clientFrameNumber,
-//				clientOffsetNumber,
-//				clientPacket->offsetNumber);
+		fprintf(stderr,"frame number: %d expecting offset %d, got %d\n", 
+				clientFrameNumber,
+				clientOffsetNumber,
+				clientPacket->offsetNumber);
 		sendTCP_NACK();
 		return false; /* Fail. */
 	}
 
 	if(clientPacket->offsetNumber != clientOffsetNumber) {
-	//	printf("frame number: %d readOffset number: %d expecting %d ret %d\n", 
-//			clientPacket->frameNumber, 
-//			clientPacket->offsetNumber, 
-//			clientOffsetNumber, 
-//			ret);
+		printf("frame number: %d readOffset number: %d expecting %d ret %d\n", 
+			clientPacket->frameNumber, 
+			clientPacket->offsetNumber, 
+			clientOffsetNumber, 
+			ret);
 		free(fullPacket);
 		return false;
 	}
@@ -219,6 +219,7 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
 	/* copy payload data */
 	memcpy(buf, fullPacket+ sizeof(multicast_header), ret-sizeof(multicast_header));
 	clientOffsetNumber += ret-sizeof(multicast_header);
+	//printf("offset now: %d %d\n", clientOffsetNumber, clientFrameNumber);
 	/* check if final packet */
 	if(CHECK_BIT(clientPacket->packetFlags, FINPOS)) {
 		last_packet = true;

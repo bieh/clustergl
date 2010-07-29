@@ -2797,7 +2797,7 @@ extern "C" void glViewport(GLint x, GLint y, GLsizei width, GLsizei height){
 	pushParam(y);
 	pushParam(width);
 	pushParam(height);
-	LOG("glViewport %d %d %d %d\n", x, y, width, height); 
+	//LOG("glViewport %d %d %d %d\n", x, y, width, height); 
 }
 
 //306
