@@ -9,7 +9,7 @@ extern string addresses[5];
 
 int multicastSocket;
 int mSockets[5];
-int numConnections = 3;
+int numConnections = 4;
 
 /* select timer */
 timeval mytime;
@@ -46,6 +46,9 @@ buffer_t storedBuffers[2];
 int curBuffer = 1;
 uint32_t framesStored[2];
 bool firstPacket[2];
+
+int retransmitSize = 0;
+unsigned char * retransmit = (unsigned char *) malloc(sizeof(multicast_header)+MAX_PACKET_SIZE);
 
 /*********************************************************
 	Server Configuration
@@ -203,9 +206,14 @@ int Server::writeData(void *buf, size_t count)
 	/* check for new ACKs, block until the data we are writing over has been ACKed */
 	while (!checkACKList(serverFrameNumber & 1)) {
 		//printf("readTCP_packet(100, framesStored[curBuffer]! %d %d\n", serverFrameNumber, serverFrameNumber & 1);
-		readTCP_packet(12000, framesStored[curBuffer]);
+		readTCP_packet(6000, framesStored[curBuffer]);
 		if(!checkACKList(serverFrameNumber & 1)) {
-			printf("timeout occured!! %d \n", serverFrameNumber);
+			    if(sendto(multicastSocket,
+				retransmit,retransmitSize,
+				 0,
+				(struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
+				         fprintf(stderr, "sendto() failed\n");
+				}
 		}
 	}
 	
@@ -230,7 +238,7 @@ bool Server::flushData(void)
 			return true; /* ignore zero byte frames, this won't work, but paulh says it will. */
 				/* 2 minutes later: Ok, that worked.  Sorry to blame you paulh. */
 
-	//fprintf(stderr,"Frame %d: Flushing %d bytes: \n", serverFrameNumber, storedBuffers[curBuffer].length);
+	fprintf(stderr,"Frame %d: Flushing %d bytes: \n", serverFrameNumber, storedBuffers[curBuffer].length);
 	/* Send the data, then wait for an ACK or a NAK.  If we get a NAK, revisit
 	 * sending all the data. 
          */
@@ -312,6 +320,10 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool finalPacket, int 
 				) == -1) {
     		fprintf(stderr, "sendto() failed\n");
 	}
+	if(finalPacket) {
+		memcpy(retransmit, fullPacket, count+sizeof(multicast_header));
+		retransmitSize = count+sizeof(multicast_header);
+	}
 	free(fullPacket);
 }
 
@@ -323,12 +335,30 @@ int Server::readData(void *buf, size_t count)
 {
 //	printf("reading Data!: %d\n", count);
 	/* block until all outstanding data is ACKed */
-	while (!checkACKList((serverFrameNumber -2) & 1)) {
+	while (!checkACKList(serverFrameNumber & 1)) {
 		readTCP_packet(12000, (serverFrameNumber - 2));
+		if(!checkACKList(serverFrameNumber & 1)) {
+                if(sendto(multicastSocket,
+					                retransmit, retransmitSize,
+									                 0,  
+													                 (struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
+					                         fprintf(stderr, "sendto() failed\n");
+											                 }
+
+		}
 	}
 	//printf("halfway ACK\n");
 	while (!checkACKList((serverFrameNumber-1) & 1)) {
 		readTCP_packet(12000, serverFrameNumber - 1);
+		if(!checkACKList((serverFrameNumber-1) & 1)) {
+                if(sendto(multicastSocket,
+					                retransmit, retransmitSize,
+									                 0,  
+													                 (struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
+					                         fprintf(stderr, "sendto() failed\n");
+											                 }
+
+		}
 	}
 	//printf("all ACKS up to date\n");
 

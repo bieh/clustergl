@@ -165,7 +165,7 @@ bool Client::pullData(void)
 		length+=readMulticastPacket(&buffer[length], MAX_CONTENT);	
 	}
 	offset=0;
-	//fprintf(stderr,"Frame: %d Size: %d\n", clientFrameNumber, length);
+	fprintf(stderr,"Frame: %d Size: %d\n", clientFrameNumber, length);
 	return true;
 }
 
@@ -190,30 +190,26 @@ int Client::readMulticastPacket(void *buf, size_t maxsize)
 
 	/* copy over to correct places */
  	memcpy(clientPacket, fullPacket, sizeof(multicast_header));
-
-	if(clientPacket->frameNumber != clientFrameNumber) {
-		printf("got frame number: %d with offset: %d. Expecting %d with offset %d\n", clientPacket->frameNumber, clientPacket->offsetNumber, clientFrameNumber, clientOffsetNumber);
-		free(fullPacket);
+	if(clientPacket->frameNumber > clientFrameNumber) {
+		//printf("panic! %d %d/n", clientPacket->frameNumber, clientFrameNumber);
+		//free(fullPacket);
+		sendTCP_NACK();
 		return false;
 	}
+    if(clientPacket->frameNumber < clientFrameNumber) {
+	 	// printf("dont panic! %d %d/n", clientPacket->frameNumber, clientFrameNumber);
+	  //free(fullPacket);
+	return false;
+	}
 
-	if (clientOffsetNumber < clientPacket->offsetNumber /*|| rand() % 100 == 12*/) {
-		fprintf(stderr,"frame number: %d expecting offset %d, got %d\n", 
+	if (clientOffsetNumber < clientPacket->offsetNumber/*|| rand() % 100 == 12*/) {
+		/*fprintf(stderr,"frame number: %d expecting offset %d, got %d offset %d \n", 
 				clientFrameNumber,
 				clientOffsetNumber,
-				clientPacket->offsetNumber);
+				clientPacket->frameNumber,
+				clientPacket->offsetNumber);*/
 		sendTCP_NACK();
 		return false; /* Fail. */
-	}
-
-	if(clientPacket->offsetNumber != clientOffsetNumber) {
-		printf("frame number: %d readOffset number: %d expecting %d ret %d\n", 
-			clientPacket->frameNumber, 
-			clientPacket->offsetNumber, 
-			clientOffsetNumber, 
-			ret);
-		free(fullPacket);
-		return false;
 	}
 
 	/* copy payload data */
