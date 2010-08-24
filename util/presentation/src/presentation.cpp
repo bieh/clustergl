@@ -45,8 +45,8 @@ void Presentation::render(){
 
 		mSlides[iCurrentSlide]->bind();
 		
-		float h = 0.67f;
-		float w = 0.93f;
+		float h = 0.7f; //0.67f;
+ 		float w = 1.4f; //0.93f;
 	
 		glBegin(GL_QUADS);
 			// Front Face

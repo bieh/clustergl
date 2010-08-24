@@ -91,7 +91,7 @@ public:
 	void sendTCP_ACK();
 	void sendTCP_NACK();
 	int sendTCP_DATA(void *data, size_t size);
-	int readMulticastPacket(void *buf, size_t count);
+	int readMulticastPacket(unsigned char *buf, size_t count);
 	int writeData(void *buf, size_t count);
 	int readData(void *buf, size_t count);
 	bool pullData();

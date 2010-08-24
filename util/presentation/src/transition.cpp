@@ -46,8 +46,8 @@ void Presentation::doSimpleTransition(bool init){
 	
 		mSlides[i]->bind();
 		
-		float h = 0.67f;
-		float w = 0.93f;
+		float h = 1.0f; //0.67f;
+		float w = 1.0f; //0.93f;
 		
 		glTranslatef(3, 0, 0);
 	

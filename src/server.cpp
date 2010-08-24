@@ -37,7 +37,7 @@ struct group_source_req group_source_req;
 struct sockaddr_in *source;
 
 struct buffer_t {
-	char buffer[16*1024*1024];
+	unsigned char buffer[16*1024*1024];
 	unsigned int length;
 };
 
@@ -48,7 +48,7 @@ uint32_t framesStored[2];
 bool firstPacket[2];
 
 int retransmitSize = 0;
-unsigned char * retransmit = (unsigned char *) malloc(sizeof(multicast_header)+MAX_PACKET_SIZE);
+unsigned char * retransmit[MAX_PACKET_SIZE];
 
 /*********************************************************
 	Server Configuration
@@ -97,7 +97,7 @@ Server::Server()
 
 void Server::createMulticastSocket()
 {		
-
+		/* reset all counter values ready to start transmitting */
 		storedBuffers[0].length = 0;
 		storedBuffers[1].length = 0;
 		framesStored[1] = -1;
@@ -208,12 +208,12 @@ int Server::writeData(void *buf, size_t count)
 		//printf("readTCP_packet(100, framesStored[curBuffer]! %d %d\n", serverFrameNumber, serverFrameNumber & 1);
 		readTCP_packet(6000, framesStored[curBuffer]);
 		if(!checkACKList(serverFrameNumber & 1)) {
-			    if(sendto(multicastSocket,
+			    /*if(sendto(multicastSocket,
 				retransmit,retransmitSize,
 				 0,
 				(struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
 				         fprintf(stderr, "sendto() failed\n");
-				}
+				}*/
 		}
 	}
 	
@@ -275,7 +275,8 @@ bool Server::flushDataWorker(uint32_t startingOffset, int bufNum)
 					startingOffset+to_write == storedBuffers[bufNum].length, startingOffset, framesStored[bufNum]);
 				startingOffset += to_write;
 				tokens -= to_write;
-			//}
+				
+				//}
 			/*else {
 			    	/* add to the token bucket 
 				gettimeofday(&tokenEnd, NULL);
@@ -308,17 +309,21 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool finalPacket, int 
 	
 	//printf("multicast packet details: %d %d %d %d\n", serverPacket->frameNumber, serverPacket->offsetNumber, serverPacket->packetFlags, serverPacket->packetSize);
 	/* storage for full packet to send one datagram */
-	unsigned char * fullPacket = (unsigned char *) malloc(sizeof(multicast_header)+MAX_PACKET_SIZE);
+	unsigned char * fullPacket = (unsigned char *) malloc(MAX_PACKET_SIZE);
  	memcpy(fullPacket, serverPacket, sizeof(multicast_header));
 	memcpy(fullPacket+ sizeof(multicast_header), buf, count);
 
 	/* send the full packet */
-	if(sendto(multicastSocket,
-				fullPacket,sizeof(multicast_header)+count,
-				0,
+	int sendVal = 0;
+	sendVal = sendto(multicastSocket, fullPacket, sizeof(multicast_header)+count, 0,
 				(struct sockaddr*)group,sizeof(struct sockaddr_in)
-				) == -1) {
+				);
+
+	if(sendVal == -1)	{
     		fprintf(stderr, "sendto() failed\n");
+	}
+	if(sendVal != count+sizeof(multicast_header)) {
+		printf("sendto kind of failing: %d %d\n", sendVal, count+sizeof(multicast_header));
 	}
 	if(finalPacket) {
 		memcpy(retransmit, fullPacket, count+sizeof(multicast_header));
@@ -338,26 +343,24 @@ int Server::readData(void *buf, size_t count)
 	while (!checkACKList(serverFrameNumber & 1)) {
 		readTCP_packet(12000, (serverFrameNumber - 2));
 		if(!checkACKList(serverFrameNumber & 1)) {
-                if(sendto(multicastSocket,
-					                retransmit, retransmitSize,
-									                 0,  
-													                 (struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
-					                         fprintf(stderr, "sendto() failed\n");
-											                 }
-
+                /*if(sendto(multicastSocket,
+	                retransmit, retransmitSize,
+	                 0,  
+	                 (struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
+		                 fprintf(stderr, "sendto() failed\n");
+	                 }*/
 		}
 	}
 	//printf("halfway ACK\n");
 	while (!checkACKList((serverFrameNumber-1) & 1)) {
 		readTCP_packet(12000, serverFrameNumber - 1);
 		if(!checkACKList((serverFrameNumber-1) & 1)) {
-                if(sendto(multicastSocket,
-					                retransmit, retransmitSize,
-									                 0,  
-													                 (struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
-					                         fprintf(stderr, "sendto() failed\n");
-											                 }
-
+                /*if(sendto(multicastSocket,
+		           retransmit, retransmitSize,
+		           0,  
+		           (struct sockaddr*)group,sizeof(struct sockaddr_in)) == -1) {
+		                  fprintf(stderr, "sendto() failed\n");
+		           }*/
 		}
 	}
 	//printf("all ACKS up to date\n");
@@ -367,7 +370,7 @@ int Server::readData(void *buf, size_t count)
 		int remaining = count;
 		int ret = 0;
 		while(remaining > 0) {
-			ret = read(mSockets[i], (char *) buf + count - remaining, count);
+			ret = read(mSockets[i], (char *) buf + count - remaining, remaining);
 			remaining -= ret;
 			//printf("reading %d, read this time: %d!\n", count, ret);
 		}
@@ -384,11 +387,13 @@ bool Server::checkACKList(int list) {
 	for(int i = 0; i < numConnections; i++) {
 		if(list == 0) {
 			if(!ackList[i]) {
+				//printf("waiting on: %d\n", i);
 				return false;
 			}
 		}
 		else {
 			if(!ackList2[i]) {
+				//printf("waiting on: %d\n", i);
 				return false;
 			}
 		}
@@ -401,9 +406,11 @@ bool Server::checkACKList(int list) {
 *********************************************************/
 
 int Server::readTCP_packet(int timeout, uint32_t expectedFrame) {
+	
 	int list = expectedFrame & 1;
 	fd_set rfds;
 	FD_ZERO(&rfds);
+
 	for(int i = 0; i < numConnections; i++) {
 		/* macro to set each socket to listen to */
 		if ((!ackList[i] && list == 0) || (!ackList2[i] && list == 1))
@@ -416,6 +423,7 @@ int Server::readTCP_packet(int timeout, uint32_t expectedFrame) {
 
 	/* attempt to read from select sockets */
 	int valReady = select(sd_max+1,&rfds,(fd_set *)0,(fd_set *)0,&mytime);
+	bool success = true;
 	if(valReady < 0) {
 		printf("select error!\n");
 	}
@@ -446,19 +454,19 @@ int Server::readTCP_packet(int timeout, uint32_t expectedFrame) {
 				}
 				else {
 					if(CHECK_BIT(serverPacket->packetFlags, NACKPOS)) {
-						fprintf(stderr,"got a NACK! for frame: %d, framesStored %d & %d\n", serverPacket->frameNumber, framesStored[0], framesStored[1]);
+						//fprintf(stderr,"got a NACK! from %d for frame: %d, offset %d\n", i, serverPacket->frameNumber, serverPacket->offsetNumber);
 						/* its a NACK, so resend every bit of data after missing packet */
 						if(framesStored[0] == serverPacket->frameNumber) {
-							flushDataWorker(serverPacket->offsetNumber, 0);
-							if(framesStored[1] > serverPacket->frameNumber)	{
-								flushDataWorker(0, 1);
-							}	
+								flushDataWorker(serverPacket->offsetNumber, 0);
+									if(framesStored[1] > serverPacket->frameNumber) {
+											flushDataWorker(0, 1);
+									}       
 						}
 						else {
-							flushDataWorker(serverPacket->offsetNumber, 1);
-							if(framesStored[0] > serverPacket->frameNumber)	{
-								flushDataWorker(0, 0);
-							}
+								flushDataWorker(serverPacket->offsetNumber, 1);
+									 if(framesStored[0] > serverPacket->frameNumber) {
+									 		flushDataWorker(0, 0);
+									}
 						}
 					}
 					else if(CHECK_BIT(serverPacket->packetFlags, ACKPOS)){
