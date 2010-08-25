@@ -130,6 +130,7 @@ bool NetSrvModule::process(list<Instruction> &list)
 		else {
 			prevInstruction = i.id;
 		}
+
 		//Now see if we're expecting any buffers
 		for(int n=0;n<3;n++) {
 			int l = i.buffers[n].len;
@@ -141,12 +142,21 @@ bool NetSrvModule::process(list<Instruction> &list)
 			}
 		}
 		if(i.id == CGL_REPEAT_INSTRUCTION) {
+			uint32_t sameCount = 0;
+			memcpy(&sameCount, i.args, sizeof(uint32_t));
+			//printf("repeat instruction of size: %d\n", sameCount);
 			//decrease num, as we won't need to read these instructions from the socket
-			num -= i.args[0];
-			for (uint32_t a = 0;a <(uint32_t)i.args[0];a++) {
+			num -= sameCount;
+			
+			for (uint32_t a = 0;a <sameCount;a++) {
 				Instruction p;
 
 				p.id = pIter->id;
+				if(p.id > 1700) {
+					printf("> 1700!!!!!!!!\n");
+					exit(1);
+				}
+				//TODO: MEMCPY
 				for (int j =0;j<MAX_ARG_LEN;j++)
 					p.args[j] = pIter->args[j];
 
@@ -168,6 +178,10 @@ bool NetSrvModule::process(list<Instruction> &list)
 				list.push_back(p);
 				if (pIter != (*prevFrame).end())
 					pIter++;
+				else{
+					printf("Got to the end of prevFrame!!!\n\n");
+					exit(1);
+				}
 			}
 			//decrease x, as CGL_REPEAT_INSTRUCTION does not count as an instruction
 			x--;
@@ -177,6 +191,7 @@ bool NetSrvModule::process(list<Instruction> &list)
 			if (pIter != (*prevFrame).end()) pIter++;
 		}
 	}
+
 	return true;
 }
 

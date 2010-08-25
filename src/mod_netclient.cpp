@@ -128,7 +128,7 @@ bool NetClientModule::process(list<Instruction> &list)
 
 	//First send the total number
 	uint32_t num = list.size();
-	//LOG("num instructions netClient: %d!\n", num);
+	//LOG("********num instructions netClient: %d!\n", num);
 	fflush(stdout);
 	if(multicast) {
 		netBytes += sizeof(uint32_t);
@@ -162,7 +162,8 @@ bool NetClientModule::process(list<Instruction> &list)
 		if (useRepeat			 //value from config to enable/disable deltas
 			&& i->id == pIter->id//if the instruction has the same id as previous
 			&& !mustSend && i->id//mustSend is set when expecting a reply
-			&& sameCount < 150//stops sameBuffer filling up indefinitely (is this needed?)
+		//	&& sameCount < 150//stops sameBuffer filling up indefinitely (is this needed?)
+			&& i->id != 1499
 		) {
 			//assume the instruction is the same
 			bool same = true;
@@ -202,7 +203,7 @@ bool NetClientModule::process(list<Instruction> &list)
 				continue;
 			}
 		}
-
+		//printf("same count: %d\n", sameCount);
 		if (sameCount> 0) {		 // send a count of the duplicates before this instruction
 			Instruction * skip = (Instruction *)malloc(sizeof(Instruction));
 			if (skip == 0) {
@@ -210,7 +211,8 @@ bool NetClientModule::process(list<Instruction> &list)
 				exit(-1);
 			}
 			skip->id = CGL_REPEAT_INSTRUCTION;
-			skip->args[0] = (uint32_t) sameCount;
+			memcpy(skip->args, &sameCount, sizeof(uint32_t));
+			//printf("sameCount: %d\n", sameCount);
 			for(int i=0;i<3;i++) {
 				skip->buffers[i].buffer = NULL;
 				skip->buffers[i].len = 0;
@@ -272,6 +274,7 @@ bool NetClientModule::process(list<Instruction> &list)
 		}
 		skip->id = CGL_REPEAT_INSTRUCTION;
 		skip->args[0] = (uint32_t) sameCount;
+		//printf("sameCount: %d\n", sameCount);
 		for(int i=0;i<3;i++) {
 			skip->buffers[i].buffer = NULL;
 			skip->buffers[i].len = 0;
@@ -547,7 +550,7 @@ int NetClientModule::myRead(void *buf, size_t count)
 					if(i == 0) {
 						int remaining = count;
 						while(remaining > 0) {
-							ret[i] = read(fd, buf, remaining);
+							ret[i] = read(fd, buf+(count-remaining), remaining);
 							remaining -= ret[i];
 						}
 						ret[0] = count;
@@ -556,7 +559,7 @@ int NetClientModule::myRead(void *buf, size_t count)
 						byte * tempBuf = (byte *) malloc(count);
 						int remaining = count;
 						while(remaining > 0) {
-							ret[i] = read(fd, tempBuf, count);
+							ret[i] = read(fd, tempBuf+(count-remaining), remaining);
 							remaining -= ret[i];
 						}
 						free(tempBuf);

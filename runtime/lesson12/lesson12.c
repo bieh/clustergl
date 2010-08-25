@@ -1,7 +1,7 @@
 
 /* stress test settings */
-int pyramidSize = 100;
-int retro = 1;
+int pyramidSize = 20;
+int retro = 0;
 
 /*
  * This code was created by Jeff Molofee '99 
@@ -19,7 +19,7 @@ int retro = 1;
 #include <stdlib.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "SDL.h"
+#include <SDL/SDL.h>
 
 /* screen width, height, and bit depth */
 #define SCREEN_WIDTH  880
@@ -85,34 +85,34 @@ GLvoid BuildLists( )
     glNewList( box, GL_COMPILE );
       glBegin( GL_QUADS ); /* Start drawing quads */
         /* Bottom Face */
-        glTexCoord2f( 0.0f, 1.0f ); glVertex3f( -1.0f, -1.0f, -1.0f );
-	glTexCoord2f( 1.0f, 1.0f ); glVertex3f(  1.0f, -1.0f, -1.0f );
-	glTexCoord2f( 1.0f, 0.0f ); glVertex3f(  1.0f, -1.0f,  1.0f );
-	glTexCoord2f( 0.0f, 0.0f ); glVertex3f( -1.0f, -1.0f,  1.0f );
+    glVertex3f( -1.0f, -1.0f, -1.0f );
+	glVertex3f(  1.0f, -1.0f, -1.0f );
+	glVertex3f(  1.0f, -1.0f,  1.0f );
+	glVertex3f( -1.0f, -1.0f,  1.0f );
 
 	/* Front Face */
-	glTexCoord2f( 1.0f, 0.0f ); glVertex3f( -1.0f, -1.0f,  1.0f );
-	glTexCoord2f( 0.0f, 0.0f ); glVertex3f(  1.0f, -1.0f,  1.0f );
-	glTexCoord2f( 0.0f, 1.0f ); glVertex3f(  1.0f,  1.0f,  1.0f );
-	glTexCoord2f( 1.0f, 1.0f ); glVertex3f( -1.0f,  1.0f,  1.0f );
+	glVertex3f( -1.0f, -1.0f,  1.0f );
+	glVertex3f(  1.0f, -1.0f,  1.0f );
+	glVertex3f(  1.0f,  1.0f,  1.0f );
+	glVertex3f( -1.0f,  1.0f,  1.0f );
 
 	/* Back Face */
-	glTexCoord2f( 0.0f, 0.0f ); glVertex3f( -1.0f, -1.0f, -1.0f );
-	glTexCoord2f( 0.0f, 1.0f ); glVertex3f( -1.0f,  1.0f, -1.0f );
-	glTexCoord2f( 1.0f, 1.0f ); glVertex3f(  1.0f,  1.0f, -1.0f );
-	glTexCoord2f( 1.0f, 0.0f ); glVertex3f(  1.0f, -1.0f, -1.0f );
+	glVertex3f( -1.0f, -1.0f, -1.0f );
+	glVertex3f( -1.0f,  1.0f, -1.0f );
+	glVertex3f(  1.0f,  1.0f, -1.0f );
+	glVertex3f(  1.0f, -1.0f, -1.0f );
 
 	/* Right face */
-	glTexCoord2f( 0.0f, 0.0f ); glVertex3f( 1.0f, -1.0f, -1.0f );
-	glTexCoord2f( 0.0f, 1.0f ); glVertex3f( 1.0f,  1.0f, -1.0f );
-	glTexCoord2f( 1.0f, 1.0f ); glVertex3f( 1.0f,  1.0f,  1.0f );
-	glTexCoord2f( 1.0f, 0.0f ); glVertex3f( 1.0f, -1.0f,  1.0f );
+	glVertex3f( 1.0f, -1.0f, -1.0f );
+	glVertex3f( 1.0f,  1.0f, -1.0f );
+	glVertex3f( 1.0f,  1.0f,  1.0f );
+	glVertex3f( 1.0f, -1.0f,  1.0f );
 
 	/* Left Face */
-	glTexCoord2f( 1.0f, 0.0f ); glVertex3f( -1.0f, -1.0f, -1.0f );
-	glTexCoord2f( 0.0f, 0.0f ); glVertex3f( -1.0f, -1.0f,  1.0f );
-	glTexCoord2f( 0.0f, 1.0f ); glVertex3f( -1.0f,  1.0f,  1.0f );
-	glTexCoord2f( 1.0f, 1.0f ); glVertex3f( -1.0f,  1.0f, -1.0f );
+	glVertex3f( -1.0f, -1.0f, -1.0f );
+	glVertex3f( -1.0f, -1.0f,  1.0f );
+	glVertex3f( -1.0f,  1.0f,  1.0f );
+	glVertex3f( -1.0f,  1.0f, -1.0f );
       glEnd( );
     glEndList( );
 
@@ -122,10 +122,10 @@ GLvoid BuildLists( )
     glNewList( top, GL_COMPILE );
       glBegin( GL_QUADS ); /* Start Drawing Quad */
         /* Top Face */
-        glTexCoord2f( 1.0f, 1.0f ); glVertex3f( -1.0f,  1.0f, -1.0f );
-	glTexCoord2f( 1.0f, 0.0f ); glVertex3f( -1.0f,  1.0f,  1.0f );
-	glTexCoord2f( 0.0f, 0.0f ); glVertex3f(  1.0f,  1.0f,  1.0f );
-	glTexCoord2f( 0.0f, 1.0f ); glVertex3f(  1.0f,  1.0f, -1.0f );
+    glVertex3f( -1.0f,  1.0f, -1.0f );
+	glVertex3f( -1.0f,  1.0f,  1.0f );
+	glVertex3f(  1.0f,  1.0f,  1.0f );
+	glVertex3f(  1.0f,  1.0f, -1.0f );
       glEnd( );
     glEndList( );
 }
@@ -136,37 +136,10 @@ int LoadGLTextures( )
     /* Status indicator */
     int Status = FALSE;
 
-    /* Create storage space for the texture */
-    SDL_Surface *TextureImage[1]; 
-
     /* Load The Bitmap, Check For Errors, If Bitmap's Not Found Quit */
-    if ( ( TextureImage[0] = SDL_LoadBMP( "data/cube.bmp" ) ) )
-        {
 
 	    /* Set the status to true */
 	    Status = TRUE;
-
-	    /* Create The Texture */
-	    glGenTextures( 1, &texture[0] );
-
-	    /* Typical Texture Generation Using Data From The Bitmap */
-	    glBindTexture( GL_TEXTURE_2D, texture[0] );
-
-	    /* Generate The Texture */
-	    gluBuild2DMipmaps( GL_TEXTURE_2D, 3, TextureImage[0]->w,
-			       TextureImage[0]->h, GL_BGR,
-			       GL_UNSIGNED_BYTE, TextureImage[0]->pixels );
-
-	    /* Linear Filtering */
-	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-			     GL_LINEAR_MIPMAP_NEAREST );
-	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-			     GL_LINEAR );
-        }
-
-    /* Free up any memory we may have used */
-    if ( TextureImage[0] )
-	    SDL_FreeSurface( TextureImage[0] );
 
     return Status;
 }
@@ -287,6 +260,7 @@ int initGL( GLvoid )
     return( TRUE );
 }
 
+float rot = 0;
 /* Here goes our drawing code */
 int drawGLScene( GLvoid )
 {
@@ -297,18 +271,19 @@ int drawGLScene( GLvoid )
     /* Clear The Screen And The Depth Buffer */
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    /* Select Our Texture */
-    glBindTexture( GL_TEXTURE_2D, texture[0] );
-
     /* Start loading in our display lists */
-	
+	glRotatef( sinf(rot), 0.0f, 1.0f, 0.0f );
+
+	rot ++;
+
 	float multiplier = pyramidSize / 10;
     for ( yloop = 0; yloop < pyramidSize; yloop++ )
 	{
 	    for ( xloop = 0; xloop < pyramidSize; xloop++ )
 		{
 		    /* Reset the view */
-		    glLoadIdentity( );
+		    //glLoadIdentity( );
+			glPushMatrix();
 		 	int odd = yloop & 1;
 		    /* Position The Cubes On The Screen */
 		    glTranslatef( -14.0f*multiplier + 2.8f * xloop + 1.4f*odd,
@@ -331,7 +306,7 @@ int drawGLScene( GLvoid )
 		    
 		    glColor3fv( topcol[randCol] ); /* Select The Top Color */
 		    glCallList( top );               /* Draw The Top */
-
+			glPopMatrix();
 		}
 	}
     /* Draw it to the screen */

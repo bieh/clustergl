@@ -8,9 +8,9 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
-#define  NOHACK true
-#define  GLXFULL true
-#define  GLUFULL true
+//#define  NOHACK true
+//#define  GLXFULL true
+//#define  GLUFULL true
 
 extern App *theApp;
 

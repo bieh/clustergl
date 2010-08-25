@@ -92,7 +92,7 @@ int App::run_shared()
 		mModules.push_back(profile);
 	}
 	mModules.push_back(new NetClientModule());
-
+//	mModules.push_back(new TextModule());
 	//Return control to the parent process.
 
 	return 0;

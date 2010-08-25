@@ -127,11 +127,23 @@ bool ExecModule::makeWindow()
 
 bool ExecModule::process(list<Instruction> &list)
 {
+
+ for(std::list<Instruction>::iterator iter = list.begin();
+    iter != list.end(); iter++) {
+        if(iter->id >= 1700 ) {
+            LOG("Unimplemented %d BEFORE STUFF\n", iter->id);
+            return false;
+            //continue;
+        }
+    }
+
+
 	for(std::list<Instruction>::iterator iter = list.begin();
 	iter != list.end(); iter++) {
 		if(iter->id >= 1700 || !mFunctions[iter->id]) {
-			LOG("Unimplemented %d\n", iter->id);
+			LOG("Unimplemented %d AFTER STUFF\n", iter->id);
 			return false;
+			//continue;
 		}
 
 		mCurrentInstruction = &(*iter);
@@ -175,12 +187,13 @@ bool ExecModule::process(list<Instruction> &list)
 			GLdouble nearVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*4));
 			GLdouble farVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*5));
 
-			//LOG("glOrtho values %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
+			LOG("glOrtho values %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
 
 			if(symphony) {
 				GLdouble totalWidth = right - left;
 				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
 				GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
+
 				GLdouble startingPoint = left + (displayNumber * (singleWidth + bezelWidth));
 								 //if ratio is correct, do nothing
 				if(right/bottom == (double) sizeX/sizeY || right/top == (double) sizeX/sizeY)
@@ -239,6 +252,12 @@ bool ExecModule::process(list<Instruction> &list)
 				GLdouble totalWidth = fW * 2;
 				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
 				GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
+				bool noBezels = false;
+				if(noBezels) {
+					singleWidth = totalWidth * ((SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) / SYMPHONY_SCREEN_TOTAL_WIDTH);
+					bezelWidth = 0;
+					
+				}
 				GLdouble startingPoint = -fW + (displayNumber * (singleWidth + bezelWidth));
 
 				glFrustum(startingPoint, startingPoint + singleWidth, -fH, fH, zNear, zFar);

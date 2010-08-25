@@ -80,8 +80,27 @@ void Client::createMulticastSocket()
 		setsockopt(multi_fd,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req_local, sizeof(group_source_req));
 
 		printf("listening to multicast group 232.1.1.1 on port 8991!\n");
+	    printf("ClusterGL: UDP buffer size is %d\n", bufferSize(SO_RCVBUF));
+	    printf("ClusterGL: UDP buffer size is %d\n", setBufferSize(SO_RCVBUF, 300000));
 
 }
+
+int Client::bufferSize(int buf)
+  {
+    int value = 0;
+    socklen_t size = sizeof(value);
+
+    getsockopt(multi_fd, SOL_SOCKET, buf,&value, &size);
+
+    return value;
+  }
+
+int Client::setBufferSize(int buf, int bytes)
+  {
+    setsockopt(multi_fd, SOL_SOCKET, buf, &bytes, sizeof(buf));
+
+    return bufferSize(buf);
+  }
 
 /*********************************************************
 	Create TCP Connection
@@ -226,7 +245,7 @@ int Client::readMulticastPacket(unsigned char *buf, size_t maxsize)
 	memcpy(buf+clientOffsetNumber, fullPacket+sizeof(multicast_header), multicastPacket.packetSize);
 
 	clientOffsetNumber += multicastPacket.packetSize;
-	//printf("got a packet with ret = %d, packetSize = %d\n", ret, clientPacket->packetSize);
+	//printf("got a packet with ret = %d, packetSize = %d\n", ret, multicastPacket.packetSize);
 	//printf("offset now: %d %d\n", clientOffsetNumber, clientFrameNumber);
 	
 	/* check if final packet */
@@ -302,7 +321,7 @@ void Client::sendTCP_NACK()
 
 int Client::writeData(void *buf, size_t count)
 {
-	//printf("sending: %d bytes of data\n", count);
+	printf("sending: %d bytes of data\n", count);
 	int remaining = count;
 	int ret = 0;
 	while(remaining > 0) {
