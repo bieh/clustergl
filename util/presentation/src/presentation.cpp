@@ -32,6 +32,8 @@ bool Presentation::init(vector<string> files){
 	return true;	
 }
 
+float rot = 0.0f;
+
 void Presentation::render(){
 
 	if(isTransition){
@@ -45,8 +47,11 @@ void Presentation::render(){
 
 		mSlides[iCurrentSlide]->bind();
 		
-		float h = 0.7f; //0.67f;
- 		float w = 1.4f; //0.93f;
+		float h = 0.7f + 0.03f; //0.67f;
+ 		float w = 1.4f + 0.03f; //0.93f;
+
+		rot += 0.04f;
+		glTranslatef(sinf(rot) * 0.025f, 0.0f, 0.0f);
 	
 		glBegin(GL_QUADS);
 			// Front Face

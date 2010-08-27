@@ -11,6 +11,7 @@
 bool bHasInit = false;
 bool profileApp = false;
 ProfileModule *profile = NULL;
+bool intercept = false;
 
 /********************************************************
 	Main Globals (Loaded from config file)
@@ -48,6 +49,9 @@ bool useRepeat;
 bool useSYMPHONYnodes[5];
 string addresses[5];
 
+uint32_t startTime = 0;
+uint32_t endTime = 0;
+
 /********************************************************
 	Application Object
 ********************************************************/
@@ -84,6 +88,7 @@ int App::run_shared()
 	}
 	init(true);
 	LOG("Loading modules for application intercept\n");
+	intercept = true;
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule()); //output OpenGL method calls to console
 	if(profileApp) {
@@ -176,7 +181,7 @@ time_t totalTime = 0, prevTime = 0;
 bool App::tick()
 {
 	totFrames++;				 //used to calculate when to SYNC
-
+/*
 	if (totalTime == 0) {		 // initlise time for calculating statistics
 		time(&totalTime);
 		time(&prevTime);
@@ -186,7 +191,7 @@ bool App::tick()
 	time(&curTime);
 	// Output FPS and BPS
 								 //maybe need more precision
-	if (curTime - prevTime>= 5) {
+	//if (curTime - prevTime>= 5) {
 		LOG("Last %ld Seconds:\n", curTime - prevTime);
 		// First calculate FPS
 		int FPS = 0;
@@ -195,10 +200,13 @@ bool App::tick()
 			FPS += m->frames;
 			m->frames = 0;
 		}
+		if(FPS > 0) {
 		LOG("ClusterGL2 Average FPS:\t\t\t%ld\n",
 			FPS/(curTime - prevTime));
+		}
+*/
 
-		// Now Calculate KBPS (Kbytes per second)
+	/*	// Now Calculate KBPS (Kbytes per second)
 		int bytes = 0;
 		int bytes2 = 0;
 		for(int i=0;i<(int)mModules.size();i++) {
@@ -216,7 +224,7 @@ bool App::tick()
 		}
 		time(&prevTime);
 		if(profileApp) profile->output();
-	}
+	//}*/
 
 	//initlize frames
 	if (thisFrame == NULL) {
@@ -274,6 +282,19 @@ bool App::tick()
 	}
 	thisFrame->clear();
 
+	/*endTime = SDL_GetTicks();
+	uint32_t diff = endTime - startTime;
+	int FPS = 0;
+	for(int i=0;i<(int)mModules.size();i++) {
+        Module *m = mModules[i];
+        FPS += m->frames;
+        m->frames = 0;
+    }
+        if(FPS > 0 && intercept) {
+        LOG("ClusterGL2 Average Time: %d %d %d FPS: %f\n", startTime, endTime, diff, 1000.0/diff);
+        }
+
+	startTime = SDL_GetTicks();*/
 	return true;
 }
 

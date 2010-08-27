@@ -187,7 +187,7 @@ bool ExecModule::process(list<Instruction> &list)
 			GLdouble nearVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*4));
 			GLdouble farVal = *((GLdouble*)(iter->args+ sizeof(GLdouble)*5));
 
-			LOG("glOrtho values %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
+			//LOG("glOrtho values %lf %lf %lf %lf %lf %lf\n", left, right, bottom, top, nearVal, farVal);
 
 			if(symphony) {
 				GLdouble totalWidth = right - left;

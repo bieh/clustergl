@@ -88,7 +88,6 @@ public:
 	Client();
 	void createMulticastSocket();
 	void createTCPSocket();
-	void sendTCP_ACK();
 	void sendTCP_NACK();
 	int sendTCP_DATA(void *data, size_t size);
 	int readMulticastPacket(unsigned char *buf, size_t count);
@@ -114,8 +113,7 @@ public:
 	bool flushDataWorker(uint32_t startingOffset, uint32_t endingOffest, int bufNum, int windowSize);
 	int readData(void *buf, size_t count);
 	int writeMulticastPacket(void *buf, size_t count, bool finalPacket, bool requireACK, int offset, uint32_t frame);
-	int readTCP_packet(int timeout, uint32_t expectedFrame);
-	bool readTCPPacket(void *buf, size_t count, int timeout);
+	int readTCP_packet(int timeout);
 	uint32_t checkACKList(int list);
 	bool checkDATAList();
 	int bufferSize(int buf);

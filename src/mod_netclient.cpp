@@ -33,7 +33,8 @@ NetCompressModule *compressor2;
 Server *server;
 
 
-const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
+const int sendBufferSize = 268435456;
+//const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iSendBufPos = 0;
 uint32_t bytesLeft = sendBufferSize;
 

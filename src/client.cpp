@@ -208,13 +208,13 @@ int Client::readMulticastPacket(unsigned char *buf, size_t maxsize)
 	multicast_header multicastPacket;
 
 	int ret=recv(multi_fd, fullPacket, MAX_PACKET_SIZE,0);
-//	printf("ret = %d \n", ret);
 	
 	memcpy(&multicastPacket, fullPacket, sizeof(multicast_header));
+
 	/* if the server is ahead a frame from us, PANIC! */
 	if(multicastPacket.frameNumber > clientFrameNumber) {
 		printf("frame behind! PANIC!\n");
-		sendTCP_NACK();
+		//sendTCP_NACK();
 		free(fullPacket);
 		return 0;
 	}
@@ -245,8 +245,6 @@ int Client::readMulticastPacket(unsigned char *buf, size_t maxsize)
 	memcpy(buf+clientOffsetNumber, fullPacket+sizeof(multicast_header), multicastPacket.packetSize);
 
 	clientOffsetNumber += multicastPacket.packetSize;
-	//printf("got a packet with ret = %d, packetSize = %d\n", ret, multicastPacket.packetSize);
-	//printf("offset now: %d %d\n", clientOffsetNumber, clientFrameNumber);
 	
 	/* check if final packet */
 	if(CHECK_BIT(multicastPacket.packetFlags, FINPOS)) {
@@ -254,13 +252,18 @@ int Client::readMulticastPacket(unsigned char *buf, size_t maxsize)
 	}
 	/* check if ACK needs to be sent */
 	if(CHECK_BIT(multicastPacket.packetFlags, RQAPOS)) {
-		sendTCP_ACK();
-		/* If this asks for an ACK, then send it. */
+		multicastPacket.offsetNumber += multicastPacket.packetSize;
+		//printf("sending ACK! Frame %d Offset %d\n", multicastPacket.frameNumber, multicastPacket.offsetNumber);
+		/* set flags */
+	    short flags = 1 << ACKPOS;
+
+		multicastPacket.packetFlags = flags;
+    	/* send it */
+	    write(tcp_fd, (const unsigned char *) &multicastPacket, sizeof(multicast_header));
 	}
 	free(fullPacket);
 
 	/* Return the amount of payload */
-//	printf("ret val: %d %d %d \n", ret, ret-sizeof(multicast_header), multicastPacket.packetSize); 
 	return multicastPacket.packetSize;
 }
 
@@ -268,29 +271,8 @@ int Client::readMulticastPacket(unsigned char *buf, size_t maxsize)
 	TCP Control messaging
 *********************************************************/
 
-void Client::sendTCP_ACK()
-{
-	printf("got: %d bytes, sending ACK for frame: %d!\n", clientOffsetNumber, clientFrameNumber);
-	
-	/* set flags */
-	short flags = 0;
-	flags |=  1 << ACKPOS;
-
-	multicast_header ACKheader;
-
-	ACKheader.packetFlags = flags;
-
-	/* fill in header values */
-	ACKheader.frameNumber = clientFrameNumber;
-	ACKheader.offsetNumber = clientOffsetNumber;
-
-	/* send it */
-	writeData(&ACKheader, sizeof(multicast_header));
-}
-
 void Client::sendTCP_NACK()
 {
-	
 	/* check that we're not spamming NACKS */
 	gettimeofday(&end, NULL);
 
@@ -300,7 +282,7 @@ void Client::sendTCP_NACK()
 	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
 	
 	if(mtime > 0) {
-		printf("sending NACK! frame %d offset: %d\n", clientFrameNumber, clientOffsetNumber);
+		//printf("sending NACK! frame %d offset: %d\n", clientFrameNumber, clientOffsetNumber);
 		/* set flags */
 		short flags = 0;
 		flags |=  1 << NACKPOS;
@@ -311,9 +293,9 @@ void Client::sendTCP_NACK()
 		/* fill in header values */
 		NACKheader.frameNumber = clientFrameNumber;
 		NACKheader.offsetNumber = clientOffsetNumber;
-
+		
 		/* send it */
-		writeData(&NACKheader, sizeof(multicast_header));
+		write(tcp_fd, &NACKheader, sizeof(multicast_header));
 
 		gettimeofday(&start, NULL);
 	}
@@ -321,14 +303,15 @@ void Client::sendTCP_NACK()
 
 int Client::writeData(void *buf, size_t count)
 {
-	printf("sending: %d bytes of data\n", count);
+	//printf("writing data, size: %d\n", count);
+	int value;
+	memcpy(&value, buf, sizeof(int));
+	//printf("data contents: %d\n", value);
 	int remaining = count;
 	int ret = 0;
 	while(remaining > 0) {
-	ret = write(tcp_fd, (const unsigned char *) buf+count-remaining, remaining);
-	remaining -= ret;
-	//printf("sent: %d!\n", ret);
+		ret = write(tcp_fd, (const unsigned char *) buf+count-remaining, remaining);
+		remaining -= ret;
 	}
 	return count;
 }
-

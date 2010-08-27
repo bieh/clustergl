@@ -26,7 +26,8 @@ NetCompressModule *compressor;
 Client *client;
 int prevInstruction = 0;
 
-const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
+const int recieveBufferSize = 268435456;
+//const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iRecieveBufPos = 0;
 uint32_t bytesRemaining = 0;;
 
