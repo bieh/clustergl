@@ -9,16 +9,32 @@ bool Presentation::init(vector<string> files){
 	for(int i=0;i<(int)files.size();i++){
 			
 		//LOG("loading '%s'\n", files[i].c_str());
+
+		string thumbFile = files[i];
+
+		//thumbnail is in a 'thumbs' directory
+		//man, c++ is annoying to do this in
+		int r = thumbFile.rfind("/");
+		if(r == string::npos){ r = 2; thumbFile = "./" + thumbFile; }
+		thumbFile.replace(r, 1, "/thumbs/");
+
+		//LOG("thumb: %s, %s\n", files[i].c_str(), thumbFile.c_str());
 	
-		Texture *t = new Texture(files[i]);
+		Texture *thumb = new Texture(thumbFile);
 		
-		if(t->isLoaded()){
+		if(thumb->isLoaded()){
+
+		    Slide *s = new Slide();
+		    s->mThumb = thumb;
+		    s->mFull = NULL;
+		    s->mFullFilename = files[i];
+		    s->mThumbFilename = thumbFile;
 		
-			mSlides.push_back(t);	
-			LOG("Loaded slide '%s'\n", files[i].c_str());
+			mSlides.push_back(s);	
+			LOG("Loaded thumb '%s'\n", thumbFile.c_str());
 		}else{
-			ERR("Failed to load slide '%s'\n", files[i].c_str());
-			delete t;
+			ERR("Failed to load slide '%s'\n", thumbFile.c_str());
+			delete thumb;
 			return false;
 		}
 	
@@ -32,7 +48,35 @@ bool Presentation::init(vector<string> files){
 	return true;	
 }
 
-float rot = 0.0f;
+void Presentation::render2D(){
+    if(isTransition){
+
+    }else{
+
+        Slide *s = mSlides[iCurrentSlide];
+
+        if(!s->mFull || !s->mFull->isLoaded()){
+            LOG("need to load %d\n", iCurrentSlide);
+            if(!s->loadFull()){
+                LOG("Failed to load full texture!\n");
+                return;
+            }
+        }
+    
+		s->mFull->bind();	
+
+		float w = 840;
+		float h = 420;	
+	
+		glBegin(GL_QUADS);
+			// Front Face
+			glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);	// Point 1 (Front)
+			glTexCoord2f(1.0f, 0.0f); glVertex2f(w, 0);	// Point 2 (Front)
+			glTexCoord2f(1.0f, -1.0f); glVertex2f(w,  h);	// Point 3 (Front)
+			glTexCoord2f(0.0f, -1.0f); glVertex2f(0,  h);	// Point 4 (Front)
+		glEnd();
+	}
+}
 
 void Presentation::render(){
 
@@ -41,26 +85,6 @@ void Presentation::render(){
 		transitionInit = false;
 	}else{
 		
-		gluLookAt(	0, 0, 1, 
-				0, 0, 0, 
-				0, 1, 0	);
-
-		mSlides[iCurrentSlide]->bind();
-		
-		float h = 0.7f + 0.03f; //0.67f;
- 		float w = 1.4f + 0.03f; //0.93f;
-
-		rot += 0.04f;
-		glTranslatef(sinf(rot) * 0.025f, 0.0f, 0.0f);
-	
-		glBegin(GL_QUADS);
-			// Front Face
-			glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
-			glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
-			glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
-			glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
-			glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
-		glEnd();
 	}
 }
 

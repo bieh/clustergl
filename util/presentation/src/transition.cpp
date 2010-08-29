@@ -1,5 +1,30 @@
 #include "main.h"
 
+Slide::Slide(){
+    mFull = NULL;
+    mThumb = NULL;
+}
+
+bool Slide::loadFull(){
+        
+	Texture *full = new Texture(mFullFilename);
+
+	if(!full || !full->isLoaded()){
+        return false;
+	}
+	mFull = full;
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
 void Presentation::doSimpleTransition(bool init){
 
 	static float fZoom = 1.0f;
@@ -12,6 +37,7 @@ void Presentation::doSimpleTransition(bool init){
 		x = iCurrentSlide * 3;
 		xTarget = x + 3;
 		xVel = 0.0f;
+		fZoomVel = 0.1f;
 	}
 	
 	gluLookAt(	x, 0, fZoom, 
@@ -35,19 +61,18 @@ void Presentation::doSimpleTransition(bool init){
 	
 	if(fZoom < 1.0f){
 		fZoom = 1.0f;
-		fZoomVel = 0.1f;
+		fZoomVel = 0.0f;
 		isTransition = false;
-	}
-	
+	}	
 	
 	glPushMatrix();
 	
 	for(int i=0;i<(int)mSlides.size();i++){	
 	
-		mSlides[i]->bind();
+		mSlides[i]->mThumb->bind();
 		
-		float h = 1.0f; //0.67f;
-		float w = 1.0f; //0.93f;
+		float h = 0.7f;
+		float w = 1.4f;
 		
 		glTranslatef(3, 0, 0);
 	
