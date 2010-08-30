@@ -35,6 +35,7 @@ long mtime, seconds, useconds;
 
 Client::Client()
 {
+	mtime = 99999;
 	createMulticastSocket();
 	createTCPSocket();
 }
@@ -183,7 +184,7 @@ bool Client::pullData(void)
 	//	printf("returned!\n");
 	}
 	offset=0;
-	fprintf(stderr,"Frame: %d Size: %d, clientOffsetNumber %d\n", clientFrameNumber, length, clientOffsetNumber);
+//	fprintf(stderr,"Frame: %d Size: %d, clientOffsetNumber %d\n", clientFrameNumber, length, clientOffsetNumber);
 	return true;
 }
 
@@ -280,9 +281,9 @@ void Client::sendTCP_NACK()
 	useconds = end.tv_usec - start.tv_usec;
 
 	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
-	
-	if(mtime > 0) {
-		//printf("sending NACK! frame %d offset: %d\n", clientFrameNumber, clientOffsetNumber);
+	printf("trying to send a NACK: %d\n", mtime);	
+	if(mtime > 100) {
+		printf("sending NACK! frame %d offset: %d\n", clientFrameNumber, clientOffsetNumber);
 		/* set flags */
 		short flags = 0;
 		flags |=  1 << NACKPOS;

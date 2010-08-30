@@ -13267,7 +13267,17 @@ void EXEC_gluLoadSamplingMatrices(byte *commandbuf)
 //1526
 void EXEC_gluLookAt(byte *commandbuf)
 {
-	LOG("Called unimplemted stub gluLookAt!\n");
+	LOG("Called untested stub gluLookAt!\n");
+   /* GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
+	GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
+	GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
+	GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
+	GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
+	GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
+	GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
+	GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
+*/
+    //glDeformationMap3fSGIX(*target, *u1, *u2, *ustride, *uorder, *v1, *v2, *vstride, *vorder, *w1, *w2, *wstride, *worder, (const GLfloat *)popBuf());
 	//(GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble centerX, GLdouble centerY, GLdouble centerZ, GLdouble upX, GLdouble upY, GLdouble upZ)
 }
 

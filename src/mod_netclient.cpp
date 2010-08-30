@@ -32,7 +32,6 @@ int outgoingSize = 0;
 NetCompressModule *compressor2;
 Server *server;
 
-
 const int sendBufferSize = 268435456;
 //const int sendBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iSendBufPos = 0;
@@ -395,7 +394,6 @@ int NetClientModule::myWrite(void* buf, long unsigned nByte)
 
 void NetClientModule::sendBuffer()
 {
-
 	if(iSendBufPos > 0) {
 		if(usingSendCompression) {
 			//create room for new compressed buffer

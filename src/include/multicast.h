@@ -118,5 +118,5 @@ public:
 	bool checkDATAList();
 	int bufferSize(int buf);
 	int setBufferSize(int buf, int bytes);
-
+	void sendPulsePackets(void);
 };

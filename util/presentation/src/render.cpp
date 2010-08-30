@@ -2,6 +2,8 @@
 
 void Application::render(){
 
+	//LOG("2\n");
+
 	mSurface.beginRender();
 		
 	mPresentation.render();

@@ -49,6 +49,8 @@ bool Presentation::init(vector<string> files){
 	
 	iCurrentSlide = 0;
 	isTransition = false;
+
+	mTransitions.clear();
 	
 	//set up transitions
 	mTransitions.push_back(new HitInFace());
@@ -164,12 +166,14 @@ void Presentation::next(){
 		iCurrentSlide = 0;
 	}
 	
-	LOG("Next! (%d)\n", iCurrentSlide);
+	LOG("Next! (%d, %d)\n", iCurrentSlide, mTransitions.size());
 	
 	mCurrentTransition = mTransitions[0];
 	
 	isTransition = true;
 	transitionInit = true;
+
+	LOG("1\n");
 }
 
 void Presentation::prev(){

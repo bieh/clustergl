@@ -42,6 +42,14 @@ struct buffer_t {
 	unsigned int length;
 };
 
+struct retransmit_packets {
+	unsigned char buffer[MAX_PACKET_SIZE];
+	unsigned int length;
+	unsigned int frame;
+}
+/* buffer storage for retransmitting the last packet */
+retransmit_packets[2];
+
 /* buffer storage and info */
 buffer_t storedBuffers[2];
 int curBuffer = 1;
@@ -215,6 +223,26 @@ void Server::connectTCPSockets()
 	write
 *********************************************************/
 
+
+void Server::sendPulsePackets() {
+	if(retransmit_packets[0].frame < retransmit_packets[1].frame) {
+	sendto(multicastSocket, retransmit_packets[0].buffer, retransmit_packets[0].length, 0,
+          (struct sockaddr*)group,sizeof(struct sockaddr_in)
+          );
+    sendto(multicastSocket, retransmit_packets[1].buffer, retransmit_packets[1].length, 0,
+          (struct sockaddr*)group,sizeof(struct sockaddr_in)
+          );
+	}
+	else {
+    sendto(multicastSocket, retransmit_packets[1].buffer, retransmit_packets[1].length, 0,
+          (struct sockaddr*)group,sizeof(struct sockaddr_in)
+          );
+    sendto(multicastSocket, retransmit_packets[0].buffer, retransmit_packets[0].length, 0,
+          (struct sockaddr*)group,sizeof(struct sockaddr_in)
+          );
+    }
+}
+
 int Server::writeData(void *buf, size_t count)
 {
 
@@ -266,7 +294,7 @@ bool Server::flushDataWorker(uint32_t startingOffset, uint32_t endingOffest, int
 	//printf("flushDataWorker: %d %d\n", startingOffset, storedBuffers[bufNum].length);
 	int packets = 0;
 	while(startingOffset < storedBuffers[bufNum].length){
-			//if(packets != 20) {
+			if(packets != 20) {
 				packets++;
 				int to_write = (int)storedBuffers[bufNum].length-(int)startingOffset < MAX_CONTENT 
 					? (int)storedBuffers[bufNum].length-startingOffset 
@@ -282,14 +310,14 @@ bool Server::flushDataWorker(uint32_t startingOffset, uint32_t endingOffest, int
 	
 						startingOffset += to_write;
 						serverOffsetNumber = startingOffset;
-		//	}
-		//	else {
-		//		while(checkACKList(bufNum&1) < MAX_CONTENT * 10) {
-					//printf("sent 20 packets! check for ACKS!\n");
-		//			readTCP_packet(25000);
-		//		}
-		//		packets++;
-		//	}		
+			}
+			else {
+				while(checkACKList(bufNum&1) < MAX_CONTENT * 10) {
+			//printf("sent 20 packets! check for ACKS!\n");
+					readTCP_packet(25000);
+				}
+				packets++;
+			}		
 		}
 	return true; /* Success */
 }
@@ -323,6 +351,11 @@ int Server::writeMulticastPacket(void *buf, size_t count, bool finalPacket, bool
 	}
 	if(sendVal != (int) count+sizeof(multicast_header)) {
 		printf("sendto kind of failing: %d %d\n", sendVal, count+sizeof(multicast_header));
+	}
+	if(finalPacket) {
+		memcpy(retransmit_packets[frame&1].buffer, fullPacket, count+sizeof(multicast_header));
+		retransmit_packets[frame&1].length = count+sizeof(multicast_header);
+		retransmit_packets[frame&1].frame = frame;
 	}
 	free(fullPacket);
 }
@@ -406,7 +439,8 @@ int Server::readTCP_packet(int timeout) {
 		printf("select error!\n");
 	}
 	else if(valReady == 0) {
-		printf("select timeout!\n");
+		printf("select timeout: sending pulse Packets!\n");
+		sendPulsePackets();
 	}
 	else {
 		//printf("%d socket(s) to read from! timeout: %d\n", valReady, mytime.tv_usec);
@@ -428,7 +462,9 @@ int Server::readTCP_packet(int timeout) {
 				if(CHECK_BIT(serverPacket->packetFlags, NACKPOS)) {
 					fprintf(stderr,"got a NACK! from %d for frame: %d, offset %d\n", i, serverPacket->frameNumber, serverPacket->offsetNumber);
 					if(framesStored[0] == serverPacket->frameNumber)
-						flushDataWorker(serverPacket->offsetNumber, storedBuffers[curBuffer].length, 0, 30);
+						flushDataWorker(serverPacket->offsetNumber, storedBuffers[0].length, 0, 30);
+					else
+						flushDataWorker(serverPacket->offsetNumber, storedBuffers[1].length, 1, 30);
 				}
 				else if(CHECK_BIT(serverPacket->packetFlags, ACKPOS)){
 					//printf("got an ACK! from: %d frame: %d, offset: %d\n", i, serverPacket->frameNumber, serverPacket->offsetNumber);

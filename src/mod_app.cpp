@@ -8,9 +8,9 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
-//#define  NOHACK true
+#define  NOHACK true
 //#define  GLXFULL true
-//#define  GLUFULL true
+#define  GLUFULL true
 
 extern App *theApp;
 
@@ -2445,7 +2445,7 @@ extern "C" GLenum glGetError(){
 	return ret;
 }
 
-#ifdef NOHACK
+//#ifdef NOHACK
 
 //262
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
@@ -2461,7 +2461,7 @@ extern "C" void glGetIntegerv(GLenum pname, GLint * params){
 	waitForReturn();
 }
 
-#endif
+//#endif
 
 //264
 extern "C" void glGetLightfv(GLenum light, GLenum pname, GLfloat * params){
@@ -10741,10 +10741,23 @@ extern "C" void  gluLoadSamplingMatrices (GLUnurbs* nurb, const GLfloat *model, 
 LOG("Called unimplemted stub gluLoadSamplingMatrices!\n");
 }
 
+#ifdef abc
 //1526
 extern "C" void  gluLookAt (GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble centerX, GLdouble centerY, GLdouble centerZ, GLdouble upX, GLdouble upY, GLdouble upZ) {
-LOG("Called unimplemted stub gluLookAt!\n");
+LOG("Called untested stub gluLookAt!\n");
+    pushOp(1526);
+    pushParam(eyeX);
+    pushParam(eyeY);
+    pushParam(eyeZ);
+    pushParam(centerX);
+	pushParam(centerY);
+	pushParam(centerZ);
+	pushParam(upX);
+	pushParam(upY);
+	pushParam(upZ);
+
 }
+#endif
 
 //1527
 extern "C" GLUnurbs* gluNewNurbsRenderer (void) {
@@ -11157,11 +11170,12 @@ extern "C" const char *glXQueryServerString( Display *dpy, int screen, int name 
 	return (*_glXQueryServerString) (dpy, screen, name);
 
 }
-
+#if abc
 //1620
 extern "C" const char *glXGetClientString( Display *dpy, int name ) {
 LOG("Called unimplemted stub glXGetClientString!\n");
 }
+#endif
 
 // GLX 1.2 and later
 //1621
@@ -11257,7 +11271,7 @@ LOG("Called unimplemted stub glXGetSelectedEvent!\n");
 
 //1639
 extern "C" __GLXextFuncPtr glXGetProcAddressARB (const GLubyte * str) {
-	printf("finding: %s\n", str);
+	//printf("finding: %s\n", str);
 	      char *path = NULL;
 	      size_t size = 0;
 	      path = getcwd(path,size);
