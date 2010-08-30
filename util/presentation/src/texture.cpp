@@ -20,7 +20,7 @@ bool Texture::load(string filename, int flags){
 					
 	iSizeX = ilGetInteger(IL_IMAGE_WIDTH);
 	iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
-		
+	
 	//if(flags != TEXTURE_NO_GL){	
 						
 		mHandle = ilutGLBindTexImage(); //
@@ -30,6 +30,8 @@ bool Texture::load(string filename, int flags){
 			return false;
 		}
 	//}	
+	
+	ilDeleteImages(1, &iDevilID);
 	
 	bIsLoaded = true;
 		
@@ -42,11 +44,16 @@ void Texture::bind(){
 		LOG("Tried to bind a null texture!\n");
 		return;
 	}	
+	
+	
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, mHandle);
+	
+	
 }
 
 void Texture::destroy(){
 	glDeleteTextures(1, &mHandle);
+	bIsLoaded = false;
 }

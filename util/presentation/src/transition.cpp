@@ -22,23 +22,20 @@ bool Slide::loadFull(){
 
 
 
-
-
-
-void Presentation::doSimpleTransition(bool init){
-
-	static float fZoom = 1.0f;
-	static float fZoomVel = 0.1f;
-	static float x = 0.0f;
-	static float xVel = 0.0f;
-	static float xTarget = 0.0f;
+bool HitInFace::init(){
+	x = iCurrentSlide * 5;
+	xTarget = x + 5;
+	xVel = 0.0f;
+	fZoomVel = 0.1f;
+	fZoom = 1.1f;
 	
-	if(init){
-		x = iCurrentSlide * 3;
-		xTarget = x + 3;
-		xVel = 0.0f;
-		fZoomVel = 0.1f;
-	}
+	LOG("Started transition\n");
+	
+	return true;
+}
+
+
+bool HitInFace::render(){
 	
 	gluLookAt(	x, 0, fZoom, 
 				x, 0, 0, 
@@ -62,7 +59,8 @@ void Presentation::doSimpleTransition(bool init){
 	if(fZoom < 1.0f){
 		fZoom = 1.0f;
 		fZoomVel = 0.0f;
-		isTransition = false;
+		LOG("Ended transition\n");
+		return false; //finished!
 	}	
 	
 	glPushMatrix();
@@ -71,10 +69,10 @@ void Presentation::doSimpleTransition(bool init){
 	
 		mSlides[i]->mThumb->bind();
 		
-		float h = 0.7f;
-		float w = 1.4f;
+		float h = 0.74f * 1.14f;
+		float w = 1.52f * 1.08f;
 		
-		glTranslatef(3, 0, 0);
+		glTranslatef(5, 0, 0);
 	
 		glBegin(GL_QUADS);
 			// Front Face
@@ -87,5 +85,7 @@ void Presentation::doSimpleTransition(bool init){
 	}
 	
 	glPopMatrix();
+	
+	return true; //keep going
 
 }

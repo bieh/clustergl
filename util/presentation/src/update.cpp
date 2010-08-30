@@ -25,5 +25,9 @@ void Application::onKeyEvent(int keycode, int event){
 	if(keycode == SDLK_SPACE){
 		mPresentation.next();
 	}
+	
+	if(keycode == SDLK_p){
+		mPresentation.prev();
+	}
 }
 
