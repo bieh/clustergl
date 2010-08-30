@@ -102,7 +102,7 @@ void Presentation::render2D(){
         
         if(allowCache && !didLoad){
 		    
-		    if(!n->mFull || !n->mFull->isLoaded()){
+		    if(n && (!n->mFull || !n->mFull->isLoaded())){
 		        LOG("caching %d\n", iCurrentSlide + 1);
 		        if(!n->loadFull()){
 		            LOG("Failed to load full texture!\n");
