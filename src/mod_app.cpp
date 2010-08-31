@@ -2446,12 +2446,12 @@ extern "C" GLenum glGetError(){
 }
 
 //#ifdef NOHACK
-
+#ifdef abc
 //262
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 	LOG("Called unimplemted stub GetFloatv!\n");
 }
-
+#endif
 //263
 extern "C" void glGetIntegerv(GLenum pname, GLint * params){
 	LOG("Called untested stub GetIntegerv!\n");

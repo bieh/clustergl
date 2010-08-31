@@ -17,8 +17,8 @@
 #include <SDL/SDL.h>
 
 /* screen width, height, and bit depth */
-#define SCREEN_WIDTH  640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH  8880
+#define SCREEN_HEIGHT 4560
 #define SCREEN_BPP     16
 
 /* Define our booleans */
@@ -58,7 +58,7 @@ int resizeWindow( int width, int height )
     glLoadIdentity( );
 
     /* Set our perspective */
-    gluPerspective( 45.0f, ratio, 0.1f, 100.0f );
+    gluPerspective( 45.0f, ratio, 0.9f, 100.0f );
 
     /* Make sure we're chaning the model view and not the projection */
     glMatrixMode( GL_MODELVIEW );
@@ -131,7 +131,7 @@ int drawGLScene( GLvoid )
 
     /* Move Left 1.5 Units And Into The Screen 6.0 */
     glLoadIdentity();
-    glTranslatef( -1.5f, 0.0f, -6.0f );
+    glTranslatef( -1.5f, 0.0f, -4.0f );
 
     /* Rotate The Triangle On The Y axis ( NEW ) */
     glRotatef( rtri, 0.0f, 1.0f, 0.0f );
@@ -168,7 +168,7 @@ int drawGLScene( GLvoid )
 
     /* Move Right 3 Units */
     glLoadIdentity( );
-    glTranslatef( 1.5f, 0.0f, -6.0f );
+    glTranslatef( 1.5f, 0.0f, -4.0f );
 
     /* Rotate The Quad On The X axis ( NEW ) */
     glRotatef( rquad, 1.0f, 0.0f, 0.0f );

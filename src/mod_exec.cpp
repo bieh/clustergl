@@ -22,6 +22,8 @@ extern int offsetX;
 extern int offsetY;
 extern float scaleX;
 extern float scaleY;
+extern bool glFrustumUsage;
+extern bool bezelCompensation;
 
 /*********************************************************
 	Execution Globals
@@ -98,8 +100,9 @@ bool ExecModule::makeWindow()
 	height = dpy->current_h;	 //get screen height
 
 	// if the app res is less than the current screen size
-	if (sizeX < width && sizeY<height)
+	if (sizeX < width && sizeY<height) {
 		width = sizeX, height = sizeY;
+	}
 
 	//get a SDL surface
 	SDL_Surface *surface = SDL_SetVideoMode(width, height, 32, videoFlags );
@@ -152,15 +155,20 @@ bool ExecModule::process(list<Instruction> &list)
 		//check if the message requires special attention (adjusting)
 		//else use standard process calling methods below
 		if (iter->id== 305) {	 //glViewPort
-
-			//no nothing, will be handled later (in gluPerpespective or glLoadMatrix)
-			GLint x = *((GLint*)iter->args);
-			GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
-			GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
-			GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
-
-			//LOG("glViewPort values %d %d %d %d\n", x, y, w, h);
-			//glViewport(x, y, w, h);
+			LOG("EXEC Frustum %d, bezel %d\n", glFrustumUsage, bezelCompensation);
+			if(!glFrustumUsage) {
+				//no nothing, will be handled later (in gluPerpespective or glLoadMatrix)
+				GLint x = *((GLint*)iter->args);
+				GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
+				GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
+				GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
+				if(bezelCompensation) {
+					glViewport((-offsetX),0, 8880, 4560);
+				}
+				else {
+					glViewport((-offsetX*1680.0)/1800.0,0, 8880, 4560);
+				}
+			}
 
 		}						 //glScissor
 		else if (iter->id== 176) {
@@ -214,63 +222,64 @@ bool ExecModule::process(list<Instruction> &list)
 
 		}						 //gluPerspective
 		else if (iter->id == 1539) {
+			if(glFrustumUsage) {
+				//read original values from the instruction
+				GLdouble fovy = *((GLdouble*)iter->args);
+				GLdouble aspect = *((GLdouble*)(iter->args+ sizeof(GLdouble)));
+				GLdouble zNear = *((GLdouble*)(iter->args+ sizeof(GLdouble)*2));
+				GLdouble zFar = *((GLdouble*)(iter->args+ sizeof(GLdouble)*3));
 
-			//read original values from the instruction
-			GLdouble fovy = *((GLdouble*)iter->args);
-			GLdouble aspect = *((GLdouble*)(iter->args+ sizeof(GLdouble)));
-			GLdouble zNear = *((GLdouble*)(iter->args+ sizeof(GLdouble)*2));
-			GLdouble zFar = *((GLdouble*)(iter->args+ sizeof(GLdouble)*3));
+				//LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
+	
+				/*      diagram to explain how frustum works (without bezels, ignoring fov)
+					(-1,-1)    (-0.6,-1)  (-0.2,-1)  (0.2,-1)   (0.6,-1)  (1,-1)
+					~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					|---------||---------||---------||---------||---------|
+					~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+					(-1,1)						      (1,1)
+				*/
+	
+				const GLdouble pi = 3.1415926535897932384626433832795;
+				GLdouble fW, fH;
+	
+				if(symphony) {
+					//calculate height, then adjust according to how different the
+					//programs aspect ratio and our ratio is
+					//fW and fH are the equivalent glFrustum calculations using the gluPerspective values
+					fH = tan( (fovy / 360.0) * pi ) * scaleY * zNear * (1.0/((SYMPHONY_SCREEN_TOTAL_WIDTH/SYMPHONY_SCREEN_TOTAL_HEIGHT) / aspect));
+					fW = tan( (fovy / 360.0) * pi ) * scaleX * zNear * aspect;
+	
+					GLdouble totalWidth = fW * 2;
+					GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
+					GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
+					if(!bezelCompensation) {
+						singleWidth = totalWidth * ((SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) / SYMPHONY_SCREEN_TOTAL_WIDTH);
+						bezelWidth = 0;					
+					}
+					GLdouble startingPoint = -fW + (displayNumber * (singleWidth + bezelWidth));
 
-			//LOG("gluPerspective values %lf %lf %lf %lf\n", fovy, aspect, zNear, zFar);
-
-			/*      diagram to explain how frustum works (without bezels, ignoring fov)
-				(-1,-1)    (-0.6,-1)  (-0.2,-1)  (0.2,-1)   (0.6,-1)  (1,-1)
-				~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-				|---------||---------||---------||---------||---------|
-				|---------||---------||---------||---------||---------|
-				|---------||---------||---------||---------||---------|
-				|---------||---------||---------||---------||---------|
-				|---------||---------||---------||---------||---------|
-				|---------||---------||---------||---------||---------|
-				|---------||---------||---------||---------||---------|
-				|---------||---------||---------||---------||---------|
-				|---------||---------||---------||---------||---------|
-				~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-				(-1,1)						      (1,1)
-			*/
-
-			const GLdouble pi = 3.1415926535897932384626433832795;
-			GLdouble fW, fH;
-
-			if(symphony) {
-				//calculate height, then adjust according to how different the
-				//programs aspect ratio and our ratio is
-				//fW and fH are the equivalent glFrustum calculations using the gluPerspective values
-				fH = tan( (fovy / 360.0) * pi ) * scaleY * zNear * (1.0/((SYMPHONY_SCREEN_TOTAL_WIDTH/SYMPHONY_SCREEN_TOTAL_HEIGHT) / aspect));
-				fW = tan( (fovy / 360.0) * pi ) * scaleX * zNear * aspect;
-
-				GLdouble totalWidth = fW * 2;
-				GLdouble singleWidth = totalWidth * (SYMPHONY_SCREEN_WIDTH / SYMPHONY_SCREEN_TOTAL_WIDTH);
-				GLdouble bezelWidth = totalWidth * (SYMPHONY_SCREEN_GAP / SYMPHONY_SCREEN_TOTAL_WIDTH);
-				bool noBezels = false;
-				if(noBezels) {
-					singleWidth = totalWidth * ((SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) / SYMPHONY_SCREEN_TOTAL_WIDTH);
-					bezelWidth = 0;
-					
+					glFrustum(startingPoint, startingPoint + singleWidth, -fH, fH, zNear, zFar);
 				}
-				GLdouble startingPoint = -fW + (displayNumber * (singleWidth + bezelWidth));
-
-				glFrustum(startingPoint, startingPoint + singleWidth, -fH, fH, zNear, zFar);
+				else {
+					fH = tan( (fovy / 360.0) * pi ) * scaleY * zNear * (1.0/((sizeX * 1.0/sizeY) / aspect));
+					fW = tan( (fovy / 360.0) * pi ) * scaleX * zNear * aspect;
+	
+					glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+	
+					//gluPerspective(fovy, aspect, zNear, zFar);
+				}
 			}
 			else {
-				fH = tan( (fovy / 360.0) * pi ) * scaleY * zNear * (1.0/((sizeX * 1.0/sizeY) / aspect));
-				fW = tan( (fovy / 360.0) * pi ) * scaleX * zNear * aspect;
-
-				glFrustum(-fW, fW, -fH, fH, zNear, zFar);
-
-				//gluPerspective(fovy, aspect, zNear, zFar);
+				gluPerspective(45.0,8880.0/4560.0, 0.9f, 100.0f);
 			}
-
 		}						 //glLoadMatrixf
 		else if (iter->id == 291) {
 			GLfloat * m = (GLfloat *)iter->buffers[0].buffer;

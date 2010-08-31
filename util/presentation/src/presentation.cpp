@@ -178,6 +178,9 @@ void Presentation::next(){
 
 void Presentation::prev(){
 	iCurrentSlide--;
+
+	if(iCurrentSlide < 0) iCurrentSlide = mSlides.size() - 1;
+
 	LOG("Prev! (%d)\n", iCurrentSlide);
 	isTransition = false;
 }

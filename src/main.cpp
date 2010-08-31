@@ -31,10 +31,11 @@ float scaleX;
 float scaleY;
 int fakeWindowX;
 int fakeWindowY;
+bool glFrustumUsage;
+bool bezelCompensation;
 
 /* connection */
 //string addresses[5];
-string dnNumber;
 int port;
 bool multicast;
 char * multicastServer;
@@ -62,11 +63,12 @@ int App::run(int argc, char **argv)
 		fprintf(stderr,"usage: cgl <SYMPHONY number. Use 0 for testing, 1-5 for SYMPHONY>\n");
 		exit(0);
 	}
-	dnNumber = argv[1];
+	LOG("Console DNnumber: %s\n", argv[1]);
+	int dnNumber = atoi(argv[1]);
 	if(bHasInit) {
 		return 1;
 	}
-	init(false);
+	init(false, dnNumber);
 
 	LOG("Loading modules for network server and renderer output on port: %d\n", port);
 	mModules.push_back(new NetSrvModule());
@@ -86,7 +88,7 @@ int App::run_shared()
 	if(bHasInit) {
 		return 1;
 	}
-	init(true);
+	init(true, -1);
 	LOG("Loading modules for application intercept\n");
 	intercept = true;
 	mModules.push_back(new AppModule(""));
@@ -103,7 +105,7 @@ int App::run_shared()
 	return 0;
 }
 
-void App::init(bool shared)
+void App::init(bool shared, int dn)
 {
 	//load values in from config file
 	cfg_opt_t opts[] = {
@@ -118,6 +120,8 @@ void App::init(bool shared)
 		CFG_SIMPLE_INT((char *)("offsetY"), &offsetY),
 		CFG_SIMPLE_INT((char *)("fakeWindowX"), &fakeWindowX),
 		CFG_SIMPLE_INT((char *)("fakeWindowY"), &fakeWindowY),
+		CFG_SIMPLE_BOOL((char *)("bezelCompensation"), &bezelCompensation),
+		CFG_SIMPLE_BOOL((char *)("glFrustumUsage"), &glFrustumUsage),
 		CFG_SIMPLE_INT((char *)("port"), &port),
 		CFG_SIMPLE_BOOL((char *)("multicast"), &multicast),
 		CFG_SIMPLE_STR((char *)("multicastServer"), &multicastServer),
@@ -134,6 +138,7 @@ void App::init(bool shared)
 
 	cfg = cfg_init(opts, CFGF_NONE);
 	cfg_parse(cfg, "config.conf");
+
 	//process lists in the config file
 	for(uint32_t i = 0; i < cfg_size(cfg, "SYMPHONYnodes"); i++)
 		useSYMPHONYnodes[i] = cfg_getnbool(cfg, "SYMPHONYnodes", i);
@@ -150,12 +155,10 @@ void App::init(bool shared)
 	//adjust offset and size values for symphony display nodes
 	// (saves having 5 unique config files)
 	if(symphony) {
-		int dn = atoi(dnNumber.c_str());
 		offsetX = (int) (SYMPHONY_SCREEN_WIDTH + SYMPHONY_SCREEN_GAP) * (dn - 1);
 		sizeX = sizeSYMPHONYX;
 		sizeY = sizeSYMPHONYY;
 	}
-
 	LOG("\n");
 	LOG("**********************************************\n");
 	LOG("                 ClusterGL(%s)\n", shared ? "intercept" : "renderer");
