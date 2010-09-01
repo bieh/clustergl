@@ -29,5 +29,9 @@ void Application::onKeyEvent(int keycode, int event){
 	if(keycode == SDLK_p){
 		mPresentation.prev();
 	}
+
+	if(keycode == SDLK_r){
+        mPresentation.toggleReadabilityMovement();
+	}
 }
 

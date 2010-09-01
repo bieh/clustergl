@@ -1,6 +1,6 @@
 
 /*******************************************************************************
-						Holds slides
+						transitions
 *******************************************************************************/
 class Transition{
 public:
@@ -19,6 +19,39 @@ public:
 	bool init();
 	bool render();
 };
+
+class Collapse : public Transition{
+
+	int stage;
+	float size;
+public:
+	bool init();
+	bool render();
+};
+
+class Rotate : public Transition{
+
+	int stage;
+	float size;
+
+	int AX, AY, AZ;
+public:
+
+    Rotate(int x, int y, int z);
+
+	bool init();
+	bool render();
+};
+
+class Fade : public Transition{
+
+	int stage;
+	float size;
+public:
+	bool init();
+	bool render();
+};
+
 
 
 /*******************************************************************************
@@ -68,6 +101,9 @@ public:
 	Transition *mCurrentTransition;
 	
 	bool allowCache;
+	bool bUseReadabilityMovement;
+
+	bool toggleReadabilityMovement();
 };
 
 //hacky - these are globals so transitions can access em

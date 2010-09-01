@@ -19,7 +19,7 @@ bool Presentation::init(vector<string> files){
 
 		//thumbnail is in a 'thumbs' directory
 		//man, c++ is annoying to do this in
-		int r = thumbFile.rfind("/");
+		unsigned int r = thumbFile.rfind("/");
 		if(r == string::npos){ r = 2; thumbFile = "./" + thumbFile; }
 		thumbFile.replace(r, 1, "/thumbs/");
 
@@ -49,17 +49,24 @@ bool Presentation::init(vector<string> files){
 	
 	iCurrentSlide = 0;
 	isTransition = false;
+	bUseReadabilityMovement = false;
 
 	mTransitions.clear();
 	
 	//set up transitions
-	mTransitions.push_back(new HitInFace());
+    mTransitions.push_back(new HitInFace());
+	mTransitions.push_back(new Collapse());
+	mTransitions.push_back(new Rotate(1, 0, 0));
+    mTransitions.push_back(new Rotate(0, 1, 0));
+	mTransitions.push_back(new Rotate(1, 0, 1));
+	mTransitions.push_back(new Fade());
+	
 		
 	return true;	
 }
 
 Slide *Presentation::getNextSlide(){
-	if((iCurrentSlide + 1) < mSlides.size()){
+	if((iCurrentSlide + 1) < (int)mSlides.size()){
 		return mSlides[iCurrentSlide + 1];
 	}else{
 		return NULL;
@@ -121,15 +128,31 @@ void Presentation::render2D(){
     
 		s->mFull->bind();	
 
+        float x = 0;
+        float y = 0;
 		float w = 888;
 		float h = 456;	
+
+		if(bUseReadabilityMovement){
+            static float move = 0.0f;
+            move += 0.01f;
+
+            float scale = 1.0f;
+
+            glTranslatef(sinf(move) * scale, cosf(move) * scale, 0);
+
+            x -= scale;
+            y -= scale;
+            w += scale;
+            h += scale;
+		}
 	
 		glBegin(GL_QUADS);
 			// Front Face
-			glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);	// Point 1 (Front)
-			glTexCoord2f(1.0f, 0.0f); glVertex2f(w, 0);	// Point 2 (Front)
+			glTexCoord2f(0.0f, 0.0f); glVertex2f(x, y);	// Point 1 (Front)
+			glTexCoord2f(1.0f, 0.0f); glVertex2f(w, y);	// Point 2 (Front)
 			glTexCoord2f(1.0f, -1.0f); glVertex2f(w,  h);	// Point 3 (Front)
-			glTexCoord2f(0.0f, -1.0f); glVertex2f(0,  h);	// Point 4 (Front)
+			glTexCoord2f(0.0f, -1.0f); glVertex2f(x,  h);	// Point 4 (Front)
 		glEnd();
 		
 		allowCache = true;
@@ -162,18 +185,17 @@ void Presentation::update(){
 void Presentation::next(){
 	iCurrentSlide++;
 	
-	if(iCurrentSlide >= mSlides.size()){
+	if(iCurrentSlide >= (int)mSlides.size()){
 		iCurrentSlide = 0;
 	}
 	
 	LOG("Next! (%d, %d)\n", iCurrentSlide, mTransitions.size());
 	
-	mCurrentTransition = mTransitions[0];
+	mCurrentTransition = mTransitions[rand() % mTransitions.size()];
 	
 	isTransition = true;
 	transitionInit = true;
 
-	LOG("1\n");
 }
 
 void Presentation::prev(){
@@ -194,4 +216,9 @@ void Presentation::shutdown(){
 		delete mSlides[i];
 	}
 	mSlides.clear();
+}
+
+bool Presentation::toggleReadabilityMovement(){
+    bUseReadabilityMovement = !bUseReadabilityMovement;
+    return bUseReadabilityMovement;
 }
