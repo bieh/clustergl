@@ -294,7 +294,7 @@ bool App::tick()
         m->frames = 0;
     }
         if(FPS > 0 && intercept) {
-        LOG("ClusterGL2 Average Time: %d %d %d FPS: %f\n", startTime, endTime, diff, 1000.0/diff);
+        LOG("ClusterGL2 FPS: %f\n", 1000.0/diff);
         }
 
 	startTime = SDL_GetTicks();*/

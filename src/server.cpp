@@ -9,7 +9,7 @@ extern string addresses[5];
 
 int multicastSocket;
 int mSockets[5];
-int numConnections = 4;
+int numConnections = 5;
 
 /* select timer */
 timeval mytime;
@@ -118,7 +118,7 @@ void Server::createMulticastSocket()
 
 		/* First bind to the port */
 		bindaddr.sin_family = AF_INET;
-		bindaddr.sin_port = htons(8990);
+		bindaddr.sin_port = htons(9990);
 		bindaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 		bind(multicastSocket,(struct sockaddr*)&bindaddr,sizeof(bindaddr));
@@ -147,9 +147,9 @@ void Server::createMulticastSocket()
 		setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_TTL, &loop, sizeof(loop));
 
 		/* Now we care about the port we send to */
-		group->sin_port = htons(8991);
+		group->sin_port = htons(9991);
 		
-		printf("multicast socket created group 232.1.1.1 on port 8991!\n");
+		printf("multicast socket created group 232.1.1.1 on port 9991!\n");
 	    printf("ClusterGL: UDP buffer size is %d\n", bufferSize(SO_RCVBUF));
 	    printf("ClusterGL: UDP buffer size is %d\n", setBufferSize(SO_RCVBUF, 300000));
 }
@@ -251,7 +251,7 @@ int Server::writeData(void *buf, size_t count)
 		//printf("blocking waiting for ACKS in writeData!\n");
 		//printf("values: %d < %d\n", checkACKList(serverFrameNumber & 1), storedBuffers[serverFrameNumber & 1].length);
 		//printf("serverFrameNumber: %d\n", serverFrameNumber);
-		readTCP_packet(25000);
+		readTCP_packet(500000);
 		}
 	
 	/* if this is the first chunk of data, save it */
@@ -314,7 +314,7 @@ bool Server::flushDataWorker(uint32_t startingOffset, uint32_t endingOffest, int
 			else {
 				while(checkACKList(bufNum&1) < MAX_CONTENT * 10) {
 			//printf("sent 20 packets! check for ACKS!\n");
-					readTCP_packet(25000);
+					readTCP_packet(500000);
 				}
 				packets++;
 			}		
@@ -371,7 +371,7 @@ int Server::readData(void *buf, size_t count)
 	while (checkACKList(0) < storedBuffers[0].length ||
 		   checkACKList(1) < storedBuffers[1].length) {
 		//printf("waiting for ACKs before reading data!\n");
-		readTCP_packet(25000);
+		readTCP_packet(500000);
 		}
 		
 	//printf("all ACKS up to date, will now read DATA\n");

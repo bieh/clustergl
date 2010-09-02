@@ -451,11 +451,13 @@ extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
 }
 
 extern "C" void SDL_GL_SwapBuffers( ) {
+	/*
 	if(!bHasMinimized){
 	 if (SDL_WM_IconifyWindow()==0)
 		LOG("Could not minimize Window\n");
 	  bHasMinimized = true;
 	}
+	*/
 	
 	pushOp(1499); //Swap buffers
 	(*iFrames)++;

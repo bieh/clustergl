@@ -1,8 +1,14 @@
 #include "main.h"
 
+extern bool presentationFinished;
+
 bool Application::update(){
 
 	processEvents();
+
+	if(presentationFinished){
+		requestShutdown();
+	}
 
 	return true;
 }

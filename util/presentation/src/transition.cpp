@@ -1,6 +1,8 @@
 #include "main.h"
 
-
+float randFloat(float min, float max){
+    return min + (((float)rand()/(float)RAND_MAX) * (max - min));
+}
 
 /*******************************************************************************
 						slide
@@ -123,11 +125,11 @@ bool Collapse::render(){
 				
 	
 	
-	float h = 0.74f / size;
-	float w = 1.52f * size;
+	float h = 0.7f / size;
+	float w = 1.365f * size;
 
 	if(stage == 0){
-        size *= 0.99f;
+        size *= 0.97f;
 
         if(size < 0.01f){
             stage++;
@@ -137,7 +139,7 @@ bool Collapse::render(){
     	mSlides[iCurrentSlide-1]->mThumb->bind();
 	
 	}else if(stage == 1){
-        size *= 1.01f;
+        size *= 1.03f;
 
         if(size > 1.0f){
             size = 1.0f;
@@ -196,8 +198,8 @@ bool Rotate::render(){
 				
 	
 	
-	float h = 0.74f;
-	float w = 1.52f;
+	float h = 0.7f;
+	float w = 1.365f;
 
 	float scaleX = 1.0f;
 	float scaleY = 1.0f;
@@ -271,7 +273,7 @@ bool Fade::render(){
 	float h = 0.7f;
 	float w = 1.365f;
 	
-	mSlides[iCurrentSlide]->mThumb->bind();
+	mSlides[iCurrentSlide]->mFull->bind();
 
 	size -= 0.01f;
 
@@ -287,7 +289,7 @@ bool Fade::render(){
 	glColor4f(1,1,1,size);
 
 
-    mSlides[iCurrentSlide]->mThumb->bind();
+    mSlides[iCurrentSlide]->mFull->bind();
     
     glColor4f(1 - size,1 - size,1 - size,1 - size);
 
@@ -317,4 +319,386 @@ bool Fade::render(){
 	return true; //keep going
 
 }
+
+
+
+
+/*******************************************************************************
+						starwars
+*******************************************************************************/
+
+bool StarWars::init(){
+
+	stage = 1;
+	size = 0.0f;
+	
+	LOG("Started transition\n");
+	
+	return true;
+}
+
+
+bool StarWars::render(){
+	
+	gluLookAt(	0, 0, 1, 
+				0, 0, 0, 
+				0, 1, 0	);
+				
+	
+	
+	float h = 0.7f;
+	float w = 1.365f;
+
+   
+
+    if(stage == 0){     
+       /*
+        glRotatef(size, 1, 0, 0);	
+        size -=5;
+
+        if(size <= -45){
+            size = 0;
+            stage++;
+        }
+        */
+        stage++;
+    }else if(stage == 1){
+        glTranslatef(0, 0, -size);
+
+        int angle = -(size * 30);
+        
+        glRotatef(angle, 1, 0, 0);	
+
+        if(angle == -90){
+            stage++;
+        }
+
+        size += 0.01f;
+
+         mSlides[iCurrentSlide-1]->mThumb->bind();
+
+    
+    }
+    else if(stage == 2){
+        glTranslatef(0, 0, -size);
+
+        int angle = -(size * 30);
+        
+        glRotatef(angle, 1, 0, 0);	
+
+
+        size -= 0.01f;
+
+        if(size <= 0){
+            return false;
+        }
+
+        mSlides[iCurrentSlide]->mThumb->bind();
+
+    
+    }
+
+    
+	glBegin(GL_QUADS);
+		// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
+	glEnd();
+	
+	
+	return true; //keep going
+
+}
+
+
+
+
+/*******************************************************************************
+						tumble
+*******************************************************************************/
+
+bool Tumble::init(){
+
+	stage = 0;
+	size = 0.0f;
+	
+	LOG("Started transition\n");
+	
+	return true;
+}
+
+
+bool Tumble::render(){
+	
+	gluLookAt(	0, 0, 1, 
+				0, 0, 0, 
+				0, 1, 0	);
+				
+	
+	
+	float h = 0.7f;
+	float w = 1.365f;
+
+    mSlides[iCurrentSlide-1+stage]->mThumb->bind();
+
+
+    if(stage == 0){
+        size += 0.005f;
+        
+        glRotatef(size * 180, 0, 0, 1);
+    }	
+    else if(stage == 1){
+        size -= 0.005f;
+        
+        glRotatef((size * -1) * 180, 0, 0, 1);
+    }	
+
+    glTranslatef(0, 0, -size * 10);
+    
+    if(size >= 1.0f){
+        stage = 1;
+    }else if(size <= 0.0f){
+        return false;
+    }
+	
+	glBegin(GL_QUADS);
+		// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
+	glEnd();
+	
+	
+	return true; //keep going
+
+}
+
+
+
+/*******************************************************************************
+						shatter
+*******************************************************************************/
+
+class Fragment{
+public:
+    float x, y;
+    float x2, y2;
+
+    float px, py;
+    float vx, vy;
+};
+
+
+
+
+bool Shatter::init(){
+
+	stage = 0;
+	size = 0.0f;
+	
+	LOG("Started transition\n");
+
+	for(int i=0;i<10;i++){
+        Fragment *f = new Fragment();
+        f->x = randFloat(0, 1);
+        f->y = randFloat(0, 1);
+
+        f->x2 = f->x + 0.1f;
+        f->y2 = f->y + 0.1f;
+    }
+	
+	return true;
+}
+
+
+bool Shatter::render(){
+	
+	gluLookAt(	0, 0, 1, 
+				0, 0, 0, 
+				0, 1, 0	);
+				
+	
+	
+	float h = 0.7f;
+	float w = 1.365f;
+
+    mSlides[iCurrentSlide-1+stage]->mThumb->bind();
+
+	glBegin(GL_QUADS);
+		// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
+	glEnd();
+	
+	
+	return true; //keep going
+
+}
+
+
+
+
+/*******************************************************************************
+						bounce
+*******************************************************************************/
+
+
+
+bool Bounce::init(){
+
+	stage = 0;
+	size = 0.0f;
+
+	top = 1.5f;
+	bottom = 0.0f;
+	topvel = -0.001f;
+	bottomvel = 0.0f;
+	
+	LOG("Started transition\n");
+
+	return true;
+}
+
+
+bool Bounce::render(){
+	
+	gluLookAt(	0, 0, 1, 
+				0, 0, 0, 
+				0, 1, 0	);
+				
+	
+	
+	float h = 0.7f;
+	float w = 1.365f;
+
+    mSlides[iCurrentSlide]->mThumb->bind();
+
+	glBegin(GL_QUADS);
+		// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h + top,  0);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h + top,  0);	// Point 2 (Front)
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h + top,  0);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h + top,  0);	// Point 4 (Front)
+	glEnd();
+
+
+
+	mSlides[iCurrentSlide-1]->mThumb->bind();
+
+	float o = bottomvel * -10;
+
+	glBegin(GL_QUADS);
+		// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w - o, -h + bottom,  0);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(w + o, -h + bottom,  0);	// Point 2 (Front)
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(w + o,  h + bottom,  0);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w - o,  h + bottom,  0);	// Point 4 (Front)
+	glEnd();
+
+	top += topvel;
+	bottom += bottomvel;
+    topvel -= 0.0001f;
+
+	if((top - (h * 2)) < bottom){
+        bottomvel = topvel * 0.75f;
+        topvel *= -0.75f;
+	}
+
+	bottomvel *= 0.99f;
+
+    if(top <= 0.0f){
+        return false;
+    }
+	
+	
+	return true; //keep going
+
+}
+
+
+
+
+/*******************************************************************************
+						spin
+*******************************************************************************/
+
+Spin::Spin(int x, int y, int z){
+      AX = x; AY = y; AZ = z;
+}
+
+bool Spin::init(){
+
+	stage = 0;
+	size = 0.001f;
+	vel = 0.1f;
+	
+	LOG("Started transition\n");
+	
+	return true;
+}
+
+
+
+
+bool Spin::render(){
+	
+	gluLookAt(	0, 0, 1, 
+				0, 0, 0, 
+				0, 1, 0	);
+				
+	
+    glRotatef(size, AX, AY, AZ);
+
+    if(stage == 0){
+        size += vel;
+        
+	    mSlides[iCurrentSlide-1]->mThumb->bind();
+	}
+    else if(stage == 1){
+        size -= vel;
+        
+	    mSlides[iCurrentSlide]->mThumb->bind();
+	}
+
+    if(vel > 5){
+        stage++;
+    }
+
+    if(vel <= 0){
+        return false;
+    }
+
+    if(stage == 0)
+        vel += 0.05f;
+    else
+        vel -= 0.05f;
+	
+	float h = 0.7f;
+	float w = 1.365f;
+    
+	
+	glBegin(GL_QUADS);
+		// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
+		glTexCoord2f(1.0f , 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
+	glEnd();
+	
+	
+	return true; //keep going
+
+}
+
 

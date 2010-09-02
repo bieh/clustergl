@@ -155,7 +155,6 @@ bool ExecModule::process(list<Instruction> &list)
 		//check if the message requires special attention (adjusting)
 		//else use standard process calling methods below
 		if (iter->id== 305) {	 //glViewPort
-			LOG("EXEC Frustum %d, bezel %d\n", glFrustumUsage, bezelCompensation);
 			if(!glFrustumUsage) {
 				//no nothing, will be handled later (in gluPerpespective or glLoadMatrix)
 				GLint x = *((GLint*)iter->args);
@@ -166,7 +165,7 @@ bool ExecModule::process(list<Instruction> &list)
 					glViewport((-offsetX),0, 8880, 4560);
 				}
 				else {
-					glViewport((-offsetX*1680.0)/1800.0,0, 8880, 4560);
+					glViewport((-offsetX*1680.0)/1800.0,0, 8880, 4560*3.0/4.0);
 				}
 			}
 

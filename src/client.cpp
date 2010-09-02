@@ -57,7 +57,7 @@ void Client::createMulticastSocket()
 
 		/* Setup the socket to listen on */
 		bindaddr.sin_family = AF_INET;
-		bindaddr.sin_port = htons(8991);
+		bindaddr.sin_port = htons(9991);
 		bindaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		bind(multi_fd,(struct sockaddr*)&bindaddr,sizeof(bindaddr));
 
@@ -80,7 +80,7 @@ void Client::createMulticastSocket()
 
 		setsockopt(multi_fd,SOL_IP,MCAST_JOIN_SOURCE_GROUP, &group_source_req_local, sizeof(group_source_req));
 
-		printf("listening to multicast group 232.1.1.1 on port 8991!\n");
+		printf("listening to multicast group 232.1.1.1 on port 9991!\n");
 	    printf("ClusterGL: UDP buffer size is %d\n", bufferSize(SO_RCVBUF));
 	    printf("ClusterGL: UDP buffer size is %d\n", setBufferSize(SO_RCVBUF, 300000));
 

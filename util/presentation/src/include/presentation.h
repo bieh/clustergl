@@ -43,11 +43,72 @@ public:
 	bool render();
 };
 
+
+
 class Fade : public Transition{
 
 	int stage;
 	float size;
 public:
+	bool init();
+	bool render();
+};
+
+class StarWars : public Transition{
+
+	int stage;
+	float size;
+public:
+	bool init();
+	bool render();
+};
+
+class Tumble : public Transition{
+
+	int stage;
+	float size;
+public:
+	bool init();
+	bool render();
+};
+
+
+class Shatter : public Transition{
+
+	int stage;
+	float size;
+public:
+	bool init();
+	bool render();
+};
+
+
+class Bounce : public Transition{
+
+	int stage;
+	float size;
+
+	float top;
+	float bottom;
+	float topvel;
+	float bottomvel;
+public:
+	bool init();
+	bool render();
+};
+
+class Spin : public Transition{
+
+	int stage;
+	float size;
+	float vel;
+
+
+	int AX, AY, AZ;
+public:
+
+    Spin(int x, int y, int z);
+
 	bool init();
 	bool render();
 };

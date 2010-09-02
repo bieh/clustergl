@@ -4,8 +4,42 @@
 vector<Slide *> mSlides;
 int iCurrentSlide;
 
+char *textFileRead(const char *filename) 
+	{
+		FILE *fp;
+		char *content = NULL;
+
+		int count=0;
+
+		if (filename != NULL) {
+
+			fp = fopen(filename,"rt");
+
+			if (fp != NULL) {
+										      
+        	      		fseek(fp, 0, SEEK_END);
+        			count = ftell(fp);
+        			rewind(fp);
+
+				if (count > 0) {
+					content = (char *)malloc(sizeof(char) * (count+1));
+					count = fread(content,sizeof(char),count,fp);
+					content[count] = '\0';
+				}
+				fclose(fp);
+										
+			}
+		}
+	
+		return content;
+	}
+	
+
+bool presentationFinished = false;
 
 bool Presentation::init(vector<string> files){
+
+    srand((unsigned int)time(0));
 
 	LOG("Starting presentation init\n");
 	
@@ -45,7 +79,7 @@ bool Presentation::init(vector<string> files){
 	
 	}
 	
-	LOG("Done presentation init (%d slides)\n", mSlides.size());
+	LOG("Done presentation init (%d slides)\n", (int)mSlides.size());
 	
 	iCurrentSlide = 0;
 	isTransition = false;
@@ -54,12 +88,29 @@ bool Presentation::init(vector<string> files){
 	mTransitions.clear();
 	
 	//set up transitions
+	
     mTransitions.push_back(new HitInFace());
 	mTransitions.push_back(new Collapse());
 	mTransitions.push_back(new Rotate(1, 0, 0));
     mTransitions.push_back(new Rotate(0, 1, 0));
 	mTransitions.push_back(new Rotate(1, 0, 1));
-	mTransitions.push_back(new Fade());
+	mTransitions.push_back(new Fade());	
+	mTransitions.push_back(new Tumble());	
+	mTransitions.push_back(new Bounce());	
+	mTransitions.push_back(new Bounce());	
+	mTransitions.push_back(new StarWars());
+    mTransitions.push_back(new Spin(1,0,0));
+    mTransitions.push_back(new Spin(0,0,1));
+	mTransitions.push_back(new Spin(0,1,0));
+	mTransitions.push_back(new Spin(1,1,0));	
+	mTransitions.push_back(new Spin(1,1,1));
+
+
+
+	
+	
+	//mTransitions.push_back(new Shatter());
+
 	
 		
 	return true;	
@@ -105,7 +156,12 @@ void Presentation::render2D(){
             }
             didLoad = true;
         }
-        
+
+/*
+		if(p && p->mFull && p->mFull->isLoaded()){
+			p->mFull->destroy();
+		}
+*/
         
         if(allowCache && !didLoad){
 		    
@@ -124,6 +180,7 @@ void Presentation::render2D(){
 		    	p->mFull->destroy();
 		    }
 		}
+		
 			    
     
 		s->mFull->bind();	
@@ -187,9 +244,10 @@ void Presentation::next(){
 	
 	if(iCurrentSlide >= (int)mSlides.size()){
 		iCurrentSlide = 0;
+		presentationFinished = true;
 	}
 	
-	LOG("Next! (%d, %d)\n", iCurrentSlide, mTransitions.size());
+	LOG("Next! (%d, %d)\n", iCurrentSlide, (int)mTransitions.size());
 	
 	mCurrentTransition = mTransitions[rand() % mTransitions.size()];
 	
@@ -210,7 +268,7 @@ void Presentation::prev(){
 
 void Presentation::shutdown(){
 
-	LOG("presentation shutdown (%d slides)\n", mSlides.size());
+	LOG("presentation shutdown (%d slides)\n", (int)mSlides.size());
 
 	for(int i=0;i<(int)mSlides.size();i++){
 		delete mSlides[i];
