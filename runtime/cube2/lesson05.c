@@ -85,44 +85,6 @@ int LoadGLTextures( )
 {
     /* Status indicator */
     int Status = FALSE;
-
-    /* Create storage space for the texture */
-    SDL_Surface *TextureImage[1]; 
-
-    /* Load The Bitmap, Check For Errors, If Bitmap's Not Found Quit */
-    if ( ( TextureImage[0] = SDL_LoadBMP( "crate.bmp" ) ) )
-        {
-
-	    /* Set the status to true */
-	    Status = TRUE;
-
-	    /* Create The Texture */
-		//glGenTextures( 1, &texture[0] );
-		//printf("Got texture ID %d\n", texture[0]);
-
-		//glGenTextures( 1, &texture[0] );
-		//printf("Got texture ID %d\n", texture[0]);
-
-		//glGenTextures( 1, &texture[0] );
-
-		//printf("Got texture ID %d\n", texture[0]);
-
-	    /* Typical Texture Generation Using Data From The Bitmap */
-	    glBindTexture( GL_TEXTURE_2D, texture[0] );
-
-	    /* Generate The Texture */
-	    glTexImage2D( GL_TEXTURE_2D, 0, 3, TextureImage[0]->w,
-			  TextureImage[0]->h, 0, GL_BGR,
-			  GL_UNSIGNED_BYTE, TextureImage[0]->pixels );
-
-	    /* Linear Filtering */
-	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        }
-
-    /* Free up any memory we may have used */
-    if ( TextureImage[0] )
-	    SDL_FreeSurface( TextureImage[0] );
 	
 	const char *vs,*fs;	
 
@@ -148,8 +110,8 @@ int LoadGLTextures( )
 	glShaderSource(f, 1, &ff, length2);
 	
 	/* compile shaders */
-	GLint compiled = 10000;
-	GLint compiled2 = 10000;
+	GLint compiled = 0;
+	GLint compiled2 = 0;
 	//printf("compiled = %d\n", compiled);
 	glCompileShader(v);
 	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
