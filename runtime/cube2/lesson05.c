@@ -254,7 +254,6 @@ int initGL( GLvoid )
 /* Here goes our drawing code */
 int drawGLScene( GLvoid )
 {
-	LoadGLTextures();
     /* These are to calculate our fps */
     static GLint T0     = 0;
     static GLint Frames = 0;
