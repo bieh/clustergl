@@ -1,5 +1,10 @@
 #include "main.h"
 
+
+float h = 0.7f;
+float w = 0.93f;
+
+
 float randFloat(float min, float max){
     return min + (((float)rand()/(float)RAND_MAX) * (max - min));
 }
@@ -79,18 +84,18 @@ bool HitInFace::render(){
 	
 		mSlides[i]->mThumb->bind();
 		
-		float h = 0.74f * 1.14f;
-		float w = 1.52f * 1.08f;
+		float h2 = h * 1.14f;
+		float w2 = w * 1.08f;
 		
 		glTranslatef(5, 0, 0);
 	
 		glBegin(GL_QUADS);
 			// Front Face
 			glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
-			glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
-			glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
-			glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
-			glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(-w2, -h2,  0);	// Point 1 (Front)
+			glTexCoord2f(1.0f, 0.0f); glVertex3f(w2, -h2,  0);	// Point 2 (Front)
+			glTexCoord2f(1.0f, 1.0f); glVertex3f(w2,  h2,  0);	// Point 3 (Front)
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(-w2,  h2,  0);	// Point 4 (Front)
 		glEnd();
 	}
 	
@@ -125,8 +130,8 @@ bool Collapse::render(){
 				
 	
 	
-	float h = 0.7f / size;
-	float w = 1.365f * size;
+	float h2 = h / size;
+	float w2 = w * size;
 
 	if(stage == 0){
         size *= 0.97f;
@@ -154,10 +159,10 @@ bool Collapse::render(){
 	glBegin(GL_QUADS);
 		// Front Face
 		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer
-		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, -h,  0);	// Point 1 (Front)
-		glTexCoord2f(1.0f, 0.0f); glVertex3f(w, -h,  0);	// Point 2 (Front)
-		glTexCoord2f(1.0f, 1.0f); glVertex3f(w,  h,  0);	// Point 3 (Front)
-		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w,  h,  0);	// Point 4 (Front)
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-w2, -h2,  0);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(w2, -h2,  0);	// Point 2 (Front)
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(w2,  h2,  0);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-w2,  h2,  0);	// Point 4 (Front)
 	glEnd();
 	
 	
@@ -198,9 +203,6 @@ bool Rotate::render(){
 				
 	
 	
-	float h = 0.7f;
-	float w = 1.365f;
-
 	float scaleX = 1.0f;
 	float scaleY = 1.0f;
 
@@ -269,9 +271,6 @@ bool Fade::render(){
 				0, 1, 0	);
 				
 	
-	
-	float h = 0.7f;
-	float w = 1.365f;
 	
 	mSlides[iCurrentSlide]->mFull->bind();
 
@@ -345,12 +344,6 @@ bool StarWars::render(){
 				0, 1, 0	);
 				
 	
-	
-	float h = 0.7f;
-	float w = 1.365f;
-
-   
-
     if(stage == 0){     
        /*
         glRotatef(size, 1, 0, 0);	
@@ -438,9 +431,6 @@ bool Tumble::render(){
 				0, 1, 0	);
 				
 	
-	
-	float h = 0.7f;
-	float w = 1.365f;
 
     mSlides[iCurrentSlide-1+stage]->mThumb->bind();
 
@@ -524,9 +514,6 @@ bool Shatter::render(){
 				
 	
 	
-	float h = 0.7f;
-	float w = 1.365f;
-
     mSlides[iCurrentSlide-1+stage]->mThumb->bind();
 
 	glBegin(GL_QUADS);
@@ -575,9 +562,6 @@ bool Bounce::render(){
 				0, 1, 0	);
 				
 	
-	
-	float h = 0.7f;
-	float w = 1.365f;
 
     mSlides[iCurrentSlide]->mThumb->bind();
 
@@ -682,11 +666,7 @@ bool Spin::render(){
         vel += 0.05f;
     else
         vel -= 0.05f;
-	
-	float h = 0.7f;
-	float w = 1.365f;
-    
-	
+		
 	glBegin(GL_QUADS);
 		// Front Face
 		glNormal3f( 0.0f, 0.0f, 1.0f);		// Normal Pointing Towards Viewer

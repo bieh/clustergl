@@ -88,6 +88,7 @@ bool Presentation::init(vector<string> files){
 	mTransitions.clear();
 	
 	//set up transitions
+
 	
     mTransitions.push_back(new HitInFace());
 	mTransitions.push_back(new Collapse());
@@ -104,7 +105,7 @@ bool Presentation::init(vector<string> files){
 	mTransitions.push_back(new Spin(0,1,0));
 	mTransitions.push_back(new Spin(1,1,0));	
 	mTransitions.push_back(new Spin(1,1,1));
-
+    
 
 
 	
@@ -187,8 +188,8 @@ void Presentation::render2D(){
 
         float x = 0;
         float y = 0;
-		float w = 888;
-		float h = 456;	
+		float w = 1024;//888
+		float h = 768;//456
 
 		if(bUseReadabilityMovement){
             static float move = 0.0f;
