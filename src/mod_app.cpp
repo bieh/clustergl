@@ -1,6 +1,6 @@
-/********************************************************
-	Headers
-********************************************************/
+/*******************************************************************************
+	ClusterGL - Application intercept module
+*******************************************************************************/
 
 #include "main.h"
 #include <iostream>
@@ -15,42 +15,6 @@
 extern App *theApp;
 
 /*********************************************************
-	External Main Globals
-*********************************************************/
-
-extern int fakeWindowX;
-extern int fakeWindowY;
-
-/*********************************************************
-	Coloured Console Output (not used)
-*********************************************************/
-
-#define RESET		0
-#define BRIGHT 		1
-#define DIM		2
-#define UNDERLINE 	3
-#define BLINK		4
-#define REVERSE		7
-#define HIDDEN		8
-
-#define BLACK 		0
-#define RED		1
-#define GREEN		2
-#define YELLOW		3
-#define BLUE		4
-#define MAGENTA		5
-#define CYAN		6
-#define	WHITE		7
-
-void textcolor(int attr, int fg, int bg)
-{	char command[13];
-
-	/* Command is the control command to the terminal */
-	sprintf(command, "%c[%d;%d;%dm", 0x1B, attr, fg + 30, bg + 40);
-	printf("%s", command);
-}
-
-/*********************************************************
 	Pointer Structures
 *********************************************************/
 //some methods simply specify a pointer to the beginning
@@ -60,11 +24,11 @@ void textcolor(int attr, int fg, int bg)
 //known (usually when glDrawElements is called)
 
 struct storedPointer {
-Bool sent;
-GLint size;
-GLenum type;
-GLsizei stride;
-const GLvoid *pointer;
+    Bool sent;
+    GLint size;
+    GLenum type;
+    GLsizei stride;
+    const GLvoid *pointer;
 };
 
 storedPointer rpTex;
@@ -85,7 +49,7 @@ int iInstructionCount = 0;
 int iCurrentBuffer = 0;
 //current instruction
 Instruction *mCurrentInstruction = NULL;
-//current arguements
+//current arguements 
 byte *mCurrentArgs = NULL;
 
 uint32_t *iFrames = NULL;
@@ -95,15 +59,15 @@ uint32_t *iFrames = NULL;
 *********************************************************/
 
 AppModule::AppModule(string command){
+
 	//initialize values and structures
-	netBytes = 0;
-	netBytes2 = 0;
 	frames = 0;
 	iFrames = &frames;
 	rpTex.size = (GLint) NULL;
 	rpVert.size = (GLint) NULL;
 	rpCol.size = (GLint) NULL;
 	rpInter.size = (GLint) NULL;
+	
 	init(command);
 }
 

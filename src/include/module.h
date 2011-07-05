@@ -1,154 +1,212 @@
 /*******************************************************************************
-	The module interface
+	ClusterGL - module.h
 *******************************************************************************/
 
-/*********************************************
-	Module object
-**********************************************/
+//Modules can operate on either instructions or byte bufs. Most of them should
+//work on the instruction level, but things like compression or network read
+//operate on bytes
+const int MOD_TYPE_INSTR = 1; //takes/emits a list of instructions
+const int MOD_TYPE_BYTES = 2; //takes/emits a byte buffer
+
+/*******************************************************************************
+	The main module interface
+*******************************************************************************/
 class Module
 {
-	public:
-		Module(){}
+public:
+	Module(){}
 
-								 //used for comparing deltas (only used in NetClient and NetSrv)
-		list<Instruction> *prevFrame;
-		ulong netBytes;			 // variable to calculate network usage
-		ulong netBytes2;		 // variable to calculate compressed network usage
-		uint32_t frames;
-
-		virtual bool process(list<Instruction> &i)=0;
-		virtual void reply(Instruction *instr, int i){}
-		virtual bool sync()=0;
+    //input
+	virtual bool process(list<Instruction> &i){}
+	virtual bool process(byte *buf, int len){}
+	
+	//output
+	virtual list<Instruction> *resultAsList(){}
+	virtual byte *resultAsBytes(int *len){}
+	
+	//Config defaults
+	virtual int getInputFormat(){return MOD_TYPE_INSTR;}
+	virtual int getOutputFormat(){return MOD_TYPE_INSTR;}
+	
+	virtual void reply(Instruction *instr, int i){}
+	virtual bool sync()=0;
 };
 
-/*********************************************
-	A module that captures from a program
-**********************************************/
+
+
+/*******************************************************************************
+	Capture from a program
+*******************************************************************************/
 class AppModule : public Module
 {
-	public:
-		AppModule(string command);
+public:
+	AppModule(string command);
 
-		bool init(string command);
-		bool process(list<Instruction> &i);
-		bool sync();
+	bool init(string command);
+	bool process(list<Instruction> &i);
+	bool sync();
 };
 
-/*********************************************
-	A module that outputs to stdout
-**********************************************/
+
+/*******************************************************************************
+	Output to stdout
+*******************************************************************************/
 class TextModule : public Module
 {
-	public:
-		TextModule();
-		bool init();
-		bool process(list<Instruction> &i);
-		bool sync();
+public:
+	TextModule();
+	bool init();
+	bool process(list<Instruction> &i);
+	bool sync();
 };
 
-/*********************************************
-	A module that outputs to GL
-**********************************************/
+
+
+/*******************************************************************************
+	Output to OpenGL (executing the commands)
+*******************************************************************************/
 class ExecModule : public Module
 {
-	bool makeWindow();
+    bool makeWindow();
 
-	public:
-		ExecModule();
+public:
+	ExecModule();
 
-		bool init();
-		bool process(list<Instruction> &i);
-		bool sync();
+	bool init();
+	bool process(list<Instruction> &i);
+	bool sync();
 };
 
-/*********************************************
- Network server module. This recvs commands
- and thus should go at the *start* of the local
- pipe. Blocks till a client connects.
-**********************************************/
+/*******************************************************************************
+ Network server module. This recvs commands and thus should go at the *start* 
+ of the local pipeline. Blocks till a client connects.
+*******************************************************************************/
 class NetSrvModule : public Module
 {
-	int mSocket;
-	BufferedFd *mClientSocket;
-	public:
-		NetSrvModule();
+    int mSocket;
+    BufferedFd *mClientSocket;
+    
+    int myRead(byte *input, int nByte);
+    int myWrite(byte *input, int nByte);
+    void recieveBuffer(void);
+	
+public:
+	NetSrvModule();
 
-		bool process(list<Instruction> &i);
-		void reply(Instruction *instr, int i);
-		bool sync();
-		int myRead(byte *input, int nByte);
-		int myWrite(byte *input, int nByte);
-		void recieveBuffer(void);
+	bool process(list<Instruction> &i);
+	void reply(Instruction *instr, int i);
+	bool sync();
+
 };
 
-/*********************************************
- Network client module. This sends commands,
- and thus should go at the *end* of the local
- pipe (probably on the app side).
-**********************************************/
+
+/*******************************************************************************
+  Network client module. This sends commands, and thus should go at the *end* 
+  of the local pipe (probably on the app side).
+*******************************************************************************/
 class NetClientModule : public Module
 {
-	int mSocket[5];
-	int numConnections;
-	public:
-		NetClientModule();
+    vector<int> mSockets;
+    int numConnections;
+    
+    int internalWrite(void* buf, int nByte);
+	int internalRead(void *buf, size_t count);
+	
+	void sendBuffer();
+	
+public:
+	NetClientModule();
 
-		bool process(list<Instruction> &i);
-		bool sync();
-		int myWrite(void* buf, int nByte);
-		int myWrite(void* buf, unsigned nByte);
-		int myWrite(void* buf, long unsigned nByte);
-		int myRead(void *buf, size_t count);
-		void sendBuffer();
+	bool process(list<Instruction> &i);
+	bool sync();
+		
+	//Config defaults
+	int getInputFormat(){return MOD_TYPE_INSTR;}
+	int getOutputFormat(){return MOD_TYPE_INSTR;}
+
 };
 
-/*********************************************
- Network compress module. This compresses each
- instruction/buffer to send over the network.
- Internal to NetSrvModule & NetClientModule
-**********************************************/
+/*******************************************************************************
+  Network client module. Like NCM, but multicasty!
+*******************************************************************************/
+class MulticastNetClientModule : public Module
+{
+public:
+	MulticastNetClientModule();
+
+	bool process(list<Instruction> &i);
+	bool sync();
+}
+
+
+/*******************************************************************************
+ Network compress module. This compresses each instruction/buffer to send over 
+ the network. 
+*******************************************************************************/
 class NetCompressModule : public Module
 {
-	public:
-		NetCompressModule();
+	int myCompress(void *input, int nByte, void *output);
+	int myDecompress(void *dest, int destLen, void *source, int sourceLen);
+	
+public:
+	NetCompressModule();
 
-		bool process(list<Instruction> &i);
-		void reply(Instruction *instr, int i);
-		bool sync();
-		int myCompress(void *input, int nByte, void *output);
-		int myDecompress(void *dest, int destLen, void *source, int sourceLen);
+	bool process(list<Instruction> &i);
+	void reply(Instruction *instr, int i);
+	bool sync();
+
 };
 
-/*********************************************
- InsertModule. Inserts additional instructions
- into the list for adding text or pictures
- over the top of the program.
-**********************************************/
+
+/*******************************************************************************
+ Insertion module. Insert instructions into a frame at runtime
+*******************************************************************************/
 class InsertModule : public Module
 {
-	public:
-		InsertModule();
+public:
+	InsertModule();
 
-		bool init();
-		bool process(list<Instruction> &i);
-		void reply(Instruction *instr, int i);
-		bool sync();
+	bool init();
+	bool process(list<Instruction> &i);
+	void reply(Instruction *instr, int i);
+	bool sync();
 };
 
-/*********************************************
- Profiling Module, calculates the top 5
- Instructions getting called, and the top 5
- Instructions using the most buffer space
-**********************************************/
+
+/*******************************************************************************
+ Profiling module
+*******************************************************************************/
 class ProfileModule : public Module
 {
-	public:
-		ProfileModule();
+public:
+	ProfileModule();
 
-		bool process(list<Instruction> &i);
-		void reply(Instruction *instr, int i);
-		bool sync();
-		void resetCounts();
-		void output();
-		void outputBuffers();
+	bool process(list<Instruction> &i);
+	void reply(Instruction *instr, int i);
+	bool sync();
+	void resetCounts();
+	void output();
+	void outputBuffers();
+};
+
+
+
+/*******************************************************************************
+ Delta module. Takes instructions, emits instructions
+*******************************************************************************/
+class DeltaModule : public Module
+{
+public:
+    
+    //input
+	bool process(byte *buf, int len);
+	
+	//output
+	list<Instruction> *resultAsList();
+	
+	//Config defaults
+	int getInputFormat(){return MOD_TYPE_INSTR;}
+	int getOutputFormat(){return MOD_TYPE_INSTR;}
+	
+	bool sync(){}
 };

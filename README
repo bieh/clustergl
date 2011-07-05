@@ -1,4 +1,13 @@
 ********************************************************************************
+    Notes June 20th 2011
+********************************************************************************
+
+- We need to be able to return back up the pipeline
+- Each module needs an internal link to its next stage
+- that way we can go next->process(foo), with foo+n still outstanding
+
+
+********************************************************************************
 	TODO from the board
 ********************************************************************************
 Tidy up multicast
