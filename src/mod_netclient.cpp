@@ -22,7 +22,7 @@ byte mSendBuf[SEND_BUFFER_SIZE];
 NetClientModule::NetClientModule()
 {    
 	//Make each socket
-	for(int i=0;i<gConfig->numRenderers;i++){
+	for(int i=0;i<gConfig->numOutputs;i++){
 		mSockets.push_back(socket(PF_INET, SOCK_STREAM, 0));
 	}
 
@@ -40,8 +40,8 @@ NetClientModule::NetClientModule()
 	//connect each socket to server
 	for(int i=0;i<(int)mSockets.size();i++) {
 		struct sockaddr_in mAddr; 
-		string addr = gConfig->rendererAddresses[i];
-		int port = gConfig->rendererPorts[i];
+		string addr = gConfig->outputAddresses[i];
+		int port = gConfig->outputPorts[i];
 		
 		memset(&mAddr, 0, sizeof(mAddr));
 		mAddr.sin_family = AF_INET;

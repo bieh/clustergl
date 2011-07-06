@@ -20,15 +20,12 @@ int App::run(int argc, char **argv)
 		fprintf(stderr,"usage: %s <window id>\n", argv[0]);
 		exit(0);
 	}
-	LOG("Window ID: %s\n", argv[1]);
 	
 	if(bHasInit) {
 		return 1;
 	}
 	
 	init(false, argv[1]);
-
-	LOG("Loading modules for network server and renderer output\n");
 	
 	//Set up the module chain	
 	mModules.push_back(new NetSrvModule());
@@ -74,15 +71,15 @@ int App::run_shared()
 *******************************************************************************/
 void App::init(bool shared, const char *id)
 {
+    printf("**********************************************\n");
+	printf(" ClusterGL(%s - %s)\n", bIsIntercept ? "intercept" : "renderer", id);
+	printf("**********************************************\n");	
+	printf("\n");
+	
     bIsIntercept = shared;
 
 	gConfig = new Config("cgl.conf", string(id));
-	exit(1);
-	
-	LOG("\n");
-	LOG("**********************************************\n");
-	LOG(" ClusterGL(%s - %s)\n", bIsIntercept ? "intercept" : "renderer", id);
-	LOG("**********************************************\n");
+
 	bHasInit = true;
 }
 

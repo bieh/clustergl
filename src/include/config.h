@@ -34,6 +34,8 @@ public:
     float scaleX;
     float scaleY;
     
+    int clientPort;
+    
 /*******************************************************************************
 	Capture configuration
 *******************************************************************************/
@@ -44,9 +46,9 @@ public:
     int fakeWindowY;
 	    
     //Location of renderers. Automatically calculated
-    int numRenderers;    
-	vector<string> rendererAddresses;
-	vector<int> rendererPorts;
+    int numOutputs;    
+	vector<string> outputAddresses;
+	vector<int> outputPorts;
 	
 };
 

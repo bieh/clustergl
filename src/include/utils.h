@@ -6,7 +6,7 @@
 #define MAX_INSTRUCTIONS 500000
 
 //Quick LOG hack that we can make a proper log system out of later
-#define LOG printf
+#define LOG printf("[%16s:%4d]\t", __FILE__, __LINE__); printf
 
 /**************************************
 	Network Buffer

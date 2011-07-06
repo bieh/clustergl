@@ -48,6 +48,8 @@ NetSrvModule::NetSrvModule()
 		LOG("Failed to listen on server socket\n");
 		exit(1);
 	}
+	
+	LOG("Waiting for connection\n");
 
 	unsigned int clientlen = sizeof(clientaddr);
 	int client = 0;

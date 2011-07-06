@@ -83,12 +83,13 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output)
 
 		if(compressingMethod == 1) {
 			if(ret != Z_OK) {
-				if(ret == Z_MEM_ERROR)
+				if(ret == Z_MEM_ERROR){
 					LOG("ERROR compressing: memory error\n");
-				else if(ret == Z_BUF_ERROR)
-					LOG("ERROR compressing: buffer error\n");
-				else if(ret == Z_STREAM_ERROR)
+				}else if(ret == Z_BUF_ERROR){
+					LOG("ERROR compressing: buffer error\n");					
+				}else if(ret == Z_STREAM_ERROR){
 					LOG("ERROR compressing: compressLevel not (1-9), %d\n", compressLevel);
+				}
 			}
 		}
 	}
@@ -121,12 +122,13 @@ int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int s
 
 		if(compressingMethod == 1) {
 			if(ret != Z_OK) {
-				if(ret == Z_MEM_ERROR)
+				if(ret == Z_MEM_ERROR){
 					LOG("ERROR decompressing: memory error\n");
-				else if(ret == Z_BUF_ERROR)
+				}else if(ret == Z_BUF_ERROR){
 					LOG("ERROR decompressing: buffer error\n");
-				else if(ret == Z_DATA_ERROR)
+				}else if(ret == Z_DATA_ERROR){
 					LOG("ERROR decompressing: data error,\n");
+				}
 			}
 		}
 	}

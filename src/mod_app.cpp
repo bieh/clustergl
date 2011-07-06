@@ -2390,18 +2390,19 @@ extern "C" GLenum glGetError(){
 	waitForReturn();
 	//if(ret == GL_NO_ERROR)	
 	//	LOG("GL_NO_ERROR\n");
-	if(ret == GL_INVALID_ENUM)
+	if(ret == GL_INVALID_ENUM){
 		LOG("GL_INVALID_ENUM\n");
-	else if(ret == GL_INVALID_VALUE)
+	}else if(ret == GL_INVALID_VALUE){
 		LOG("\t\t\t\t***********GL_INVALID_VALUE\n");
-	else if(ret == GL_INVALID_OPERATION)
+	}else if(ret == GL_INVALID_OPERATION){
 		LOG("\t\t\t\t***********GL_INVALID_OPERATION\n");
-	else if(ret == GL_STACK_OVERFLOW)
+	}else if(ret == GL_STACK_OVERFLOW){
 		LOG("\t\t\t\t***********GL_STACK_OVERFLOW\n");
-	else if(ret == GL_STACK_UNDERFLOW)
+	}else if(ret == GL_STACK_UNDERFLOW){
 		LOG("\t\t\t\t***********GL_STACK_UNDERFLOW\n");
-	else if(ret == GL_OUT_OF_MEMORY)
+	}else if(ret == GL_OUT_OF_MEMORY){
 		LOG("\t\t\t\t***********GL_OUT_OF_MEMORY\n");
+	}
 	//if(ret != GL_NO_ERROR)
 	//	sleep(30);
 	return ret;
