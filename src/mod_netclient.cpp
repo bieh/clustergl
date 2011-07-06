@@ -157,7 +157,12 @@ int NetClientModule::internalWrite(void* buf, int nByte)
 
 void NetClientModule::sendBuffer()
 {
-	LOG("NetClientModule::sendBuffer()\n");
+	LOG("NetClientModule::sendBuffer(%d)\n", iSendBufPos);
+	for(int i=0;i<(int)mSockets.size();i++){
+		write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
+		write(mSockets[i], mSendBuf, iSendBufPos);
+	}
+	iSendBufPos = 0;
 }
 
 

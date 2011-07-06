@@ -91,6 +91,9 @@ void App::init(bool shared, const char *id)
 *******************************************************************************/
 bool App::tick()
 {
+	//LOG("tick()\n");
+	
+	thisFrame = new list<Instruction>();
 	
 	if(gConfig->enableStats){
 	    stats_begin();
@@ -112,7 +115,7 @@ bool App::tick()
 			return false;
 		}
 	}
-
+/*
 	//return appropriate frames
 	for(std::list<Instruction>::iterator iter = thisFrame->begin();
 	    iter != (*thisFrame).end(); iter++) {
@@ -124,6 +127,7 @@ bool App::tick()
 			}
 		}
 	}
+*/
 /*
 	//Sync frames if necessary
 	if(gConfig->syncRate > 0) {
@@ -162,6 +166,7 @@ bool App::tick()
 	}
 	thisFrame->clear();    
 */	
+	delete thisFrame;
 
 	return true;
 }

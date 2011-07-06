@@ -8,5 +8,5 @@ clean:
 		
 test:
 	cd runtime && \
-	gnome-terminal -e "./cgl-render testing" && \
+	gnome-terminal -e " gdb -ex run -quiet --args ./cgl-render testing" && \
 	gnome-terminal -e "./cgl-capture tests/lesson05/lesson05"

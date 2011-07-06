@@ -139,7 +139,9 @@ bool NetSrvModule::sync()
 
 int NetSrvModule::internalRead(byte *input, int nByte)
 {
-	if(bytesRemaining == 0){
+	//LOG("Read: %d (%d)\n", nByte, bytesRemaining);
+	
+	if(bytesRemaining <= 0){
 		recieveBuffer();
 	}
 	
@@ -161,6 +163,8 @@ void NetSrvModule::recieveBuffer(void)
 	//then read the buffer
 	mClientSocket->read(mRecieveBuf, bytesRemaining);
 	iRecieveBufPos = 0;
+	
+	LOG("bytesRemaining = %d\n", bytesRemaining);
 }
 
 

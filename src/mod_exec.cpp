@@ -274,6 +274,8 @@ void handlePerspective(std::list<Instruction>::iterator &iter){
 
 	const GLdouble pi = 3.1415926535897932384626433832795;
 	GLdouble fW, fH;
+	
+	LOG("%d, %d\n", gConfig->totalWidth, gConfig->totalHeight);
 
 	//calculate height, then adjust according to how different the
 	//programs aspect ratio and our ratio is

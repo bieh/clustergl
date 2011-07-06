@@ -25,8 +25,8 @@ Config::Config(string filename, string id){
     
     //Top level options
 	static cfg_opt_t opts[] = {
-		CFG_SIMPLE_INT(		(char *)("totalWidth"), 	&offsetX),
-		CFG_SIMPLE_INT(		(char *)("totalHeight"), 	&offsetY),
+		CFG_SIMPLE_INT(		(char *)("totalWidth"), 	&totalWidth),
+		CFG_SIMPLE_INT(		(char *)("totalHeight"), 	&totalHeight),
 		CFG_SIMPLE_INT(		(char *)("fakeWindowX"), 	&fakeWindowX),
 		CFG_SIMPLE_INT(		(char *)("fakeWindowY"), 	&fakeWindowY),
 		CFG_SIMPLE_INT(		(char *)("syncRate"),		&syncRate),
