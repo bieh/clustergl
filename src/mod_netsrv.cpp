@@ -164,7 +164,7 @@ void NetSrvModule::recieveBuffer(void)
 	mClientSocket->read(mRecieveBuf, bytesRemaining);
 	iRecieveBufPos = 0;
 	
-	LOG("bytesRemaining = %d\n", bytesRemaining);
+	//LOG("bytesRemaining = %d\n", bytesRemaining);
 }
 
 

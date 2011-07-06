@@ -31,6 +31,7 @@ Config::Config(string filename, string id){
 		CFG_SIMPLE_INT(		(char *)("fakeWindowY"), 	&fakeWindowY),
 		CFG_SIMPLE_INT(		(char *)("syncRate"),		&syncRate),
 		CFG_SIMPLE_BOOL(	(char *)("enableStats"),	&enableStats),
+		CFG_SIMPLE_BOOL(	(char *)("enableWindowPositioning"),	&enableWindowPositioning),
 		CFG_STR_LIST((char *)"capturePipeline", (char *)"{}", CFGF_NONE),
 		CFG_STR_LIST((char *)"outputPipeline", (char *)"{}", CFGF_NONE),
 		CFG_SEC(			(char *)"output", 	output_opts, CFGF_MULTI | CFGF_TITLE),

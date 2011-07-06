@@ -94,6 +94,25 @@ bool ExecModule::makeWindow()
 	//Disable mouse pointer
 	SDL_ShowCursor(SDL_DISABLE);
 
+	string title = "ClusterGL Output - " + gConfig->id;
+
+	SDL_WM_SetCaption(title.c_str(), NULL);
+	
+	if(gConfig->enableWindowPositioning){
+		
+		SDL_SysWMinfo info;
+		SDL_VERSION(&info.version);
+
+		if (SDL_GetWMInfo(&info) > 0 ) {
+		  if (info.subsystem == SDL_SYSWM_X11) {
+			XMoveWindow(info.info.x11.display, 
+						info.info.x11.window, 
+						gConfig->offsetX, gConfig->offsetY);
+		  }
+		}
+
+	}
+	
 	if (GLEW_OK != glewInit()) {
 		LOG("GLEW failed to start up for some reason\n");
 		return false;
@@ -113,7 +132,7 @@ bool ExecModule::process(list<Instruction> &list)
 		iter != list.end(); iter++) {
 		
 		if(iter->id >= 1700 || !mFunctions[iter->id]) {
-			LOG("Unimplemented %d AFTER STUFF\n", iter->id);
+			LOG("Unimplemented method %d, bailing out\n", iter->id);
 			return false;
 		}
 
@@ -123,7 +142,10 @@ bool ExecModule::process(list<Instruction> &list)
 		//TODO: Clean this up some more
 		if (iter->id == 305) {	 
 			handleViewport(iter);//glViewPort
-		}else if (iter->id == 176) {
+		}
+		
+		/*
+		else if (iter->id == 176) {
 			handleScissor(iter); //glScissor
 		}else if (iter->id == 296) {
 			handleOrtho(iter); //glOrtho
@@ -131,7 +153,9 @@ bool ExecModule::process(list<Instruction> &list)
 			handlePerspective(iter); //gluPerspective
 		}else if (iter->id == 291) {
 			handleLoadMatrix(iter); //glLoadMatrixf
-		}else {
+		}*/
+				
+		else {
 			mFunctions[iter->id](iter->args);
 		}
 	}
@@ -158,13 +182,18 @@ void handleViewport(std::list<Instruction>::iterator &iter){
 	GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
 	GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 	
-	glViewport((-gConfig->offsetX),0, gConfig->totalWidth, gConfig->totalHeight);
+	glViewport(-gConfig->offsetX,-gConfig->offsetY, 
+				gConfig->totalWidth, gConfig->totalHeight);
+	//glViewport(x,y,w,h);
+	
 	
 	//if(bezelCompensation){
 
 	//}else{
 	//	glViewport((-offsetX*screenWidth)/magic,0, gConfig->totalWidth, 4560*3.0/4.0);
 	//}
+	
+	LOG("handleViewport(%d,%d,%d,%d)\n",x,y,w,h);
 }
 
 void handleScissor(std::list<Instruction>::iterator &iter){
@@ -177,6 +206,8 @@ void handleScissor(std::list<Instruction>::iterator &iter){
 	//LOG("glScissor values %d %d %d %d\n", x, y, w, h);
 
 	glScissor(0, 0, gConfig->totalWidth, gConfig->totalHeight);
+	
+	LOG("handleScissor\n");
 }
 
 void handleOrtho(std::list<Instruction>::iterator &iter){
@@ -239,6 +270,8 @@ void handleOrtho(std::list<Instruction>::iterator &iter){
 		}
 	}
 	*/
+	
+	LOG("handleOrtho\n");
 }
 
 void handlePerspective(std::list<Instruction>::iterator &iter){
@@ -275,8 +308,6 @@ void handlePerspective(std::list<Instruction>::iterator &iter){
 	const GLdouble pi = 3.1415926535897932384626433832795;
 	GLdouble fW, fH;
 	
-	LOG("%d, %d\n", gConfig->totalWidth, gConfig->totalHeight);
-
 	//calculate height, then adjust according to how different the
 	//programs aspect ratio and our ratio is
 	//fW and fH are the equivalent glFrustum calculations using the gluPerspective values
@@ -305,6 +336,8 @@ void handlePerspective(std::list<Instruction>::iterator &iter){
 		//gluPerspective(fovy, aspect, zNear, zFar);
 	}
 	*/
+	
+	LOG("handlePerspective\n");
 }
 
 void handleLoadMatrix(std::list<Instruction>::iterator &iter){
@@ -327,6 +360,8 @@ void handleLoadMatrix(std::list<Instruction>::iterator &iter){
 	else {
 		glLoadMatrixf(m);
 	}
+	
+	LOG("handleLoadMatrix\n");
 }
 
 
@@ -396,6 +431,7 @@ void pushRet(const GLchar * val)
 //1499
 static void EXEC_CGLSwapBuffers(byte *commandbuf)
 {
+	//LOG("Swap!\n");
 	SDL_GL_SwapBuffers();
 }
 
