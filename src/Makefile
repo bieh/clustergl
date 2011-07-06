@@ -4,7 +4,7 @@
 
 
 #Output filename
-NAME= GL
+NAME= cgl
 
 
 #files
@@ -30,8 +30,8 @@ LDFLAGS=-lGL -lGLU -lconfuse -llzo2 -lz `sdl-config --cflags --libs` -lSDL_net -
 all: $(OBJS) $(NAME)
   
 $(NAME): $(OBJS) 
-	$(CXX) -o ../runtime/$@ $(OBJS_APP) $(CXXFLAGS) $(LDFLAGS)
-	$(CXX) -shared -o ../runtime/lib$@.so.1 $(OBJS_SHARED) $(CXXFLAGS) $(LDFLAGS) 
+	$(CXX) -o ../runtime/$@-render $(OBJS_APP) $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -shared -o ../runtime/lib$@-capture.so $(OBJS_SHARED) $(CXXFLAGS) $(LDFLAGS) 
 	
 #------------------------------------------------------#
 #					Test
