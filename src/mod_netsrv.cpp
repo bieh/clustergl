@@ -39,7 +39,7 @@ NetSrvModule::NetSrvModule()
 
 	//Bind the server socket
 	if (bind(mSocket, (struct sockaddr *) &addr,
-	sizeof(addr)) < 0) {
+			sizeof(addr)) < 0) {
 		LOG("Failed to bind the server socket NetSrvModule\n");
 		exit(1);
 	}
@@ -49,7 +49,7 @@ NetSrvModule::NetSrvModule()
 		exit(1);
 	}
 	
-	LOG("Waiting for connection\n");
+	LOG("Waiting for connection on port %d\n", gConfig->serverPort);
 
 	unsigned int clientlen = sizeof(clientaddr);
 	int client = 0;

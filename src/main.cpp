@@ -31,7 +31,6 @@ int App::run(int argc, char **argv)
 	mModules.push_back(new NetSrvModule());
 	//mModules.push_back(new InsertModule());
 	mModules.push_back(new ExecModule());
-	//mModules.push_back(new TextModule()); //output OpenGL method calls to console
 
 	while( tick() ){ 
 	    //run tick() until we decide to bail
@@ -52,10 +51,14 @@ int App::run_shared()
 		return 1;
 	}
 	
-	init(true, NULL);
-		
-	LOG("Loading modules for application intercept\n");
+	init(true, "capture");
 	
+	for(int i=0;i<gConfig->numOutputs;i++){
+		LOG("Found output: %s:%d\n", 
+				gConfig->outputAddresses[i].c_str(), 
+				gConfig->outputPorts[i]);
+	}
+			
 	//Set up the module chain
 	mModules.push_back(new AppModule(""));
 	//mModules.push_back(new TextModule()); 	
@@ -74,11 +77,10 @@ void App::init(bool shared, const char *id)
     printf("**********************************************\n");
 	printf(" ClusterGL(%s - %s)\n", bIsIntercept ? "intercept" : "renderer", id);
 	printf("**********************************************\n");	
-	printf("\n");
-	
+
     bIsIntercept = shared;
 
-	gConfig = new Config("cgl.conf", string(id));
+	gConfig = new Config("cgl.conf", string(id ? id : "null"));
 
 	bHasInit = true;
 }

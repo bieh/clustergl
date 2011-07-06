@@ -392,7 +392,7 @@ void pushRet(const GLchar * val)
 *******************************************************************************/
 
 //1499
-void EXEC_CGLSwapBuffers(byte *commandbuf)
+static void EXEC_CGLSwapBuffers(byte *commandbuf)
 {
 	SDL_GL_SwapBuffers();
 }
@@ -403,7 +403,7 @@ void EXEC_CGLSwapBuffers(byte *commandbuf)
 *******************************************************************************/
 
 //0
-void EXEC_glNewList(byte *commandbuf)
+static void EXEC_glNewList(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -413,7 +413,7 @@ void EXEC_glNewList(byte *commandbuf)
 
 
 //1
-void EXEC_glEndList(byte *commandbuf)
+static void EXEC_glEndList(byte *commandbuf)
 {
 
 	glEndList();
@@ -421,7 +421,7 @@ void EXEC_glEndList(byte *commandbuf)
 
 
 //2
-void EXEC_glCallList(byte *commandbuf)
+static void EXEC_glCallList(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -430,7 +430,7 @@ void EXEC_glCallList(byte *commandbuf)
 
 
 //3
-void EXEC_glCallLists(byte *commandbuf)
+static void EXEC_glCallLists(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -440,7 +440,7 @@ void EXEC_glCallLists(byte *commandbuf)
 
 
 //4
-void EXEC_glDeleteLists(byte *commandbuf)
+static void EXEC_glDeleteLists(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLsizei *range = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -450,7 +450,7 @@ void EXEC_glDeleteLists(byte *commandbuf)
 
 
 //5
-void EXEC_glGenLists(byte *commandbuf)
+static void EXEC_glGenLists(byte *commandbuf)
 {
 	GLsizei *range = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -459,7 +459,7 @@ void EXEC_glGenLists(byte *commandbuf)
 
 
 //6
-void EXEC_glListBase(byte *commandbuf)
+static void EXEC_glListBase(byte *commandbuf)
 {
 	GLuint *base = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -468,7 +468,7 @@ void EXEC_glListBase(byte *commandbuf)
 
 
 //7
-void EXEC_glBegin(byte *commandbuf)
+static void EXEC_glBegin(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	glBegin(*mode);
@@ -476,7 +476,7 @@ void EXEC_glBegin(byte *commandbuf)
 
 
 //8
-void EXEC_glBitmap(byte *commandbuf)
+static void EXEC_glBitmap(byte *commandbuf)
 {
 	GLsizei *width = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	GLsizei *height = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -490,7 +490,7 @@ void EXEC_glBitmap(byte *commandbuf)
 
 
 //9
-void EXEC_glColor3b(byte *commandbuf)
+static void EXEC_glColor3b(byte *commandbuf)
 {
 	GLbyte *red = (GLbyte*)commandbuf;   commandbuf += sizeof(GLbyte);
 	GLbyte *green = (GLbyte*)commandbuf;     commandbuf += sizeof(GLbyte);
@@ -501,7 +501,7 @@ void EXEC_glColor3b(byte *commandbuf)
 
 
 //10
-void EXEC_glColor3bv(byte *commandbuf)
+static void EXEC_glColor3bv(byte *commandbuf)
 {
 
 	glColor3bv((const GLbyte *)popBuf());
@@ -509,7 +509,7 @@ void EXEC_glColor3bv(byte *commandbuf)
 
 
 //11
-void EXEC_glColor3d(byte *commandbuf)
+static void EXEC_glColor3d(byte *commandbuf)
 {
 	GLdouble *red = (GLdouble*)commandbuf;   commandbuf += sizeof(GLdouble);
 	GLdouble *green = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -520,7 +520,7 @@ void EXEC_glColor3d(byte *commandbuf)
 
 
 //12
-void EXEC_glColor3dv(byte *commandbuf)
+static void EXEC_glColor3dv(byte *commandbuf)
 {
 
 	glColor3dv((const GLdouble *)popBuf());
@@ -528,7 +528,7 @@ void EXEC_glColor3dv(byte *commandbuf)
 
 
 //13
-void EXEC_glColor3f(byte *commandbuf)
+static void EXEC_glColor3f(byte *commandbuf)
 {
 	GLfloat *red = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
 	GLfloat *green = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -539,7 +539,7 @@ void EXEC_glColor3f(byte *commandbuf)
 
 
 //14
-void EXEC_glColor3fv(byte *commandbuf)
+static void EXEC_glColor3fv(byte *commandbuf)
 {
 
 	glColor3fv((const GLfloat *)popBuf());
@@ -547,7 +547,7 @@ void EXEC_glColor3fv(byte *commandbuf)
 
 
 //15
-void EXEC_glColor3i(byte *commandbuf)
+static void EXEC_glColor3i(byte *commandbuf)
 {
 	GLint *red = (GLint*)commandbuf;     commandbuf += sizeof(GLint);
 	GLint *green = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -558,7 +558,7 @@ void EXEC_glColor3i(byte *commandbuf)
 
 
 //16
-void EXEC_glColor3iv(byte *commandbuf)
+static void EXEC_glColor3iv(byte *commandbuf)
 {
 
 	glColor3iv((const GLint *)popBuf());
@@ -566,7 +566,7 @@ void EXEC_glColor3iv(byte *commandbuf)
 
 
 //17
-void EXEC_glColor3s(byte *commandbuf)
+static void EXEC_glColor3s(byte *commandbuf)
 {
 	GLshort *red = (GLshort*)commandbuf;     commandbuf += sizeof(GLshort);
 	GLshort *green = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -577,7 +577,7 @@ void EXEC_glColor3s(byte *commandbuf)
 
 
 //18
-void EXEC_glColor3sv(byte *commandbuf)
+static void EXEC_glColor3sv(byte *commandbuf)
 {
 
 	glColor3sv((const GLshort *)popBuf());
@@ -585,7 +585,7 @@ void EXEC_glColor3sv(byte *commandbuf)
 
 
 //19
-void EXEC_glColor3ub(byte *commandbuf)
+static void EXEC_glColor3ub(byte *commandbuf)
 {
 	GLubyte *red = (GLubyte*)commandbuf;     commandbuf += sizeof(GLubyte);
 	GLubyte *green = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -596,7 +596,7 @@ void EXEC_glColor3ub(byte *commandbuf)
 
 
 //20
-void EXEC_glColor3ubv(byte *commandbuf)
+static void EXEC_glColor3ubv(byte *commandbuf)
 {
 
 	glColor3ubv((const GLubyte *)popBuf());
@@ -604,7 +604,7 @@ void EXEC_glColor3ubv(byte *commandbuf)
 
 
 //21
-void EXEC_glColor3ui(byte *commandbuf)
+static void EXEC_glColor3ui(byte *commandbuf)
 {
 	GLuint *red = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *green = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -615,7 +615,7 @@ void EXEC_glColor3ui(byte *commandbuf)
 
 
 //22
-void EXEC_glColor3uiv(byte *commandbuf)
+static void EXEC_glColor3uiv(byte *commandbuf)
 {
 
 	glColor3uiv((const GLuint *)popBuf());
@@ -623,7 +623,7 @@ void EXEC_glColor3uiv(byte *commandbuf)
 
 
 //23
-void EXEC_glColor3us(byte *commandbuf)
+static void EXEC_glColor3us(byte *commandbuf)
 {
 	GLushort *red = (GLushort*)commandbuf;   commandbuf += sizeof(GLushort);
 	GLushort *green = (GLushort*)commandbuf;     commandbuf += sizeof(GLushort);
@@ -634,7 +634,7 @@ void EXEC_glColor3us(byte *commandbuf)
 
 
 //24
-void EXEC_glColor3usv(byte *commandbuf)
+static void EXEC_glColor3usv(byte *commandbuf)
 {
 
 	glColor3usv((const GLushort *)popBuf());
@@ -642,7 +642,7 @@ void EXEC_glColor3usv(byte *commandbuf)
 
 
 //25
-void EXEC_glColor4b(byte *commandbuf)
+static void EXEC_glColor4b(byte *commandbuf)
 {
 	GLbyte *red = (GLbyte*)commandbuf;   commandbuf += sizeof(GLbyte);
 	GLbyte *green = (GLbyte*)commandbuf;     commandbuf += sizeof(GLbyte);
@@ -654,7 +654,7 @@ void EXEC_glColor4b(byte *commandbuf)
 
 
 //26
-void EXEC_glColor4bv(byte *commandbuf)
+static void EXEC_glColor4bv(byte *commandbuf)
 {
 
 	glColor4bv((const GLbyte *)popBuf());
@@ -662,7 +662,7 @@ void EXEC_glColor4bv(byte *commandbuf)
 
 
 //27
-void EXEC_glColor4d(byte *commandbuf)
+static void EXEC_glColor4d(byte *commandbuf)
 {
 	GLdouble *red = (GLdouble*)commandbuf;   commandbuf += sizeof(GLdouble);
 	GLdouble *green = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -674,7 +674,7 @@ void EXEC_glColor4d(byte *commandbuf)
 
 
 //28
-void EXEC_glColor4dv(byte *commandbuf)
+static void EXEC_glColor4dv(byte *commandbuf)
 {
 
 	glColor4dv((const GLdouble *)popBuf());
@@ -682,7 +682,7 @@ void EXEC_glColor4dv(byte *commandbuf)
 
 
 //29
-void EXEC_glColor4f(byte *commandbuf)
+static void EXEC_glColor4f(byte *commandbuf)
 {
 	GLfloat *red = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
 	GLfloat *green = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -694,7 +694,7 @@ void EXEC_glColor4f(byte *commandbuf)
 
 
 //30
-void EXEC_glColor4fv(byte *commandbuf)
+static void EXEC_glColor4fv(byte *commandbuf)
 {
 
 	glColor4fv((const GLfloat *)popBuf());
@@ -702,7 +702,7 @@ void EXEC_glColor4fv(byte *commandbuf)
 
 
 //31
-void EXEC_glColor4i(byte *commandbuf)
+static void EXEC_glColor4i(byte *commandbuf)
 {
 	GLint *red = (GLint*)commandbuf;     commandbuf += sizeof(GLint);
 	GLint *green = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -714,7 +714,7 @@ void EXEC_glColor4i(byte *commandbuf)
 
 
 //32
-void EXEC_glColor4iv(byte *commandbuf)
+static void EXEC_glColor4iv(byte *commandbuf)
 {
 
 	glColor4iv((const GLint *)popBuf());
@@ -722,7 +722,7 @@ void EXEC_glColor4iv(byte *commandbuf)
 
 
 //33
-void EXEC_glColor4s(byte *commandbuf)
+static void EXEC_glColor4s(byte *commandbuf)
 {
 	GLshort *red = (GLshort*)commandbuf;     commandbuf += sizeof(GLshort);
 	GLshort *green = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -734,7 +734,7 @@ void EXEC_glColor4s(byte *commandbuf)
 
 
 //34
-void EXEC_glColor4sv(byte *commandbuf)
+static void EXEC_glColor4sv(byte *commandbuf)
 {
 
 	glColor4sv((const GLshort *)popBuf());
@@ -742,7 +742,7 @@ void EXEC_glColor4sv(byte *commandbuf)
 
 
 //35
-void EXEC_glColor4ub(byte *commandbuf)
+static void EXEC_glColor4ub(byte *commandbuf)
 {
 	GLubyte *red = (GLubyte*)commandbuf;     commandbuf += sizeof(GLubyte);
 	GLubyte *green = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -754,7 +754,7 @@ void EXEC_glColor4ub(byte *commandbuf)
 
 
 //36
-void EXEC_glColor4ubv(byte *commandbuf)
+static void EXEC_glColor4ubv(byte *commandbuf)
 {
 
 	glColor4ubv((const GLubyte *)popBuf());
@@ -762,7 +762,7 @@ void EXEC_glColor4ubv(byte *commandbuf)
 
 
 //37
-void EXEC_glColor4ui(byte *commandbuf)
+static void EXEC_glColor4ui(byte *commandbuf)
 {
 	GLuint *red = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *green = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -774,7 +774,7 @@ void EXEC_glColor4ui(byte *commandbuf)
 
 
 //38
-void EXEC_glColor4uiv(byte *commandbuf)
+static void EXEC_glColor4uiv(byte *commandbuf)
 {
 
 	glColor4uiv((const GLuint *)popBuf());
@@ -782,7 +782,7 @@ void EXEC_glColor4uiv(byte *commandbuf)
 
 
 //39
-void EXEC_glColor4us(byte *commandbuf)
+static void EXEC_glColor4us(byte *commandbuf)
 {
 	GLushort *red = (GLushort*)commandbuf;   commandbuf += sizeof(GLushort);
 	GLushort *green = (GLushort*)commandbuf;     commandbuf += sizeof(GLushort);
@@ -794,7 +794,7 @@ void EXEC_glColor4us(byte *commandbuf)
 
 
 //40
-void EXEC_glColor4usv(byte *commandbuf)
+static void EXEC_glColor4usv(byte *commandbuf)
 {
 
 	glColor4usv((const GLushort *)popBuf());
@@ -802,7 +802,7 @@ void EXEC_glColor4usv(byte *commandbuf)
 
 
 //41
-void EXEC_glEdgeFlag(byte *commandbuf)
+static void EXEC_glEdgeFlag(byte *commandbuf)
 {
 	GLboolean *flag = (GLboolean*)commandbuf;    commandbuf += sizeof(GLboolean);
 
@@ -811,7 +811,7 @@ void EXEC_glEdgeFlag(byte *commandbuf)
 
 
 //42
-void EXEC_glEdgeFlagv(byte *commandbuf)
+static void EXEC_glEdgeFlagv(byte *commandbuf)
 {
 
 	glEdgeFlagv((const GLboolean *)popBuf());
@@ -819,7 +819,7 @@ void EXEC_glEdgeFlagv(byte *commandbuf)
 
 
 //43
-void EXEC_glEnd(byte *commandbuf)
+static void EXEC_glEnd(byte *commandbuf)
 {
 
 	glEnd();
@@ -827,7 +827,7 @@ void EXEC_glEnd(byte *commandbuf)
 
 
 //44
-void EXEC_glIndexd(byte *commandbuf)
+static void EXEC_glIndexd(byte *commandbuf)
 {
 	GLdouble *c = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 
@@ -836,7 +836,7 @@ void EXEC_glIndexd(byte *commandbuf)
 
 
 //45
-void EXEC_glIndexdv(byte *commandbuf)
+static void EXEC_glIndexdv(byte *commandbuf)
 {
 
 	glIndexdv((const GLdouble *)popBuf());
@@ -844,7 +844,7 @@ void EXEC_glIndexdv(byte *commandbuf)
 
 
 //46
-void EXEC_glIndexf(byte *commandbuf)
+static void EXEC_glIndexf(byte *commandbuf)
 {
 	GLfloat *c = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 
@@ -853,7 +853,7 @@ void EXEC_glIndexf(byte *commandbuf)
 
 
 //47
-void EXEC_glIndexfv(byte *commandbuf)
+static void EXEC_glIndexfv(byte *commandbuf)
 {
 
 	glIndexfv((const GLfloat *)popBuf());
@@ -861,7 +861,7 @@ void EXEC_glIndexfv(byte *commandbuf)
 
 
 //48
-void EXEC_glIndexi(byte *commandbuf)
+static void EXEC_glIndexi(byte *commandbuf)
 {
 	GLint *c = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -870,7 +870,7 @@ void EXEC_glIndexi(byte *commandbuf)
 
 
 //49
-void EXEC_glIndexiv(byte *commandbuf)
+static void EXEC_glIndexiv(byte *commandbuf)
 {
 
 	glIndexiv((const GLint *)popBuf());
@@ -878,7 +878,7 @@ void EXEC_glIndexiv(byte *commandbuf)
 
 
 //50
-void EXEC_glIndexs(byte *commandbuf)
+static void EXEC_glIndexs(byte *commandbuf)
 {
 	GLshort *c = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 
@@ -887,7 +887,7 @@ void EXEC_glIndexs(byte *commandbuf)
 
 
 //51
-void EXEC_glIndexsv(byte *commandbuf)
+static void EXEC_glIndexsv(byte *commandbuf)
 {
 
 	glIndexsv((const GLshort *)popBuf());
@@ -895,7 +895,7 @@ void EXEC_glIndexsv(byte *commandbuf)
 
 
 //52
-void EXEC_glNormal3b(byte *commandbuf)
+static void EXEC_glNormal3b(byte *commandbuf)
 {
 	GLbyte *nx = (GLbyte*)commandbuf;    commandbuf += sizeof(GLbyte);
 	GLbyte *ny = (GLbyte*)commandbuf;    commandbuf += sizeof(GLbyte);
@@ -906,7 +906,7 @@ void EXEC_glNormal3b(byte *commandbuf)
 
 
 //53
-void EXEC_glNormal3bv(byte *commandbuf)
+static void EXEC_glNormal3bv(byte *commandbuf)
 {
 
 	glNormal3bv((const GLbyte *)popBuf());
@@ -914,7 +914,7 @@ void EXEC_glNormal3bv(byte *commandbuf)
 
 
 //54
-void EXEC_glNormal3d(byte *commandbuf)
+static void EXEC_glNormal3d(byte *commandbuf)
 {
 	GLdouble *nx = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
 	GLdouble *ny = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -925,7 +925,7 @@ void EXEC_glNormal3d(byte *commandbuf)
 
 
 //55
-void EXEC_glNormal3dv(byte *commandbuf)
+static void EXEC_glNormal3dv(byte *commandbuf)
 {
 
 	glNormal3dv((const GLdouble *)popBuf());
@@ -933,7 +933,7 @@ void EXEC_glNormal3dv(byte *commandbuf)
 
 
 //56
-void EXEC_glNormal3f(byte *commandbuf)
+static void EXEC_glNormal3f(byte *commandbuf)
 {
 	GLfloat *nx = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *ny = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -944,7 +944,7 @@ void EXEC_glNormal3f(byte *commandbuf)
 
 
 //57
-void EXEC_glNormal3fv(byte *commandbuf)
+static void EXEC_glNormal3fv(byte *commandbuf)
 {
 
 	glNormal3fv((const GLfloat *)popBuf());
@@ -952,7 +952,7 @@ void EXEC_glNormal3fv(byte *commandbuf)
 
 
 //58
-void EXEC_glNormal3i(byte *commandbuf)
+static void EXEC_glNormal3i(byte *commandbuf)
 {
 	GLint *nx = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLint *ny = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -963,7 +963,7 @@ void EXEC_glNormal3i(byte *commandbuf)
 
 
 //59
-void EXEC_glNormal3iv(byte *commandbuf)
+static void EXEC_glNormal3iv(byte *commandbuf)
 {
 
 	glNormal3iv((const GLint *)popBuf());
@@ -971,7 +971,7 @@ void EXEC_glNormal3iv(byte *commandbuf)
 
 
 //60
-void EXEC_glNormal3s(byte *commandbuf)
+static void EXEC_glNormal3s(byte *commandbuf)
 {
 	GLshort *nx = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
 	GLshort *ny = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
@@ -982,7 +982,7 @@ void EXEC_glNormal3s(byte *commandbuf)
 
 
 //61
-void EXEC_glNormal3sv(byte *commandbuf)
+static void EXEC_glNormal3sv(byte *commandbuf)
 {
 
 	glNormal3sv((const GLshort *)popBuf());
@@ -990,7 +990,7 @@ void EXEC_glNormal3sv(byte *commandbuf)
 
 
 //62
-void EXEC_glRasterPos2d(byte *commandbuf)
+static void EXEC_glRasterPos2d(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1000,7 +1000,7 @@ void EXEC_glRasterPos2d(byte *commandbuf)
 
 
 //63
-void EXEC_glRasterPos2dv(byte *commandbuf)
+static void EXEC_glRasterPos2dv(byte *commandbuf)
 {
 
 	glRasterPos2dv((const GLdouble *)popBuf());
@@ -1008,7 +1008,7 @@ void EXEC_glRasterPos2dv(byte *commandbuf)
 
 
 //64
-void EXEC_glRasterPos2f(byte *commandbuf)
+static void EXEC_glRasterPos2f(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1018,7 +1018,7 @@ void EXEC_glRasterPos2f(byte *commandbuf)
 
 
 //65
-void EXEC_glRasterPos2fv(byte *commandbuf)
+static void EXEC_glRasterPos2fv(byte *commandbuf)
 {
 
 	glRasterPos2fv((const GLfloat *)popBuf());
@@ -1026,7 +1026,7 @@ void EXEC_glRasterPos2fv(byte *commandbuf)
 
 
 //66
-void EXEC_glRasterPos2i(byte *commandbuf)
+static void EXEC_glRasterPos2i(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1036,7 +1036,7 @@ void EXEC_glRasterPos2i(byte *commandbuf)
 
 
 //67
-void EXEC_glRasterPos2iv(byte *commandbuf)
+static void EXEC_glRasterPos2iv(byte *commandbuf)
 {
 
 	glRasterPos2iv((const GLint *)popBuf());
@@ -1044,7 +1044,7 @@ void EXEC_glRasterPos2iv(byte *commandbuf)
 
 
 //68
-void EXEC_glRasterPos2s(byte *commandbuf)
+static void EXEC_glRasterPos2s(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1054,7 +1054,7 @@ void EXEC_glRasterPos2s(byte *commandbuf)
 
 
 //69
-void EXEC_glRasterPos2sv(byte *commandbuf)
+static void EXEC_glRasterPos2sv(byte *commandbuf)
 {
 
 	glRasterPos2sv((const GLshort *)popBuf());
@@ -1062,7 +1062,7 @@ void EXEC_glRasterPos2sv(byte *commandbuf)
 
 
 //70
-void EXEC_glRasterPos3d(byte *commandbuf)
+static void EXEC_glRasterPos3d(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1073,7 +1073,7 @@ void EXEC_glRasterPos3d(byte *commandbuf)
 
 
 //71
-void EXEC_glRasterPos3dv(byte *commandbuf)
+static void EXEC_glRasterPos3dv(byte *commandbuf)
 {
 
 	glRasterPos3dv((const GLdouble *)popBuf());
@@ -1081,7 +1081,7 @@ void EXEC_glRasterPos3dv(byte *commandbuf)
 
 
 //72
-void EXEC_glRasterPos3f(byte *commandbuf)
+static void EXEC_glRasterPos3f(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1092,7 +1092,7 @@ void EXEC_glRasterPos3f(byte *commandbuf)
 
 
 //73
-void EXEC_glRasterPos3fv(byte *commandbuf)
+static void EXEC_glRasterPos3fv(byte *commandbuf)
 {
 
 	glRasterPos3fv((const GLfloat *)popBuf());
@@ -1100,7 +1100,7 @@ void EXEC_glRasterPos3fv(byte *commandbuf)
 
 
 //74
-void EXEC_glRasterPos3i(byte *commandbuf)
+static void EXEC_glRasterPos3i(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1111,7 +1111,7 @@ void EXEC_glRasterPos3i(byte *commandbuf)
 
 
 //75
-void EXEC_glRasterPos3iv(byte *commandbuf)
+static void EXEC_glRasterPos3iv(byte *commandbuf)
 {
 
 	glRasterPos3iv((const GLint *)popBuf());
@@ -1119,7 +1119,7 @@ void EXEC_glRasterPos3iv(byte *commandbuf)
 
 
 //76
-void EXEC_glRasterPos3s(byte *commandbuf)
+static void EXEC_glRasterPos3s(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1130,7 +1130,7 @@ void EXEC_glRasterPos3s(byte *commandbuf)
 
 
 //77
-void EXEC_glRasterPos3sv(byte *commandbuf)
+static void EXEC_glRasterPos3sv(byte *commandbuf)
 {
 
 	glRasterPos3sv((const GLshort *)popBuf());
@@ -1138,7 +1138,7 @@ void EXEC_glRasterPos3sv(byte *commandbuf)
 
 
 //78
-void EXEC_glRasterPos4d(byte *commandbuf)
+static void EXEC_glRasterPos4d(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1150,7 +1150,7 @@ void EXEC_glRasterPos4d(byte *commandbuf)
 
 
 //79
-void EXEC_glRasterPos4dv(byte *commandbuf)
+static void EXEC_glRasterPos4dv(byte *commandbuf)
 {
 
 	glRasterPos4dv((const GLdouble *)popBuf());
@@ -1158,7 +1158,7 @@ void EXEC_glRasterPos4dv(byte *commandbuf)
 
 
 //80
-void EXEC_glRasterPos4f(byte *commandbuf)
+static void EXEC_glRasterPos4f(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1170,7 +1170,7 @@ void EXEC_glRasterPos4f(byte *commandbuf)
 
 
 //81
-void EXEC_glRasterPos4fv(byte *commandbuf)
+static void EXEC_glRasterPos4fv(byte *commandbuf)
 {
 
 	glRasterPos4fv((const GLfloat *)popBuf());
@@ -1178,7 +1178,7 @@ void EXEC_glRasterPos4fv(byte *commandbuf)
 
 
 //82
-void EXEC_glRasterPos4i(byte *commandbuf)
+static void EXEC_glRasterPos4i(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1190,7 +1190,7 @@ void EXEC_glRasterPos4i(byte *commandbuf)
 
 
 //83
-void EXEC_glRasterPos4iv(byte *commandbuf)
+static void EXEC_glRasterPos4iv(byte *commandbuf)
 {
 
 	glRasterPos4iv((const GLint *)popBuf());
@@ -1198,7 +1198,7 @@ void EXEC_glRasterPos4iv(byte *commandbuf)
 
 
 //84
-void EXEC_glRasterPos4s(byte *commandbuf)
+static void EXEC_glRasterPos4s(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1210,7 +1210,7 @@ void EXEC_glRasterPos4s(byte *commandbuf)
 
 
 //85
-void EXEC_glRasterPos4sv(byte *commandbuf)
+static void EXEC_glRasterPos4sv(byte *commandbuf)
 {
 
 	glRasterPos4sv((const GLshort *)popBuf());
@@ -1218,7 +1218,7 @@ void EXEC_glRasterPos4sv(byte *commandbuf)
 
 
 //86
-void EXEC_glRectd(byte *commandbuf)
+static void EXEC_glRectd(byte *commandbuf)
 {
 	GLdouble *x1 = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
 	GLdouble *y1 = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -1230,7 +1230,7 @@ void EXEC_glRectd(byte *commandbuf)
 
 
 //87
-void EXEC_glRectdv(byte *commandbuf)
+static void EXEC_glRectdv(byte *commandbuf)
 {
 
 	glRectdv((const GLdouble *)popBuf(), (const GLdouble *)popBuf());
@@ -1238,7 +1238,7 @@ void EXEC_glRectdv(byte *commandbuf)
 
 
 //88
-void EXEC_glRectf(byte *commandbuf)
+static void EXEC_glRectf(byte *commandbuf)
 {
 	GLfloat *x1 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *y1 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -1250,7 +1250,7 @@ void EXEC_glRectf(byte *commandbuf)
 
 
 //89
-void EXEC_glRectfv(byte *commandbuf)
+static void EXEC_glRectfv(byte *commandbuf)
 {
 
 	glRectfv((const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -1258,7 +1258,7 @@ void EXEC_glRectfv(byte *commandbuf)
 
 
 //90
-void EXEC_glRecti(byte *commandbuf)
+static void EXEC_glRecti(byte *commandbuf)
 {
 	GLint *x1 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLint *y1 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -1270,7 +1270,7 @@ void EXEC_glRecti(byte *commandbuf)
 
 
 //91
-void EXEC_glRectiv(byte *commandbuf)
+static void EXEC_glRectiv(byte *commandbuf)
 {
 
 	glRectiv((const GLint *)popBuf(), (const GLint *)popBuf());
@@ -1278,7 +1278,7 @@ void EXEC_glRectiv(byte *commandbuf)
 
 
 //92
-void EXEC_glRects(byte *commandbuf)
+static void EXEC_glRects(byte *commandbuf)
 {
 	GLshort *x1 = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
 	GLshort *y1 = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
@@ -1290,7 +1290,7 @@ void EXEC_glRects(byte *commandbuf)
 
 
 //93
-void EXEC_glRectsv(byte *commandbuf)
+static void EXEC_glRectsv(byte *commandbuf)
 {
 
 	glRectsv((const GLshort *)popBuf(), (const GLshort *)popBuf());
@@ -1298,7 +1298,7 @@ void EXEC_glRectsv(byte *commandbuf)
 
 
 //94
-void EXEC_glTexCoord1d(byte *commandbuf)
+static void EXEC_glTexCoord1d(byte *commandbuf)
 {
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 
@@ -1307,7 +1307,7 @@ void EXEC_glTexCoord1d(byte *commandbuf)
 
 
 //95
-void EXEC_glTexCoord1dv(byte *commandbuf)
+static void EXEC_glTexCoord1dv(byte *commandbuf)
 {
 
 	glTexCoord1dv((const GLdouble *)popBuf());
@@ -1315,7 +1315,7 @@ void EXEC_glTexCoord1dv(byte *commandbuf)
 
 
 //96
-void EXEC_glTexCoord1f(byte *commandbuf)
+static void EXEC_glTexCoord1f(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 
@@ -1324,7 +1324,7 @@ void EXEC_glTexCoord1f(byte *commandbuf)
 
 
 //97
-void EXEC_glTexCoord1fv(byte *commandbuf)
+static void EXEC_glTexCoord1fv(byte *commandbuf)
 {
 
 	glTexCoord1fv((const GLfloat *)popBuf());
@@ -1332,7 +1332,7 @@ void EXEC_glTexCoord1fv(byte *commandbuf)
 
 
 //98
-void EXEC_glTexCoord1i(byte *commandbuf)
+static void EXEC_glTexCoord1i(byte *commandbuf)
 {
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -1341,7 +1341,7 @@ void EXEC_glTexCoord1i(byte *commandbuf)
 
 
 //99
-void EXEC_glTexCoord1iv(byte *commandbuf)
+static void EXEC_glTexCoord1iv(byte *commandbuf)
 {
 
 	glTexCoord1iv((const GLint *)popBuf());
@@ -1349,7 +1349,7 @@ void EXEC_glTexCoord1iv(byte *commandbuf)
 
 
 //100
-void EXEC_glTexCoord1s(byte *commandbuf)
+static void EXEC_glTexCoord1s(byte *commandbuf)
 {
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 
@@ -1358,7 +1358,7 @@ void EXEC_glTexCoord1s(byte *commandbuf)
 
 
 //101
-void EXEC_glTexCoord1sv(byte *commandbuf)
+static void EXEC_glTexCoord1sv(byte *commandbuf)
 {
 
 	glTexCoord1sv((const GLshort *)popBuf());
@@ -1366,7 +1366,7 @@ void EXEC_glTexCoord1sv(byte *commandbuf)
 
 
 //102
-void EXEC_glTexCoord2d(byte *commandbuf)
+static void EXEC_glTexCoord2d(byte *commandbuf)
 {
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *t = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1376,7 +1376,7 @@ void EXEC_glTexCoord2d(byte *commandbuf)
 
 
 //103
-void EXEC_glTexCoord2dv(byte *commandbuf)
+static void EXEC_glTexCoord2dv(byte *commandbuf)
 {
 
 	glTexCoord2dv((const GLdouble *)popBuf());
@@ -1384,7 +1384,7 @@ void EXEC_glTexCoord2dv(byte *commandbuf)
 
 
 //104
-void EXEC_glTexCoord2f(byte *commandbuf)
+static void EXEC_glTexCoord2f(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1394,7 +1394,7 @@ void EXEC_glTexCoord2f(byte *commandbuf)
 
 
 //105
-void EXEC_glTexCoord2fv(byte *commandbuf)
+static void EXEC_glTexCoord2fv(byte *commandbuf)
 {
 
 	glTexCoord2fv((const GLfloat *)popBuf());
@@ -1402,7 +1402,7 @@ void EXEC_glTexCoord2fv(byte *commandbuf)
 
 
 //106
-void EXEC_glTexCoord2i(byte *commandbuf)
+static void EXEC_glTexCoord2i(byte *commandbuf)
 {
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *t = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1412,7 +1412,7 @@ void EXEC_glTexCoord2i(byte *commandbuf)
 
 
 //107
-void EXEC_glTexCoord2iv(byte *commandbuf)
+static void EXEC_glTexCoord2iv(byte *commandbuf)
 {
 
 	glTexCoord2iv((const GLint *)popBuf());
@@ -1420,7 +1420,7 @@ void EXEC_glTexCoord2iv(byte *commandbuf)
 
 
 //108
-void EXEC_glTexCoord2s(byte *commandbuf)
+static void EXEC_glTexCoord2s(byte *commandbuf)
 {
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *t = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1430,7 +1430,7 @@ void EXEC_glTexCoord2s(byte *commandbuf)
 
 
 //109
-void EXEC_glTexCoord2sv(byte *commandbuf)
+static void EXEC_glTexCoord2sv(byte *commandbuf)
 {
 
 	glTexCoord2sv((const GLshort *)popBuf());
@@ -1438,7 +1438,7 @@ void EXEC_glTexCoord2sv(byte *commandbuf)
 
 
 //110
-void EXEC_glTexCoord3d(byte *commandbuf)
+static void EXEC_glTexCoord3d(byte *commandbuf)
 {
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *t = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1449,7 +1449,7 @@ void EXEC_glTexCoord3d(byte *commandbuf)
 
 
 //111
-void EXEC_glTexCoord3dv(byte *commandbuf)
+static void EXEC_glTexCoord3dv(byte *commandbuf)
 {
 
 	glTexCoord3dv((const GLdouble *)popBuf());
@@ -1457,7 +1457,7 @@ void EXEC_glTexCoord3dv(byte *commandbuf)
 
 
 //112
-void EXEC_glTexCoord3f(byte *commandbuf)
+static void EXEC_glTexCoord3f(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1468,7 +1468,7 @@ void EXEC_glTexCoord3f(byte *commandbuf)
 
 
 //113
-void EXEC_glTexCoord3fv(byte *commandbuf)
+static void EXEC_glTexCoord3fv(byte *commandbuf)
 {
 
 	glTexCoord3fv((const GLfloat *)popBuf());
@@ -1476,7 +1476,7 @@ void EXEC_glTexCoord3fv(byte *commandbuf)
 
 
 //114
-void EXEC_glTexCoord3i(byte *commandbuf)
+static void EXEC_glTexCoord3i(byte *commandbuf)
 {
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *t = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1487,7 +1487,7 @@ void EXEC_glTexCoord3i(byte *commandbuf)
 
 
 //115
-void EXEC_glTexCoord3iv(byte *commandbuf)
+static void EXEC_glTexCoord3iv(byte *commandbuf)
 {
 
 	glTexCoord3iv((const GLint *)popBuf());
@@ -1495,7 +1495,7 @@ void EXEC_glTexCoord3iv(byte *commandbuf)
 
 
 //116
-void EXEC_glTexCoord3s(byte *commandbuf)
+static void EXEC_glTexCoord3s(byte *commandbuf)
 {
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *t = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1506,7 +1506,7 @@ void EXEC_glTexCoord3s(byte *commandbuf)
 
 
 //117
-void EXEC_glTexCoord3sv(byte *commandbuf)
+static void EXEC_glTexCoord3sv(byte *commandbuf)
 {
 
 	glTexCoord3sv((const GLshort *)popBuf());
@@ -1514,7 +1514,7 @@ void EXEC_glTexCoord3sv(byte *commandbuf)
 
 
 //118
-void EXEC_glTexCoord4d(byte *commandbuf)
+static void EXEC_glTexCoord4d(byte *commandbuf)
 {
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *t = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1526,7 +1526,7 @@ void EXEC_glTexCoord4d(byte *commandbuf)
 
 
 //119
-void EXEC_glTexCoord4dv(byte *commandbuf)
+static void EXEC_glTexCoord4dv(byte *commandbuf)
 {
 
 	glTexCoord4dv((const GLdouble *)popBuf());
@@ -1534,7 +1534,7 @@ void EXEC_glTexCoord4dv(byte *commandbuf)
 
 
 //120
-void EXEC_glTexCoord4f(byte *commandbuf)
+static void EXEC_glTexCoord4f(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1546,7 +1546,7 @@ void EXEC_glTexCoord4f(byte *commandbuf)
 
 
 //121
-void EXEC_glTexCoord4fv(byte *commandbuf)
+static void EXEC_glTexCoord4fv(byte *commandbuf)
 {
 
 	glTexCoord4fv((const GLfloat *)popBuf());
@@ -1554,7 +1554,7 @@ void EXEC_glTexCoord4fv(byte *commandbuf)
 
 
 //122
-void EXEC_glTexCoord4i(byte *commandbuf)
+static void EXEC_glTexCoord4i(byte *commandbuf)
 {
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *t = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1566,7 +1566,7 @@ void EXEC_glTexCoord4i(byte *commandbuf)
 
 
 //123
-void EXEC_glTexCoord4iv(byte *commandbuf)
+static void EXEC_glTexCoord4iv(byte *commandbuf)
 {
 
 	glTexCoord4iv((const GLint *)popBuf());
@@ -1574,7 +1574,7 @@ void EXEC_glTexCoord4iv(byte *commandbuf)
 
 
 //124
-void EXEC_glTexCoord4s(byte *commandbuf)
+static void EXEC_glTexCoord4s(byte *commandbuf)
 {
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *t = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1586,7 +1586,7 @@ void EXEC_glTexCoord4s(byte *commandbuf)
 
 
 //125
-void EXEC_glTexCoord4sv(byte *commandbuf)
+static void EXEC_glTexCoord4sv(byte *commandbuf)
 {
 
 	glTexCoord4sv((const GLshort *)popBuf());
@@ -1594,7 +1594,7 @@ void EXEC_glTexCoord4sv(byte *commandbuf)
 
 
 //126
-void EXEC_glVertex2d(byte *commandbuf)
+static void EXEC_glVertex2d(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1604,7 +1604,7 @@ void EXEC_glVertex2d(byte *commandbuf)
 
 
 //127
-void EXEC_glVertex2dv(byte *commandbuf)
+static void EXEC_glVertex2dv(byte *commandbuf)
 {
 
 	glVertex2dv((const GLdouble *)popBuf());
@@ -1612,7 +1612,7 @@ void EXEC_glVertex2dv(byte *commandbuf)
 
 
 //128
-void EXEC_glVertex2f(byte *commandbuf)
+static void EXEC_glVertex2f(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1621,7 +1621,7 @@ void EXEC_glVertex2f(byte *commandbuf)
 
 
 //129
-void EXEC_glVertex2fv(byte *commandbuf)
+static void EXEC_glVertex2fv(byte *commandbuf)
 {
 
 	glVertex2fv((const GLfloat *)popBuf());
@@ -1629,7 +1629,7 @@ void EXEC_glVertex2fv(byte *commandbuf)
 
 
 //130
-void EXEC_glVertex2i(byte *commandbuf)
+static void EXEC_glVertex2i(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1639,7 +1639,7 @@ void EXEC_glVertex2i(byte *commandbuf)
 
 
 //131
-void EXEC_glVertex2iv(byte *commandbuf)
+static void EXEC_glVertex2iv(byte *commandbuf)
 {
 
 	glVertex2iv((const GLint *)popBuf());
@@ -1647,7 +1647,7 @@ void EXEC_glVertex2iv(byte *commandbuf)
 
 
 //132
-void EXEC_glVertex2s(byte *commandbuf)
+static void EXEC_glVertex2s(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1657,7 +1657,7 @@ void EXEC_glVertex2s(byte *commandbuf)
 
 
 //133
-void EXEC_glVertex2sv(byte *commandbuf)
+static void EXEC_glVertex2sv(byte *commandbuf)
 {
 
 	glVertex2sv((const GLshort *)popBuf());
@@ -1665,7 +1665,7 @@ void EXEC_glVertex2sv(byte *commandbuf)
 
 
 //134
-void EXEC_glVertex3d(byte *commandbuf)
+static void EXEC_glVertex3d(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1676,7 +1676,7 @@ void EXEC_glVertex3d(byte *commandbuf)
 
 
 //135
-void EXEC_glVertex3dv(byte *commandbuf)
+static void EXEC_glVertex3dv(byte *commandbuf)
 {
 
 	glVertex3dv((const GLdouble *)popBuf());
@@ -1684,7 +1684,7 @@ void EXEC_glVertex3dv(byte *commandbuf)
 
 
 //136
-void EXEC_glVertex3f(byte *commandbuf)
+static void EXEC_glVertex3f(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1695,7 +1695,7 @@ void EXEC_glVertex3f(byte *commandbuf)
 
 
 //137
-void EXEC_glVertex3fv(byte *commandbuf)
+static void EXEC_glVertex3fv(byte *commandbuf)
 {
 
 	glVertex3fv((const GLfloat *)popBuf());
@@ -1703,7 +1703,7 @@ void EXEC_glVertex3fv(byte *commandbuf)
 
 
 //138
-void EXEC_glVertex3i(byte *commandbuf)
+static void EXEC_glVertex3i(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1714,7 +1714,7 @@ void EXEC_glVertex3i(byte *commandbuf)
 
 
 //139
-void EXEC_glVertex3iv(byte *commandbuf)
+static void EXEC_glVertex3iv(byte *commandbuf)
 {
 
 	glVertex3iv((const GLint *)popBuf());
@@ -1722,7 +1722,7 @@ void EXEC_glVertex3iv(byte *commandbuf)
 
 
 //140
-void EXEC_glVertex3s(byte *commandbuf)
+static void EXEC_glVertex3s(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1733,7 +1733,7 @@ void EXEC_glVertex3s(byte *commandbuf)
 
 
 //141
-void EXEC_glVertex3sv(byte *commandbuf)
+static void EXEC_glVertex3sv(byte *commandbuf)
 {
 
 	glVertex3sv((const GLshort *)popBuf());
@@ -1741,7 +1741,7 @@ void EXEC_glVertex3sv(byte *commandbuf)
 
 
 //142
-void EXEC_glVertex4d(byte *commandbuf)
+static void EXEC_glVertex4d(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -1753,7 +1753,7 @@ void EXEC_glVertex4d(byte *commandbuf)
 
 
 //143
-void EXEC_glVertex4dv(byte *commandbuf)
+static void EXEC_glVertex4dv(byte *commandbuf)
 {
 
 	glVertex4dv((const GLdouble *)popBuf());
@@ -1761,7 +1761,7 @@ void EXEC_glVertex4dv(byte *commandbuf)
 
 
 //144
-void EXEC_glVertex4f(byte *commandbuf)
+static void EXEC_glVertex4f(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1773,7 +1773,7 @@ void EXEC_glVertex4f(byte *commandbuf)
 
 
 //145
-void EXEC_glVertex4fv(byte *commandbuf)
+static void EXEC_glVertex4fv(byte *commandbuf)
 {
 
 	glVertex4fv((const GLfloat *)popBuf());
@@ -1781,7 +1781,7 @@ void EXEC_glVertex4fv(byte *commandbuf)
 
 
 //146
-void EXEC_glVertex4i(byte *commandbuf)
+static void EXEC_glVertex4i(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1793,7 +1793,7 @@ void EXEC_glVertex4i(byte *commandbuf)
 
 
 //147
-void EXEC_glVertex4iv(byte *commandbuf)
+static void EXEC_glVertex4iv(byte *commandbuf)
 {
 
 	glVertex4iv((const GLint *)popBuf());
@@ -1801,7 +1801,7 @@ void EXEC_glVertex4iv(byte *commandbuf)
 
 
 //148
-void EXEC_glVertex4s(byte *commandbuf)
+static void EXEC_glVertex4s(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -1813,7 +1813,7 @@ void EXEC_glVertex4s(byte *commandbuf)
 
 
 //149
-void EXEC_glVertex4sv(byte *commandbuf)
+static void EXEC_glVertex4sv(byte *commandbuf)
 {
 
 	glVertex4sv((const GLshort *)popBuf());
@@ -1821,7 +1821,7 @@ void EXEC_glVertex4sv(byte *commandbuf)
 
 
 //150
-void EXEC_glClipPlane(byte *commandbuf)
+static void EXEC_glClipPlane(byte *commandbuf)
 {
 	GLenum *plane = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -1830,7 +1830,7 @@ void EXEC_glClipPlane(byte *commandbuf)
 
 
 //151
-void EXEC_glColorMaterial(byte *commandbuf)
+static void EXEC_glColorMaterial(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -1840,7 +1840,7 @@ void EXEC_glColorMaterial(byte *commandbuf)
 
 
 //152
-void EXEC_glCullFace(byte *commandbuf)
+static void EXEC_glCullFace(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -1849,7 +1849,7 @@ void EXEC_glCullFace(byte *commandbuf)
 
 
 //153
-void EXEC_glFogf(byte *commandbuf)
+static void EXEC_glFogf(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1859,7 +1859,7 @@ void EXEC_glFogf(byte *commandbuf)
 
 
 //154
-void EXEC_glFogfv(byte *commandbuf)
+static void EXEC_glFogfv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -1868,7 +1868,7 @@ void EXEC_glFogfv(byte *commandbuf)
 
 
 //155
-void EXEC_glFogi(byte *commandbuf)
+static void EXEC_glFogi(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1878,7 +1878,7 @@ void EXEC_glFogi(byte *commandbuf)
 
 
 //156
-void EXEC_glFogiv(byte *commandbuf)
+static void EXEC_glFogiv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	glFogiv(*pname, (const GLint *)popBuf());
@@ -1886,7 +1886,7 @@ void EXEC_glFogiv(byte *commandbuf)
 
 
 //157
-void EXEC_glFrontFace(byte *commandbuf)
+static void EXEC_glFrontFace(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -1895,7 +1895,7 @@ void EXEC_glFrontFace(byte *commandbuf)
 
 
 //158
-void EXEC_glHint(byte *commandbuf)
+static void EXEC_glHint(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -1905,7 +1905,7 @@ void EXEC_glHint(byte *commandbuf)
 
 
 //159
-void EXEC_glLightf(byte *commandbuf)
+static void EXEC_glLightf(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -1916,7 +1916,7 @@ void EXEC_glLightf(byte *commandbuf)
 
 
 //160
-void EXEC_glLightfv(byte *commandbuf)
+static void EXEC_glLightfv(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -1926,7 +1926,7 @@ void EXEC_glLightfv(byte *commandbuf)
 
 
 //161
-void EXEC_glLighti(byte *commandbuf)
+static void EXEC_glLighti(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -1937,7 +1937,7 @@ void EXEC_glLighti(byte *commandbuf)
 
 
 //162
-void EXEC_glLightiv(byte *commandbuf)
+static void EXEC_glLightiv(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -1947,7 +1947,7 @@ void EXEC_glLightiv(byte *commandbuf)
 
 
 //163
-void EXEC_glLightModelf(byte *commandbuf)
+static void EXEC_glLightModelf(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1957,7 +1957,7 @@ void EXEC_glLightModelf(byte *commandbuf)
 
 
 //164
-void EXEC_glLightModelfv(byte *commandbuf)
+static void EXEC_glLightModelfv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -1966,7 +1966,7 @@ void EXEC_glLightModelfv(byte *commandbuf)
 
 
 //165
-void EXEC_glLightModeli(byte *commandbuf)
+static void EXEC_glLightModeli(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -1976,7 +1976,7 @@ void EXEC_glLightModeli(byte *commandbuf)
 
 
 //166
-void EXEC_glLightModeliv(byte *commandbuf)
+static void EXEC_glLightModeliv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -1985,7 +1985,7 @@ void EXEC_glLightModeliv(byte *commandbuf)
 
 
 //167
-void EXEC_glLineStipple(byte *commandbuf)
+static void EXEC_glLineStipple(byte *commandbuf)
 {
 	GLint *factor = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLushort *pattern = (GLushort*)commandbuf;   commandbuf += sizeof(GLushort);
@@ -1995,7 +1995,7 @@ void EXEC_glLineStipple(byte *commandbuf)
 
 
 //168
-void EXEC_glLineWidth(byte *commandbuf)
+static void EXEC_glLineWidth(byte *commandbuf)
 {
 	GLfloat *width = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 
@@ -2004,7 +2004,7 @@ void EXEC_glLineWidth(byte *commandbuf)
 
 
 //169
-void EXEC_glMaterialf(byte *commandbuf)
+static void EXEC_glMaterialf(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2015,7 +2015,7 @@ void EXEC_glMaterialf(byte *commandbuf)
 
 
 //170
-void EXEC_glMaterialfv(byte *commandbuf)
+static void EXEC_glMaterialfv(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2025,7 +2025,7 @@ void EXEC_glMaterialfv(byte *commandbuf)
 
 
 //171
-void EXEC_glMateriali(byte *commandbuf)
+static void EXEC_glMateriali(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2036,7 +2036,7 @@ void EXEC_glMateriali(byte *commandbuf)
 
 
 //172
-void EXEC_glMaterialiv(byte *commandbuf)
+static void EXEC_glMaterialiv(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2046,7 +2046,7 @@ void EXEC_glMaterialiv(byte *commandbuf)
 
 
 //173
-void EXEC_glPointSize(byte *commandbuf)
+static void EXEC_glPointSize(byte *commandbuf)
 {
 	GLfloat *size = (GLfloat*)commandbuf;    commandbuf += sizeof(GLfloat);
 
@@ -2055,7 +2055,7 @@ void EXEC_glPointSize(byte *commandbuf)
 
 
 //174
-void EXEC_glPolygonMode(byte *commandbuf)
+static void EXEC_glPolygonMode(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -2065,7 +2065,7 @@ void EXEC_glPolygonMode(byte *commandbuf)
 
 
 //175
-void EXEC_glPolygonStipple(byte *commandbuf)
+static void EXEC_glPolygonStipple(byte *commandbuf)
 {
 
 	glPolygonStipple((const GLubyte *)popBuf());
@@ -2073,7 +2073,7 @@ void EXEC_glPolygonStipple(byte *commandbuf)
 
 
 //176
-void EXEC_glScissor(byte *commandbuf)
+static void EXEC_glScissor(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -2085,7 +2085,7 @@ void EXEC_glScissor(byte *commandbuf)
 
 
 //177
-void EXEC_glShadeModel(byte *commandbuf)
+static void EXEC_glShadeModel(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -2094,7 +2094,7 @@ void EXEC_glShadeModel(byte *commandbuf)
 
 
 //178
-void EXEC_glTexParameterf(byte *commandbuf)
+static void EXEC_glTexParameterf(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2105,7 +2105,7 @@ void EXEC_glTexParameterf(byte *commandbuf)
 
 
 //179
-void EXEC_glTexParameterfv(byte *commandbuf)
+static void EXEC_glTexParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2115,7 +2115,7 @@ void EXEC_glTexParameterfv(byte *commandbuf)
 
 
 //180
-void EXEC_glTexParameteri(byte *commandbuf)
+static void EXEC_glTexParameteri(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2125,7 +2125,7 @@ void EXEC_glTexParameteri(byte *commandbuf)
 
 
 //181
-void EXEC_glTexParameteriv(byte *commandbuf)
+static void EXEC_glTexParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2135,7 +2135,7 @@ void EXEC_glTexParameteriv(byte *commandbuf)
 
 
 //182
-void EXEC_glTexImage1D(byte *commandbuf)
+static void EXEC_glTexImage1D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -2150,7 +2150,7 @@ void EXEC_glTexImage1D(byte *commandbuf)
 
 
 //183
-void EXEC_glTexImage2D(byte *commandbuf)
+static void EXEC_glTexImage2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -2172,7 +2172,7 @@ void EXEC_glTexImage2D(byte *commandbuf)
 
 
 //184
-void EXEC_glTexEnvf(byte *commandbuf)
+static void EXEC_glTexEnvf(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2183,7 +2183,7 @@ void EXEC_glTexEnvf(byte *commandbuf)
 
 
 //185
-void EXEC_glTexEnvfv(byte *commandbuf)
+static void EXEC_glTexEnvfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2193,7 +2193,7 @@ void EXEC_glTexEnvfv(byte *commandbuf)
 
 
 //186
-void EXEC_glTexEnvi(byte *commandbuf)
+static void EXEC_glTexEnvi(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2204,7 +2204,7 @@ void EXEC_glTexEnvi(byte *commandbuf)
 
 
 //187
-void EXEC_glTexEnviv(byte *commandbuf)
+static void EXEC_glTexEnviv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2214,7 +2214,7 @@ void EXEC_glTexEnviv(byte *commandbuf)
 
 
 //188
-void EXEC_glTexGend(byte *commandbuf)
+static void EXEC_glTexGend(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2225,7 +2225,7 @@ void EXEC_glTexGend(byte *commandbuf)
 
 
 //189
-void EXEC_glTexGendv(byte *commandbuf)
+static void EXEC_glTexGendv(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2235,7 +2235,7 @@ void EXEC_glTexGendv(byte *commandbuf)
 
 
 //190
-void EXEC_glTexGenf(byte *commandbuf)
+static void EXEC_glTexGenf(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2246,7 +2246,7 @@ void EXEC_glTexGenf(byte *commandbuf)
 
 
 //191
-void EXEC_glTexGenfv(byte *commandbuf)
+static void EXEC_glTexGenfv(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2256,7 +2256,7 @@ void EXEC_glTexGenfv(byte *commandbuf)
 
 
 //192
-void EXEC_glTexGeni(byte *commandbuf)
+static void EXEC_glTexGeni(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2267,7 +2267,7 @@ void EXEC_glTexGeni(byte *commandbuf)
 
 
 //193
-void EXEC_glTexGeniv(byte *commandbuf)
+static void EXEC_glTexGeniv(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2277,7 +2277,7 @@ void EXEC_glTexGeniv(byte *commandbuf)
 
 
 //194
-void EXEC_glFeedbackBuffer(byte *commandbuf)
+static void EXEC_glFeedbackBuffer(byte *commandbuf)
 {
 	GLsizei *size = (GLsizei*)commandbuf;    commandbuf += sizeof(GLsizei);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -2287,7 +2287,7 @@ void EXEC_glFeedbackBuffer(byte *commandbuf)
 
 
 //195
-void EXEC_glSelectBuffer(byte *commandbuf)
+static void EXEC_glSelectBuffer(byte *commandbuf)
 {
 	GLsizei *size = (GLsizei*)commandbuf;    commandbuf += sizeof(GLsizei);
 
@@ -2296,7 +2296,7 @@ void EXEC_glSelectBuffer(byte *commandbuf)
 
 
 //196
-void EXEC_glRenderMode(byte *commandbuf)
+static void EXEC_glRenderMode(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -2305,7 +2305,7 @@ void EXEC_glRenderMode(byte *commandbuf)
 
 
 //197
-void EXEC_glInitNames(byte *commandbuf)
+static void EXEC_glInitNames(byte *commandbuf)
 {
 
 	glInitNames();
@@ -2313,7 +2313,7 @@ void EXEC_glInitNames(byte *commandbuf)
 
 
 //198
-void EXEC_glLoadName(byte *commandbuf)
+static void EXEC_glLoadName(byte *commandbuf)
 {
 	GLuint *name = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -2322,7 +2322,7 @@ void EXEC_glLoadName(byte *commandbuf)
 
 
 //199
-void EXEC_glPassThrough(byte *commandbuf)
+static void EXEC_glPassThrough(byte *commandbuf)
 {
 	GLfloat *token = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 
@@ -2331,7 +2331,7 @@ void EXEC_glPassThrough(byte *commandbuf)
 
 
 //200
-void EXEC_glPopName(byte *commandbuf)
+static void EXEC_glPopName(byte *commandbuf)
 {
 
 	glPopName();
@@ -2339,7 +2339,7 @@ void EXEC_glPopName(byte *commandbuf)
 
 
 //201
-void EXEC_glPushName(byte *commandbuf)
+static void EXEC_glPushName(byte *commandbuf)
 {
 	GLuint *name = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -2348,7 +2348,7 @@ void EXEC_glPushName(byte *commandbuf)
 
 
 //202
-void EXEC_glDrawBuffer(byte *commandbuf)
+static void EXEC_glDrawBuffer(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -2357,7 +2357,7 @@ void EXEC_glDrawBuffer(byte *commandbuf)
 
 
 //203
-void EXEC_glClear(byte *commandbuf)
+static void EXEC_glClear(byte *commandbuf)
 {
 	GLbitfield *mask = (GLbitfield*)commandbuf;  commandbuf += sizeof(GLbitfield);
 
@@ -2366,7 +2366,7 @@ void EXEC_glClear(byte *commandbuf)
 
 
 //204
-void EXEC_glClearAccum(byte *commandbuf)
+static void EXEC_glClearAccum(byte *commandbuf)
 {
 	GLfloat *red = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
 	GLfloat *green = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -2378,7 +2378,7 @@ void EXEC_glClearAccum(byte *commandbuf)
 
 
 //205
-void EXEC_glClearIndex(byte *commandbuf)
+static void EXEC_glClearIndex(byte *commandbuf)
 {
 	GLfloat *c = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 
@@ -2387,7 +2387,7 @@ void EXEC_glClearIndex(byte *commandbuf)
 
 
 //206
-void EXEC_glClearColor(byte *commandbuf)
+static void EXEC_glClearColor(byte *commandbuf)
 {
 	GLclampf *red = (GLclampf*)commandbuf;   commandbuf += sizeof(GLclampf);
 	GLclampf *green = (GLclampf*)commandbuf;     commandbuf += sizeof(GLclampf);
@@ -2399,7 +2399,7 @@ void EXEC_glClearColor(byte *commandbuf)
 
 
 //207
-void EXEC_glClearStencil(byte *commandbuf)
+static void EXEC_glClearStencil(byte *commandbuf)
 {
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -2408,7 +2408,7 @@ void EXEC_glClearStencil(byte *commandbuf)
 
 
 //208
-void EXEC_glClearDepth(byte *commandbuf)
+static void EXEC_glClearDepth(byte *commandbuf)
 {
 	GLclampd *depth = (GLclampd*)commandbuf;     commandbuf += sizeof(GLclampd);
 
@@ -2417,7 +2417,7 @@ void EXEC_glClearDepth(byte *commandbuf)
 
 
 //209
-void EXEC_glStencilMask(byte *commandbuf)
+static void EXEC_glStencilMask(byte *commandbuf)
 {
 	GLuint *mask = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -2426,7 +2426,7 @@ void EXEC_glStencilMask(byte *commandbuf)
 
 
 //210
-void EXEC_glColorMask(byte *commandbuf)
+static void EXEC_glColorMask(byte *commandbuf)
 {
 	GLboolean *red = (GLboolean*)commandbuf;     commandbuf += sizeof(GLboolean);
 	GLboolean *green = (GLboolean*)commandbuf;   commandbuf += sizeof(GLboolean);
@@ -2438,7 +2438,7 @@ void EXEC_glColorMask(byte *commandbuf)
 
 
 //211
-void EXEC_glDepthMask(byte *commandbuf)
+static void EXEC_glDepthMask(byte *commandbuf)
 {
 	GLboolean *flag = (GLboolean*)commandbuf;    commandbuf += sizeof(GLboolean);
 
@@ -2447,7 +2447,7 @@ void EXEC_glDepthMask(byte *commandbuf)
 
 
 //212
-void EXEC_glIndexMask(byte *commandbuf)
+static void EXEC_glIndexMask(byte *commandbuf)
 {
 	GLuint *mask = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -2456,7 +2456,7 @@ void EXEC_glIndexMask(byte *commandbuf)
 
 
 //213
-void EXEC_glAccum(byte *commandbuf)
+static void EXEC_glAccum(byte *commandbuf)
 {
 	GLenum *op = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *value = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -2466,7 +2466,7 @@ void EXEC_glAccum(byte *commandbuf)
 
 
 //214
-void EXEC_glDisable(byte *commandbuf)
+static void EXEC_glDisable(byte *commandbuf)
 {
 	GLenum *cap = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -2475,7 +2475,7 @@ void EXEC_glDisable(byte *commandbuf)
 
 
 //215
-void EXEC_glEnable(byte *commandbuf)
+static void EXEC_glEnable(byte *commandbuf)
 {
 	GLenum *cap = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -2484,7 +2484,7 @@ void EXEC_glEnable(byte *commandbuf)
 
 
 //216
-void EXEC_glFinish(byte *commandbuf)
+static void EXEC_glFinish(byte *commandbuf)
 {
 
 	glFinish();
@@ -2492,7 +2492,7 @@ void EXEC_glFinish(byte *commandbuf)
 
 
 //217
-void EXEC_glFlush(byte *commandbuf)
+static void EXEC_glFlush(byte *commandbuf)
 {
 
 	glFlush();
@@ -2500,7 +2500,7 @@ void EXEC_glFlush(byte *commandbuf)
 
 
 //218
-void EXEC_glPopAttrib(byte *commandbuf)
+static void EXEC_glPopAttrib(byte *commandbuf)
 {
 
 	glPopAttrib();
@@ -2508,7 +2508,7 @@ void EXEC_glPopAttrib(byte *commandbuf)
 
 
 //219
-void EXEC_glPushAttrib(byte *commandbuf)
+static void EXEC_glPushAttrib(byte *commandbuf)
 {
 	GLbitfield *mask = (GLbitfield*)commandbuf;  commandbuf += sizeof(GLbitfield);
 
@@ -2517,7 +2517,7 @@ void EXEC_glPushAttrib(byte *commandbuf)
 
 
 //220
-void EXEC_glMap1d(byte *commandbuf)
+static void EXEC_glMap1d(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *u1 = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -2530,7 +2530,7 @@ void EXEC_glMap1d(byte *commandbuf)
 
 
 //221
-void EXEC_glMap1f(byte *commandbuf)
+static void EXEC_glMap1f(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *u1 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -2543,7 +2543,7 @@ void EXEC_glMap1f(byte *commandbuf)
 
 
 //222
-void EXEC_glMap2d(byte *commandbuf)
+static void EXEC_glMap2d(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *u1 = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -2560,7 +2560,7 @@ void EXEC_glMap2d(byte *commandbuf)
 
 
 //223
-void EXEC_glMap2f(byte *commandbuf)
+static void EXEC_glMap2f(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *u1 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -2577,7 +2577,7 @@ void EXEC_glMap2f(byte *commandbuf)
 
 
 //224
-void EXEC_glMapGrid1d(byte *commandbuf)
+static void EXEC_glMapGrid1d(byte *commandbuf)
 {
 	GLint *un = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLdouble *u1 = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -2588,7 +2588,7 @@ void EXEC_glMapGrid1d(byte *commandbuf)
 
 
 //225
-void EXEC_glMapGrid1f(byte *commandbuf)
+static void EXEC_glMapGrid1f(byte *commandbuf)
 {
 	GLint *un = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLfloat *u1 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -2599,7 +2599,7 @@ void EXEC_glMapGrid1f(byte *commandbuf)
 
 
 //226
-void EXEC_glMapGrid2d(byte *commandbuf)
+static void EXEC_glMapGrid2d(byte *commandbuf)
 {
 	GLint *un = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLdouble *u1 = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -2613,7 +2613,7 @@ void EXEC_glMapGrid2d(byte *commandbuf)
 
 
 //227
-void EXEC_glMapGrid2f(byte *commandbuf)
+static void EXEC_glMapGrid2f(byte *commandbuf)
 {
 	GLint *un = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLfloat *u1 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -2627,7 +2627,7 @@ void EXEC_glMapGrid2f(byte *commandbuf)
 
 
 //228
-void EXEC_glEvalCoord1d(byte *commandbuf)
+static void EXEC_glEvalCoord1d(byte *commandbuf)
 {
 	GLdouble *u = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 
@@ -2636,7 +2636,7 @@ void EXEC_glEvalCoord1d(byte *commandbuf)
 
 
 //229
-void EXEC_glEvalCoord1dv(byte *commandbuf)
+static void EXEC_glEvalCoord1dv(byte *commandbuf)
 {
 
 	glEvalCoord1dv((const GLdouble *)popBuf());
@@ -2644,7 +2644,7 @@ void EXEC_glEvalCoord1dv(byte *commandbuf)
 
 
 //230
-void EXEC_glEvalCoord1f(byte *commandbuf)
+static void EXEC_glEvalCoord1f(byte *commandbuf)
 {
 	GLfloat *u = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 
@@ -2653,7 +2653,7 @@ void EXEC_glEvalCoord1f(byte *commandbuf)
 
 
 //231
-void EXEC_glEvalCoord1fv(byte *commandbuf)
+static void EXEC_glEvalCoord1fv(byte *commandbuf)
 {
 
 	glEvalCoord1fv((const GLfloat *)popBuf());
@@ -2661,7 +2661,7 @@ void EXEC_glEvalCoord1fv(byte *commandbuf)
 
 
 //232
-void EXEC_glEvalCoord2d(byte *commandbuf)
+static void EXEC_glEvalCoord2d(byte *commandbuf)
 {
 	GLdouble *u = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *v = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -2671,7 +2671,7 @@ void EXEC_glEvalCoord2d(byte *commandbuf)
 
 
 //233
-void EXEC_glEvalCoord2dv(byte *commandbuf)
+static void EXEC_glEvalCoord2dv(byte *commandbuf)
 {
 
 	glEvalCoord2dv((const GLdouble *)popBuf());
@@ -2679,7 +2679,7 @@ void EXEC_glEvalCoord2dv(byte *commandbuf)
 
 
 //234
-void EXEC_glEvalCoord2f(byte *commandbuf)
+static void EXEC_glEvalCoord2f(byte *commandbuf)
 {
 	GLfloat *u = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *v = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -2689,7 +2689,7 @@ void EXEC_glEvalCoord2f(byte *commandbuf)
 
 
 //235
-void EXEC_glEvalCoord2fv(byte *commandbuf)
+static void EXEC_glEvalCoord2fv(byte *commandbuf)
 {
 
 	glEvalCoord2fv((const GLfloat *)popBuf());
@@ -2697,7 +2697,7 @@ void EXEC_glEvalCoord2fv(byte *commandbuf)
 
 
 //236
-void EXEC_glEvalMesh1(byte *commandbuf)
+static void EXEC_glEvalMesh1(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *i1 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -2708,7 +2708,7 @@ void EXEC_glEvalMesh1(byte *commandbuf)
 
 
 //237
-void EXEC_glEvalPoint1(byte *commandbuf)
+static void EXEC_glEvalPoint1(byte *commandbuf)
 {
 	GLint *i = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -2717,7 +2717,7 @@ void EXEC_glEvalPoint1(byte *commandbuf)
 
 
 //238
-void EXEC_glEvalMesh2(byte *commandbuf)
+static void EXEC_glEvalMesh2(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *i1 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -2730,7 +2730,7 @@ void EXEC_glEvalMesh2(byte *commandbuf)
 
 
 //239
-void EXEC_glEvalPoint2(byte *commandbuf)
+static void EXEC_glEvalPoint2(byte *commandbuf)
 {
 	GLint *i = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *j = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -2740,7 +2740,7 @@ void EXEC_glEvalPoint2(byte *commandbuf)
 
 
 //240
-void EXEC_glAlphaFunc(byte *commandbuf)
+static void EXEC_glAlphaFunc(byte *commandbuf)
 {
 	GLenum *func = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLclampf *ref = (GLclampf*)commandbuf;   commandbuf += sizeof(GLclampf);
@@ -2750,7 +2750,7 @@ void EXEC_glAlphaFunc(byte *commandbuf)
 
 
 //241
-void EXEC_glBlendFunc(byte *commandbuf)
+static void EXEC_glBlendFunc(byte *commandbuf)
 {
 	GLenum *sfactor = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLenum *dfactor = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -2760,7 +2760,7 @@ void EXEC_glBlendFunc(byte *commandbuf)
 
 
 //242
-void EXEC_glLogicOp(byte *commandbuf)
+static void EXEC_glLogicOp(byte *commandbuf)
 {
 	GLenum *opcode = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -2769,7 +2769,7 @@ void EXEC_glLogicOp(byte *commandbuf)
 
 
 //243
-void EXEC_glStencilFunc(byte *commandbuf)
+static void EXEC_glStencilFunc(byte *commandbuf)
 {
 	GLenum *func = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *ref = (GLint*)commandbuf;     commandbuf += sizeof(GLint);
@@ -2780,7 +2780,7 @@ void EXEC_glStencilFunc(byte *commandbuf)
 
 
 //244
-void EXEC_glStencilOp(byte *commandbuf)
+static void EXEC_glStencilOp(byte *commandbuf)
 {
 	GLenum *fail = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *zfail = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2791,7 +2791,7 @@ void EXEC_glStencilOp(byte *commandbuf)
 
 
 //245
-void EXEC_glDepthFunc(byte *commandbuf)
+static void EXEC_glDepthFunc(byte *commandbuf)
 {
 	GLenum *func = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -2800,7 +2800,7 @@ void EXEC_glDepthFunc(byte *commandbuf)
 
 
 //246
-void EXEC_glPixelZoom(byte *commandbuf)
+static void EXEC_glPixelZoom(byte *commandbuf)
 {
 	GLfloat *xfactor = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
 	GLfloat *yfactor = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
@@ -2810,7 +2810,7 @@ void EXEC_glPixelZoom(byte *commandbuf)
 
 
 //247
-void EXEC_glPixelTransferf(byte *commandbuf)
+static void EXEC_glPixelTransferf(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -2820,7 +2820,7 @@ void EXEC_glPixelTransferf(byte *commandbuf)
 
 
 //248
-void EXEC_glPixelTransferi(byte *commandbuf)
+static void EXEC_glPixelTransferi(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -2830,7 +2830,7 @@ void EXEC_glPixelTransferi(byte *commandbuf)
 
 
 //249
-void EXEC_glPixelStoref(byte *commandbuf)
+static void EXEC_glPixelStoref(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -2840,7 +2840,7 @@ void EXEC_glPixelStoref(byte *commandbuf)
 
 
 //250
-void EXEC_glPixelStorei(byte *commandbuf)
+static void EXEC_glPixelStorei(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -2850,7 +2850,7 @@ void EXEC_glPixelStorei(byte *commandbuf)
 
 
 //251
-void EXEC_glPixelMapfv(byte *commandbuf)
+static void EXEC_glPixelMapfv(byte *commandbuf)
 {
 	GLenum *map = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLsizei *mapsize = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -2860,7 +2860,7 @@ void EXEC_glPixelMapfv(byte *commandbuf)
 
 
 //252
-void EXEC_glPixelMapuiv(byte *commandbuf)
+static void EXEC_glPixelMapuiv(byte *commandbuf)
 {
 	GLenum *map = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLsizei *mapsize = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -2870,7 +2870,7 @@ void EXEC_glPixelMapuiv(byte *commandbuf)
 
 
 //253
-void EXEC_glPixelMapusv(byte *commandbuf)
+static void EXEC_glPixelMapusv(byte *commandbuf)
 {
 	GLenum *map = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLsizei *mapsize = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -2880,7 +2880,7 @@ void EXEC_glPixelMapusv(byte *commandbuf)
 
 
 //254
-void EXEC_glReadBuffer(byte *commandbuf)
+static void EXEC_glReadBuffer(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -2889,7 +2889,7 @@ void EXEC_glReadBuffer(byte *commandbuf)
 
 
 //255
-void EXEC_glCopyPixels(byte *commandbuf)
+static void EXEC_glCopyPixels(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -2902,7 +2902,7 @@ void EXEC_glCopyPixels(byte *commandbuf)
 
 
 //256
-void EXEC_glReadPixels(byte *commandbuf)
+static void EXEC_glReadPixels(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -2916,7 +2916,7 @@ void EXEC_glReadPixels(byte *commandbuf)
 
 
 //257
-void EXEC_glDrawPixels(byte *commandbuf)
+static void EXEC_glDrawPixels(byte *commandbuf)
 {
 	GLsizei *width = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	GLsizei *height = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -2928,7 +2928,7 @@ void EXEC_glDrawPixels(byte *commandbuf)
 
 
 //258
-void EXEC_glGetBooleanv(byte *commandbuf)
+static void EXEC_glGetBooleanv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -2937,7 +2937,7 @@ void EXEC_glGetBooleanv(byte *commandbuf)
 
 
 //259
-void EXEC_glGetClipPlane(byte *commandbuf)
+static void EXEC_glGetClipPlane(byte *commandbuf)
 {
 	GLenum *plane = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -2946,7 +2946,7 @@ void EXEC_glGetClipPlane(byte *commandbuf)
 
 
 //260
-void EXEC_glGetDoublev(byte *commandbuf)
+static void EXEC_glGetDoublev(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -2955,7 +2955,7 @@ void EXEC_glGetDoublev(byte *commandbuf)
 
 
 //261
-void EXEC_glGetError(byte *commandbuf)
+static void EXEC_glGetError(byte *commandbuf)
 {
 
 	pushRet(glGetError());
@@ -2963,7 +2963,7 @@ void EXEC_glGetError(byte *commandbuf)
 
 
 //262
-void EXEC_glGetFloatv(byte *commandbuf)
+static void EXEC_glGetFloatv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -2972,7 +2972,7 @@ void EXEC_glGetFloatv(byte *commandbuf)
 
 
 //263
-void EXEC_glGetIntegerv(byte *commandbuf)
+static void EXEC_glGetIntegerv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -2981,7 +2981,7 @@ void EXEC_glGetIntegerv(byte *commandbuf)
 
 
 //264
-void EXEC_glGetLightfv(byte *commandbuf)
+static void EXEC_glGetLightfv(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -2991,7 +2991,7 @@ void EXEC_glGetLightfv(byte *commandbuf)
 
 
 //265
-void EXEC_glGetLightiv(byte *commandbuf)
+static void EXEC_glGetLightiv(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3001,7 +3001,7 @@ void EXEC_glGetLightiv(byte *commandbuf)
 
 
 //266
-void EXEC_glGetMapdv(byte *commandbuf)
+static void EXEC_glGetMapdv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *query = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3011,7 +3011,7 @@ void EXEC_glGetMapdv(byte *commandbuf)
 
 
 //267
-void EXEC_glGetMapfv(byte *commandbuf)
+static void EXEC_glGetMapfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *query = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3021,7 +3021,7 @@ void EXEC_glGetMapfv(byte *commandbuf)
 
 
 //268
-void EXEC_glGetMapiv(byte *commandbuf)
+static void EXEC_glGetMapiv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *query = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3031,7 +3031,7 @@ void EXEC_glGetMapiv(byte *commandbuf)
 
 
 //269
-void EXEC_glGetMaterialfv(byte *commandbuf)
+static void EXEC_glGetMaterialfv(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3041,7 +3041,7 @@ void EXEC_glGetMaterialfv(byte *commandbuf)
 
 
 //270
-void EXEC_glGetMaterialiv(byte *commandbuf)
+static void EXEC_glGetMaterialiv(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3051,7 +3051,7 @@ void EXEC_glGetMaterialiv(byte *commandbuf)
 
 
 //271
-void EXEC_glGetPixelMapfv(byte *commandbuf)
+static void EXEC_glGetPixelMapfv(byte *commandbuf)
 {
 	GLenum *map = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -3060,7 +3060,7 @@ void EXEC_glGetPixelMapfv(byte *commandbuf)
 
 
 //272
-void EXEC_glGetPixelMapuiv(byte *commandbuf)
+static void EXEC_glGetPixelMapuiv(byte *commandbuf)
 {
 	GLenum *map = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -3069,7 +3069,7 @@ void EXEC_glGetPixelMapuiv(byte *commandbuf)
 
 
 //273
-void EXEC_glGetPixelMapusv(byte *commandbuf)
+static void EXEC_glGetPixelMapusv(byte *commandbuf)
 {
 	GLenum *map = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -3078,7 +3078,7 @@ void EXEC_glGetPixelMapusv(byte *commandbuf)
 
 
 //274
-void EXEC_glGetPolygonStipple(byte *commandbuf)
+static void EXEC_glGetPolygonStipple(byte *commandbuf)
 {
 
 	glGetPolygonStipple((GLubyte *)popBuf());
@@ -3086,7 +3086,7 @@ void EXEC_glGetPolygonStipple(byte *commandbuf)
 
 
 //275
-void EXEC_glGetString(byte *commandbuf)
+static void EXEC_glGetString(byte *commandbuf)
 {
 	GLenum *name = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -3095,7 +3095,7 @@ void EXEC_glGetString(byte *commandbuf)
 
 
 //276
-void EXEC_glGetTexEnvfv(byte *commandbuf)
+static void EXEC_glGetTexEnvfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3105,7 +3105,7 @@ void EXEC_glGetTexEnvfv(byte *commandbuf)
 
 
 //277
-void EXEC_glGetTexEnviv(byte *commandbuf)
+static void EXEC_glGetTexEnviv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3115,7 +3115,7 @@ void EXEC_glGetTexEnviv(byte *commandbuf)
 
 
 //278
-void EXEC_glGetTexGendv(byte *commandbuf)
+static void EXEC_glGetTexGendv(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3125,7 +3125,7 @@ void EXEC_glGetTexGendv(byte *commandbuf)
 
 
 //279
-void EXEC_glGetTexGenfv(byte *commandbuf)
+static void EXEC_glGetTexGenfv(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3135,7 +3135,7 @@ void EXEC_glGetTexGenfv(byte *commandbuf)
 
 
 //280
-void EXEC_glGetTexGeniv(byte *commandbuf)
+static void EXEC_glGetTexGeniv(byte *commandbuf)
 {
 	GLenum *coord = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3145,7 +3145,7 @@ void EXEC_glGetTexGeniv(byte *commandbuf)
 
 
 //281
-void EXEC_glGetTexImage(byte *commandbuf)
+static void EXEC_glGetTexImage(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3157,7 +3157,7 @@ void EXEC_glGetTexImage(byte *commandbuf)
 
 
 //282
-void EXEC_glGetTexParameterfv(byte *commandbuf)
+static void EXEC_glGetTexParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3167,7 +3167,7 @@ void EXEC_glGetTexParameterfv(byte *commandbuf)
 
 
 //283
-void EXEC_glGetTexParameteriv(byte *commandbuf)
+static void EXEC_glGetTexParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3177,7 +3177,7 @@ void EXEC_glGetTexParameteriv(byte *commandbuf)
 
 
 //284
-void EXEC_glGetTexLevelParameterfv(byte *commandbuf)
+static void EXEC_glGetTexLevelParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3188,7 +3188,7 @@ void EXEC_glGetTexLevelParameterfv(byte *commandbuf)
 
 
 //285
-void EXEC_glGetTexLevelParameteriv(byte *commandbuf)
+static void EXEC_glGetTexLevelParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3199,7 +3199,7 @@ void EXEC_glGetTexLevelParameteriv(byte *commandbuf)
 
 
 //286
-void EXEC_glIsEnabled(byte *commandbuf)
+static void EXEC_glIsEnabled(byte *commandbuf)
 {
 	GLenum *cap = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -3208,7 +3208,7 @@ void EXEC_glIsEnabled(byte *commandbuf)
 
 
 //287
-void EXEC_glIsList(byte *commandbuf)
+static void EXEC_glIsList(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -3217,7 +3217,7 @@ void EXEC_glIsList(byte *commandbuf)
 
 
 //288
-void EXEC_glDepthRange(byte *commandbuf)
+static void EXEC_glDepthRange(byte *commandbuf)
 {
 	GLclampd *zNear = (GLclampd*)commandbuf;     commandbuf += sizeof(GLclampd);
 	GLclampd *zFar = (GLclampd*)commandbuf;  commandbuf += sizeof(GLclampd);
@@ -3227,7 +3227,7 @@ void EXEC_glDepthRange(byte *commandbuf)
 
 
 //289
-void EXEC_glFrustum(byte *commandbuf)
+static void EXEC_glFrustum(byte *commandbuf)
 {
 	GLdouble *left = (GLdouble*)commandbuf;  commandbuf += sizeof(GLdouble);
 	GLdouble *right = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -3241,7 +3241,7 @@ void EXEC_glFrustum(byte *commandbuf)
 
 
 //290
-void EXEC_glLoadIdentity(byte *commandbuf)
+static void EXEC_glLoadIdentity(byte *commandbuf)
 {
 
 	glLoadIdentity();
@@ -3249,7 +3249,7 @@ void EXEC_glLoadIdentity(byte *commandbuf)
 
 
 //291
-void EXEC_glLoadMatrixf(byte *commandbuf)
+static void EXEC_glLoadMatrixf(byte *commandbuf)
 {
 
 	glLoadMatrixf((const GLfloat *)popBuf());
@@ -3257,7 +3257,7 @@ void EXEC_glLoadMatrixf(byte *commandbuf)
 
 
 //292
-void EXEC_glLoadMatrixd(byte *commandbuf)
+static void EXEC_glLoadMatrixd(byte *commandbuf)
 {
 
 	glLoadMatrixd((const GLdouble *)popBuf());
@@ -3265,7 +3265,7 @@ void EXEC_glLoadMatrixd(byte *commandbuf)
 
 
 //293
-void EXEC_glMatrixMode(byte *commandbuf)
+static void EXEC_glMatrixMode(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	currentMode = *mode;
@@ -3274,7 +3274,7 @@ void EXEC_glMatrixMode(byte *commandbuf)
 
 
 //294
-void EXEC_glMultMatrixf(byte *commandbuf)
+static void EXEC_glMultMatrixf(byte *commandbuf)
 {
 
 	glMultMatrixf((const GLfloat *)popBuf());
@@ -3282,7 +3282,7 @@ void EXEC_glMultMatrixf(byte *commandbuf)
 
 
 //295
-void EXEC_glMultMatrixd(byte *commandbuf)
+static void EXEC_glMultMatrixd(byte *commandbuf)
 {
 
 	glMultMatrixd((const GLdouble *)popBuf());
@@ -3290,7 +3290,7 @@ void EXEC_glMultMatrixd(byte *commandbuf)
 
 
 //296
-void EXEC_glOrtho(byte *commandbuf)
+static void EXEC_glOrtho(byte *commandbuf)
 {
 	GLdouble *left = (GLdouble*)commandbuf;  commandbuf += sizeof(GLdouble);
 	GLdouble *right = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -3304,7 +3304,7 @@ void EXEC_glOrtho(byte *commandbuf)
 
 
 //297
-void EXEC_glPopMatrix(byte *commandbuf)
+static void EXEC_glPopMatrix(byte *commandbuf)
 {
 
 	glPopMatrix();
@@ -3312,7 +3312,7 @@ void EXEC_glPopMatrix(byte *commandbuf)
 
 
 //298
-void EXEC_glPushMatrix(byte *commandbuf)
+static void EXEC_glPushMatrix(byte *commandbuf)
 {
 
 	glPushMatrix();
@@ -3320,7 +3320,7 @@ void EXEC_glPushMatrix(byte *commandbuf)
 
 
 //299
-void EXEC_glRotated(byte *commandbuf)
+static void EXEC_glRotated(byte *commandbuf)
 {
 	GLdouble *angle = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -3332,7 +3332,7 @@ void EXEC_glRotated(byte *commandbuf)
 
 
 //300
-void EXEC_glRotatef(byte *commandbuf)
+static void EXEC_glRotatef(byte *commandbuf)
 {
 	GLfloat *angle = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -3344,7 +3344,7 @@ void EXEC_glRotatef(byte *commandbuf)
 
 
 //301
-void EXEC_glScaled(byte *commandbuf)
+static void EXEC_glScaled(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -3355,7 +3355,7 @@ void EXEC_glScaled(byte *commandbuf)
 
 
 //302
-void EXEC_glScalef(byte *commandbuf)
+static void EXEC_glScalef(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -3366,7 +3366,7 @@ void EXEC_glScalef(byte *commandbuf)
 
 
 //303
-void EXEC_glTranslated(byte *commandbuf)
+static void EXEC_glTranslated(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -3377,7 +3377,7 @@ void EXEC_glTranslated(byte *commandbuf)
 
 
 //304
-void EXEC_glTranslatef(byte *commandbuf)
+static void EXEC_glTranslatef(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -3388,7 +3388,7 @@ void EXEC_glTranslatef(byte *commandbuf)
 
 
 //305
-void EXEC_glViewport(byte *commandbuf)
+static void EXEC_glViewport(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3400,7 +3400,7 @@ void EXEC_glViewport(byte *commandbuf)
 
 
 //306
-void EXEC_glArrayElement(byte *commandbuf)
+static void EXEC_glArrayElement(byte *commandbuf)
 {
 	GLint *i = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -3409,7 +3409,7 @@ void EXEC_glArrayElement(byte *commandbuf)
 
 
 //307
-void EXEC_glBindTexture(byte *commandbuf)
+static void EXEC_glBindTexture(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *texture = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -3418,7 +3418,7 @@ void EXEC_glBindTexture(byte *commandbuf)
 
 
 //308
-void EXEC_glColorPointer(byte *commandbuf)
+static void EXEC_glColorPointer(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -3434,7 +3434,7 @@ void EXEC_glColorPointer(byte *commandbuf)
 
 
 //309
-void EXEC_glDisableClientState(byte *commandbuf)
+static void EXEC_glDisableClientState(byte *commandbuf)
 {
 	GLenum *array = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -3443,7 +3443,7 @@ void EXEC_glDisableClientState(byte *commandbuf)
 
 
 //310
-void EXEC_glDrawArrays(byte *commandbuf)
+static void EXEC_glDrawArrays(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *first = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3454,7 +3454,7 @@ void EXEC_glDrawArrays(byte *commandbuf)
 
 
 //311
-void EXEC_glDrawElements(byte *commandbuf)
+static void EXEC_glDrawElements(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -3466,7 +3466,7 @@ void EXEC_glDrawElements(byte *commandbuf)
 
 
 //312
-void EXEC_glEdgeFlagPointer(byte *commandbuf)
+static void EXEC_glEdgeFlagPointer(byte *commandbuf)
 {
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
 
@@ -3475,7 +3475,7 @@ void EXEC_glEdgeFlagPointer(byte *commandbuf)
 
 
 //313
-void EXEC_glEnableClientState(byte *commandbuf)
+static void EXEC_glEnableClientState(byte *commandbuf)
 {
 	GLenum *array = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -3484,7 +3484,7 @@ void EXEC_glEnableClientState(byte *commandbuf)
 
 
 //314
-void EXEC_glIndexPointer(byte *commandbuf)
+static void EXEC_glIndexPointer(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -3494,7 +3494,7 @@ void EXEC_glIndexPointer(byte *commandbuf)
 
 
 //315
-void EXEC_glIndexub(byte *commandbuf)
+static void EXEC_glIndexub(byte *commandbuf)
 {
 	GLubyte *c = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
 
@@ -3503,7 +3503,7 @@ void EXEC_glIndexub(byte *commandbuf)
 
 
 //316
-void EXEC_glIndexubv(byte *commandbuf)
+static void EXEC_glIndexubv(byte *commandbuf)
 {
 
 	glIndexubv((const GLubyte *)popBuf());
@@ -3511,7 +3511,7 @@ void EXEC_glIndexubv(byte *commandbuf)
 
 
 //317
-void EXEC_glInterleavedArrays(byte *commandbuf)
+static void EXEC_glInterleavedArrays(byte *commandbuf)
 {
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -3526,7 +3526,7 @@ void EXEC_glInterleavedArrays(byte *commandbuf)
 
 
 //318
-void EXEC_glNormalPointer(byte *commandbuf)
+static void EXEC_glNormalPointer(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -3536,7 +3536,7 @@ void EXEC_glNormalPointer(byte *commandbuf)
 
 
 //319
-void EXEC_glPolygonOffset(byte *commandbuf)
+static void EXEC_glPolygonOffset(byte *commandbuf)
 {
 	GLfloat *factor = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *units = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -3546,7 +3546,7 @@ void EXEC_glPolygonOffset(byte *commandbuf)
 
 
 //320
-void EXEC_glTexCoordPointer(byte *commandbuf)
+static void EXEC_glTexCoordPointer(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -3562,7 +3562,7 @@ void EXEC_glTexCoordPointer(byte *commandbuf)
 
 
 //321
-void EXEC_glVertexPointer(byte *commandbuf)
+static void EXEC_glVertexPointer(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -3579,7 +3579,7 @@ void EXEC_glVertexPointer(byte *commandbuf)
 
 
 //322
-void EXEC_glAreTexturesResident(byte *commandbuf)
+static void EXEC_glAreTexturesResident(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -3588,7 +3588,7 @@ void EXEC_glAreTexturesResident(byte *commandbuf)
 
 
 //323
-void EXEC_glCopyTexImage1D(byte *commandbuf)
+static void EXEC_glCopyTexImage1D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3603,7 +3603,7 @@ void EXEC_glCopyTexImage1D(byte *commandbuf)
 
 
 //324
-void EXEC_glCopyTexImage2D(byte *commandbuf)
+static void EXEC_glCopyTexImage2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3619,7 +3619,7 @@ void EXEC_glCopyTexImage2D(byte *commandbuf)
 
 
 //325
-void EXEC_glCopyTexSubImage1D(byte *commandbuf)
+static void EXEC_glCopyTexSubImage1D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3633,7 +3633,7 @@ void EXEC_glCopyTexSubImage1D(byte *commandbuf)
 
 
 //326
-void EXEC_glCopyTexSubImage2D(byte *commandbuf)
+static void EXEC_glCopyTexSubImage2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3649,7 +3649,7 @@ void EXEC_glCopyTexSubImage2D(byte *commandbuf)
 
 
 //327
-void EXEC_glDeleteTextures(byte *commandbuf)
+static void EXEC_glDeleteTextures(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -3658,7 +3658,7 @@ void EXEC_glDeleteTextures(byte *commandbuf)
 
 
 //328
-void EXEC_glGenTextures(byte *commandbuf)
+static void EXEC_glGenTextures(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	glGenTextures(*n, (GLuint *)popBuf());
@@ -3666,7 +3666,7 @@ void EXEC_glGenTextures(byte *commandbuf)
 
 
 //329
-void EXEC_glGetPointerv(byte *commandbuf)
+static void EXEC_glGetPointerv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -3675,7 +3675,7 @@ void EXEC_glGetPointerv(byte *commandbuf)
 
 
 //330
-void EXEC_glIsTexture(byte *commandbuf)
+static void EXEC_glIsTexture(byte *commandbuf)
 {
 	GLuint *texture = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -3684,7 +3684,7 @@ void EXEC_glIsTexture(byte *commandbuf)
 
 
 //331
-void EXEC_glPrioritizeTextures(byte *commandbuf)
+static void EXEC_glPrioritizeTextures(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -3693,7 +3693,7 @@ void EXEC_glPrioritizeTextures(byte *commandbuf)
 
 
 //332
-void EXEC_glTexSubImage1D(byte *commandbuf)
+static void EXEC_glTexSubImage1D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3708,7 +3708,7 @@ void EXEC_glTexSubImage1D(byte *commandbuf)
 
 
 //333
-void EXEC_glTexSubImage2D(byte *commandbuf)
+static void EXEC_glTexSubImage2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -3725,7 +3725,7 @@ void EXEC_glTexSubImage2D(byte *commandbuf)
 
 
 //334
-void EXEC_glPopClientAttrib(byte *commandbuf)
+static void EXEC_glPopClientAttrib(byte *commandbuf)
 {
 
 	glPopClientAttrib();
@@ -3733,7 +3733,7 @@ void EXEC_glPopClientAttrib(byte *commandbuf)
 
 
 //335
-void EXEC_glPushClientAttrib(byte *commandbuf)
+static void EXEC_glPushClientAttrib(byte *commandbuf)
 {
 	GLbitfield *mask = (GLbitfield*)commandbuf;  commandbuf += sizeof(GLbitfield);
 
@@ -3742,7 +3742,7 @@ void EXEC_glPushClientAttrib(byte *commandbuf)
 
 
 //336
-void EXEC_glBlendColor(byte *commandbuf)
+static void EXEC_glBlendColor(byte *commandbuf)
 {
 	GLclampf *red = (GLclampf*)commandbuf;   commandbuf += sizeof(GLclampf);
 	GLclampf *green = (GLclampf*)commandbuf;     commandbuf += sizeof(GLclampf);
@@ -3754,7 +3754,7 @@ void EXEC_glBlendColor(byte *commandbuf)
 
 
 //337
-void EXEC_glBlendEquation(byte *commandbuf)
+static void EXEC_glBlendEquation(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -3763,7 +3763,7 @@ void EXEC_glBlendEquation(byte *commandbuf)
 
 
 //338
-void EXEC_glDrawRangeElements(byte *commandbuf)
+static void EXEC_glDrawRangeElements(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLuint *start = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -3776,7 +3776,7 @@ void EXEC_glDrawRangeElements(byte *commandbuf)
 
 
 //339
-void EXEC_glColorTable(byte *commandbuf)
+static void EXEC_glColorTable(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3789,7 +3789,7 @@ void EXEC_glColorTable(byte *commandbuf)
 
 
 //340
-void EXEC_glColorTableParameterfv(byte *commandbuf)
+static void EXEC_glColorTableParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3799,7 +3799,7 @@ void EXEC_glColorTableParameterfv(byte *commandbuf)
 
 
 //341
-void EXEC_glColorTableParameteriv(byte *commandbuf)
+static void EXEC_glColorTableParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3809,7 +3809,7 @@ void EXEC_glColorTableParameteriv(byte *commandbuf)
 
 
 //342
-void EXEC_glCopyColorTable(byte *commandbuf)
+static void EXEC_glCopyColorTable(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3822,7 +3822,7 @@ void EXEC_glCopyColorTable(byte *commandbuf)
 
 
 //343
-void EXEC_glGetColorTable(byte *commandbuf)
+static void EXEC_glGetColorTable(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3833,7 +3833,7 @@ void EXEC_glGetColorTable(byte *commandbuf)
 
 
 //344
-void EXEC_glGetColorTableParameterfv(byte *commandbuf)
+static void EXEC_glGetColorTableParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3843,7 +3843,7 @@ void EXEC_glGetColorTableParameterfv(byte *commandbuf)
 
 
 //345
-void EXEC_glGetColorTableParameteriv(byte *commandbuf)
+static void EXEC_glGetColorTableParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3853,7 +3853,7 @@ void EXEC_glGetColorTableParameteriv(byte *commandbuf)
 
 
 //346
-void EXEC_glColorSubTable(byte *commandbuf)
+static void EXEC_glColorSubTable(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *start = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -3866,7 +3866,7 @@ void EXEC_glColorSubTable(byte *commandbuf)
 
 
 //347
-void EXEC_glCopyColorSubTable(byte *commandbuf)
+static void EXEC_glCopyColorSubTable(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *start = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -3879,7 +3879,7 @@ void EXEC_glCopyColorSubTable(byte *commandbuf)
 
 
 //348
-void EXEC_glConvolutionFilter1D(byte *commandbuf)
+static void EXEC_glConvolutionFilter1D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3892,7 +3892,7 @@ void EXEC_glConvolutionFilter1D(byte *commandbuf)
 
 
 //349
-void EXEC_glConvolutionFilter2D(byte *commandbuf)
+static void EXEC_glConvolutionFilter2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3906,7 +3906,7 @@ void EXEC_glConvolutionFilter2D(byte *commandbuf)
 
 
 //350
-void EXEC_glConvolutionParameterf(byte *commandbuf)
+static void EXEC_glConvolutionParameterf(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3917,7 +3917,7 @@ void EXEC_glConvolutionParameterf(byte *commandbuf)
 
 
 //351
-void EXEC_glConvolutionParameterfv(byte *commandbuf)
+static void EXEC_glConvolutionParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3927,7 +3927,7 @@ void EXEC_glConvolutionParameterfv(byte *commandbuf)
 
 
 //352
-void EXEC_glConvolutionParameteri(byte *commandbuf)
+static void EXEC_glConvolutionParameteri(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3938,7 +3938,7 @@ void EXEC_glConvolutionParameteri(byte *commandbuf)
 
 
 //353
-void EXEC_glConvolutionParameteriv(byte *commandbuf)
+static void EXEC_glConvolutionParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3948,7 +3948,7 @@ void EXEC_glConvolutionParameteriv(byte *commandbuf)
 
 
 //354
-void EXEC_glCopyConvolutionFilter1D(byte *commandbuf)
+static void EXEC_glCopyConvolutionFilter1D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3961,7 +3961,7 @@ void EXEC_glCopyConvolutionFilter1D(byte *commandbuf)
 
 
 //355
-void EXEC_glCopyConvolutionFilter2D(byte *commandbuf)
+static void EXEC_glCopyConvolutionFilter2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3975,7 +3975,7 @@ void EXEC_glCopyConvolutionFilter2D(byte *commandbuf)
 
 
 //356
-void EXEC_glGetConvolutionFilter(byte *commandbuf)
+static void EXEC_glGetConvolutionFilter(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3986,7 +3986,7 @@ void EXEC_glGetConvolutionFilter(byte *commandbuf)
 
 
 //357
-void EXEC_glGetConvolutionParameterfv(byte *commandbuf)
+static void EXEC_glGetConvolutionParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -3996,7 +3996,7 @@ void EXEC_glGetConvolutionParameterfv(byte *commandbuf)
 
 
 //358
-void EXEC_glGetConvolutionParameteriv(byte *commandbuf)
+static void EXEC_glGetConvolutionParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -4006,7 +4006,7 @@ void EXEC_glGetConvolutionParameteriv(byte *commandbuf)
 
 
 //359
-void EXEC_glGetSeparableFilter(byte *commandbuf)
+static void EXEC_glGetSeparableFilter(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -4017,7 +4017,7 @@ void EXEC_glGetSeparableFilter(byte *commandbuf)
 
 
 //360
-void EXEC_glSeparableFilter2D(byte *commandbuf)
+static void EXEC_glSeparableFilter2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -4031,7 +4031,7 @@ void EXEC_glSeparableFilter2D(byte *commandbuf)
 
 
 //361
-void EXEC_glGetHistogram(byte *commandbuf)
+static void EXEC_glGetHistogram(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLboolean *reset = (GLboolean*)commandbuf;   commandbuf += sizeof(GLboolean);
@@ -4043,7 +4043,7 @@ void EXEC_glGetHistogram(byte *commandbuf)
 
 
 //362
-void EXEC_glGetHistogramParameterfv(byte *commandbuf)
+static void EXEC_glGetHistogramParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -4053,7 +4053,7 @@ void EXEC_glGetHistogramParameterfv(byte *commandbuf)
 
 
 //363
-void EXEC_glGetHistogramParameteriv(byte *commandbuf)
+static void EXEC_glGetHistogramParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -4063,7 +4063,7 @@ void EXEC_glGetHistogramParameteriv(byte *commandbuf)
 
 
 //364
-void EXEC_glGetMinmax(byte *commandbuf)
+static void EXEC_glGetMinmax(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLboolean *reset = (GLboolean*)commandbuf;   commandbuf += sizeof(GLboolean);
@@ -4075,7 +4075,7 @@ void EXEC_glGetMinmax(byte *commandbuf)
 
 
 //365
-void EXEC_glGetMinmaxParameterfv(byte *commandbuf)
+static void EXEC_glGetMinmaxParameterfv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -4085,7 +4085,7 @@ void EXEC_glGetMinmaxParameterfv(byte *commandbuf)
 
 
 //366
-void EXEC_glGetMinmaxParameteriv(byte *commandbuf)
+static void EXEC_glGetMinmaxParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -4095,7 +4095,7 @@ void EXEC_glGetMinmaxParameteriv(byte *commandbuf)
 
 
 //367
-void EXEC_glHistogram(byte *commandbuf)
+static void EXEC_glHistogram(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *width = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -4107,7 +4107,7 @@ void EXEC_glHistogram(byte *commandbuf)
 
 
 //368
-void EXEC_glMinmax(byte *commandbuf)
+static void EXEC_glMinmax(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -4118,7 +4118,7 @@ void EXEC_glMinmax(byte *commandbuf)
 
 
 //369
-void EXEC_glResetHistogram(byte *commandbuf)
+static void EXEC_glResetHistogram(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4127,7 +4127,7 @@ void EXEC_glResetHistogram(byte *commandbuf)
 
 
 //370
-void EXEC_glResetMinmax(byte *commandbuf)
+static void EXEC_glResetMinmax(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4136,7 +4136,7 @@ void EXEC_glResetMinmax(byte *commandbuf)
 
 
 //371
-void EXEC_glTexImage3D(byte *commandbuf)
+static void EXEC_glTexImage3D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4153,7 +4153,7 @@ void EXEC_glTexImage3D(byte *commandbuf)
 
 
 //372
-void EXEC_glTexSubImage3D(byte *commandbuf)
+static void EXEC_glTexSubImage3D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4172,7 +4172,7 @@ void EXEC_glTexSubImage3D(byte *commandbuf)
 
 
 //373
-void EXEC_glCopyTexSubImage3D(byte *commandbuf)
+static void EXEC_glCopyTexSubImage3D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4189,7 +4189,7 @@ void EXEC_glCopyTexSubImage3D(byte *commandbuf)
 
 
 //374
-void EXEC_glActiveTexture(byte *commandbuf)
+static void EXEC_glActiveTexture(byte *commandbuf)
 {
 	GLenum *texture = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -4198,7 +4198,7 @@ void EXEC_glActiveTexture(byte *commandbuf)
 
 
 //375
-void EXEC_glClientActiveTexture(byte *commandbuf)
+static void EXEC_glClientActiveTexture(byte *commandbuf)
 {
 	GLenum *texture = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -4207,7 +4207,7 @@ void EXEC_glClientActiveTexture(byte *commandbuf)
 
 
 //376
-void EXEC_glMultiTexCoord1d(byte *commandbuf)
+static void EXEC_glMultiTexCoord1d(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -4217,7 +4217,7 @@ void EXEC_glMultiTexCoord1d(byte *commandbuf)
 
 
 //377
-void EXEC_glMultiTexCoord1dv(byte *commandbuf)
+static void EXEC_glMultiTexCoord1dv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4226,7 +4226,7 @@ void EXEC_glMultiTexCoord1dv(byte *commandbuf)
 
 
 //378
-void EXEC_glMultiTexCoord1f(byte *commandbuf)
+static void EXEC_glMultiTexCoord1f(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -4236,7 +4236,7 @@ void EXEC_glMultiTexCoord1f(byte *commandbuf)
 
 
 //379
-void EXEC_glMultiTexCoord1fv(byte *commandbuf)
+static void EXEC_glMultiTexCoord1fv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4245,7 +4245,7 @@ void EXEC_glMultiTexCoord1fv(byte *commandbuf)
 
 
 //380
-void EXEC_glMultiTexCoord1i(byte *commandbuf)
+static void EXEC_glMultiTexCoord1i(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4255,7 +4255,7 @@ void EXEC_glMultiTexCoord1i(byte *commandbuf)
 
 
 //381
-void EXEC_glMultiTexCoord1iv(byte *commandbuf)
+static void EXEC_glMultiTexCoord1iv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4264,7 +4264,7 @@ void EXEC_glMultiTexCoord1iv(byte *commandbuf)
 
 
 //382
-void EXEC_glMultiTexCoord1s(byte *commandbuf)
+static void EXEC_glMultiTexCoord1s(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -4274,7 +4274,7 @@ void EXEC_glMultiTexCoord1s(byte *commandbuf)
 
 
 //383
-void EXEC_glMultiTexCoord1sv(byte *commandbuf)
+static void EXEC_glMultiTexCoord1sv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4283,7 +4283,7 @@ void EXEC_glMultiTexCoord1sv(byte *commandbuf)
 
 
 //384
-void EXEC_glMultiTexCoord2d(byte *commandbuf)
+static void EXEC_glMultiTexCoord2d(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -4294,7 +4294,7 @@ void EXEC_glMultiTexCoord2d(byte *commandbuf)
 
 
 //385
-void EXEC_glMultiTexCoord2dv(byte *commandbuf)
+static void EXEC_glMultiTexCoord2dv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4303,7 +4303,7 @@ void EXEC_glMultiTexCoord2dv(byte *commandbuf)
 
 
 //386
-void EXEC_glMultiTexCoord2f(byte *commandbuf)
+static void EXEC_glMultiTexCoord2f(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -4314,7 +4314,7 @@ void EXEC_glMultiTexCoord2f(byte *commandbuf)
 
 
 //387
-void EXEC_glMultiTexCoord2fv(byte *commandbuf)
+static void EXEC_glMultiTexCoord2fv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4323,7 +4323,7 @@ void EXEC_glMultiTexCoord2fv(byte *commandbuf)
 
 
 //388
-void EXEC_glMultiTexCoord2i(byte *commandbuf)
+static void EXEC_glMultiTexCoord2i(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4334,7 +4334,7 @@ void EXEC_glMultiTexCoord2i(byte *commandbuf)
 
 
 //389
-void EXEC_glMultiTexCoord2iv(byte *commandbuf)
+static void EXEC_glMultiTexCoord2iv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4343,7 +4343,7 @@ void EXEC_glMultiTexCoord2iv(byte *commandbuf)
 
 
 //390
-void EXEC_glMultiTexCoord2s(byte *commandbuf)
+static void EXEC_glMultiTexCoord2s(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -4354,7 +4354,7 @@ void EXEC_glMultiTexCoord2s(byte *commandbuf)
 
 
 //391
-void EXEC_glMultiTexCoord2sv(byte *commandbuf)
+static void EXEC_glMultiTexCoord2sv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4363,7 +4363,7 @@ void EXEC_glMultiTexCoord2sv(byte *commandbuf)
 
 
 //392
-void EXEC_glMultiTexCoord3d(byte *commandbuf)
+static void EXEC_glMultiTexCoord3d(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -4375,7 +4375,7 @@ void EXEC_glMultiTexCoord3d(byte *commandbuf)
 
 
 //393
-void EXEC_glMultiTexCoord3dv(byte *commandbuf)
+static void EXEC_glMultiTexCoord3dv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4384,7 +4384,7 @@ void EXEC_glMultiTexCoord3dv(byte *commandbuf)
 
 
 //394
-void EXEC_glMultiTexCoord3f(byte *commandbuf)
+static void EXEC_glMultiTexCoord3f(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -4396,7 +4396,7 @@ void EXEC_glMultiTexCoord3f(byte *commandbuf)
 
 
 //395
-void EXEC_glMultiTexCoord3fv(byte *commandbuf)
+static void EXEC_glMultiTexCoord3fv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4405,7 +4405,7 @@ void EXEC_glMultiTexCoord3fv(byte *commandbuf)
 
 
 //396
-void EXEC_glMultiTexCoord3i(byte *commandbuf)
+static void EXEC_glMultiTexCoord3i(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4417,7 +4417,7 @@ void EXEC_glMultiTexCoord3i(byte *commandbuf)
 
 
 //397
-void EXEC_glMultiTexCoord3iv(byte *commandbuf)
+static void EXEC_glMultiTexCoord3iv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4426,7 +4426,7 @@ void EXEC_glMultiTexCoord3iv(byte *commandbuf)
 
 
 //398
-void EXEC_glMultiTexCoord3s(byte *commandbuf)
+static void EXEC_glMultiTexCoord3s(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -4438,7 +4438,7 @@ void EXEC_glMultiTexCoord3s(byte *commandbuf)
 
 
 //399
-void EXEC_glMultiTexCoord3sv(byte *commandbuf)
+static void EXEC_glMultiTexCoord3sv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4447,7 +4447,7 @@ void EXEC_glMultiTexCoord3sv(byte *commandbuf)
 
 
 //400
-void EXEC_glMultiTexCoord4d(byte *commandbuf)
+static void EXEC_glMultiTexCoord4d(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -4460,7 +4460,7 @@ void EXEC_glMultiTexCoord4d(byte *commandbuf)
 
 
 //401
-void EXEC_glMultiTexCoord4dv(byte *commandbuf)
+static void EXEC_glMultiTexCoord4dv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4469,7 +4469,7 @@ void EXEC_glMultiTexCoord4dv(byte *commandbuf)
 
 
 //402
-void EXEC_glMultiTexCoord4f(byte *commandbuf)
+static void EXEC_glMultiTexCoord4f(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -4482,7 +4482,7 @@ void EXEC_glMultiTexCoord4f(byte *commandbuf)
 
 
 //403
-void EXEC_glMultiTexCoord4fv(byte *commandbuf)
+static void EXEC_glMultiTexCoord4fv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4491,7 +4491,7 @@ void EXEC_glMultiTexCoord4fv(byte *commandbuf)
 
 
 //404
-void EXEC_glMultiTexCoord4i(byte *commandbuf)
+static void EXEC_glMultiTexCoord4i(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4504,7 +4504,7 @@ void EXEC_glMultiTexCoord4i(byte *commandbuf)
 
 
 //405
-void EXEC_glMultiTexCoord4iv(byte *commandbuf)
+static void EXEC_glMultiTexCoord4iv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4513,7 +4513,7 @@ void EXEC_glMultiTexCoord4iv(byte *commandbuf)
 
 
 //406
-void EXEC_glMultiTexCoord4s(byte *commandbuf)
+static void EXEC_glMultiTexCoord4s(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -4526,7 +4526,7 @@ void EXEC_glMultiTexCoord4s(byte *commandbuf)
 
 
 //407
-void EXEC_glMultiTexCoord4sv(byte *commandbuf)
+static void EXEC_glMultiTexCoord4sv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -4535,7 +4535,7 @@ void EXEC_glMultiTexCoord4sv(byte *commandbuf)
 
 
 //408
-void EXEC_glLoadTransposeMatrixf(byte *commandbuf)
+static void EXEC_glLoadTransposeMatrixf(byte *commandbuf)
 {
 
 	glLoadTransposeMatrixf((const GLfloat *)popBuf());
@@ -4543,7 +4543,7 @@ void EXEC_glLoadTransposeMatrixf(byte *commandbuf)
 
 
 //409
-void EXEC_glLoadTransposeMatrixd(byte *commandbuf)
+static void EXEC_glLoadTransposeMatrixd(byte *commandbuf)
 {
 
 	glLoadTransposeMatrixd((const GLdouble *)popBuf());
@@ -4551,7 +4551,7 @@ void EXEC_glLoadTransposeMatrixd(byte *commandbuf)
 
 
 //410
-void EXEC_glMultTransposeMatrixf(byte *commandbuf)
+static void EXEC_glMultTransposeMatrixf(byte *commandbuf)
 {
 
 	glMultTransposeMatrixf((const GLfloat *)popBuf());
@@ -4559,7 +4559,7 @@ void EXEC_glMultTransposeMatrixf(byte *commandbuf)
 
 
 //411
-void EXEC_glMultTransposeMatrixd(byte *commandbuf)
+static void EXEC_glMultTransposeMatrixd(byte *commandbuf)
 {
 
 	glMultTransposeMatrixd((const GLdouble *)popBuf());
@@ -4567,7 +4567,7 @@ void EXEC_glMultTransposeMatrixd(byte *commandbuf)
 
 
 //412
-void EXEC_glSampleCoverage(byte *commandbuf)
+static void EXEC_glSampleCoverage(byte *commandbuf)
 {
 	GLclampf *value = (GLclampf*)commandbuf;     commandbuf += sizeof(GLclampf);
 	GLboolean *invert = (GLboolean*)commandbuf;  commandbuf += sizeof(GLboolean);
@@ -4577,7 +4577,7 @@ void EXEC_glSampleCoverage(byte *commandbuf)
 
 
 //413
-void EXEC_glCompressedTexImage3D(byte *commandbuf)
+static void EXEC_glCompressedTexImage3D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4593,7 +4593,7 @@ void EXEC_glCompressedTexImage3D(byte *commandbuf)
 
 
 //414
-void EXEC_glCompressedTexImage2D(byte *commandbuf)
+static void EXEC_glCompressedTexImage2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4608,7 +4608,7 @@ void EXEC_glCompressedTexImage2D(byte *commandbuf)
 
 
 //415
-void EXEC_glCompressedTexImage1D(byte *commandbuf)
+static void EXEC_glCompressedTexImage1D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4622,7 +4622,7 @@ void EXEC_glCompressedTexImage1D(byte *commandbuf)
 
 
 //416
-void EXEC_glCompressedTexSubImage3D(byte *commandbuf)
+static void EXEC_glCompressedTexSubImage3D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4640,7 +4640,7 @@ void EXEC_glCompressedTexSubImage3D(byte *commandbuf)
 
 
 //417
-void EXEC_glCompressedTexSubImage2D(byte *commandbuf)
+static void EXEC_glCompressedTexSubImage2D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4656,7 +4656,7 @@ void EXEC_glCompressedTexSubImage2D(byte *commandbuf)
 
 
 //418
-void EXEC_glCompressedTexSubImage1D(byte *commandbuf)
+static void EXEC_glCompressedTexSubImage1D(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4670,7 +4670,7 @@ void EXEC_glCompressedTexSubImage1D(byte *commandbuf)
 
 
 //419
-void EXEC_glGetCompressedTexImage(byte *commandbuf)
+static void EXEC_glGetCompressedTexImage(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4680,7 +4680,7 @@ void EXEC_glGetCompressedTexImage(byte *commandbuf)
 
 
 //420
-void EXEC_glBlendFuncSeparate(byte *commandbuf)
+static void EXEC_glBlendFuncSeparate(byte *commandbuf)
 {
 	GLenum *sfactorRGB = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *dfactorRGB = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -4692,7 +4692,7 @@ void EXEC_glBlendFuncSeparate(byte *commandbuf)
 
 
 //421
-void EXEC_glFogCoordf(byte *commandbuf)
+static void EXEC_glFogCoordf(byte *commandbuf)
 {
 	GLfloat *coord = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 
@@ -4701,14 +4701,14 @@ void EXEC_glFogCoordf(byte *commandbuf)
 
 
 //422
-void EXEC_glFogCoordfv(byte *commandbuf)
+static void EXEC_glFogCoordfv(byte *commandbuf)
 {
 	glFogCoordfv((const GLfloat *)popBuf());
 }
 
 
 //423
-void EXEC_glFogCoordd(byte *commandbuf)
+static void EXEC_glFogCoordd(byte *commandbuf)
 {
 	GLdouble *coord = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 
@@ -4717,7 +4717,7 @@ void EXEC_glFogCoordd(byte *commandbuf)
 
 
 //424
-void EXEC_glFogCoorddv(byte *commandbuf)
+static void EXEC_glFogCoorddv(byte *commandbuf)
 {
 
 	glFogCoorddv((const GLdouble *)popBuf());
@@ -4725,7 +4725,7 @@ void EXEC_glFogCoorddv(byte *commandbuf)
 
 
 //425
-void EXEC_glFogCoordPointer(byte *commandbuf)
+static void EXEC_glFogCoordPointer(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -4735,7 +4735,7 @@ void EXEC_glFogCoordPointer(byte *commandbuf)
 
 
 //426
-void EXEC_glMultiDrawArrays(byte *commandbuf)
+static void EXEC_glMultiDrawArrays(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *primcount = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -4745,7 +4745,7 @@ void EXEC_glMultiDrawArrays(byte *commandbuf)
 
 
 //427
-void EXEC_glMultiDrawElements(byte *commandbuf)
+static void EXEC_glMultiDrawElements(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -4756,7 +4756,7 @@ void EXEC_glMultiDrawElements(byte *commandbuf)
 
 
 //428
-void EXEC_glPointParameterf(byte *commandbuf)
+static void EXEC_glPointParameterf(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -4766,7 +4766,7 @@ void EXEC_glPointParameterf(byte *commandbuf)
 
 
 //429
-void EXEC_glPointParameterfv(byte *commandbuf)
+static void EXEC_glPointParameterfv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -4775,7 +4775,7 @@ void EXEC_glPointParameterfv(byte *commandbuf)
 
 
 //430
-void EXEC_glPointParameteri(byte *commandbuf)
+static void EXEC_glPointParameteri(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4788,7 +4788,7 @@ void EXEC_glPointParameteri(byte *commandbuf)
 
 
 //431
-void EXEC_glPointParameteriv(byte *commandbuf)
+static void EXEC_glPointParameteriv(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -4800,7 +4800,7 @@ void EXEC_glPointParameteriv(byte *commandbuf)
 
 
 //432
-void EXEC_glSecondaryColor3b(byte *commandbuf)
+static void EXEC_glSecondaryColor3b(byte *commandbuf)
 {
 	GLbyte *red = (GLbyte*)commandbuf;   commandbuf += sizeof(GLbyte);
 	GLbyte *green = (GLbyte*)commandbuf;     commandbuf += sizeof(GLbyte);
@@ -4811,7 +4811,7 @@ void EXEC_glSecondaryColor3b(byte *commandbuf)
 
 
 //433
-void EXEC_glSecondaryColor3bv(byte *commandbuf)
+static void EXEC_glSecondaryColor3bv(byte *commandbuf)
 {
 
 	glSecondaryColor3bv((const GLbyte *)popBuf());
@@ -4819,7 +4819,7 @@ void EXEC_glSecondaryColor3bv(byte *commandbuf)
 
 
 //434
-void EXEC_glSecondaryColor3d(byte *commandbuf)
+static void EXEC_glSecondaryColor3d(byte *commandbuf)
 {
 	GLdouble *red = (GLdouble*)commandbuf;   commandbuf += sizeof(GLdouble);
 	GLdouble *green = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -4830,7 +4830,7 @@ void EXEC_glSecondaryColor3d(byte *commandbuf)
 
 
 //435
-void EXEC_glSecondaryColor3dv(byte *commandbuf)
+static void EXEC_glSecondaryColor3dv(byte *commandbuf)
 {
 
 	glSecondaryColor3dv((const GLdouble *)popBuf());
@@ -4838,7 +4838,7 @@ void EXEC_glSecondaryColor3dv(byte *commandbuf)
 
 
 //436
-void EXEC_glSecondaryColor3f(byte *commandbuf)
+static void EXEC_glSecondaryColor3f(byte *commandbuf)
 {
 	GLfloat *red = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
 	GLfloat *green = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -4849,7 +4849,7 @@ void EXEC_glSecondaryColor3f(byte *commandbuf)
 
 
 //437
-void EXEC_glSecondaryColor3fv(byte *commandbuf)
+static void EXEC_glSecondaryColor3fv(byte *commandbuf)
 {
 
 	glSecondaryColor3fv((const GLfloat *)popBuf());
@@ -4857,7 +4857,7 @@ void EXEC_glSecondaryColor3fv(byte *commandbuf)
 
 
 //438
-void EXEC_glSecondaryColor3i(byte *commandbuf)
+static void EXEC_glSecondaryColor3i(byte *commandbuf)
 {
 	GLint *red = (GLint*)commandbuf;     commandbuf += sizeof(GLint);
 	GLint *green = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -4868,7 +4868,7 @@ void EXEC_glSecondaryColor3i(byte *commandbuf)
 
 
 //439
-void EXEC_glSecondaryColor3iv(byte *commandbuf)
+static void EXEC_glSecondaryColor3iv(byte *commandbuf)
 {
 
 	glSecondaryColor3iv((const GLint *)popBuf());
@@ -4876,7 +4876,7 @@ void EXEC_glSecondaryColor3iv(byte *commandbuf)
 
 
 //440
-void EXEC_glSecondaryColor3s(byte *commandbuf)
+static void EXEC_glSecondaryColor3s(byte *commandbuf)
 {
 	GLshort *red = (GLshort*)commandbuf;     commandbuf += sizeof(GLshort);
 	GLshort *green = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -4887,7 +4887,7 @@ void EXEC_glSecondaryColor3s(byte *commandbuf)
 
 
 //441
-void EXEC_glSecondaryColor3sv(byte *commandbuf)
+static void EXEC_glSecondaryColor3sv(byte *commandbuf)
 {
 
 	glSecondaryColor3sv((const GLshort *)popBuf());
@@ -4895,7 +4895,7 @@ void EXEC_glSecondaryColor3sv(byte *commandbuf)
 
 
 //442
-void EXEC_glSecondaryColor3ub(byte *commandbuf)
+static void EXEC_glSecondaryColor3ub(byte *commandbuf)
 {
 	GLubyte *red = (GLubyte*)commandbuf;     commandbuf += sizeof(GLubyte);
 	GLubyte *green = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -4906,7 +4906,7 @@ void EXEC_glSecondaryColor3ub(byte *commandbuf)
 
 
 //443
-void EXEC_glSecondaryColor3ubv(byte *commandbuf)
+static void EXEC_glSecondaryColor3ubv(byte *commandbuf)
 {
 
 	glSecondaryColor3ubv((const GLubyte *)popBuf());
@@ -4914,7 +4914,7 @@ void EXEC_glSecondaryColor3ubv(byte *commandbuf)
 
 
 //444
-void EXEC_glSecondaryColor3ui(byte *commandbuf)
+static void EXEC_glSecondaryColor3ui(byte *commandbuf)
 {
 	GLuint *red = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *green = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -4925,7 +4925,7 @@ void EXEC_glSecondaryColor3ui(byte *commandbuf)
 
 
 //445
-void EXEC_glSecondaryColor3uiv(byte *commandbuf)
+static void EXEC_glSecondaryColor3uiv(byte *commandbuf)
 {
 
 	glSecondaryColor3uiv((const GLuint *)popBuf());
@@ -4933,7 +4933,7 @@ void EXEC_glSecondaryColor3uiv(byte *commandbuf)
 
 
 //446
-void EXEC_glSecondaryColor3us(byte *commandbuf)
+static void EXEC_glSecondaryColor3us(byte *commandbuf)
 {
 	GLushort *red = (GLushort*)commandbuf;   commandbuf += sizeof(GLushort);
 	GLushort *green = (GLushort*)commandbuf;     commandbuf += sizeof(GLushort);
@@ -4944,7 +4944,7 @@ void EXEC_glSecondaryColor3us(byte *commandbuf)
 
 
 //447
-void EXEC_glSecondaryColor3usv(byte *commandbuf)
+static void EXEC_glSecondaryColor3usv(byte *commandbuf)
 {
 
 	glSecondaryColor3usv((const GLushort *)popBuf());
@@ -4952,7 +4952,7 @@ void EXEC_glSecondaryColor3usv(byte *commandbuf)
 
 
 //448
-void EXEC_glSecondaryColorPointer(byte *commandbuf)
+static void EXEC_glSecondaryColorPointer(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -4963,7 +4963,7 @@ void EXEC_glSecondaryColorPointer(byte *commandbuf)
 
 
 //449
-void EXEC_glWindowPos2d(byte *commandbuf)
+static void EXEC_glWindowPos2d(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -4973,7 +4973,7 @@ void EXEC_glWindowPos2d(byte *commandbuf)
 
 
 //450
-void EXEC_glWindowPos2dv(byte *commandbuf)
+static void EXEC_glWindowPos2dv(byte *commandbuf)
 {
 
 	glWindowPos2dv((const GLdouble *)popBuf());
@@ -4981,7 +4981,7 @@ void EXEC_glWindowPos2dv(byte *commandbuf)
 
 
 //451
-void EXEC_glWindowPos2f(byte *commandbuf)
+static void EXEC_glWindowPos2f(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -4991,7 +4991,7 @@ void EXEC_glWindowPos2f(byte *commandbuf)
 
 
 //452
-void EXEC_glWindowPos2fv(byte *commandbuf)
+static void EXEC_glWindowPos2fv(byte *commandbuf)
 {
 
 	glWindowPos2fv((const GLfloat *)popBuf());
@@ -4999,7 +4999,7 @@ void EXEC_glWindowPos2fv(byte *commandbuf)
 
 
 //453
-void EXEC_glWindowPos2i(byte *commandbuf)
+static void EXEC_glWindowPos2i(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -5009,7 +5009,7 @@ void EXEC_glWindowPos2i(byte *commandbuf)
 
 
 //454
-void EXEC_glWindowPos2iv(byte *commandbuf)
+static void EXEC_glWindowPos2iv(byte *commandbuf)
 {
 
 	glWindowPos2iv((const GLint *)popBuf());
@@ -5017,7 +5017,7 @@ void EXEC_glWindowPos2iv(byte *commandbuf)
 
 
 //455
-void EXEC_glWindowPos2s(byte *commandbuf)
+static void EXEC_glWindowPos2s(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -5027,7 +5027,7 @@ void EXEC_glWindowPos2s(byte *commandbuf)
 
 
 //456
-void EXEC_glWindowPos2sv(byte *commandbuf)
+static void EXEC_glWindowPos2sv(byte *commandbuf)
 {
 
 	glWindowPos2sv((const GLshort *)popBuf());
@@ -5035,7 +5035,7 @@ void EXEC_glWindowPos2sv(byte *commandbuf)
 
 
 //457
-void EXEC_glWindowPos3d(byte *commandbuf)
+static void EXEC_glWindowPos3d(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -5046,7 +5046,7 @@ void EXEC_glWindowPos3d(byte *commandbuf)
 
 
 //458
-void EXEC_glWindowPos3dv(byte *commandbuf)
+static void EXEC_glWindowPos3dv(byte *commandbuf)
 {
 
 	glWindowPos3dv((const GLdouble *)popBuf());
@@ -5054,7 +5054,7 @@ void EXEC_glWindowPos3dv(byte *commandbuf)
 
 
 //459
-void EXEC_glWindowPos3f(byte *commandbuf)
+static void EXEC_glWindowPos3f(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -5065,7 +5065,7 @@ void EXEC_glWindowPos3f(byte *commandbuf)
 
 
 //460
-void EXEC_glWindowPos3fv(byte *commandbuf)
+static void EXEC_glWindowPos3fv(byte *commandbuf)
 {
 
 	glWindowPos3fv((const GLfloat *)popBuf());
@@ -5073,7 +5073,7 @@ void EXEC_glWindowPos3fv(byte *commandbuf)
 
 
 //461
-void EXEC_glWindowPos3i(byte *commandbuf)
+static void EXEC_glWindowPos3i(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -5084,7 +5084,7 @@ void EXEC_glWindowPos3i(byte *commandbuf)
 
 
 //462
-void EXEC_glWindowPos3iv(byte *commandbuf)
+static void EXEC_glWindowPos3iv(byte *commandbuf)
 {
 
 	glWindowPos3iv((const GLint *)popBuf());
@@ -5092,7 +5092,7 @@ void EXEC_glWindowPos3iv(byte *commandbuf)
 
 
 //463
-void EXEC_glWindowPos3s(byte *commandbuf)
+static void EXEC_glWindowPos3s(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -5103,7 +5103,7 @@ void EXEC_glWindowPos3s(byte *commandbuf)
 
 
 //464
-void EXEC_glWindowPos3sv(byte *commandbuf)
+static void EXEC_glWindowPos3sv(byte *commandbuf)
 {
 
 	glWindowPos3sv((const GLshort *)popBuf());
@@ -5111,7 +5111,7 @@ void EXEC_glWindowPos3sv(byte *commandbuf)
 
 
 //465
-void EXEC_glBindBuffer(byte *commandbuf)
+static void EXEC_glBindBuffer(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *buffer = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -5121,7 +5121,7 @@ void EXEC_glBindBuffer(byte *commandbuf)
 
 
 //466
-void EXEC_glBufferData(byte *commandbuf)
+static void EXEC_glBufferData(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizeiptr *size = (GLsizeiptr*)commandbuf;  commandbuf += sizeof(GLsizeiptr);
@@ -5132,7 +5132,7 @@ void EXEC_glBufferData(byte *commandbuf)
 
 
 //467
-void EXEC_glBufferSubData(byte *commandbuf)
+static void EXEC_glBufferSubData(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLintptr *offset = (GLintptr*)commandbuf;    commandbuf += sizeof(GLintptr);
@@ -5143,7 +5143,7 @@ void EXEC_glBufferSubData(byte *commandbuf)
 
 
 //468
-void EXEC_glDeleteBuffers(byte *commandbuf)
+static void EXEC_glDeleteBuffers(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -5152,7 +5152,7 @@ void EXEC_glDeleteBuffers(byte *commandbuf)
 
 
 //469
-void EXEC_glGenBuffers(byte *commandbuf)
+static void EXEC_glGenBuffers(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -5161,7 +5161,7 @@ void EXEC_glGenBuffers(byte *commandbuf)
 
 
 //470
-void EXEC_glGetBufferParameteriv(byte *commandbuf)
+static void EXEC_glGetBufferParameteriv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5171,7 +5171,7 @@ void EXEC_glGetBufferParameteriv(byte *commandbuf)
 
 
 //471
-void EXEC_glGetBufferPointerv(byte *commandbuf)
+static void EXEC_glGetBufferPointerv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5181,7 +5181,7 @@ void EXEC_glGetBufferPointerv(byte *commandbuf)
 
 
 //472
-void EXEC_glGetBufferSubData(byte *commandbuf)
+static void EXEC_glGetBufferSubData(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLintptr *offset = (GLintptr*)commandbuf;    commandbuf += sizeof(GLintptr);
@@ -5192,7 +5192,7 @@ void EXEC_glGetBufferSubData(byte *commandbuf)
 
 
 //473
-void EXEC_glIsBuffer(byte *commandbuf)
+static void EXEC_glIsBuffer(byte *commandbuf)
 {
 	GLuint *buffer = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -5201,7 +5201,7 @@ void EXEC_glIsBuffer(byte *commandbuf)
 
 
 //474
-void EXEC_glMapBuffer(byte *commandbuf)
+static void EXEC_glMapBuffer(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *access = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -5212,7 +5212,7 @@ void EXEC_glMapBuffer(byte *commandbuf)
 
 
 //475
-void EXEC_glUnmapBuffer(byte *commandbuf)
+static void EXEC_glUnmapBuffer(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -5221,7 +5221,7 @@ void EXEC_glUnmapBuffer(byte *commandbuf)
 
 
 //476
-void EXEC_glGenQueries(byte *commandbuf)
+static void EXEC_glGenQueries(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -5230,7 +5230,7 @@ void EXEC_glGenQueries(byte *commandbuf)
 
 
 //477
-void EXEC_glDeleteQueries(byte *commandbuf)
+static void EXEC_glDeleteQueries(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -5239,7 +5239,7 @@ void EXEC_glDeleteQueries(byte *commandbuf)
 
 
 //478
-void EXEC_glIsQuery(byte *commandbuf)
+static void EXEC_glIsQuery(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -5248,7 +5248,7 @@ void EXEC_glIsQuery(byte *commandbuf)
 
 
 //479
-void EXEC_glBeginQuery(byte *commandbuf)
+static void EXEC_glBeginQuery(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -5258,7 +5258,7 @@ void EXEC_glBeginQuery(byte *commandbuf)
 
 
 //480
-void EXEC_glEndQuery(byte *commandbuf)
+static void EXEC_glEndQuery(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -5267,7 +5267,7 @@ void EXEC_glEndQuery(byte *commandbuf)
 
 
 //481
-void EXEC_glGetQueryiv(byte *commandbuf)
+static void EXEC_glGetQueryiv(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5277,7 +5277,7 @@ void EXEC_glGetQueryiv(byte *commandbuf)
 
 
 //482
-void EXEC_glGetQueryObjectiv(byte *commandbuf)
+static void EXEC_glGetQueryObjectiv(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5287,7 +5287,7 @@ void EXEC_glGetQueryObjectiv(byte *commandbuf)
 
 
 //483
-void EXEC_glGetQueryObjectuiv(byte *commandbuf)
+static void EXEC_glGetQueryObjectuiv(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5297,7 +5297,7 @@ void EXEC_glGetQueryObjectuiv(byte *commandbuf)
 
 
 //484
-void EXEC_glBlendEquationSeparate(byte *commandbuf)
+static void EXEC_glBlendEquationSeparate(byte *commandbuf)
 {
 	GLenum *modeRGB = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLenum *modeA = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5307,7 +5307,7 @@ void EXEC_glBlendEquationSeparate(byte *commandbuf)
 
 
 //485
-void EXEC_glDrawBuffers(byte *commandbuf)
+static void EXEC_glDrawBuffers(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -5316,7 +5316,7 @@ void EXEC_glDrawBuffers(byte *commandbuf)
 
 
 //486
-void EXEC_glStencilFuncSeparate(byte *commandbuf)
+static void EXEC_glStencilFuncSeparate(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *func = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -5328,7 +5328,7 @@ void EXEC_glStencilFuncSeparate(byte *commandbuf)
 
 
 //487
-void EXEC_glStencilOpSeparate(byte *commandbuf)
+static void EXEC_glStencilOpSeparate(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *sfail = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5340,7 +5340,7 @@ void EXEC_glStencilOpSeparate(byte *commandbuf)
 
 
 //488
-void EXEC_glStencilMaskSeparate(byte *commandbuf)
+static void EXEC_glStencilMaskSeparate(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLuint *mask = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
@@ -5350,7 +5350,7 @@ void EXEC_glStencilMaskSeparate(byte *commandbuf)
 
 
 //489
-void EXEC_glAttachShader(byte *commandbuf)
+static void EXEC_glAttachShader(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -5360,7 +5360,7 @@ void EXEC_glAttachShader(byte *commandbuf)
 
 
 //490
-void EXEC_glBindAttribLocation(byte *commandbuf)
+static void EXEC_glBindAttribLocation(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -5370,7 +5370,7 @@ void EXEC_glBindAttribLocation(byte *commandbuf)
 
 
 //491
-void EXEC_glCompileShader(byte *commandbuf)
+static void EXEC_glCompileShader(byte *commandbuf)
 {
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -5379,7 +5379,7 @@ void EXEC_glCompileShader(byte *commandbuf)
 
 
 //492
-void EXEC_glCreateProgram(byte *commandbuf)
+static void EXEC_glCreateProgram(byte *commandbuf)
 {
 
 	pushRet(glCreateProgram());
@@ -5387,7 +5387,7 @@ void EXEC_glCreateProgram(byte *commandbuf)
 
 
 //493
-void EXEC_glCreateShader(byte *commandbuf)
+static void EXEC_glCreateShader(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	pushRet(glCreateShader(*type));
@@ -5395,7 +5395,7 @@ void EXEC_glCreateShader(byte *commandbuf)
 
 
 //494
-void EXEC_glDeleteProgram(byte *commandbuf)
+static void EXEC_glDeleteProgram(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -5404,7 +5404,7 @@ void EXEC_glDeleteProgram(byte *commandbuf)
 
 
 //495
-void EXEC_glDeleteShader(byte *commandbuf)
+static void EXEC_glDeleteShader(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -5413,7 +5413,7 @@ void EXEC_glDeleteShader(byte *commandbuf)
 
 
 //496
-void EXEC_glDetachShader(byte *commandbuf)
+static void EXEC_glDetachShader(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -5423,7 +5423,7 @@ void EXEC_glDetachShader(byte *commandbuf)
 
 
 //497
-void EXEC_glDisableVertexAttribArray(byte *commandbuf)
+static void EXEC_glDisableVertexAttribArray(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -5432,7 +5432,7 @@ void EXEC_glDisableVertexAttribArray(byte *commandbuf)
 
 
 //498
-void EXEC_glEnableVertexAttribArray(byte *commandbuf)
+static void EXEC_glEnableVertexAttribArray(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -5441,7 +5441,7 @@ void EXEC_glEnableVertexAttribArray(byte *commandbuf)
 
 
 //499
-void EXEC_glGetActiveAttrib(byte *commandbuf)
+static void EXEC_glGetActiveAttrib(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -5452,7 +5452,7 @@ void EXEC_glGetActiveAttrib(byte *commandbuf)
 
 
 //500
-void EXEC_glGetActiveUniform(byte *commandbuf)
+static void EXEC_glGetActiveUniform(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -5463,7 +5463,7 @@ void EXEC_glGetActiveUniform(byte *commandbuf)
 
 
 //501
-void EXEC_glGetAttachedShaders(byte *commandbuf)
+static void EXEC_glGetAttachedShaders(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLsizei *maxCount = (GLsizei*)commandbuf;    commandbuf += sizeof(GLsizei);
@@ -5473,7 +5473,7 @@ void EXEC_glGetAttachedShaders(byte *commandbuf)
 
 
 //502
-void EXEC_glGetAttribLocation(byte *commandbuf)
+static void EXEC_glGetAttribLocation(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -5482,7 +5482,7 @@ void EXEC_glGetAttribLocation(byte *commandbuf)
 
 
 //503
-void EXEC_glGetProgramiv(byte *commandbuf)
+static void EXEC_glGetProgramiv(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5492,7 +5492,7 @@ void EXEC_glGetProgramiv(byte *commandbuf)
 
 
 //504
-void EXEC_glGetProgramInfoLog(byte *commandbuf)
+static void EXEC_glGetProgramInfoLog(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLsizei *bufSize = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -5502,7 +5502,7 @@ void EXEC_glGetProgramInfoLog(byte *commandbuf)
 
 
 //505
-void EXEC_glGetShaderiv(byte *commandbuf)
+static void EXEC_glGetShaderiv(byte *commandbuf)
 {
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5513,7 +5513,7 @@ void EXEC_glGetShaderiv(byte *commandbuf)
 
 
 //506
-void EXEC_glGetShaderInfoLog(byte *commandbuf)
+static void EXEC_glGetShaderInfoLog(byte *commandbuf)
 {
 	GLuint  *shader  = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLsizei *bufSize = (GLsizei*)commandbuf; commandbuf += sizeof(GLsizei);
@@ -5529,7 +5529,7 @@ void EXEC_glGetShaderInfoLog(byte *commandbuf)
 
 
 //507
-void EXEC_glGetShaderSource(byte *commandbuf)
+static void EXEC_glGetShaderSource(byte *commandbuf)
 {
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *bufSize = (GLsizei*)commandbuf; commandbuf += sizeof(GLsizei);
@@ -5544,7 +5544,7 @@ void EXEC_glGetShaderSource(byte *commandbuf)
 
 
 //508
-void EXEC_glGetUniformLocation(byte *commandbuf)
+static void EXEC_glGetUniformLocation(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -5553,7 +5553,7 @@ void EXEC_glGetUniformLocation(byte *commandbuf)
 
 
 //509
-void EXEC_glGetUniformfv(byte *commandbuf)
+static void EXEC_glGetUniformfv(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
@@ -5563,7 +5563,7 @@ void EXEC_glGetUniformfv(byte *commandbuf)
 
 
 //510
-void EXEC_glGetUniformiv(byte *commandbuf)
+static void EXEC_glGetUniformiv(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
@@ -5573,7 +5573,7 @@ void EXEC_glGetUniformiv(byte *commandbuf)
 
 
 //511
-void EXEC_glGetVertexAttribdv(byte *commandbuf)
+static void EXEC_glGetVertexAttribdv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5583,7 +5583,7 @@ void EXEC_glGetVertexAttribdv(byte *commandbuf)
 
 
 //512
-void EXEC_glGetVertexAttribfv(byte *commandbuf)
+static void EXEC_glGetVertexAttribfv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5593,7 +5593,7 @@ void EXEC_glGetVertexAttribfv(byte *commandbuf)
 
 
 //513
-void EXEC_glGetVertexAttribiv(byte *commandbuf)
+static void EXEC_glGetVertexAttribiv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5603,7 +5603,7 @@ void EXEC_glGetVertexAttribiv(byte *commandbuf)
 
 
 //514
-void EXEC_glGetVertexAttribPointerv(byte *commandbuf)
+static void EXEC_glGetVertexAttribPointerv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -5613,7 +5613,7 @@ void EXEC_glGetVertexAttribPointerv(byte *commandbuf)
 
 
 //515
-void EXEC_glIsProgram(byte *commandbuf)
+static void EXEC_glIsProgram(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -5622,7 +5622,7 @@ void EXEC_glIsProgram(byte *commandbuf)
 
 
 //516
-void EXEC_glIsShader(byte *commandbuf)
+static void EXEC_glIsShader(byte *commandbuf)
 {
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -5631,7 +5631,7 @@ void EXEC_glIsShader(byte *commandbuf)
 
 
 //517
-void EXEC_glLinkProgram(byte *commandbuf)
+static void EXEC_glLinkProgram(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -5640,7 +5640,7 @@ void EXEC_glLinkProgram(byte *commandbuf)
 
 
 //518
-void EXEC_glShaderSource(byte *commandbuf)
+static void EXEC_glShaderSource(byte *commandbuf)
 {
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5655,7 +5655,7 @@ void EXEC_glShaderSource(byte *commandbuf)
 
 
 //519
-void EXEC_glUseProgram(byte *commandbuf)
+static void EXEC_glUseProgram(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -5664,7 +5664,7 @@ void EXEC_glUseProgram(byte *commandbuf)
 
 
 //520
-void EXEC_glUniform1f(byte *commandbuf)
+static void EXEC_glUniform1f(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLfloat *v0 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -5674,7 +5674,7 @@ void EXEC_glUniform1f(byte *commandbuf)
 
 
 //521
-void EXEC_glUniform2f(byte *commandbuf)
+static void EXEC_glUniform2f(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLfloat *v0 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -5685,7 +5685,7 @@ void EXEC_glUniform2f(byte *commandbuf)
 
 
 //522
-void EXEC_glUniform3f(byte *commandbuf)
+static void EXEC_glUniform3f(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLfloat *v0 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -5697,7 +5697,7 @@ void EXEC_glUniform3f(byte *commandbuf)
 
 
 //523
-void EXEC_glUniform4f(byte *commandbuf)
+static void EXEC_glUniform4f(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLfloat *v0 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -5710,7 +5710,7 @@ void EXEC_glUniform4f(byte *commandbuf)
 
 
 //524
-void EXEC_glUniform1i(byte *commandbuf)
+static void EXEC_glUniform1i(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLint *v0 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -5720,7 +5720,7 @@ void EXEC_glUniform1i(byte *commandbuf)
 
 
 //525
-void EXEC_glUniform2i(byte *commandbuf)
+static void EXEC_glUniform2i(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLint *v0 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -5731,7 +5731,7 @@ void EXEC_glUniform2i(byte *commandbuf)
 
 
 //526
-void EXEC_glUniform3i(byte *commandbuf)
+static void EXEC_glUniform3i(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLint *v0 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -5743,7 +5743,7 @@ void EXEC_glUniform3i(byte *commandbuf)
 
 
 //527
-void EXEC_glUniform4i(byte *commandbuf)
+static void EXEC_glUniform4i(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLint *v0 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -5756,7 +5756,7 @@ void EXEC_glUniform4i(byte *commandbuf)
 
 
 //528
-void EXEC_glUniform1fv(byte *commandbuf)
+static void EXEC_glUniform1fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5766,7 +5766,7 @@ void EXEC_glUniform1fv(byte *commandbuf)
 
 
 //529
-void EXEC_glUniform2fv(byte *commandbuf)
+static void EXEC_glUniform2fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5776,7 +5776,7 @@ void EXEC_glUniform2fv(byte *commandbuf)
 
 
 //530
-void EXEC_glUniform3fv(byte *commandbuf)
+static void EXEC_glUniform3fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5786,7 +5786,7 @@ void EXEC_glUniform3fv(byte *commandbuf)
 
 
 //531
-void EXEC_glUniform4fv(byte *commandbuf)
+static void EXEC_glUniform4fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5796,7 +5796,7 @@ void EXEC_glUniform4fv(byte *commandbuf)
 
 
 //532
-void EXEC_glUniform1iv(byte *commandbuf)
+static void EXEC_glUniform1iv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5806,7 +5806,7 @@ void EXEC_glUniform1iv(byte *commandbuf)
 
 
 //533
-void EXEC_glUniform2iv(byte *commandbuf)
+static void EXEC_glUniform2iv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5816,7 +5816,7 @@ void EXEC_glUniform2iv(byte *commandbuf)
 
 
 //534
-void EXEC_glUniform3iv(byte *commandbuf)
+static void EXEC_glUniform3iv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5826,7 +5826,7 @@ void EXEC_glUniform3iv(byte *commandbuf)
 
 
 //535
-void EXEC_glUniform4iv(byte *commandbuf)
+static void EXEC_glUniform4iv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5836,7 +5836,7 @@ void EXEC_glUniform4iv(byte *commandbuf)
 
 
 //536
-void EXEC_glUniformMatrix2fv(byte *commandbuf)
+static void EXEC_glUniformMatrix2fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5847,7 +5847,7 @@ void EXEC_glUniformMatrix2fv(byte *commandbuf)
 
 
 //537
-void EXEC_glUniformMatrix3fv(byte *commandbuf)
+static void EXEC_glUniformMatrix3fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5858,7 +5858,7 @@ void EXEC_glUniformMatrix3fv(byte *commandbuf)
 
 
 //538
-void EXEC_glUniformMatrix4fv(byte *commandbuf)
+static void EXEC_glUniformMatrix4fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -5869,7 +5869,7 @@ void EXEC_glUniformMatrix4fv(byte *commandbuf)
 
 
 //539
-void EXEC_glValidateProgram(byte *commandbuf)
+static void EXEC_glValidateProgram(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -5878,7 +5878,7 @@ void EXEC_glValidateProgram(byte *commandbuf)
 
 
 //540
-void EXEC_glVertexAttrib1d(byte *commandbuf)
+static void EXEC_glVertexAttrib1d(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -5888,7 +5888,7 @@ void EXEC_glVertexAttrib1d(byte *commandbuf)
 
 
 //541
-void EXEC_glVertexAttrib1dv(byte *commandbuf)
+static void EXEC_glVertexAttrib1dv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -5897,7 +5897,7 @@ void EXEC_glVertexAttrib1dv(byte *commandbuf)
 
 
 //542
-void EXEC_glVertexAttrib1f(byte *commandbuf)
+static void EXEC_glVertexAttrib1f(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -5907,7 +5907,7 @@ void EXEC_glVertexAttrib1f(byte *commandbuf)
 
 
 //543
-void EXEC_glVertexAttrib1fv(byte *commandbuf)
+static void EXEC_glVertexAttrib1fv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -5916,7 +5916,7 @@ void EXEC_glVertexAttrib1fv(byte *commandbuf)
 
 
 //544
-void EXEC_glVertexAttrib1s(byte *commandbuf)
+static void EXEC_glVertexAttrib1s(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -5926,7 +5926,7 @@ void EXEC_glVertexAttrib1s(byte *commandbuf)
 
 
 //545
-void EXEC_glVertexAttrib1sv(byte *commandbuf)
+static void EXEC_glVertexAttrib1sv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -5935,7 +5935,7 @@ void EXEC_glVertexAttrib1sv(byte *commandbuf)
 
 
 //546
-void EXEC_glVertexAttrib2d(byte *commandbuf)
+static void EXEC_glVertexAttrib2d(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -5946,7 +5946,7 @@ void EXEC_glVertexAttrib2d(byte *commandbuf)
 
 
 //547
-void EXEC_glVertexAttrib2dv(byte *commandbuf)
+static void EXEC_glVertexAttrib2dv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -5955,7 +5955,7 @@ void EXEC_glVertexAttrib2dv(byte *commandbuf)
 
 
 //548
-void EXEC_glVertexAttrib2f(byte *commandbuf)
+static void EXEC_glVertexAttrib2f(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -5966,7 +5966,7 @@ void EXEC_glVertexAttrib2f(byte *commandbuf)
 
 
 //549
-void EXEC_glVertexAttrib2fv(byte *commandbuf)
+static void EXEC_glVertexAttrib2fv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -5975,7 +5975,7 @@ void EXEC_glVertexAttrib2fv(byte *commandbuf)
 
 
 //550
-void EXEC_glVertexAttrib2s(byte *commandbuf)
+static void EXEC_glVertexAttrib2s(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -5986,7 +5986,7 @@ void EXEC_glVertexAttrib2s(byte *commandbuf)
 
 
 //551
-void EXEC_glVertexAttrib2sv(byte *commandbuf)
+static void EXEC_glVertexAttrib2sv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -5995,7 +5995,7 @@ void EXEC_glVertexAttrib2sv(byte *commandbuf)
 
 
 //552
-void EXEC_glVertexAttrib3d(byte *commandbuf)
+static void EXEC_glVertexAttrib3d(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -6007,7 +6007,7 @@ void EXEC_glVertexAttrib3d(byte *commandbuf)
 
 
 //553
-void EXEC_glVertexAttrib3dv(byte *commandbuf)
+static void EXEC_glVertexAttrib3dv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6016,7 +6016,7 @@ void EXEC_glVertexAttrib3dv(byte *commandbuf)
 
 
 //554
-void EXEC_glVertexAttrib3f(byte *commandbuf)
+static void EXEC_glVertexAttrib3f(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -6028,7 +6028,7 @@ void EXEC_glVertexAttrib3f(byte *commandbuf)
 
 
 //555
-void EXEC_glVertexAttrib3fv(byte *commandbuf)
+static void EXEC_glVertexAttrib3fv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6037,7 +6037,7 @@ void EXEC_glVertexAttrib3fv(byte *commandbuf)
 
 
 //556
-void EXEC_glVertexAttrib3s(byte *commandbuf)
+static void EXEC_glVertexAttrib3s(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -6049,7 +6049,7 @@ void EXEC_glVertexAttrib3s(byte *commandbuf)
 
 
 //557
-void EXEC_glVertexAttrib3sv(byte *commandbuf)
+static void EXEC_glVertexAttrib3sv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6058,7 +6058,7 @@ void EXEC_glVertexAttrib3sv(byte *commandbuf)
 
 
 //558
-void EXEC_glVertexAttrib4Nbv(byte *commandbuf)
+static void EXEC_glVertexAttrib4Nbv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6067,7 +6067,7 @@ void EXEC_glVertexAttrib4Nbv(byte *commandbuf)
 
 
 //559
-void EXEC_glVertexAttrib4Niv(byte *commandbuf)
+static void EXEC_glVertexAttrib4Niv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6076,7 +6076,7 @@ void EXEC_glVertexAttrib4Niv(byte *commandbuf)
 
 
 //560
-void EXEC_glVertexAttrib4Nsv(byte *commandbuf)
+static void EXEC_glVertexAttrib4Nsv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6085,7 +6085,7 @@ void EXEC_glVertexAttrib4Nsv(byte *commandbuf)
 
 
 //561
-void EXEC_glVertexAttrib4Nub(byte *commandbuf)
+static void EXEC_glVertexAttrib4Nub(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLubyte *x = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -6098,7 +6098,7 @@ void EXEC_glVertexAttrib4Nub(byte *commandbuf)
 
 
 //562
-void EXEC_glVertexAttrib4Nubv(byte *commandbuf)
+static void EXEC_glVertexAttrib4Nubv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6107,7 +6107,7 @@ void EXEC_glVertexAttrib4Nubv(byte *commandbuf)
 
 
 //563
-void EXEC_glVertexAttrib4Nuiv(byte *commandbuf)
+static void EXEC_glVertexAttrib4Nuiv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6116,7 +6116,7 @@ void EXEC_glVertexAttrib4Nuiv(byte *commandbuf)
 
 
 //564
-void EXEC_glVertexAttrib4Nusv(byte *commandbuf)
+static void EXEC_glVertexAttrib4Nusv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6125,7 +6125,7 @@ void EXEC_glVertexAttrib4Nusv(byte *commandbuf)
 
 
 //565
-void EXEC_glVertexAttrib4bv(byte *commandbuf)
+static void EXEC_glVertexAttrib4bv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6134,7 +6134,7 @@ void EXEC_glVertexAttrib4bv(byte *commandbuf)
 
 
 //566
-void EXEC_glVertexAttrib4d(byte *commandbuf)
+static void EXEC_glVertexAttrib4d(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -6147,7 +6147,7 @@ void EXEC_glVertexAttrib4d(byte *commandbuf)
 
 
 //567
-void EXEC_glVertexAttrib4dv(byte *commandbuf)
+static void EXEC_glVertexAttrib4dv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6156,7 +6156,7 @@ void EXEC_glVertexAttrib4dv(byte *commandbuf)
 
 
 //568
-void EXEC_glVertexAttrib4f(byte *commandbuf)
+static void EXEC_glVertexAttrib4f(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -6169,7 +6169,7 @@ void EXEC_glVertexAttrib4f(byte *commandbuf)
 
 
 //569
-void EXEC_glVertexAttrib4fv(byte *commandbuf)
+static void EXEC_glVertexAttrib4fv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6178,7 +6178,7 @@ void EXEC_glVertexAttrib4fv(byte *commandbuf)
 
 
 //570
-void EXEC_glVertexAttrib4iv(byte *commandbuf)
+static void EXEC_glVertexAttrib4iv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6187,7 +6187,7 @@ void EXEC_glVertexAttrib4iv(byte *commandbuf)
 
 
 //571
-void EXEC_glVertexAttrib4s(byte *commandbuf)
+static void EXEC_glVertexAttrib4s(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -6200,7 +6200,7 @@ void EXEC_glVertexAttrib4s(byte *commandbuf)
 
 
 //572
-void EXEC_glVertexAttrib4sv(byte *commandbuf)
+static void EXEC_glVertexAttrib4sv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6209,7 +6209,7 @@ void EXEC_glVertexAttrib4sv(byte *commandbuf)
 
 
 //573
-void EXEC_glVertexAttrib4ubv(byte *commandbuf)
+static void EXEC_glVertexAttrib4ubv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6218,7 +6218,7 @@ void EXEC_glVertexAttrib4ubv(byte *commandbuf)
 
 
 //574
-void EXEC_glVertexAttrib4uiv(byte *commandbuf)
+static void EXEC_glVertexAttrib4uiv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6227,7 +6227,7 @@ void EXEC_glVertexAttrib4uiv(byte *commandbuf)
 
 
 //575
-void EXEC_glVertexAttrib4usv(byte *commandbuf)
+static void EXEC_glVertexAttrib4usv(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -6236,7 +6236,7 @@ void EXEC_glVertexAttrib4usv(byte *commandbuf)
 
 
 //576
-void EXEC_glVertexAttribPointer(byte *commandbuf)
+static void EXEC_glVertexAttribPointer(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
@@ -6249,7 +6249,7 @@ void EXEC_glVertexAttribPointer(byte *commandbuf)
 
 
 //577
-void EXEC_glUniformMatrix2x3fv(byte *commandbuf)
+static void EXEC_glUniformMatrix2x3fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -6263,7 +6263,7 @@ void EXEC_glUniformMatrix2x3fv(byte *commandbuf)
 
 
 //578
-void EXEC_glUniformMatrix3x2fv(byte *commandbuf)
+static void EXEC_glUniformMatrix3x2fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -6276,7 +6276,7 @@ void EXEC_glUniformMatrix3x2fv(byte *commandbuf)
 
 
 //579
-void EXEC_glUniformMatrix2x4fv(byte *commandbuf)
+static void EXEC_glUniformMatrix2x4fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -6289,7 +6289,7 @@ void EXEC_glUniformMatrix2x4fv(byte *commandbuf)
 
 
 //580
-void EXEC_glUniformMatrix4x2fv(byte *commandbuf)
+static void EXEC_glUniformMatrix4x2fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -6302,7 +6302,7 @@ void EXEC_glUniformMatrix4x2fv(byte *commandbuf)
 
 
 //581
-void EXEC_glUniformMatrix3x4fv(byte *commandbuf)
+static void EXEC_glUniformMatrix3x4fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -6315,7 +6315,7 @@ void EXEC_glUniformMatrix3x4fv(byte *commandbuf)
 
 
 //582
-void EXEC_glUniformMatrix4x3fv(byte *commandbuf)
+static void EXEC_glUniformMatrix4x3fv(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -6328,7 +6328,7 @@ void EXEC_glUniformMatrix4x3fv(byte *commandbuf)
 
 
 //374
-void EXEC_glActiveTextureARB(byte *commandbuf)
+static void EXEC_glActiveTextureARB(byte *commandbuf)
 {
 	GLenum *texture = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -6337,7 +6337,7 @@ void EXEC_glActiveTextureARB(byte *commandbuf)
 
 
 //375
-void EXEC_glClientActiveTextureARB(byte *commandbuf)
+static void EXEC_glClientActiveTextureARB(byte *commandbuf)
 {
 	GLenum *texture = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -6346,7 +6346,7 @@ void EXEC_glClientActiveTextureARB(byte *commandbuf)
 
 
 //376
-void EXEC_glMultiTexCoord1dARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord1dARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -6356,7 +6356,7 @@ void EXEC_glMultiTexCoord1dARB(byte *commandbuf)
 
 
 //377
-void EXEC_glMultiTexCoord1dvARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord1dvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6365,7 +6365,7 @@ void EXEC_glMultiTexCoord1dvARB(byte *commandbuf)
 
 
 //378
-void EXEC_glMultiTexCoord1fARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord1fARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -6375,7 +6375,7 @@ void EXEC_glMultiTexCoord1fARB(byte *commandbuf)
 
 
 //379
-void EXEC_glMultiTexCoord1fvARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord1fvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6384,7 +6384,7 @@ void EXEC_glMultiTexCoord1fvARB(byte *commandbuf)
 
 
 //380
-void EXEC_glMultiTexCoord1iARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord1iARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6394,7 +6394,7 @@ void EXEC_glMultiTexCoord1iARB(byte *commandbuf)
 
 
 //381
-void EXEC_glMultiTexCoord1ivARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord1ivARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6403,7 +6403,7 @@ void EXEC_glMultiTexCoord1ivARB(byte *commandbuf)
 
 
 //382
-void EXEC_glMultiTexCoord1sARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord1sARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -6413,7 +6413,7 @@ void EXEC_glMultiTexCoord1sARB(byte *commandbuf)
 
 
 //383
-void EXEC_glMultiTexCoord1svARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord1svARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6422,7 +6422,7 @@ void EXEC_glMultiTexCoord1svARB(byte *commandbuf)
 
 
 //384
-void EXEC_glMultiTexCoord2dARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord2dARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -6433,7 +6433,7 @@ void EXEC_glMultiTexCoord2dARB(byte *commandbuf)
 
 
 //385
-void EXEC_glMultiTexCoord2dvARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord2dvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6442,7 +6442,7 @@ void EXEC_glMultiTexCoord2dvARB(byte *commandbuf)
 
 
 //386
-void EXEC_glMultiTexCoord2fARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord2fARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -6453,7 +6453,7 @@ void EXEC_glMultiTexCoord2fARB(byte *commandbuf)
 
 
 //387
-void EXEC_glMultiTexCoord2fvARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord2fvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6462,7 +6462,7 @@ void EXEC_glMultiTexCoord2fvARB(byte *commandbuf)
 
 
 //388
-void EXEC_glMultiTexCoord2iARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord2iARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6473,7 +6473,7 @@ void EXEC_glMultiTexCoord2iARB(byte *commandbuf)
 
 
 //389
-void EXEC_glMultiTexCoord2ivARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord2ivARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6482,7 +6482,7 @@ void EXEC_glMultiTexCoord2ivARB(byte *commandbuf)
 
 
 //390
-void EXEC_glMultiTexCoord2sARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord2sARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -6493,7 +6493,7 @@ void EXEC_glMultiTexCoord2sARB(byte *commandbuf)
 
 
 //391
-void EXEC_glMultiTexCoord2svARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord2svARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6502,7 +6502,7 @@ void EXEC_glMultiTexCoord2svARB(byte *commandbuf)
 
 
 //392
-void EXEC_glMultiTexCoord3dARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord3dARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -6514,7 +6514,7 @@ void EXEC_glMultiTexCoord3dARB(byte *commandbuf)
 
 
 //393
-void EXEC_glMultiTexCoord3dvARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord3dvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6523,7 +6523,7 @@ void EXEC_glMultiTexCoord3dvARB(byte *commandbuf)
 
 
 //394
-void EXEC_glMultiTexCoord3fARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord3fARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -6535,7 +6535,7 @@ void EXEC_glMultiTexCoord3fARB(byte *commandbuf)
 
 
 //395
-void EXEC_glMultiTexCoord3fvARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord3fvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6544,7 +6544,7 @@ void EXEC_glMultiTexCoord3fvARB(byte *commandbuf)
 
 
 //396
-void EXEC_glMultiTexCoord3iARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord3iARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6556,7 +6556,7 @@ void EXEC_glMultiTexCoord3iARB(byte *commandbuf)
 
 
 //397
-void EXEC_glMultiTexCoord3ivARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord3ivARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6565,7 +6565,7 @@ void EXEC_glMultiTexCoord3ivARB(byte *commandbuf)
 
 
 //398
-void EXEC_glMultiTexCoord3sARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord3sARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -6577,7 +6577,7 @@ void EXEC_glMultiTexCoord3sARB(byte *commandbuf)
 
 
 //399
-void EXEC_glMultiTexCoord3svARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord3svARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6586,7 +6586,7 @@ void EXEC_glMultiTexCoord3svARB(byte *commandbuf)
 
 
 //400
-void EXEC_glMultiTexCoord4dARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord4dARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *s = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -6599,7 +6599,7 @@ void EXEC_glMultiTexCoord4dARB(byte *commandbuf)
 
 
 //401
-void EXEC_glMultiTexCoord4dvARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord4dvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6608,7 +6608,7 @@ void EXEC_glMultiTexCoord4dvARB(byte *commandbuf)
 
 
 //402
-void EXEC_glMultiTexCoord4fARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord4fARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -6621,7 +6621,7 @@ void EXEC_glMultiTexCoord4fARB(byte *commandbuf)
 
 
 //403
-void EXEC_glMultiTexCoord4fvARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord4fvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6630,7 +6630,7 @@ void EXEC_glMultiTexCoord4fvARB(byte *commandbuf)
 
 
 //404
-void EXEC_glMultiTexCoord4iARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord4iARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *s = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6643,7 +6643,7 @@ void EXEC_glMultiTexCoord4iARB(byte *commandbuf)
 
 
 //405
-void EXEC_glMultiTexCoord4ivARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord4ivARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6652,7 +6652,7 @@ void EXEC_glMultiTexCoord4ivARB(byte *commandbuf)
 
 
 //406
-void EXEC_glMultiTexCoord4sARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord4sARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLshort *s = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -6665,7 +6665,7 @@ void EXEC_glMultiTexCoord4sARB(byte *commandbuf)
 
 
 //407
-void EXEC_glMultiTexCoord4svARB(byte *commandbuf)
+static void EXEC_glMultiTexCoord4svARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -6674,7 +6674,7 @@ void EXEC_glMultiTexCoord4svARB(byte *commandbuf)
 
 
 //617
-void EXEC_glLoadTransposeMatrixfARB(byte *commandbuf)
+static void EXEC_glLoadTransposeMatrixfARB(byte *commandbuf)
 {
 
 	glLoadTransposeMatrixfARB((GLfloat *)popBuf());
@@ -6682,7 +6682,7 @@ void EXEC_glLoadTransposeMatrixfARB(byte *commandbuf)
 
 
 //618
-void EXEC_glLoadTransposeMatrixdARB(byte *commandbuf)
+static void EXEC_glLoadTransposeMatrixdARB(byte *commandbuf)
 {
 
 	glLoadTransposeMatrixdARB((GLdouble *)popBuf());
@@ -6690,7 +6690,7 @@ void EXEC_glLoadTransposeMatrixdARB(byte *commandbuf)
 
 
 //619
-void EXEC_glMultTransposeMatrixfARB(byte *commandbuf)
+static void EXEC_glMultTransposeMatrixfARB(byte *commandbuf)
 {
 
 	glMultTransposeMatrixfARB((GLfloat *)popBuf());
@@ -6698,7 +6698,7 @@ void EXEC_glMultTransposeMatrixfARB(byte *commandbuf)
 
 
 //620
-void EXEC_glMultTransposeMatrixdARB(byte *commandbuf)
+static void EXEC_glMultTransposeMatrixdARB(byte *commandbuf)
 {
 
 	glMultTransposeMatrixdARB((GLdouble *)popBuf());
@@ -6706,7 +6706,7 @@ void EXEC_glMultTransposeMatrixdARB(byte *commandbuf)
 
 
 //621
-void EXEC_glSampleCoverageARB(byte *commandbuf)
+static void EXEC_glSampleCoverageARB(byte *commandbuf)
 {
 	GLclampf *value = (GLclampf*)commandbuf;     commandbuf += sizeof(GLclampf);
 	GLboolean *invert = (GLboolean*)commandbuf;  commandbuf += sizeof(GLboolean);
@@ -6716,7 +6716,7 @@ void EXEC_glSampleCoverageARB(byte *commandbuf)
 
 
 //622
-void EXEC_glCompressedTexImage3DARB(byte *commandbuf)
+static void EXEC_glCompressedTexImage3DARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6732,7 +6732,7 @@ void EXEC_glCompressedTexImage3DARB(byte *commandbuf)
 
 
 //623
-void EXEC_glCompressedTexImage2DARB(byte *commandbuf)
+static void EXEC_glCompressedTexImage2DARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6747,7 +6747,7 @@ void EXEC_glCompressedTexImage2DARB(byte *commandbuf)
 
 
 //624
-void EXEC_glCompressedTexImage1DARB(byte *commandbuf)
+static void EXEC_glCompressedTexImage1DARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6761,7 +6761,7 @@ void EXEC_glCompressedTexImage1DARB(byte *commandbuf)
 
 
 //625
-void EXEC_glCompressedTexSubImage3DARB(byte *commandbuf)
+static void EXEC_glCompressedTexSubImage3DARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6779,7 +6779,7 @@ void EXEC_glCompressedTexSubImage3DARB(byte *commandbuf)
 
 
 //626
-void EXEC_glCompressedTexSubImage2DARB(byte *commandbuf)
+static void EXEC_glCompressedTexSubImage2DARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6795,7 +6795,7 @@ void EXEC_glCompressedTexSubImage2DARB(byte *commandbuf)
 
 
 //627
-void EXEC_glCompressedTexSubImage1DARB(byte *commandbuf)
+static void EXEC_glCompressedTexSubImage1DARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6809,7 +6809,7 @@ void EXEC_glCompressedTexSubImage1DARB(byte *commandbuf)
 
 
 //628
-void EXEC_glGetCompressedTexImageARB(byte *commandbuf)
+static void EXEC_glGetCompressedTexImageARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -6819,7 +6819,7 @@ void EXEC_glGetCompressedTexImageARB(byte *commandbuf)
 
 
 //629
-void EXEC_glPointParameterfARB(byte *commandbuf)
+static void EXEC_glPointParameterfARB(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -6829,7 +6829,7 @@ void EXEC_glPointParameterfARB(byte *commandbuf)
 
 
 //630
-void EXEC_glPointParameterfvARB(byte *commandbuf)
+static void EXEC_glPointParameterfvARB(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -6838,7 +6838,7 @@ void EXEC_glPointParameterfvARB(byte *commandbuf)
 
 
 //631
-void EXEC_glWeightbvARB(byte *commandbuf)
+static void EXEC_glWeightbvARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6847,7 +6847,7 @@ void EXEC_glWeightbvARB(byte *commandbuf)
 
 
 //632
-void EXEC_glWeightsvARB(byte *commandbuf)
+static void EXEC_glWeightsvARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6856,7 +6856,7 @@ void EXEC_glWeightsvARB(byte *commandbuf)
 
 
 //633
-void EXEC_glWeightivARB(byte *commandbuf)
+static void EXEC_glWeightivARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6865,7 +6865,7 @@ void EXEC_glWeightivARB(byte *commandbuf)
 
 
 //634
-void EXEC_glWeightfvARB(byte *commandbuf)
+static void EXEC_glWeightfvARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6874,7 +6874,7 @@ void EXEC_glWeightfvARB(byte *commandbuf)
 
 
 //635
-void EXEC_glWeightdvARB(byte *commandbuf)
+static void EXEC_glWeightdvARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6883,7 +6883,7 @@ void EXEC_glWeightdvARB(byte *commandbuf)
 
 
 //636
-void EXEC_glWeightubvARB(byte *commandbuf)
+static void EXEC_glWeightubvARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6892,7 +6892,7 @@ void EXEC_glWeightubvARB(byte *commandbuf)
 
 
 //637
-void EXEC_glWeightusvARB(byte *commandbuf)
+static void EXEC_glWeightusvARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6901,7 +6901,7 @@ void EXEC_glWeightusvARB(byte *commandbuf)
 
 
 //638
-void EXEC_glWeightuivARB(byte *commandbuf)
+static void EXEC_glWeightuivARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6910,7 +6910,7 @@ void EXEC_glWeightuivARB(byte *commandbuf)
 
 
 //639
-void EXEC_glWeightPointerARB(byte *commandbuf)
+static void EXEC_glWeightPointerARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -6921,7 +6921,7 @@ void EXEC_glWeightPointerARB(byte *commandbuf)
 
 
 //640
-void EXEC_glVertexBlendARB(byte *commandbuf)
+static void EXEC_glVertexBlendARB(byte *commandbuf)
 {
 	GLint *count = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -6930,7 +6930,7 @@ void EXEC_glVertexBlendARB(byte *commandbuf)
 
 
 //641
-void EXEC_glCurrentPaletteMatrixARB(byte *commandbuf)
+static void EXEC_glCurrentPaletteMatrixARB(byte *commandbuf)
 {
 	GLint *index = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -6939,7 +6939,7 @@ void EXEC_glCurrentPaletteMatrixARB(byte *commandbuf)
 
 
 //642
-void EXEC_glMatrixIndexubvARB(byte *commandbuf)
+static void EXEC_glMatrixIndexubvARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6948,7 +6948,7 @@ void EXEC_glMatrixIndexubvARB(byte *commandbuf)
 
 
 //643
-void EXEC_glMatrixIndexusvARB(byte *commandbuf)
+static void EXEC_glMatrixIndexusvARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6957,7 +6957,7 @@ void EXEC_glMatrixIndexusvARB(byte *commandbuf)
 
 
 //644
-void EXEC_glMatrixIndexuivARB(byte *commandbuf)
+static void EXEC_glMatrixIndexuivARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 
@@ -6966,7 +6966,7 @@ void EXEC_glMatrixIndexuivARB(byte *commandbuf)
 
 
 //645
-void EXEC_glMatrixIndexPointerARB(byte *commandbuf)
+static void EXEC_glMatrixIndexPointerARB(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -6977,7 +6977,7 @@ void EXEC_glMatrixIndexPointerARB(byte *commandbuf)
 
 
 //646
-void EXEC_glWindowPos2dARB(byte *commandbuf)
+static void EXEC_glWindowPos2dARB(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -6987,7 +6987,7 @@ void EXEC_glWindowPos2dARB(byte *commandbuf)
 
 
 //647
-void EXEC_glWindowPos2fARB(byte *commandbuf)
+static void EXEC_glWindowPos2fARB(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -6997,7 +6997,7 @@ void EXEC_glWindowPos2fARB(byte *commandbuf)
 
 
 //648
-void EXEC_glWindowPos2iARB(byte *commandbuf)
+static void EXEC_glWindowPos2iARB(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -7007,7 +7007,7 @@ void EXEC_glWindowPos2iARB(byte *commandbuf)
 
 
 //649
-void EXEC_glWindowPos2sARB(byte *commandbuf)
+static void EXEC_glWindowPos2sARB(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -7017,7 +7017,7 @@ void EXEC_glWindowPos2sARB(byte *commandbuf)
 
 
 //650
-void EXEC_glWindowPos2dvARB(byte *commandbuf)
+static void EXEC_glWindowPos2dvARB(byte *commandbuf)
 {
 
 	glWindowPos2dvARB((const GLdouble *)popBuf());
@@ -7025,7 +7025,7 @@ void EXEC_glWindowPos2dvARB(byte *commandbuf)
 
 
 //651
-void EXEC_glWindowPos2fvARB(byte *commandbuf)
+static void EXEC_glWindowPos2fvARB(byte *commandbuf)
 {
 
 	glWindowPos2fvARB((const GLfloat *)popBuf());
@@ -7033,7 +7033,7 @@ void EXEC_glWindowPos2fvARB(byte *commandbuf)
 
 
 //652
-void EXEC_glWindowPos2ivARB(byte *commandbuf)
+static void EXEC_glWindowPos2ivARB(byte *commandbuf)
 {
 
 	glWindowPos2ivARB((const GLint *)popBuf());
@@ -7041,7 +7041,7 @@ void EXEC_glWindowPos2ivARB(byte *commandbuf)
 
 
 //653
-void EXEC_glWindowPos2svARB(byte *commandbuf)
+static void EXEC_glWindowPos2svARB(byte *commandbuf)
 {
 
 	glWindowPos2svARB((const GLshort *)popBuf());
@@ -7049,7 +7049,7 @@ void EXEC_glWindowPos2svARB(byte *commandbuf)
 
 
 //654
-void EXEC_glWindowPos3dARB(byte *commandbuf)
+static void EXEC_glWindowPos3dARB(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -7060,7 +7060,7 @@ void EXEC_glWindowPos3dARB(byte *commandbuf)
 
 
 //655
-void EXEC_glWindowPos3fARB(byte *commandbuf)
+static void EXEC_glWindowPos3fARB(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -7071,7 +7071,7 @@ void EXEC_glWindowPos3fARB(byte *commandbuf)
 
 
 //656
-void EXEC_glWindowPos3iARB(byte *commandbuf)
+static void EXEC_glWindowPos3iARB(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -7082,7 +7082,7 @@ void EXEC_glWindowPos3iARB(byte *commandbuf)
 
 
 //657
-void EXEC_glWindowPos3sARB(byte *commandbuf)
+static void EXEC_glWindowPos3sARB(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -7093,7 +7093,7 @@ void EXEC_glWindowPos3sARB(byte *commandbuf)
 
 
 //658
-void EXEC_glWindowPos3dvARB(byte *commandbuf)
+static void EXEC_glWindowPos3dvARB(byte *commandbuf)
 {
 
 	glWindowPos3dvARB((const GLdouble *)popBuf());
@@ -7101,7 +7101,7 @@ void EXEC_glWindowPos3dvARB(byte *commandbuf)
 
 
 //659
-void EXEC_glWindowPos3fvARB(byte *commandbuf)
+static void EXEC_glWindowPos3fvARB(byte *commandbuf)
 {
 
 	glWindowPos3fvARB((const GLfloat *)popBuf());
@@ -7109,7 +7109,7 @@ void EXEC_glWindowPos3fvARB(byte *commandbuf)
 
 
 //660
-void EXEC_glWindowPos3ivARB(byte *commandbuf)
+static void EXEC_glWindowPos3ivARB(byte *commandbuf)
 {
 
 	glWindowPos3ivARB((const GLint *)popBuf());
@@ -7117,7 +7117,7 @@ void EXEC_glWindowPos3ivARB(byte *commandbuf)
 
 
 //661
-void EXEC_glWindowPos3svARB(byte *commandbuf)
+static void EXEC_glWindowPos3svARB(byte *commandbuf)
 {
 
 	glWindowPos3svARB((const GLshort *)popBuf());
@@ -7125,7 +7125,7 @@ void EXEC_glWindowPos3svARB(byte *commandbuf)
 
 
 //662
-void EXEC_glGetVertexAttribdvARB(byte *commandbuf)
+static void EXEC_glGetVertexAttribdvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7135,7 +7135,7 @@ void EXEC_glGetVertexAttribdvARB(byte *commandbuf)
 
 
 //663
-void EXEC_glGetVertexAttribfvARB(byte *commandbuf)
+static void EXEC_glGetVertexAttribfvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7145,7 +7145,7 @@ void EXEC_glGetVertexAttribfvARB(byte *commandbuf)
 
 
 //664
-void EXEC_glGetVertexAttribivARB(byte *commandbuf)
+static void EXEC_glGetVertexAttribivARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7155,7 +7155,7 @@ void EXEC_glGetVertexAttribivARB(byte *commandbuf)
 
 
 //665
-void EXEC_glVertexAttrib1dARB(byte *commandbuf)
+static void EXEC_glVertexAttrib1dARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -7165,7 +7165,7 @@ void EXEC_glVertexAttrib1dARB(byte *commandbuf)
 
 
 //666
-void EXEC_glVertexAttrib1dvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib1dvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7174,7 +7174,7 @@ void EXEC_glVertexAttrib1dvARB(byte *commandbuf)
 
 
 //667
-void EXEC_glVertexAttrib1fARB(byte *commandbuf)
+static void EXEC_glVertexAttrib1fARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -7184,7 +7184,7 @@ void EXEC_glVertexAttrib1fARB(byte *commandbuf)
 
 
 //668
-void EXEC_glVertexAttrib1fvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib1fvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7193,7 +7193,7 @@ void EXEC_glVertexAttrib1fvARB(byte *commandbuf)
 
 
 //669
-void EXEC_glVertexAttrib1sARB(byte *commandbuf)
+static void EXEC_glVertexAttrib1sARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -7203,7 +7203,7 @@ void EXEC_glVertexAttrib1sARB(byte *commandbuf)
 
 
 //670
-void EXEC_glVertexAttrib1svARB(byte *commandbuf)
+static void EXEC_glVertexAttrib1svARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7212,7 +7212,7 @@ void EXEC_glVertexAttrib1svARB(byte *commandbuf)
 
 
 //671
-void EXEC_glVertexAttrib2dARB(byte *commandbuf)
+static void EXEC_glVertexAttrib2dARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -7223,7 +7223,7 @@ void EXEC_glVertexAttrib2dARB(byte *commandbuf)
 
 
 //672
-void EXEC_glVertexAttrib2dvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib2dvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7232,7 +7232,7 @@ void EXEC_glVertexAttrib2dvARB(byte *commandbuf)
 
 
 //673
-void EXEC_glVertexAttrib2fARB(byte *commandbuf)
+static void EXEC_glVertexAttrib2fARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -7243,7 +7243,7 @@ void EXEC_glVertexAttrib2fARB(byte *commandbuf)
 
 
 //674
-void EXEC_glVertexAttrib2fvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib2fvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7252,7 +7252,7 @@ void EXEC_glVertexAttrib2fvARB(byte *commandbuf)
 
 
 //675
-void EXEC_glVertexAttrib2sARB(byte *commandbuf)
+static void EXEC_glVertexAttrib2sARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -7263,7 +7263,7 @@ void EXEC_glVertexAttrib2sARB(byte *commandbuf)
 
 
 //676
-void EXEC_glVertexAttrib2svARB(byte *commandbuf)
+static void EXEC_glVertexAttrib2svARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7272,7 +7272,7 @@ void EXEC_glVertexAttrib2svARB(byte *commandbuf)
 
 
 //677
-void EXEC_glVertexAttrib3dARB(byte *commandbuf)
+static void EXEC_glVertexAttrib3dARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -7284,7 +7284,7 @@ void EXEC_glVertexAttrib3dARB(byte *commandbuf)
 
 
 //678
-void EXEC_glVertexAttrib3dvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib3dvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7293,7 +7293,7 @@ void EXEC_glVertexAttrib3dvARB(byte *commandbuf)
 
 
 //679
-void EXEC_glVertexAttrib3fARB(byte *commandbuf)
+static void EXEC_glVertexAttrib3fARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -7305,7 +7305,7 @@ void EXEC_glVertexAttrib3fARB(byte *commandbuf)
 
 
 //680
-void EXEC_glVertexAttrib3fvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib3fvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7314,7 +7314,7 @@ void EXEC_glVertexAttrib3fvARB(byte *commandbuf)
 
 
 //681
-void EXEC_glVertexAttrib3sARB(byte *commandbuf)
+static void EXEC_glVertexAttrib3sARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -7326,7 +7326,7 @@ void EXEC_glVertexAttrib3sARB(byte *commandbuf)
 
 
 //682
-void EXEC_glVertexAttrib3svARB(byte *commandbuf)
+static void EXEC_glVertexAttrib3svARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7335,7 +7335,7 @@ void EXEC_glVertexAttrib3svARB(byte *commandbuf)
 
 
 //683
-void EXEC_glVertexAttrib4dARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4dARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -7348,7 +7348,7 @@ void EXEC_glVertexAttrib4dARB(byte *commandbuf)
 
 
 //684
-void EXEC_glVertexAttrib4dvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4dvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7357,7 +7357,7 @@ void EXEC_glVertexAttrib4dvARB(byte *commandbuf)
 
 
 //685
-void EXEC_glVertexAttrib4fARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4fARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -7370,7 +7370,7 @@ void EXEC_glVertexAttrib4fARB(byte *commandbuf)
 
 
 //686
-void EXEC_glVertexAttrib4fvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4fvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7379,7 +7379,7 @@ void EXEC_glVertexAttrib4fvARB(byte *commandbuf)
 
 
 //687
-void EXEC_glVertexAttrib4sARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4sARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -7392,7 +7392,7 @@ void EXEC_glVertexAttrib4sARB(byte *commandbuf)
 
 
 //688
-void EXEC_glVertexAttrib4svARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4svARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7401,7 +7401,7 @@ void EXEC_glVertexAttrib4svARB(byte *commandbuf)
 
 
 //689
-void EXEC_glVertexAttrib4NubARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4NubARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLubyte *x = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -7414,7 +7414,7 @@ void EXEC_glVertexAttrib4NubARB(byte *commandbuf)
 
 
 //690
-void EXEC_glVertexAttrib4NubvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4NubvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7423,7 +7423,7 @@ void EXEC_glVertexAttrib4NubvARB(byte *commandbuf)
 
 
 //691
-void EXEC_glVertexAttrib4bvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4bvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7432,7 +7432,7 @@ void EXEC_glVertexAttrib4bvARB(byte *commandbuf)
 
 
 //692
-void EXEC_glVertexAttrib4ivARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4ivARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7441,7 +7441,7 @@ void EXEC_glVertexAttrib4ivARB(byte *commandbuf)
 
 
 //693
-void EXEC_glVertexAttrib4ubvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4ubvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7450,7 +7450,7 @@ void EXEC_glVertexAttrib4ubvARB(byte *commandbuf)
 
 
 //694
-void EXEC_glVertexAttrib4usvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4usvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7459,7 +7459,7 @@ void EXEC_glVertexAttrib4usvARB(byte *commandbuf)
 
 
 //695
-void EXEC_glVertexAttrib4uivARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4uivARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7468,7 +7468,7 @@ void EXEC_glVertexAttrib4uivARB(byte *commandbuf)
 
 
 //696
-void EXEC_glVertexAttrib4NbvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4NbvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7477,7 +7477,7 @@ void EXEC_glVertexAttrib4NbvARB(byte *commandbuf)
 
 
 //697
-void EXEC_glVertexAttrib4NsvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4NsvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7486,7 +7486,7 @@ void EXEC_glVertexAttrib4NsvARB(byte *commandbuf)
 
 
 //698
-void EXEC_glVertexAttrib4NivARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4NivARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7495,7 +7495,7 @@ void EXEC_glVertexAttrib4NivARB(byte *commandbuf)
 
 
 //699
-void EXEC_glVertexAttrib4NusvARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4NusvARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7504,7 +7504,7 @@ void EXEC_glVertexAttrib4NusvARB(byte *commandbuf)
 
 
 //700
-void EXEC_glVertexAttrib4NuivARB(byte *commandbuf)
+static void EXEC_glVertexAttrib4NuivARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7513,7 +7513,7 @@ void EXEC_glVertexAttrib4NuivARB(byte *commandbuf)
 
 
 //701
-void EXEC_glVertexAttribPointerARB(byte *commandbuf)
+static void EXEC_glVertexAttribPointerARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
@@ -7526,7 +7526,7 @@ void EXEC_glVertexAttribPointerARB(byte *commandbuf)
 
 
 //702
-void EXEC_glEnableVertexAttribArrayARB(byte *commandbuf)
+static void EXEC_glEnableVertexAttribArrayARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7535,7 +7535,7 @@ void EXEC_glEnableVertexAttribArrayARB(byte *commandbuf)
 
 
 //703
-void EXEC_glDisableVertexAttribArrayARB(byte *commandbuf)
+static void EXEC_glDisableVertexAttribArrayARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -7544,7 +7544,7 @@ void EXEC_glDisableVertexAttribArrayARB(byte *commandbuf)
 
 
 //704
-void EXEC_glProgramStringARB(byte *commandbuf)
+static void EXEC_glProgramStringARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -7555,7 +7555,7 @@ void EXEC_glProgramStringARB(byte *commandbuf)
 
 
 //705
-void EXEC_glBindProgramARB(byte *commandbuf)
+static void EXEC_glBindProgramARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -7565,7 +7565,7 @@ void EXEC_glBindProgramARB(byte *commandbuf)
 
 
 //706
-void EXEC_glDeleteProgramsARB(byte *commandbuf)
+static void EXEC_glDeleteProgramsARB(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -7574,7 +7574,7 @@ void EXEC_glDeleteProgramsARB(byte *commandbuf)
 
 
 //707
-void EXEC_glGenProgramsARB(byte *commandbuf)
+static void EXEC_glGenProgramsARB(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -7583,7 +7583,7 @@ void EXEC_glGenProgramsARB(byte *commandbuf)
 
 
 //708
-void EXEC_glIsProgramARB(byte *commandbuf)
+static void EXEC_glIsProgramARB(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -7592,7 +7592,7 @@ void EXEC_glIsProgramARB(byte *commandbuf)
 
 
 //709
-void EXEC_glProgramEnvParameter4dARB(byte *commandbuf)
+static void EXEC_glProgramEnvParameter4dARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7606,7 +7606,7 @@ void EXEC_glProgramEnvParameter4dARB(byte *commandbuf)
 
 
 //710
-void EXEC_glProgramEnvParameter4dvARB(byte *commandbuf)
+static void EXEC_glProgramEnvParameter4dvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7616,7 +7616,7 @@ void EXEC_glProgramEnvParameter4dvARB(byte *commandbuf)
 
 
 //711
-void EXEC_glProgramEnvParameter4fARB(byte *commandbuf)
+static void EXEC_glProgramEnvParameter4fARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7630,7 +7630,7 @@ void EXEC_glProgramEnvParameter4fARB(byte *commandbuf)
 
 
 //712
-void EXEC_glProgramEnvParameter4fvARB(byte *commandbuf)
+static void EXEC_glProgramEnvParameter4fvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7640,7 +7640,7 @@ void EXEC_glProgramEnvParameter4fvARB(byte *commandbuf)
 
 
 //713
-void EXEC_glProgramLocalParameter4dARB(byte *commandbuf)
+static void EXEC_glProgramLocalParameter4dARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7654,7 +7654,7 @@ void EXEC_glProgramLocalParameter4dARB(byte *commandbuf)
 
 
 //714
-void EXEC_glProgramLocalParameter4dvARB(byte *commandbuf)
+static void EXEC_glProgramLocalParameter4dvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7664,7 +7664,7 @@ void EXEC_glProgramLocalParameter4dvARB(byte *commandbuf)
 
 
 //715
-void EXEC_glProgramLocalParameter4fARB(byte *commandbuf)
+static void EXEC_glProgramLocalParameter4fARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7678,7 +7678,7 @@ void EXEC_glProgramLocalParameter4fARB(byte *commandbuf)
 
 
 //716
-void EXEC_glProgramLocalParameter4fvARB(byte *commandbuf)
+static void EXEC_glProgramLocalParameter4fvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7688,7 +7688,7 @@ void EXEC_glProgramLocalParameter4fvARB(byte *commandbuf)
 
 
 //717
-void EXEC_glGetProgramEnvParameterdvARB(byte *commandbuf)
+static void EXEC_glGetProgramEnvParameterdvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7698,7 +7698,7 @@ void EXEC_glGetProgramEnvParameterdvARB(byte *commandbuf)
 
 
 //718
-void EXEC_glGetProgramEnvParameterfvARB(byte *commandbuf)
+static void EXEC_glGetProgramEnvParameterfvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7708,7 +7708,7 @@ void EXEC_glGetProgramEnvParameterfvARB(byte *commandbuf)
 
 
 //719
-void EXEC_glGetProgramLocalParameterdvARB(byte *commandbuf)
+static void EXEC_glGetProgramLocalParameterdvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7718,7 +7718,7 @@ void EXEC_glGetProgramLocalParameterdvARB(byte *commandbuf)
 
 
 //720
-void EXEC_glGetProgramLocalParameterfvARB(byte *commandbuf)
+static void EXEC_glGetProgramLocalParameterfvARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -7728,7 +7728,7 @@ void EXEC_glGetProgramLocalParameterfvARB(byte *commandbuf)
 
 
 //721
-void EXEC_glGetProgramivARB(byte *commandbuf)
+static void EXEC_glGetProgramivARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7738,7 +7738,7 @@ void EXEC_glGetProgramivARB(byte *commandbuf)
 
 
 //722
-void EXEC_glGetProgramStringARB(byte *commandbuf)
+static void EXEC_glGetProgramStringARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7748,7 +7748,7 @@ void EXEC_glGetProgramStringARB(byte *commandbuf)
 
 
 //723
-void EXEC_glGetVertexAttribPointervARB(byte *commandbuf)
+static void EXEC_glGetVertexAttribPointervARB(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7758,7 +7758,7 @@ void EXEC_glGetVertexAttribPointervARB(byte *commandbuf)
 
 
 //724
-void EXEC_glBindBufferARB(byte *commandbuf)
+static void EXEC_glBindBufferARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *buffer = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -7768,7 +7768,7 @@ void EXEC_glBindBufferARB(byte *commandbuf)
 
 
 //725
-void EXEC_glBufferDataARB(byte *commandbuf)
+static void EXEC_glBufferDataARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizeiptrARB *size = (GLsizeiptrARB*)commandbuf;    commandbuf += sizeof(GLsizeiptrARB);
@@ -7779,7 +7779,7 @@ void EXEC_glBufferDataARB(byte *commandbuf)
 
 
 //726
-void EXEC_glBufferSubDataARB(byte *commandbuf)
+static void EXEC_glBufferSubDataARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLintptrARB *offset = (GLintptrARB*)commandbuf;  commandbuf += sizeof(GLintptrARB);
@@ -7790,7 +7790,7 @@ void EXEC_glBufferSubDataARB(byte *commandbuf)
 
 
 //727
-void EXEC_glDeleteBuffersARB(byte *commandbuf)
+static void EXEC_glDeleteBuffersARB(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -7799,7 +7799,7 @@ void EXEC_glDeleteBuffersARB(byte *commandbuf)
 
 
 //728
-void EXEC_glGenBuffersARB(byte *commandbuf)
+static void EXEC_glGenBuffersARB(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -7808,7 +7808,7 @@ void EXEC_glGenBuffersARB(byte *commandbuf)
 
 
 //729
-void EXEC_glGetBufferParameterivARB(byte *commandbuf)
+static void EXEC_glGetBufferParameterivARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7818,7 +7818,7 @@ void EXEC_glGetBufferParameterivARB(byte *commandbuf)
 
 
 //730
-void EXEC_glGetBufferPointervARB(byte *commandbuf)
+static void EXEC_glGetBufferPointervARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7828,7 +7828,7 @@ void EXEC_glGetBufferPointervARB(byte *commandbuf)
 
 
 //731
-void EXEC_glGetBufferSubDataARB(byte *commandbuf)
+static void EXEC_glGetBufferSubDataARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLintptrARB *offset = (GLintptrARB*)commandbuf;  commandbuf += sizeof(GLintptrARB);
@@ -7839,7 +7839,7 @@ void EXEC_glGetBufferSubDataARB(byte *commandbuf)
 
 
 //732
-void EXEC_glIsBufferARB(byte *commandbuf)
+static void EXEC_glIsBufferARB(byte *commandbuf)
 {
 	GLuint *buffer = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -7848,7 +7848,7 @@ void EXEC_glIsBufferARB(byte *commandbuf)
 
 
 //733
-void EXEC_glMapBufferARB(byte *commandbuf)
+static void EXEC_glMapBufferARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *access = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -7858,7 +7858,7 @@ void EXEC_glMapBufferARB(byte *commandbuf)
 
 
 //734
-void EXEC_glUnmapBufferARB(byte *commandbuf)
+static void EXEC_glUnmapBufferARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -7867,7 +7867,7 @@ void EXEC_glUnmapBufferARB(byte *commandbuf)
 
 
 //735
-void EXEC_glGenQueriesARB(byte *commandbuf)
+static void EXEC_glGenQueriesARB(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -7876,7 +7876,7 @@ void EXEC_glGenQueriesARB(byte *commandbuf)
 
 
 //736
-void EXEC_glDeleteQueriesARB(byte *commandbuf)
+static void EXEC_glDeleteQueriesARB(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -7885,7 +7885,7 @@ void EXEC_glDeleteQueriesARB(byte *commandbuf)
 
 
 //737
-void EXEC_glIsQueryARB(byte *commandbuf)
+static void EXEC_glIsQueryARB(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -7894,7 +7894,7 @@ void EXEC_glIsQueryARB(byte *commandbuf)
 
 
 //738
-void EXEC_glBeginQueryARB(byte *commandbuf)
+static void EXEC_glBeginQueryARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -7904,7 +7904,7 @@ void EXEC_glBeginQueryARB(byte *commandbuf)
 
 
 //739
-void EXEC_glEndQueryARB(byte *commandbuf)
+static void EXEC_glEndQueryARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -7913,7 +7913,7 @@ void EXEC_glEndQueryARB(byte *commandbuf)
 
 
 //740
-void EXEC_glGetQueryivARB(byte *commandbuf)
+static void EXEC_glGetQueryivARB(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7923,7 +7923,7 @@ void EXEC_glGetQueryivARB(byte *commandbuf)
 
 
 //741
-void EXEC_glGetQueryObjectivARB(byte *commandbuf)
+static void EXEC_glGetQueryObjectivARB(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7933,7 +7933,7 @@ void EXEC_glGetQueryObjectivARB(byte *commandbuf)
 
 
 //742
-void EXEC_glGetQueryObjectuivARB(byte *commandbuf)
+static void EXEC_glGetQueryObjectuivARB(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -7943,7 +7943,7 @@ void EXEC_glGetQueryObjectuivARB(byte *commandbuf)
 
 
 //743
-void EXEC_glDeleteObjectARB(byte *commandbuf)
+static void EXEC_glDeleteObjectARB(byte *commandbuf)
 {
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 
@@ -7952,7 +7952,7 @@ void EXEC_glDeleteObjectARB(byte *commandbuf)
 
 
 //744
-void EXEC_glGetHandleARB(byte *commandbuf)
+static void EXEC_glGetHandleARB(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -7961,7 +7961,7 @@ void EXEC_glGetHandleARB(byte *commandbuf)
 
 
 //745
-void EXEC_glDetachObjectARB(byte *commandbuf)
+static void EXEC_glDetachObjectARB(byte *commandbuf)
 {
 	GLhandleARB *containerObj = (GLhandleARB*)commandbuf;    commandbuf += sizeof(GLhandleARB);
 	GLhandleARB *attachedObj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
@@ -7971,7 +7971,7 @@ void EXEC_glDetachObjectARB(byte *commandbuf)
 
 
 //746
-void EXEC_glCreateShaderObjectARB(byte *commandbuf)
+static void EXEC_glCreateShaderObjectARB(byte *commandbuf)
 {
 	GLenum *shaderType = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	pushRet(glCreateShaderObjectARB(*shaderType));
@@ -7979,7 +7979,7 @@ void EXEC_glCreateShaderObjectARB(byte *commandbuf)
 
 
 //747
-void EXEC_glShaderSourceARB(byte *commandbuf)
+static void EXEC_glShaderSourceARB(byte *commandbuf)
 {
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -7994,7 +7994,7 @@ void EXEC_glShaderSourceARB(byte *commandbuf)
 
 
 //748
-void EXEC_glCompileShaderARB(byte *commandbuf)
+static void EXEC_glCompileShaderARB(byte *commandbuf)
 {
 	GLhandleARB *shader = (GLhandleARB*)commandbuf;  commandbuf += sizeof(GLhandleARB);
 
@@ -8003,7 +8003,7 @@ void EXEC_glCompileShaderARB(byte *commandbuf)
 
 
 //749
-void EXEC_glCreateProgramObjectARB(byte *commandbuf)
+static void EXEC_glCreateProgramObjectARB(byte *commandbuf)
 {
 
 	pushRet(glCreateProgramObjectARB());
@@ -8011,7 +8011,7 @@ void EXEC_glCreateProgramObjectARB(byte *commandbuf)
 
 
 //750
-void EXEC_glAttachObjectARB(byte *commandbuf)
+static void EXEC_glAttachObjectARB(byte *commandbuf)
 {
 	GLhandleARB *containerObj = (GLhandleARB*)commandbuf;    commandbuf += sizeof(GLhandleARB);
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
@@ -8021,7 +8021,7 @@ void EXEC_glAttachObjectARB(byte *commandbuf)
 
 
 //751
-void EXEC_glLinkProgramARB(byte *commandbuf)
+static void EXEC_glLinkProgramARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 
@@ -8030,7 +8030,7 @@ void EXEC_glLinkProgramARB(byte *commandbuf)
 
 
 //752
-void EXEC_glUseProgramObjectARB(byte *commandbuf)
+static void EXEC_glUseProgramObjectARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 
@@ -8039,7 +8039,7 @@ void EXEC_glUseProgramObjectARB(byte *commandbuf)
 
 
 //753
-void EXEC_glValidateProgramARB(byte *commandbuf)
+static void EXEC_glValidateProgramARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 
@@ -8048,7 +8048,7 @@ void EXEC_glValidateProgramARB(byte *commandbuf)
 
 
 //754
-void EXEC_glUniform1fARB(byte *commandbuf)
+static void EXEC_glUniform1fARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLfloat *v0 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -8058,7 +8058,7 @@ void EXEC_glUniform1fARB(byte *commandbuf)
 
 
 //755
-void EXEC_glUniform2fARB(byte *commandbuf)
+static void EXEC_glUniform2fARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLfloat *v0 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -8069,7 +8069,7 @@ void EXEC_glUniform2fARB(byte *commandbuf)
 
 
 //756
-void EXEC_glUniform3fARB(byte *commandbuf)
+static void EXEC_glUniform3fARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLfloat *v0 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -8081,7 +8081,7 @@ void EXEC_glUniform3fARB(byte *commandbuf)
 
 
 //757
-void EXEC_glUniform4fARB(byte *commandbuf)
+static void EXEC_glUniform4fARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLfloat *v0 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -8094,7 +8094,7 @@ void EXEC_glUniform4fARB(byte *commandbuf)
 
 
 //758
-void EXEC_glUniform1iARB(byte *commandbuf)
+static void EXEC_glUniform1iARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLint *v0 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -8104,7 +8104,7 @@ void EXEC_glUniform1iARB(byte *commandbuf)
 
 
 //759
-void EXEC_glUniform2iARB(byte *commandbuf)
+static void EXEC_glUniform2iARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLint *v0 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -8115,7 +8115,7 @@ void EXEC_glUniform2iARB(byte *commandbuf)
 
 
 //760
-void EXEC_glUniform3iARB(byte *commandbuf)
+static void EXEC_glUniform3iARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLint *v0 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -8127,7 +8127,7 @@ void EXEC_glUniform3iARB(byte *commandbuf)
 
 
 //761
-void EXEC_glUniform4iARB(byte *commandbuf)
+static void EXEC_glUniform4iARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLint *v0 = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -8140,7 +8140,7 @@ void EXEC_glUniform4iARB(byte *commandbuf)
 
 
 //762
-void EXEC_glUniform1fvARB(byte *commandbuf)
+static void EXEC_glUniform1fvARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8150,7 +8150,7 @@ void EXEC_glUniform1fvARB(byte *commandbuf)
 
 
 //763
-void EXEC_glUniform2fvARB(byte *commandbuf)
+static void EXEC_glUniform2fvARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8160,7 +8160,7 @@ void EXEC_glUniform2fvARB(byte *commandbuf)
 
 
 //764
-void EXEC_glUniform3fvARB(byte *commandbuf)
+static void EXEC_glUniform3fvARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8170,7 +8170,7 @@ void EXEC_glUniform3fvARB(byte *commandbuf)
 
 
 //765
-void EXEC_glUniform4fvARB(byte *commandbuf)
+static void EXEC_glUniform4fvARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8180,7 +8180,7 @@ void EXEC_glUniform4fvARB(byte *commandbuf)
 
 
 //766
-void EXEC_glUniform1ivARB(byte *commandbuf)
+static void EXEC_glUniform1ivARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8190,7 +8190,7 @@ void EXEC_glUniform1ivARB(byte *commandbuf)
 
 
 //767
-void EXEC_glUniform2ivARB(byte *commandbuf)
+static void EXEC_glUniform2ivARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8200,7 +8200,7 @@ void EXEC_glUniform2ivARB(byte *commandbuf)
 
 
 //768
-void EXEC_glUniform3ivARB(byte *commandbuf)
+static void EXEC_glUniform3ivARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8210,7 +8210,7 @@ void EXEC_glUniform3ivARB(byte *commandbuf)
 
 
 //769
-void EXEC_glUniform4ivARB(byte *commandbuf)
+static void EXEC_glUniform4ivARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8220,7 +8220,7 @@ void EXEC_glUniform4ivARB(byte *commandbuf)
 
 
 //770
-void EXEC_glUniformMatrix2fvARB(byte *commandbuf)
+static void EXEC_glUniformMatrix2fvARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8231,7 +8231,7 @@ void EXEC_glUniformMatrix2fvARB(byte *commandbuf)
 
 
 //771
-void EXEC_glUniformMatrix3fvARB(byte *commandbuf)
+static void EXEC_glUniformMatrix3fvARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8242,7 +8242,7 @@ void EXEC_glUniformMatrix3fvARB(byte *commandbuf)
 
 
 //772
-void EXEC_glUniformMatrix4fvARB(byte *commandbuf)
+static void EXEC_glUniformMatrix4fvARB(byte *commandbuf)
 {
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8253,7 +8253,7 @@ void EXEC_glUniformMatrix4fvARB(byte *commandbuf)
 
 
 //773
-void EXEC_glGetObjectParameterfvARB(byte *commandbuf)
+static void EXEC_glGetObjectParameterfvARB(byte *commandbuf)
 {
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8263,7 +8263,7 @@ void EXEC_glGetObjectParameterfvARB(byte *commandbuf)
 
 
 //774
-void EXEC_glGetObjectParameterivARB(byte *commandbuf)
+static void EXEC_glGetObjectParameterivARB(byte *commandbuf)
 {
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8273,7 +8273,7 @@ void EXEC_glGetObjectParameterivARB(byte *commandbuf)
 
 
 //775
-void EXEC_glGetInfoLogARB(byte *commandbuf)
+static void EXEC_glGetInfoLogARB(byte *commandbuf)
 {
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLsizei *maxLength = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8284,7 +8284,7 @@ void EXEC_glGetInfoLogARB(byte *commandbuf)
 
 
 //776
-void EXEC_glGetAttachedObjectsARB(byte *commandbuf)
+static void EXEC_glGetAttachedObjectsARB(byte *commandbuf)
 {
 	GLhandleARB *containerObj = (GLhandleARB*)commandbuf;    commandbuf += sizeof(GLhandleARB);
 	GLsizei *maxLength = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8294,7 +8294,7 @@ void EXEC_glGetAttachedObjectsARB(byte *commandbuf)
 
 
 //777
-void EXEC_glGetUniformLocationARB(byte *commandbuf)
+static void EXEC_glGetUniformLocationARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	int num = glGetUniformLocationARB(*program, (const GLcharARB *)popBuf());
@@ -8303,7 +8303,7 @@ void EXEC_glGetUniformLocationARB(byte *commandbuf)
 
 
 //778
-void EXEC_glGetActiveUniformARB(byte *commandbuf)
+static void EXEC_glGetActiveUniformARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -8314,7 +8314,7 @@ void EXEC_glGetActiveUniformARB(byte *commandbuf)
 
 
 //779
-void EXEC_glGetUniformfvARB(byte *commandbuf)
+static void EXEC_glGetUniformfvARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
@@ -8324,7 +8324,7 @@ void EXEC_glGetUniformfvARB(byte *commandbuf)
 
 
 //780
-void EXEC_glGetUniformivARB(byte *commandbuf)
+static void EXEC_glGetUniformivARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLint *location = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
@@ -8334,7 +8334,7 @@ void EXEC_glGetUniformivARB(byte *commandbuf)
 
 
 //781
-void EXEC_glGetShaderSourceARB(byte *commandbuf)
+static void EXEC_glGetShaderSourceARB(byte *commandbuf)
 {
 	GLuint *shader = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *bufSize = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -8349,7 +8349,7 @@ void EXEC_glGetShaderSourceARB(byte *commandbuf)
 
 
 //782
-void EXEC_glBindAttribLocationARB(byte *commandbuf)
+static void EXEC_glBindAttribLocationARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -8359,7 +8359,7 @@ void EXEC_glBindAttribLocationARB(byte *commandbuf)
 
 
 //783
-void EXEC_glGetActiveAttribARB(byte *commandbuf)
+static void EXEC_glGetActiveAttribARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -8370,7 +8370,7 @@ void EXEC_glGetActiveAttribARB(byte *commandbuf)
 
 
 //784
-void EXEC_glGetAttribLocationARB(byte *commandbuf)
+static void EXEC_glGetAttribLocationARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 
@@ -8379,7 +8379,7 @@ void EXEC_glGetAttribLocationARB(byte *commandbuf)
 
 
 //785
-void EXEC_glDrawBuffersARB(byte *commandbuf)
+static void EXEC_glDrawBuffersARB(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -8388,7 +8388,7 @@ void EXEC_glDrawBuffersARB(byte *commandbuf)
 
 
 //786
-void EXEC_glBlendColorEXT(byte *commandbuf)
+static void EXEC_glBlendColorEXT(byte *commandbuf)
 {
 	GLclampf *red = (GLclampf*)commandbuf;   commandbuf += sizeof(GLclampf);
 	GLclampf *green = (GLclampf*)commandbuf;     commandbuf += sizeof(GLclampf);
@@ -8400,7 +8400,7 @@ void EXEC_glBlendColorEXT(byte *commandbuf)
 
 
 //787
-void EXEC_glPolygonOffsetEXT(byte *commandbuf)
+static void EXEC_glPolygonOffsetEXT(byte *commandbuf)
 {
 	GLfloat *factor = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *bias = (GLfloat*)commandbuf;    commandbuf += sizeof(GLfloat);
@@ -8410,7 +8410,7 @@ void EXEC_glPolygonOffsetEXT(byte *commandbuf)
 
 
 //788
-void EXEC_glTexImage3DEXT(byte *commandbuf)
+static void EXEC_glTexImage3DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8427,7 +8427,7 @@ void EXEC_glTexImage3DEXT(byte *commandbuf)
 
 
 //789
-void EXEC_glTexSubImage3DEXT(byte *commandbuf)
+static void EXEC_glTexSubImage3DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8446,7 +8446,7 @@ void EXEC_glTexSubImage3DEXT(byte *commandbuf)
 
 
 //790
-void EXEC_glGetTexFilterFuncSGIS(byte *commandbuf)
+static void EXEC_glGetTexFilterFuncSGIS(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *filter = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8456,7 +8456,7 @@ void EXEC_glGetTexFilterFuncSGIS(byte *commandbuf)
 
 
 //791
-void EXEC_glTexFilterFuncSGIS(byte *commandbuf)
+static void EXEC_glTexFilterFuncSGIS(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *filter = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8467,7 +8467,7 @@ void EXEC_glTexFilterFuncSGIS(byte *commandbuf)
 
 
 //792
-void EXEC_glTexSubImage1DEXT(byte *commandbuf)
+static void EXEC_glTexSubImage1DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8482,7 +8482,7 @@ void EXEC_glTexSubImage1DEXT(byte *commandbuf)
 
 
 //793
-void EXEC_glTexSubImage2DEXT(byte *commandbuf)
+static void EXEC_glTexSubImage2DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8499,7 +8499,7 @@ void EXEC_glTexSubImage2DEXT(byte *commandbuf)
 
 
 //794
-void EXEC_glCopyTexImage1DEXT(byte *commandbuf)
+static void EXEC_glCopyTexImage1DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8514,7 +8514,7 @@ void EXEC_glCopyTexImage1DEXT(byte *commandbuf)
 
 
 //795
-void EXEC_glCopyTexImage2DEXT(byte *commandbuf)
+static void EXEC_glCopyTexImage2DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8530,7 +8530,7 @@ void EXEC_glCopyTexImage2DEXT(byte *commandbuf)
 
 
 //796
-void EXEC_glCopyTexSubImage1DEXT(byte *commandbuf)
+static void EXEC_glCopyTexSubImage1DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8544,7 +8544,7 @@ void EXEC_glCopyTexSubImage1DEXT(byte *commandbuf)
 
 
 //797
-void EXEC_glCopyTexSubImage2DEXT(byte *commandbuf)
+static void EXEC_glCopyTexSubImage2DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8560,7 +8560,7 @@ void EXEC_glCopyTexSubImage2DEXT(byte *commandbuf)
 
 
 //798
-void EXEC_glCopyTexSubImage3DEXT(byte *commandbuf)
+static void EXEC_glCopyTexSubImage3DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8577,7 +8577,7 @@ void EXEC_glCopyTexSubImage3DEXT(byte *commandbuf)
 
 
 //799
-void EXEC_glGetHistogramEXT(byte *commandbuf)
+static void EXEC_glGetHistogramEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLboolean *reset = (GLboolean*)commandbuf;   commandbuf += sizeof(GLboolean);
@@ -8589,7 +8589,7 @@ void EXEC_glGetHistogramEXT(byte *commandbuf)
 
 
 //800
-void EXEC_glGetHistogramParameterfvEXT(byte *commandbuf)
+static void EXEC_glGetHistogramParameterfvEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8599,7 +8599,7 @@ void EXEC_glGetHistogramParameterfvEXT(byte *commandbuf)
 
 
 //801
-void EXEC_glGetHistogramParameterivEXT(byte *commandbuf)
+static void EXEC_glGetHistogramParameterivEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8609,7 +8609,7 @@ void EXEC_glGetHistogramParameterivEXT(byte *commandbuf)
 
 
 //802
-void EXEC_glGetMinmaxEXT(byte *commandbuf)
+static void EXEC_glGetMinmaxEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLboolean *reset = (GLboolean*)commandbuf;   commandbuf += sizeof(GLboolean);
@@ -8621,7 +8621,7 @@ void EXEC_glGetMinmaxEXT(byte *commandbuf)
 
 
 //803
-void EXEC_glGetMinmaxParameterfvEXT(byte *commandbuf)
+static void EXEC_glGetMinmaxParameterfvEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8631,7 +8631,7 @@ void EXEC_glGetMinmaxParameterfvEXT(byte *commandbuf)
 
 
 //804
-void EXEC_glGetMinmaxParameterivEXT(byte *commandbuf)
+static void EXEC_glGetMinmaxParameterivEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8641,7 +8641,7 @@ void EXEC_glGetMinmaxParameterivEXT(byte *commandbuf)
 
 
 //805
-void EXEC_glHistogramEXT(byte *commandbuf)
+static void EXEC_glHistogramEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *width = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -8653,7 +8653,7 @@ void EXEC_glHistogramEXT(byte *commandbuf)
 
 
 //806
-void EXEC_glMinmaxEXT(byte *commandbuf)
+static void EXEC_glMinmaxEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8664,7 +8664,7 @@ void EXEC_glMinmaxEXT(byte *commandbuf)
 
 
 //807
-void EXEC_glResetHistogramEXT(byte *commandbuf)
+static void EXEC_glResetHistogramEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -8673,7 +8673,7 @@ void EXEC_glResetHistogramEXT(byte *commandbuf)
 
 
 //808
-void EXEC_glResetMinmaxEXT(byte *commandbuf)
+static void EXEC_glResetMinmaxEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -8682,7 +8682,7 @@ void EXEC_glResetMinmaxEXT(byte *commandbuf)
 
 
 //809
-void EXEC_glConvolutionFilter1DEXT(byte *commandbuf)
+static void EXEC_glConvolutionFilter1DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8695,7 +8695,7 @@ void EXEC_glConvolutionFilter1DEXT(byte *commandbuf)
 
 
 //810
-void EXEC_glConvolutionFilter2DEXT(byte *commandbuf)
+static void EXEC_glConvolutionFilter2DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8709,7 +8709,7 @@ void EXEC_glConvolutionFilter2DEXT(byte *commandbuf)
 
 
 //811
-void EXEC_glConvolutionParameterfEXT(byte *commandbuf)
+static void EXEC_glConvolutionParameterfEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8720,7 +8720,7 @@ void EXEC_glConvolutionParameterfEXT(byte *commandbuf)
 
 
 //812
-void EXEC_glConvolutionParameterfvEXT(byte *commandbuf)
+static void EXEC_glConvolutionParameterfvEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8730,7 +8730,7 @@ void EXEC_glConvolutionParameterfvEXT(byte *commandbuf)
 
 
 //813
-void EXEC_glConvolutionParameteriEXT(byte *commandbuf)
+static void EXEC_glConvolutionParameteriEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8741,7 +8741,7 @@ void EXEC_glConvolutionParameteriEXT(byte *commandbuf)
 
 
 //814
-void EXEC_glConvolutionParameterivEXT(byte *commandbuf)
+static void EXEC_glConvolutionParameterivEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8751,7 +8751,7 @@ void EXEC_glConvolutionParameterivEXT(byte *commandbuf)
 
 
 //815
-void EXEC_glCopyConvolutionFilter1DEXT(byte *commandbuf)
+static void EXEC_glCopyConvolutionFilter1DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8764,7 +8764,7 @@ void EXEC_glCopyConvolutionFilter1DEXT(byte *commandbuf)
 
 
 //816
-void EXEC_glCopyConvolutionFilter2DEXT(byte *commandbuf)
+static void EXEC_glCopyConvolutionFilter2DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8778,7 +8778,7 @@ void EXEC_glCopyConvolutionFilter2DEXT(byte *commandbuf)
 
 
 //817
-void EXEC_glGetConvolutionFilterEXT(byte *commandbuf)
+static void EXEC_glGetConvolutionFilterEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8789,7 +8789,7 @@ void EXEC_glGetConvolutionFilterEXT(byte *commandbuf)
 
 
 //818
-void EXEC_glGetConvolutionParameterfvEXT(byte *commandbuf)
+static void EXEC_glGetConvolutionParameterfvEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8799,7 +8799,7 @@ void EXEC_glGetConvolutionParameterfvEXT(byte *commandbuf)
 
 
 //819
-void EXEC_glGetConvolutionParameterivEXT(byte *commandbuf)
+static void EXEC_glGetConvolutionParameterivEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8809,7 +8809,7 @@ void EXEC_glGetConvolutionParameterivEXT(byte *commandbuf)
 
 
 //820
-void EXEC_glGetSeparableFilterEXT(byte *commandbuf)
+static void EXEC_glGetSeparableFilterEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8820,7 +8820,7 @@ void EXEC_glGetSeparableFilterEXT(byte *commandbuf)
 
 
 //821
-void EXEC_glSeparableFilter2DEXT(byte *commandbuf)
+static void EXEC_glSeparableFilter2DEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8834,7 +8834,7 @@ void EXEC_glSeparableFilter2DEXT(byte *commandbuf)
 
 
 //822
-void EXEC_glColorTableSGI(byte *commandbuf)
+static void EXEC_glColorTableSGI(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8847,7 +8847,7 @@ void EXEC_glColorTableSGI(byte *commandbuf)
 
 
 //823
-void EXEC_glColorTableParameterfvSGI(byte *commandbuf)
+static void EXEC_glColorTableParameterfvSGI(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8857,7 +8857,7 @@ void EXEC_glColorTableParameterfvSGI(byte *commandbuf)
 
 
 //824
-void EXEC_glColorTableParameterivSGI(byte *commandbuf)
+static void EXEC_glColorTableParameterivSGI(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8867,7 +8867,7 @@ void EXEC_glColorTableParameterivSGI(byte *commandbuf)
 
 
 //825
-void EXEC_glCopyColorTableSGI(byte *commandbuf)
+static void EXEC_glCopyColorTableSGI(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8880,7 +8880,7 @@ void EXEC_glCopyColorTableSGI(byte *commandbuf)
 
 
 //826
-void EXEC_glGetColorTableSGI(byte *commandbuf)
+static void EXEC_glGetColorTableSGI(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -8891,7 +8891,7 @@ void EXEC_glGetColorTableSGI(byte *commandbuf)
 
 
 //827
-void EXEC_glGetColorTableParameterfvSGI(byte *commandbuf)
+static void EXEC_glGetColorTableParameterfvSGI(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8901,7 +8901,7 @@ void EXEC_glGetColorTableParameterfvSGI(byte *commandbuf)
 
 
 //828
-void EXEC_glGetColorTableParameterivSGI(byte *commandbuf)
+static void EXEC_glGetColorTableParameterivSGI(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -8911,7 +8911,7 @@ void EXEC_glGetColorTableParameterivSGI(byte *commandbuf)
 
 
 //829
-void EXEC_glPixelTexGenParameteriSGIS(byte *commandbuf)
+static void EXEC_glPixelTexGenParameteriSGIS(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8921,7 +8921,7 @@ void EXEC_glPixelTexGenParameteriSGIS(byte *commandbuf)
 
 
 //830
-void EXEC_glPixelTexGenParameterivSGIS(byte *commandbuf)
+static void EXEC_glPixelTexGenParameterivSGIS(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -8930,7 +8930,7 @@ void EXEC_glPixelTexGenParameterivSGIS(byte *commandbuf)
 
 
 //831
-void EXEC_glPixelTexGenParameterfSGIS(byte *commandbuf)
+static void EXEC_glPixelTexGenParameterfSGIS(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -8940,7 +8940,7 @@ void EXEC_glPixelTexGenParameterfSGIS(byte *commandbuf)
 
 
 //832
-void EXEC_glPixelTexGenParameterfvSGIS(byte *commandbuf)
+static void EXEC_glPixelTexGenParameterfvSGIS(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -8949,7 +8949,7 @@ void EXEC_glPixelTexGenParameterfvSGIS(byte *commandbuf)
 
 
 //833
-void EXEC_glGetPixelTexGenParameterivSGIS(byte *commandbuf)
+static void EXEC_glGetPixelTexGenParameterivSGIS(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -8958,7 +8958,7 @@ void EXEC_glGetPixelTexGenParameterivSGIS(byte *commandbuf)
 
 
 //834
-void EXEC_glGetPixelTexGenParameterfvSGIS(byte *commandbuf)
+static void EXEC_glGetPixelTexGenParameterfvSGIS(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -8967,7 +8967,7 @@ void EXEC_glGetPixelTexGenParameterfvSGIS(byte *commandbuf)
 
 
 //835
-void EXEC_glTexImage4DSGIS(byte *commandbuf)
+static void EXEC_glTexImage4DSGIS(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -8985,7 +8985,7 @@ void EXEC_glTexImage4DSGIS(byte *commandbuf)
 
 
 //836
-void EXEC_glTexSubImage4DSGIS(byte *commandbuf)
+static void EXEC_glTexSubImage4DSGIS(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -9006,7 +9006,7 @@ void EXEC_glTexSubImage4DSGIS(byte *commandbuf)
 
 
 //837
-void EXEC_glAreTexturesResidentEXT(byte *commandbuf)
+static void EXEC_glAreTexturesResidentEXT(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -9015,7 +9015,7 @@ void EXEC_glAreTexturesResidentEXT(byte *commandbuf)
 
 
 //838
-void EXEC_glBindTextureEXT(byte *commandbuf)
+static void EXEC_glBindTextureEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *texture = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -9025,7 +9025,7 @@ void EXEC_glBindTextureEXT(byte *commandbuf)
 
 
 //839
-void EXEC_glDeleteTexturesEXT(byte *commandbuf)
+static void EXEC_glDeleteTexturesEXT(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -9034,7 +9034,7 @@ void EXEC_glDeleteTexturesEXT(byte *commandbuf)
 
 
 //840
-void EXEC_glGenTexturesEXT(byte *commandbuf)
+static void EXEC_glGenTexturesEXT(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -9043,7 +9043,7 @@ void EXEC_glGenTexturesEXT(byte *commandbuf)
 
 
 //841
-void EXEC_glIsTextureEXT(byte *commandbuf)
+static void EXEC_glIsTextureEXT(byte *commandbuf)
 {
 	GLuint *texture = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -9052,7 +9052,7 @@ void EXEC_glIsTextureEXT(byte *commandbuf)
 
 
 //842
-void EXEC_glPrioritizeTexturesEXT(byte *commandbuf)
+static void EXEC_glPrioritizeTexturesEXT(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -9061,7 +9061,7 @@ void EXEC_glPrioritizeTexturesEXT(byte *commandbuf)
 
 
 //843
-void EXEC_glDetailTexFuncSGIS(byte *commandbuf)
+static void EXEC_glDetailTexFuncSGIS(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -9071,7 +9071,7 @@ void EXEC_glDetailTexFuncSGIS(byte *commandbuf)
 
 
 //844
-void EXEC_glGetDetailTexFuncSGIS(byte *commandbuf)
+static void EXEC_glGetDetailTexFuncSGIS(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -9080,7 +9080,7 @@ void EXEC_glGetDetailTexFuncSGIS(byte *commandbuf)
 
 
 //845
-void EXEC_glSharpenTexFuncSGIS(byte *commandbuf)
+static void EXEC_glSharpenTexFuncSGIS(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -9090,7 +9090,7 @@ void EXEC_glSharpenTexFuncSGIS(byte *commandbuf)
 
 
 //846
-void EXEC_glGetSharpenTexFuncSGIS(byte *commandbuf)
+static void EXEC_glGetSharpenTexFuncSGIS(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
@@ -9099,7 +9099,7 @@ void EXEC_glGetSharpenTexFuncSGIS(byte *commandbuf)
 
 
 //847
-void EXEC_glSampleMaskSGIS(byte *commandbuf)
+static void EXEC_glSampleMaskSGIS(byte *commandbuf)
 {
 	GLclampf *value = (GLclampf*)commandbuf;     commandbuf += sizeof(GLclampf);
 	GLboolean *invert = (GLboolean*)commandbuf;  commandbuf += sizeof(GLboolean);
@@ -9109,7 +9109,7 @@ void EXEC_glSampleMaskSGIS(byte *commandbuf)
 
 
 //848
-void EXEC_glSamplePatternSGIS(byte *commandbuf)
+static void EXEC_glSamplePatternSGIS(byte *commandbuf)
 {
 	GLenum *pattern = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -9118,7 +9118,7 @@ void EXEC_glSamplePatternSGIS(byte *commandbuf)
 
 
 //849
-void EXEC_glArrayElementEXT(byte *commandbuf)
+static void EXEC_glArrayElementEXT(byte *commandbuf)
 {
 	GLint *i = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -9127,7 +9127,7 @@ void EXEC_glArrayElementEXT(byte *commandbuf)
 
 
 //850
-void EXEC_glColorPointerEXT(byte *commandbuf)
+static void EXEC_glColorPointerEXT(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9139,7 +9139,7 @@ void EXEC_glColorPointerEXT(byte *commandbuf)
 
 
 //851
-void EXEC_glDrawArraysEXT(byte *commandbuf)
+static void EXEC_glDrawArraysEXT(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *first = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -9150,7 +9150,7 @@ void EXEC_glDrawArraysEXT(byte *commandbuf)
 
 
 //852
-void EXEC_glEdgeFlagPointerEXT(byte *commandbuf)
+static void EXEC_glEdgeFlagPointerEXT(byte *commandbuf)
 {
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -9160,7 +9160,7 @@ void EXEC_glEdgeFlagPointerEXT(byte *commandbuf)
 
 
 //853
-void EXEC_glGetPointervEXT(byte *commandbuf)
+static void EXEC_glGetPointervEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9169,7 +9169,7 @@ void EXEC_glGetPointervEXT(byte *commandbuf)
 
 
 //854
-void EXEC_glIndexPointerEXT(byte *commandbuf)
+static void EXEC_glIndexPointerEXT(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -9180,7 +9180,7 @@ void EXEC_glIndexPointerEXT(byte *commandbuf)
 
 
 //855
-void EXEC_glNormalPointerEXT(byte *commandbuf)
+static void EXEC_glNormalPointerEXT(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -9191,7 +9191,7 @@ void EXEC_glNormalPointerEXT(byte *commandbuf)
 
 
 //856
-void EXEC_glTexCoordPointerEXT(byte *commandbuf)
+static void EXEC_glTexCoordPointerEXT(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9203,7 +9203,7 @@ void EXEC_glTexCoordPointerEXT(byte *commandbuf)
 
 
 //857
-void EXEC_glVertexPointerEXT(byte *commandbuf)
+static void EXEC_glVertexPointerEXT(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9215,7 +9215,7 @@ void EXEC_glVertexPointerEXT(byte *commandbuf)
 
 
 //858
-void EXEC_glBlendEquationEXT(byte *commandbuf)
+static void EXEC_glBlendEquationEXT(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -9224,7 +9224,7 @@ void EXEC_glBlendEquationEXT(byte *commandbuf)
 
 
 //859
-void EXEC_glSpriteParameterfSGIX(byte *commandbuf)
+static void EXEC_glSpriteParameterfSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -9234,7 +9234,7 @@ void EXEC_glSpriteParameterfSGIX(byte *commandbuf)
 
 
 //860
-void EXEC_glSpriteParameterfvSGIX(byte *commandbuf)
+static void EXEC_glSpriteParameterfvSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9243,7 +9243,7 @@ void EXEC_glSpriteParameterfvSGIX(byte *commandbuf)
 
 
 //861
-void EXEC_glSpriteParameteriSGIX(byte *commandbuf)
+static void EXEC_glSpriteParameteriSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -9253,7 +9253,7 @@ void EXEC_glSpriteParameteriSGIX(byte *commandbuf)
 
 
 //862
-void EXEC_glSpriteParameterivSGIX(byte *commandbuf)
+static void EXEC_glSpriteParameterivSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9262,7 +9262,7 @@ void EXEC_glSpriteParameterivSGIX(byte *commandbuf)
 
 
 //863
-void EXEC_glPointParameterfEXT(byte *commandbuf)
+static void EXEC_glPointParameterfEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -9272,7 +9272,7 @@ void EXEC_glPointParameterfEXT(byte *commandbuf)
 
 
 //864
-void EXEC_glPointParameterfvEXT(byte *commandbuf)
+static void EXEC_glPointParameterfvEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9281,7 +9281,7 @@ void EXEC_glPointParameterfvEXT(byte *commandbuf)
 
 
 //865
-void EXEC_glGetInstrumentsSGIX(byte *commandbuf)
+static void EXEC_glGetInstrumentsSGIX(byte *commandbuf)
 {
 
 	//pushRet(glGetInstrumentsSGIX());
@@ -9289,7 +9289,7 @@ void EXEC_glGetInstrumentsSGIX(byte *commandbuf)
 
 
 //866
-void EXEC_glInstrumentsBufferSGIX(byte *commandbuf)
+static void EXEC_glInstrumentsBufferSGIX(byte *commandbuf)
 {
 	GLsizei *size = (GLsizei*)commandbuf;    commandbuf += sizeof(GLsizei);
 
@@ -9298,7 +9298,7 @@ void EXEC_glInstrumentsBufferSGIX(byte *commandbuf)
 
 
 //867
-void EXEC_glPollInstrumentsSGIX(byte *commandbuf)
+static void EXEC_glPollInstrumentsSGIX(byte *commandbuf)
 {
 
 	//pushRet(glPollInstrumentsSGIX((GLint *)popBuf()));
@@ -9306,7 +9306,7 @@ void EXEC_glPollInstrumentsSGIX(byte *commandbuf)
 
 
 //868
-void EXEC_glReadInstrumentsSGIX(byte *commandbuf)
+static void EXEC_glReadInstrumentsSGIX(byte *commandbuf)
 {
 	GLint *marker = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 
@@ -9315,7 +9315,7 @@ void EXEC_glReadInstrumentsSGIX(byte *commandbuf)
 
 
 //869
-void EXEC_glStartInstrumentsSGIX(byte *commandbuf)
+static void EXEC_glStartInstrumentsSGIX(byte *commandbuf)
 {
 
 	//glStartInstrumentsSGIX();
@@ -9323,7 +9323,7 @@ void EXEC_glStartInstrumentsSGIX(byte *commandbuf)
 
 
 //870
-void EXEC_glStopInstrumentsSGIX(byte *commandbuf)
+static void EXEC_glStopInstrumentsSGIX(byte *commandbuf)
 {
 	GLint *marker = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 
@@ -9332,7 +9332,7 @@ void EXEC_glStopInstrumentsSGIX(byte *commandbuf)
 
 
 //871
-void EXEC_glFrameZoomSGIX(byte *commandbuf)
+static void EXEC_glFrameZoomSGIX(byte *commandbuf)
 {
 	GLint *factor = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 
@@ -9341,7 +9341,7 @@ void EXEC_glFrameZoomSGIX(byte *commandbuf)
 
 
 //872
-void EXEC_glTagSampleBufferSGIX(byte *commandbuf)
+static void EXEC_glTagSampleBufferSGIX(byte *commandbuf)
 {
 
 	//glTagSampleBufferSGIX();
@@ -9349,7 +9349,7 @@ void EXEC_glTagSampleBufferSGIX(byte *commandbuf)
 
 
 //873
-void EXEC_glReferencePlaneSGIX(byte *commandbuf)
+static void EXEC_glReferencePlaneSGIX(byte *commandbuf)
 {
 
 	//glReferencePlaneSGIX((const GLdouble *)popBuf());
@@ -9357,7 +9357,7 @@ void EXEC_glReferencePlaneSGIX(byte *commandbuf)
 
 
 //874
-void EXEC_glFlushRasterSGIX(byte *commandbuf)
+static void EXEC_glFlushRasterSGIX(byte *commandbuf)
 {
 
 	//glFlushRasterSGIX();
@@ -9365,7 +9365,7 @@ void EXEC_glFlushRasterSGIX(byte *commandbuf)
 
 
 //875
-void EXEC_glFogFuncSGIS(byte *commandbuf)
+static void EXEC_glFogFuncSGIS(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -9374,7 +9374,7 @@ void EXEC_glFogFuncSGIS(byte *commandbuf)
 
 
 //876
-void EXEC_glGetFogFuncSGIS(byte *commandbuf)
+static void EXEC_glGetFogFuncSGIS(byte *commandbuf)
 {
 
 	glGetFogFuncSGIS((GLfloat *)popBuf());
@@ -9382,7 +9382,7 @@ void EXEC_glGetFogFuncSGIS(byte *commandbuf)
 
 
 //877
-void EXEC_glImageTransformParameteriHP(byte *commandbuf)
+static void EXEC_glImageTransformParameteriHP(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9393,7 +9393,7 @@ void EXEC_glImageTransformParameteriHP(byte *commandbuf)
 
 
 //878
-void EXEC_glImageTransformParameterfHP(byte *commandbuf)
+static void EXEC_glImageTransformParameterfHP(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9404,7 +9404,7 @@ void EXEC_glImageTransformParameterfHP(byte *commandbuf)
 
 
 //879
-void EXEC_glImageTransformParameterivHP(byte *commandbuf)
+static void EXEC_glImageTransformParameterivHP(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9414,7 +9414,7 @@ void EXEC_glImageTransformParameterivHP(byte *commandbuf)
 
 
 //880
-void EXEC_glImageTransformParameterfvHP(byte *commandbuf)
+static void EXEC_glImageTransformParameterfvHP(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9424,7 +9424,7 @@ void EXEC_glImageTransformParameterfvHP(byte *commandbuf)
 
 
 //881
-void EXEC_glGetImageTransformParameterivHP(byte *commandbuf)
+static void EXEC_glGetImageTransformParameterivHP(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9434,7 +9434,7 @@ void EXEC_glGetImageTransformParameterivHP(byte *commandbuf)
 
 
 //882
-void EXEC_glGetImageTransformParameterfvHP(byte *commandbuf)
+static void EXEC_glGetImageTransformParameterfvHP(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9444,7 +9444,7 @@ void EXEC_glGetImageTransformParameterfvHP(byte *commandbuf)
 
 
 //883
-void EXEC_glColorSubTableEXT(byte *commandbuf)
+static void EXEC_glColorSubTableEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *start = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -9457,7 +9457,7 @@ void EXEC_glColorSubTableEXT(byte *commandbuf)
 
 
 //884
-void EXEC_glCopyColorSubTableEXT(byte *commandbuf)
+static void EXEC_glCopyColorSubTableEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLsizei *start = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -9470,7 +9470,7 @@ void EXEC_glCopyColorSubTableEXT(byte *commandbuf)
 
 
 //885
-void EXEC_glHintPGI(byte *commandbuf)
+static void EXEC_glHintPGI(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *mode = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
@@ -9480,7 +9480,7 @@ void EXEC_glHintPGI(byte *commandbuf)
 
 
 //886
-void EXEC_glColorTableEXT(byte *commandbuf)
+static void EXEC_glColorTableEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *internalformat = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -9493,7 +9493,7 @@ void EXEC_glColorTableEXT(byte *commandbuf)
 
 
 //887
-void EXEC_glGetColorTableEXT(byte *commandbuf)
+static void EXEC_glGetColorTableEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -9504,7 +9504,7 @@ void EXEC_glGetColorTableEXT(byte *commandbuf)
 
 
 //888
-void EXEC_glGetColorTableParameterivEXT(byte *commandbuf)
+static void EXEC_glGetColorTableParameterivEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9514,7 +9514,7 @@ void EXEC_glGetColorTableParameterivEXT(byte *commandbuf)
 
 
 //889
-void EXEC_glGetColorTableParameterfvEXT(byte *commandbuf)
+static void EXEC_glGetColorTableParameterfvEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9524,7 +9524,7 @@ void EXEC_glGetColorTableParameterfvEXT(byte *commandbuf)
 
 
 //890
-void EXEC_glGetListParameterfvSGIX(byte *commandbuf)
+static void EXEC_glGetListParameterfvSGIX(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9534,7 +9534,7 @@ void EXEC_glGetListParameterfvSGIX(byte *commandbuf)
 
 
 //891
-void EXEC_glGetListParameterivSGIX(byte *commandbuf)
+static void EXEC_glGetListParameterivSGIX(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9544,7 +9544,7 @@ void EXEC_glGetListParameterivSGIX(byte *commandbuf)
 
 
 //892
-void EXEC_glListParameterfSGIX(byte *commandbuf)
+static void EXEC_glListParameterfSGIX(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9555,7 +9555,7 @@ void EXEC_glListParameterfSGIX(byte *commandbuf)
 
 
 //893
-void EXEC_glListParameterfvSGIX(byte *commandbuf)
+static void EXEC_glListParameterfvSGIX(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9565,7 +9565,7 @@ void EXEC_glListParameterfvSGIX(byte *commandbuf)
 
 
 //894
-void EXEC_glListParameteriSGIX(byte *commandbuf)
+static void EXEC_glListParameteriSGIX(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9576,7 +9576,7 @@ void EXEC_glListParameteriSGIX(byte *commandbuf)
 
 
 //895
-void EXEC_glListParameterivSGIX(byte *commandbuf)
+static void EXEC_glListParameterivSGIX(byte *commandbuf)
 {
 	GLuint *list = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9586,7 +9586,7 @@ void EXEC_glListParameterivSGIX(byte *commandbuf)
 
 
 //896
-void EXEC_glIndexMaterialEXT(byte *commandbuf)
+static void EXEC_glIndexMaterialEXT(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9596,7 +9596,7 @@ void EXEC_glIndexMaterialEXT(byte *commandbuf)
 
 
 //897
-void EXEC_glIndexFuncEXT(byte *commandbuf)
+static void EXEC_glIndexFuncEXT(byte *commandbuf)
 {
 	GLenum *func = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLclampf *ref = (GLclampf*)commandbuf;   commandbuf += sizeof(GLclampf);
@@ -9606,7 +9606,7 @@ void EXEC_glIndexFuncEXT(byte *commandbuf)
 
 
 //898
-void EXEC_glLockArraysEXT(byte *commandbuf)
+static void EXEC_glLockArraysEXT(byte *commandbuf)
 {
 	GLint *first = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -9616,7 +9616,7 @@ void EXEC_glLockArraysEXT(byte *commandbuf)
 
 
 //899
-void EXEC_glUnlockArraysEXT(byte *commandbuf)
+static void EXEC_glUnlockArraysEXT(byte *commandbuf)
 {
 
 	glUnlockArraysEXT();
@@ -9624,7 +9624,7 @@ void EXEC_glUnlockArraysEXT(byte *commandbuf)
 
 
 //900
-void EXEC_glCullParameterdvEXT(byte *commandbuf)
+static void EXEC_glCullParameterdvEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9633,7 +9633,7 @@ void EXEC_glCullParameterdvEXT(byte *commandbuf)
 
 
 //901
-void EXEC_glCullParameterfvEXT(byte *commandbuf)
+static void EXEC_glCullParameterfvEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9642,7 +9642,7 @@ void EXEC_glCullParameterfvEXT(byte *commandbuf)
 
 
 //902
-void EXEC_glFragmentColorMaterialSGIX(byte *commandbuf)
+static void EXEC_glFragmentColorMaterialSGIX(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9652,7 +9652,7 @@ void EXEC_glFragmentColorMaterialSGIX(byte *commandbuf)
 
 
 //903
-void EXEC_glFragmentLightfSGIX(byte *commandbuf)
+static void EXEC_glFragmentLightfSGIX(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9663,7 +9663,7 @@ void EXEC_glFragmentLightfSGIX(byte *commandbuf)
 
 
 //904
-void EXEC_glFragmentLightfvSGIX(byte *commandbuf)
+static void EXEC_glFragmentLightfvSGIX(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9673,7 +9673,7 @@ void EXEC_glFragmentLightfvSGIX(byte *commandbuf)
 
 
 //905
-void EXEC_glFragmentLightiSGIX(byte *commandbuf)
+static void EXEC_glFragmentLightiSGIX(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9684,7 +9684,7 @@ void EXEC_glFragmentLightiSGIX(byte *commandbuf)
 
 
 //906
-void EXEC_glFragmentLightivSGIX(byte *commandbuf)
+static void EXEC_glFragmentLightivSGIX(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9694,7 +9694,7 @@ void EXEC_glFragmentLightivSGIX(byte *commandbuf)
 
 
 //907
-void EXEC_glFragmentLightModelfSGIX(byte *commandbuf)
+static void EXEC_glFragmentLightModelfSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -9704,7 +9704,7 @@ void EXEC_glFragmentLightModelfSGIX(byte *commandbuf)
 
 
 //908
-void EXEC_glFragmentLightModelfvSGIX(byte *commandbuf)
+static void EXEC_glFragmentLightModelfvSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9713,7 +9713,7 @@ void EXEC_glFragmentLightModelfvSGIX(byte *commandbuf)
 
 
 //909
-void EXEC_glFragmentLightModeliSGIX(byte *commandbuf)
+static void EXEC_glFragmentLightModeliSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -9723,7 +9723,7 @@ void EXEC_glFragmentLightModeliSGIX(byte *commandbuf)
 
 
 //910
-void EXEC_glFragmentLightModelivSGIX(byte *commandbuf)
+static void EXEC_glFragmentLightModelivSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9732,7 +9732,7 @@ void EXEC_glFragmentLightModelivSGIX(byte *commandbuf)
 
 
 //911
-void EXEC_glFragmentMaterialfSGIX(byte *commandbuf)
+static void EXEC_glFragmentMaterialfSGIX(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9743,7 +9743,7 @@ void EXEC_glFragmentMaterialfSGIX(byte *commandbuf)
 
 
 //912
-void EXEC_glFragmentMaterialfvSGIX(byte *commandbuf)
+static void EXEC_glFragmentMaterialfvSGIX(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9753,7 +9753,7 @@ void EXEC_glFragmentMaterialfvSGIX(byte *commandbuf)
 
 
 //913
-void EXEC_glFragmentMaterialiSGIX(byte *commandbuf)
+static void EXEC_glFragmentMaterialiSGIX(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9764,7 +9764,7 @@ void EXEC_glFragmentMaterialiSGIX(byte *commandbuf)
 
 
 //914
-void EXEC_glFragmentMaterialivSGIX(byte *commandbuf)
+static void EXEC_glFragmentMaterialivSGIX(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9774,7 +9774,7 @@ void EXEC_glFragmentMaterialivSGIX(byte *commandbuf)
 
 
 //915
-void EXEC_glGetFragmentLightfvSGIX(byte *commandbuf)
+static void EXEC_glGetFragmentLightfvSGIX(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9784,7 +9784,7 @@ void EXEC_glGetFragmentLightfvSGIX(byte *commandbuf)
 
 
 //916
-void EXEC_glGetFragmentLightivSGIX(byte *commandbuf)
+static void EXEC_glGetFragmentLightivSGIX(byte *commandbuf)
 {
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9794,7 +9794,7 @@ void EXEC_glGetFragmentLightivSGIX(byte *commandbuf)
 
 
 //917
-void EXEC_glGetFragmentMaterialfvSGIX(byte *commandbuf)
+static void EXEC_glGetFragmentMaterialfvSGIX(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9804,7 +9804,7 @@ void EXEC_glGetFragmentMaterialfvSGIX(byte *commandbuf)
 
 
 //918
-void EXEC_glGetFragmentMaterialivSGIX(byte *commandbuf)
+static void EXEC_glGetFragmentMaterialivSGIX(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9814,7 +9814,7 @@ void EXEC_glGetFragmentMaterialivSGIX(byte *commandbuf)
 
 
 //919
-void EXEC_glLightEnviSGIX(byte *commandbuf)
+static void EXEC_glLightEnviSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -9824,7 +9824,7 @@ void EXEC_glLightEnviSGIX(byte *commandbuf)
 
 
 //920
-void EXEC_glDrawRangeElementsEXT(byte *commandbuf)
+static void EXEC_glDrawRangeElementsEXT(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLuint *start = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -9837,7 +9837,7 @@ void EXEC_glDrawRangeElementsEXT(byte *commandbuf)
 
 
 //921
-void EXEC_glApplyTextureEXT(byte *commandbuf)
+static void EXEC_glApplyTextureEXT(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -9846,7 +9846,7 @@ void EXEC_glApplyTextureEXT(byte *commandbuf)
 
 
 //922
-void EXEC_glTextureLightEXT(byte *commandbuf)
+static void EXEC_glTextureLightEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -9855,7 +9855,7 @@ void EXEC_glTextureLightEXT(byte *commandbuf)
 
 
 //923
-void EXEC_glTextureMaterialEXT(byte *commandbuf)
+static void EXEC_glTextureMaterialEXT(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9865,7 +9865,7 @@ void EXEC_glTextureMaterialEXT(byte *commandbuf)
 
 
 //924
-void EXEC_glAsyncMarkerSGIX(byte *commandbuf)
+static void EXEC_glAsyncMarkerSGIX(byte *commandbuf)
 {
 	GLuint *marker = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -9874,7 +9874,7 @@ void EXEC_glAsyncMarkerSGIX(byte *commandbuf)
 
 
 //925
-void EXEC_glFinishAsyncSGIX(byte *commandbuf)
+static void EXEC_glFinishAsyncSGIX(byte *commandbuf)
 {
 
 	pushRet(glFinishAsyncSGIX((GLuint *)popBuf()));
@@ -9882,7 +9882,7 @@ void EXEC_glFinishAsyncSGIX(byte *commandbuf)
 
 
 //926
-void EXEC_glPollAsyncSGIX(byte *commandbuf)
+static void EXEC_glPollAsyncSGIX(byte *commandbuf)
 {
 
 	pushRet(glPollAsyncSGIX((GLuint *)popBuf()));
@@ -9890,7 +9890,7 @@ void EXEC_glPollAsyncSGIX(byte *commandbuf)
 
 
 //927
-void EXEC_glGenAsyncMarkersSGIX(byte *commandbuf)
+static void EXEC_glGenAsyncMarkersSGIX(byte *commandbuf)
 {
 	GLsizei *range = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -9899,7 +9899,7 @@ void EXEC_glGenAsyncMarkersSGIX(byte *commandbuf)
 
 
 //928
-void EXEC_glDeleteAsyncMarkersSGIX(byte *commandbuf)
+static void EXEC_glDeleteAsyncMarkersSGIX(byte *commandbuf)
 {
 	GLuint *marker = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *range = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -9909,7 +9909,7 @@ void EXEC_glDeleteAsyncMarkersSGIX(byte *commandbuf)
 
 
 //929
-void EXEC_glIsAsyncMarkerSGIX(byte *commandbuf)
+static void EXEC_glIsAsyncMarkerSGIX(byte *commandbuf)
 {
 	GLuint *marker = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -9918,7 +9918,7 @@ void EXEC_glIsAsyncMarkerSGIX(byte *commandbuf)
 
 
 //930
-void EXEC_glVertexPointervINTEL(byte *commandbuf)
+static void EXEC_glVertexPointervINTEL(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9928,7 +9928,7 @@ void EXEC_glVertexPointervINTEL(byte *commandbuf)
 
 
 //931
-void EXEC_glNormalPointervINTEL(byte *commandbuf)
+static void EXEC_glNormalPointervINTEL(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -9937,7 +9937,7 @@ void EXEC_glNormalPointervINTEL(byte *commandbuf)
 
 
 //932
-void EXEC_glColorPointervINTEL(byte *commandbuf)
+static void EXEC_glColorPointervINTEL(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9947,7 +9947,7 @@ void EXEC_glColorPointervINTEL(byte *commandbuf)
 
 
 //933
-void EXEC_glTexCoordPointervINTEL(byte *commandbuf)
+static void EXEC_glTexCoordPointervINTEL(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -9957,7 +9957,7 @@ void EXEC_glTexCoordPointervINTEL(byte *commandbuf)
 
 
 //934
-void EXEC_glPixelTransformParameteriEXT(byte *commandbuf)
+static void EXEC_glPixelTransformParameteriEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9968,7 +9968,7 @@ void EXEC_glPixelTransformParameteriEXT(byte *commandbuf)
 
 
 //935
-void EXEC_glPixelTransformParameterfEXT(byte *commandbuf)
+static void EXEC_glPixelTransformParameterfEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9979,7 +9979,7 @@ void EXEC_glPixelTransformParameterfEXT(byte *commandbuf)
 
 
 //936
-void EXEC_glPixelTransformParameterivEXT(byte *commandbuf)
+static void EXEC_glPixelTransformParameterivEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9989,7 +9989,7 @@ void EXEC_glPixelTransformParameterivEXT(byte *commandbuf)
 
 
 //937
-void EXEC_glPixelTransformParameterfvEXT(byte *commandbuf)
+static void EXEC_glPixelTransformParameterfvEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -9999,7 +9999,7 @@ void EXEC_glPixelTransformParameterfvEXT(byte *commandbuf)
 
 
 //938
-void EXEC_glSecondaryColor3bEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3bEXT(byte *commandbuf)
 {
 	GLbyte *red = (GLbyte*)commandbuf;   commandbuf += sizeof(GLbyte);
 	GLbyte *green = (GLbyte*)commandbuf;     commandbuf += sizeof(GLbyte);
@@ -10010,7 +10010,7 @@ void EXEC_glSecondaryColor3bEXT(byte *commandbuf)
 
 
 //939
-void EXEC_glSecondaryColor3bvEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3bvEXT(byte *commandbuf)
 {
 
 	glSecondaryColor3bvEXT((const GLbyte *)popBuf());
@@ -10018,7 +10018,7 @@ void EXEC_glSecondaryColor3bvEXT(byte *commandbuf)
 
 
 //940
-void EXEC_glSecondaryColor3dEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3dEXT(byte *commandbuf)
 {
 	GLdouble *red = (GLdouble*)commandbuf;   commandbuf += sizeof(GLdouble);
 	GLdouble *green = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -10029,7 +10029,7 @@ void EXEC_glSecondaryColor3dEXT(byte *commandbuf)
 
 
 //941
-void EXEC_glSecondaryColor3dvEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3dvEXT(byte *commandbuf)
 {
 
 	glSecondaryColor3dvEXT((const GLdouble *)popBuf());
@@ -10037,7 +10037,7 @@ void EXEC_glSecondaryColor3dvEXT(byte *commandbuf)
 
 
 //942
-void EXEC_glSecondaryColor3fEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3fEXT(byte *commandbuf)
 {
 	GLfloat *red = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
 	GLfloat *green = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10048,7 +10048,7 @@ void EXEC_glSecondaryColor3fEXT(byte *commandbuf)
 
 
 //943
-void EXEC_glSecondaryColor3fvEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3fvEXT(byte *commandbuf)
 {
 
 	glSecondaryColor3fvEXT((const GLfloat *)popBuf());
@@ -10056,7 +10056,7 @@ void EXEC_glSecondaryColor3fvEXT(byte *commandbuf)
 
 
 //944
-void EXEC_glSecondaryColor3iEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3iEXT(byte *commandbuf)
 {
 	GLint *red = (GLint*)commandbuf;     commandbuf += sizeof(GLint);
 	GLint *green = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -10067,7 +10067,7 @@ void EXEC_glSecondaryColor3iEXT(byte *commandbuf)
 
 
 //945
-void EXEC_glSecondaryColor3ivEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3ivEXT(byte *commandbuf)
 {
 
 	glSecondaryColor3ivEXT((const GLint *)popBuf());
@@ -10075,7 +10075,7 @@ void EXEC_glSecondaryColor3ivEXT(byte *commandbuf)
 
 
 //946
-void EXEC_glSecondaryColor3sEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3sEXT(byte *commandbuf)
 {
 	GLshort *red = (GLshort*)commandbuf;     commandbuf += sizeof(GLshort);
 	GLshort *green = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -10086,7 +10086,7 @@ void EXEC_glSecondaryColor3sEXT(byte *commandbuf)
 
 
 //947
-void EXEC_glSecondaryColor3svEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3svEXT(byte *commandbuf)
 {
 
 	glSecondaryColor3svEXT((const GLshort *)popBuf());
@@ -10094,7 +10094,7 @@ void EXEC_glSecondaryColor3svEXT(byte *commandbuf)
 
 
 //948
-void EXEC_glSecondaryColor3ubEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3ubEXT(byte *commandbuf)
 {
 	GLubyte *red = (GLubyte*)commandbuf;     commandbuf += sizeof(GLubyte);
 	GLubyte *green = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -10105,7 +10105,7 @@ void EXEC_glSecondaryColor3ubEXT(byte *commandbuf)
 
 
 //949
-void EXEC_glSecondaryColor3ubvEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3ubvEXT(byte *commandbuf)
 {
 
 	glSecondaryColor3ubvEXT((const GLubyte *)popBuf());
@@ -10113,7 +10113,7 @@ void EXEC_glSecondaryColor3ubvEXT(byte *commandbuf)
 
 
 //950
-void EXEC_glSecondaryColor3uiEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3uiEXT(byte *commandbuf)
 {
 	GLuint *red = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *green = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -10124,7 +10124,7 @@ void EXEC_glSecondaryColor3uiEXT(byte *commandbuf)
 
 
 //951
-void EXEC_glSecondaryColor3uivEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3uivEXT(byte *commandbuf)
 {
 
 	glSecondaryColor3uivEXT((const GLuint *)popBuf());
@@ -10132,7 +10132,7 @@ void EXEC_glSecondaryColor3uivEXT(byte *commandbuf)
 
 
 //952
-void EXEC_glSecondaryColor3usEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3usEXT(byte *commandbuf)
 {
 	GLushort *red = (GLushort*)commandbuf;   commandbuf += sizeof(GLushort);
 	GLushort *green = (GLushort*)commandbuf;     commandbuf += sizeof(GLushort);
@@ -10143,7 +10143,7 @@ void EXEC_glSecondaryColor3usEXT(byte *commandbuf)
 
 
 //953
-void EXEC_glSecondaryColor3usvEXT(byte *commandbuf)
+static void EXEC_glSecondaryColor3usvEXT(byte *commandbuf)
 {
 
 	glSecondaryColor3usvEXT((const GLushort *)popBuf());
@@ -10151,7 +10151,7 @@ void EXEC_glSecondaryColor3usvEXT(byte *commandbuf)
 
 
 //954
-void EXEC_glSecondaryColorPointerEXT(byte *commandbuf)
+static void EXEC_glSecondaryColorPointerEXT(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -10162,7 +10162,7 @@ void EXEC_glSecondaryColorPointerEXT(byte *commandbuf)
 
 
 //955
-void EXEC_glTextureNormalEXT(byte *commandbuf)
+static void EXEC_glTextureNormalEXT(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -10171,7 +10171,7 @@ void EXEC_glTextureNormalEXT(byte *commandbuf)
 
 
 //956
-void EXEC_glMultiDrawArraysEXT(byte *commandbuf)
+static void EXEC_glMultiDrawArraysEXT(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *primcount = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -10181,7 +10181,7 @@ void EXEC_glMultiDrawArraysEXT(byte *commandbuf)
 
 
 //957
-void EXEC_glMultiDrawElementsEXT(byte *commandbuf)
+static void EXEC_glMultiDrawElementsEXT(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -10192,7 +10192,7 @@ void EXEC_glMultiDrawElementsEXT(byte *commandbuf)
 
 
 //958
-void EXEC_glFogCoordfEXT(byte *commandbuf)
+static void EXEC_glFogCoordfEXT(byte *commandbuf)
 {
 	GLfloat *coord = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 
@@ -10201,7 +10201,7 @@ void EXEC_glFogCoordfEXT(byte *commandbuf)
 
 
 //959
-void EXEC_glFogCoordfvEXT(byte *commandbuf)
+static void EXEC_glFogCoordfvEXT(byte *commandbuf)
 {
 
 	glFogCoordfvEXT((const GLfloat *)popBuf());
@@ -10209,7 +10209,7 @@ void EXEC_glFogCoordfvEXT(byte *commandbuf)
 
 
 //960
-void EXEC_glFogCoorddEXT(byte *commandbuf)
+static void EXEC_glFogCoorddEXT(byte *commandbuf)
 {
 	GLdouble *coord = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 
@@ -10218,7 +10218,7 @@ void EXEC_glFogCoorddEXT(byte *commandbuf)
 
 
 //961
-void EXEC_glFogCoorddvEXT(byte *commandbuf)
+static void EXEC_glFogCoorddvEXT(byte *commandbuf)
 {
 
 	glFogCoorddvEXT((const GLdouble *)popBuf());
@@ -10226,7 +10226,7 @@ void EXEC_glFogCoorddvEXT(byte *commandbuf)
 
 
 //962
-void EXEC_glFogCoordPointerEXT(byte *commandbuf)
+static void EXEC_glFogCoordPointerEXT(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -10236,7 +10236,7 @@ void EXEC_glFogCoordPointerEXT(byte *commandbuf)
 
 
 //963
-void EXEC_glTangent3bEXT(byte *commandbuf)
+static void EXEC_glTangent3bEXT(byte *commandbuf)
 {
 	GLbyte *tx = (GLbyte*)commandbuf;    commandbuf += sizeof(GLbyte);
 	GLbyte *ty = (GLbyte*)commandbuf;    commandbuf += sizeof(GLbyte);
@@ -10247,7 +10247,7 @@ void EXEC_glTangent3bEXT(byte *commandbuf)
 
 
 //964
-void EXEC_glTangent3bvEXT(byte *commandbuf)
+static void EXEC_glTangent3bvEXT(byte *commandbuf)
 {
 
 	//glTangent3bvEXT((const GLbyte *)popBuf());
@@ -10255,7 +10255,7 @@ void EXEC_glTangent3bvEXT(byte *commandbuf)
 
 
 //965
-void EXEC_glTangent3dEXT(byte *commandbuf)
+static void EXEC_glTangent3dEXT(byte *commandbuf)
 {
 	GLdouble *tx = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
 	GLdouble *ty = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -10266,7 +10266,7 @@ void EXEC_glTangent3dEXT(byte *commandbuf)
 
 
 //966
-void EXEC_glTangent3dvEXT(byte *commandbuf)
+static void EXEC_glTangent3dvEXT(byte *commandbuf)
 {
 
 	//glTangent3dvEXT((const GLdouble *)popBuf());
@@ -10274,7 +10274,7 @@ void EXEC_glTangent3dvEXT(byte *commandbuf)
 
 
 //967
-void EXEC_glTangent3fEXT(byte *commandbuf)
+static void EXEC_glTangent3fEXT(byte *commandbuf)
 {
 	GLfloat *tx = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *ty = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -10285,7 +10285,7 @@ void EXEC_glTangent3fEXT(byte *commandbuf)
 
 
 //968
-void EXEC_glTangent3fvEXT(byte *commandbuf)
+static void EXEC_glTangent3fvEXT(byte *commandbuf)
 {
 
 	//glTangent3fvEXT((const GLfloat *)popBuf());
@@ -10293,7 +10293,7 @@ void EXEC_glTangent3fvEXT(byte *commandbuf)
 
 
 //969
-void EXEC_glTangent3iEXT(byte *commandbuf)
+static void EXEC_glTangent3iEXT(byte *commandbuf)
 {
 	GLint *tx = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLint *ty = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -10304,7 +10304,7 @@ void EXEC_glTangent3iEXT(byte *commandbuf)
 
 
 //970
-void EXEC_glTangent3ivEXT(byte *commandbuf)
+static void EXEC_glTangent3ivEXT(byte *commandbuf)
 {
 
 	//glTangent3ivEXT((const GLint *)popBuf());
@@ -10312,7 +10312,7 @@ void EXEC_glTangent3ivEXT(byte *commandbuf)
 
 
 //971
-void EXEC_glTangent3sEXT(byte *commandbuf)
+static void EXEC_glTangent3sEXT(byte *commandbuf)
 {
 	GLshort *tx = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
 	GLshort *ty = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
@@ -10323,7 +10323,7 @@ void EXEC_glTangent3sEXT(byte *commandbuf)
 
 
 //972
-void EXEC_glTangent3svEXT(byte *commandbuf)
+static void EXEC_glTangent3svEXT(byte *commandbuf)
 {
 
 	//glTangent3svEXT((const GLshort *)popBuf());
@@ -10331,7 +10331,7 @@ void EXEC_glTangent3svEXT(byte *commandbuf)
 
 
 //973
-void EXEC_glBinormal3bEXT(byte *commandbuf)
+static void EXEC_glBinormal3bEXT(byte *commandbuf)
 {
 	GLbyte *bx = (GLbyte*)commandbuf;    commandbuf += sizeof(GLbyte);
 	GLbyte *by = (GLbyte*)commandbuf;    commandbuf += sizeof(GLbyte);
@@ -10342,7 +10342,7 @@ void EXEC_glBinormal3bEXT(byte *commandbuf)
 
 
 //974
-void EXEC_glBinormal3bvEXT(byte *commandbuf)
+static void EXEC_glBinormal3bvEXT(byte *commandbuf)
 {
 
 	//glBinormal3bvEXT((const GLbyte *)popBuf());
@@ -10350,7 +10350,7 @@ void EXEC_glBinormal3bvEXT(byte *commandbuf)
 
 
 //975
-void EXEC_glBinormal3dEXT(byte *commandbuf)
+static void EXEC_glBinormal3dEXT(byte *commandbuf)
 {
 	GLdouble *bx = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
 	GLdouble *by = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -10361,7 +10361,7 @@ void EXEC_glBinormal3dEXT(byte *commandbuf)
 
 
 //976
-void EXEC_glBinormal3dvEXT(byte *commandbuf)
+static void EXEC_glBinormal3dvEXT(byte *commandbuf)
 {
 
 	//glBinormal3dvEXT((const GLdouble *)popBuf());
@@ -10369,7 +10369,7 @@ void EXEC_glBinormal3dvEXT(byte *commandbuf)
 
 
 //977
-void EXEC_glBinormal3fEXT(byte *commandbuf)
+static void EXEC_glBinormal3fEXT(byte *commandbuf)
 {
 	GLfloat *bx = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *by = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -10380,7 +10380,7 @@ void EXEC_glBinormal3fEXT(byte *commandbuf)
 
 
 //978
-void EXEC_glBinormal3fvEXT(byte *commandbuf)
+static void EXEC_glBinormal3fvEXT(byte *commandbuf)
 {
 
 	//glBinormal3fvEXT((const GLfloat *)popBuf());
@@ -10388,7 +10388,7 @@ void EXEC_glBinormal3fvEXT(byte *commandbuf)
 
 
 //979
-void EXEC_glBinormal3iEXT(byte *commandbuf)
+static void EXEC_glBinormal3iEXT(byte *commandbuf)
 {
 	GLint *bx = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLint *by = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -10399,7 +10399,7 @@ void EXEC_glBinormal3iEXT(byte *commandbuf)
 
 
 //980
-void EXEC_glBinormal3ivEXT(byte *commandbuf)
+static void EXEC_glBinormal3ivEXT(byte *commandbuf)
 {
 
 	//glBinormal3ivEXT((const GLint *)popBuf());
@@ -10407,7 +10407,7 @@ void EXEC_glBinormal3ivEXT(byte *commandbuf)
 
 
 //981
-void EXEC_glBinormal3sEXT(byte *commandbuf)
+static void EXEC_glBinormal3sEXT(byte *commandbuf)
 {
 	GLshort *bx = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
 	GLshort *by = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
@@ -10418,7 +10418,7 @@ void EXEC_glBinormal3sEXT(byte *commandbuf)
 
 
 //982
-void EXEC_glBinormal3svEXT(byte *commandbuf)
+static void EXEC_glBinormal3svEXT(byte *commandbuf)
 {
 
 	//glBinormal3svEXT((const GLshort *)popBuf());
@@ -10426,7 +10426,7 @@ void EXEC_glBinormal3svEXT(byte *commandbuf)
 
 
 //983
-void EXEC_glTangentPointerEXT(byte *commandbuf)
+static void EXEC_glTangentPointerEXT(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -10436,7 +10436,7 @@ void EXEC_glTangentPointerEXT(byte *commandbuf)
 
 
 //984
-void EXEC_glBinormalPointerEXT(byte *commandbuf)
+static void EXEC_glBinormalPointerEXT(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -10446,7 +10446,7 @@ void EXEC_glBinormalPointerEXT(byte *commandbuf)
 
 
 //985
-void EXEC_glPixelTexGenSGIX(byte *commandbuf)
+static void EXEC_glPixelTexGenSGIX(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -10455,7 +10455,7 @@ void EXEC_glPixelTexGenSGIX(byte *commandbuf)
 
 
 //986
-void EXEC_glFinishTextureSUNX(byte *commandbuf)
+static void EXEC_glFinishTextureSUNX(byte *commandbuf)
 {
 
 	glFinishTextureSUNX();
@@ -10463,7 +10463,7 @@ void EXEC_glFinishTextureSUNX(byte *commandbuf)
 
 
 //987
-void EXEC_glGlobalAlphaFactorbSUN(byte *commandbuf)
+static void EXEC_glGlobalAlphaFactorbSUN(byte *commandbuf)
 {
 	GLbyte *factor = (GLbyte*)commandbuf;    commandbuf += sizeof(GLbyte);
 
@@ -10472,7 +10472,7 @@ void EXEC_glGlobalAlphaFactorbSUN(byte *commandbuf)
 
 
 //988
-void EXEC_glGlobalAlphaFactorsSUN(byte *commandbuf)
+static void EXEC_glGlobalAlphaFactorsSUN(byte *commandbuf)
 {
 	GLshort *factor = (GLshort*)commandbuf;  commandbuf += sizeof(GLshort);
 
@@ -10481,7 +10481,7 @@ void EXEC_glGlobalAlphaFactorsSUN(byte *commandbuf)
 
 
 //989
-void EXEC_glGlobalAlphaFactoriSUN(byte *commandbuf)
+static void EXEC_glGlobalAlphaFactoriSUN(byte *commandbuf)
 {
 	GLint *factor = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 
@@ -10490,7 +10490,7 @@ void EXEC_glGlobalAlphaFactoriSUN(byte *commandbuf)
 
 
 //990
-void EXEC_glGlobalAlphaFactorfSUN(byte *commandbuf)
+static void EXEC_glGlobalAlphaFactorfSUN(byte *commandbuf)
 {
 	GLfloat *factor = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 
@@ -10499,7 +10499,7 @@ void EXEC_glGlobalAlphaFactorfSUN(byte *commandbuf)
 
 
 //991
-void EXEC_glGlobalAlphaFactordSUN(byte *commandbuf)
+static void EXEC_glGlobalAlphaFactordSUN(byte *commandbuf)
 {
 	GLdouble *factor = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
 
@@ -10508,7 +10508,7 @@ void EXEC_glGlobalAlphaFactordSUN(byte *commandbuf)
 
 
 //992
-void EXEC_glGlobalAlphaFactorubSUN(byte *commandbuf)
+static void EXEC_glGlobalAlphaFactorubSUN(byte *commandbuf)
 {
 	GLubyte *factor = (GLubyte*)commandbuf;  commandbuf += sizeof(GLubyte);
 
@@ -10517,7 +10517,7 @@ void EXEC_glGlobalAlphaFactorubSUN(byte *commandbuf)
 
 
 //993
-void EXEC_glGlobalAlphaFactorusSUN(byte *commandbuf)
+static void EXEC_glGlobalAlphaFactorusSUN(byte *commandbuf)
 {
 	GLushort *factor = (GLushort*)commandbuf;    commandbuf += sizeof(GLushort);
 
@@ -10526,7 +10526,7 @@ void EXEC_glGlobalAlphaFactorusSUN(byte *commandbuf)
 
 
 //994
-void EXEC_glGlobalAlphaFactoruiSUN(byte *commandbuf)
+static void EXEC_glGlobalAlphaFactoruiSUN(byte *commandbuf)
 {
 	GLuint *factor = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -10535,7 +10535,7 @@ void EXEC_glGlobalAlphaFactoruiSUN(byte *commandbuf)
 
 
 //995
-void EXEC_glReplacementCodeuiSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiSUN(byte *commandbuf)
 {
 	GLuint *code = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -10544,7 +10544,7 @@ void EXEC_glReplacementCodeuiSUN(byte *commandbuf)
 
 
 //996
-void EXEC_glReplacementCodeusSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeusSUN(byte *commandbuf)
 {
 	GLushort *code = (GLushort*)commandbuf;  commandbuf += sizeof(GLushort);
 
@@ -10553,7 +10553,7 @@ void EXEC_glReplacementCodeusSUN(byte *commandbuf)
 
 
 //997
-void EXEC_glReplacementCodeubSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeubSUN(byte *commandbuf)
 {
 	GLubyte *code = (GLubyte*)commandbuf;    commandbuf += sizeof(GLubyte);
 
@@ -10562,7 +10562,7 @@ void EXEC_glReplacementCodeubSUN(byte *commandbuf)
 
 
 //998
-void EXEC_glReplacementCodeuivSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuivSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuivSUN((const GLuint *)popBuf());
@@ -10570,7 +10570,7 @@ void EXEC_glReplacementCodeuivSUN(byte *commandbuf)
 
 
 //999
-void EXEC_glReplacementCodeusvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeusvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeusvSUN((const GLushort *)popBuf());
@@ -10578,7 +10578,7 @@ void EXEC_glReplacementCodeusvSUN(byte *commandbuf)
 
 
 //1000
-void EXEC_glReplacementCodeubvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeubvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeubvSUN((const GLubyte *)popBuf());
@@ -10586,7 +10586,7 @@ void EXEC_glReplacementCodeubvSUN(byte *commandbuf)
 
 
 //1001
-void EXEC_glReplacementCodePointerSUN(byte *commandbuf)
+static void EXEC_glReplacementCodePointerSUN(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
@@ -10596,7 +10596,7 @@ void EXEC_glReplacementCodePointerSUN(byte *commandbuf)
 
 
 //1002
-void EXEC_glColor4ubVertex2fSUN(byte *commandbuf)
+static void EXEC_glColor4ubVertex2fSUN(byte *commandbuf)
 {
 	GLubyte *r = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
 	GLubyte *g = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -10610,7 +10610,7 @@ void EXEC_glColor4ubVertex2fSUN(byte *commandbuf)
 
 
 //1003
-void EXEC_glColor4ubVertex2fvSUN(byte *commandbuf)
+static void EXEC_glColor4ubVertex2fvSUN(byte *commandbuf)
 {
 
 	glColor4ubVertex2fvSUN((const GLubyte *)popBuf(), (const GLfloat *)popBuf());
@@ -10618,7 +10618,7 @@ void EXEC_glColor4ubVertex2fvSUN(byte *commandbuf)
 
 
 //1004
-void EXEC_glColor4ubVertex3fSUN(byte *commandbuf)
+static void EXEC_glColor4ubVertex3fSUN(byte *commandbuf)
 {
 	GLubyte *r = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
 	GLubyte *g = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -10633,7 +10633,7 @@ void EXEC_glColor4ubVertex3fSUN(byte *commandbuf)
 
 
 //1005
-void EXEC_glColor4ubVertex3fvSUN(byte *commandbuf)
+static void EXEC_glColor4ubVertex3fvSUN(byte *commandbuf)
 {
 
 	glColor4ubVertex3fvSUN((const GLubyte *)popBuf(), (const GLfloat *)popBuf());
@@ -10641,7 +10641,7 @@ void EXEC_glColor4ubVertex3fvSUN(byte *commandbuf)
 
 
 //1006
-void EXEC_glColor3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glColor3fVertex3fSUN(byte *commandbuf)
 {
 	GLfloat *r = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *g = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10655,7 +10655,7 @@ void EXEC_glColor3fVertex3fSUN(byte *commandbuf)
 
 
 //1007
-void EXEC_glColor3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glColor3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glColor3fVertex3fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10663,7 +10663,7 @@ void EXEC_glColor3fVertex3fvSUN(byte *commandbuf)
 
 
 //1008
-void EXEC_glNormal3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glNormal3fVertex3fSUN(byte *commandbuf)
 {
 	GLfloat *nx = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *ny = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -10677,7 +10677,7 @@ void EXEC_glNormal3fVertex3fSUN(byte *commandbuf)
 
 
 //1009
-void EXEC_glNormal3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glNormal3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glNormal3fVertex3fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10685,7 +10685,7 @@ void EXEC_glNormal3fVertex3fvSUN(byte *commandbuf)
 
 
 //1010
-void EXEC_glColor4fNormal3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glColor4fNormal3fVertex3fSUN(byte *commandbuf)
 {
 	GLfloat *r = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *g = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10703,7 +10703,7 @@ void EXEC_glColor4fNormal3fVertex3fSUN(byte *commandbuf)
 
 
 //1011
-void EXEC_glColor4fNormal3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glColor4fNormal3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glColor4fNormal3fVertex3fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10711,7 +10711,7 @@ void EXEC_glColor4fNormal3fVertex3fvSUN(byte *commandbuf)
 
 
 //1012
-void EXEC_glTexCoord2fVertex3fSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fVertex3fSUN(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10724,7 +10724,7 @@ void EXEC_glTexCoord2fVertex3fSUN(byte *commandbuf)
 
 
 //1013
-void EXEC_glTexCoord2fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fVertex3fvSUN(byte *commandbuf)
 {
 
 	glTexCoord2fVertex3fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10732,7 +10732,7 @@ void EXEC_glTexCoord2fVertex3fvSUN(byte *commandbuf)
 
 
 //1014
-void EXEC_glTexCoord4fVertex4fSUN(byte *commandbuf)
+static void EXEC_glTexCoord4fVertex4fSUN(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10748,7 +10748,7 @@ void EXEC_glTexCoord4fVertex4fSUN(byte *commandbuf)
 
 
 //1015
-void EXEC_glTexCoord4fVertex4fvSUN(byte *commandbuf)
+static void EXEC_glTexCoord4fVertex4fvSUN(byte *commandbuf)
 {
 
 	glTexCoord4fVertex4fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10756,7 +10756,7 @@ void EXEC_glTexCoord4fVertex4fvSUN(byte *commandbuf)
 
 
 //1016
-void EXEC_glTexCoord2fColor4ubVertex3fSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fColor4ubVertex3fSUN(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10773,7 +10773,7 @@ void EXEC_glTexCoord2fColor4ubVertex3fSUN(byte *commandbuf)
 
 
 //1017
-void EXEC_glTexCoord2fColor4ubVertex3fvSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fColor4ubVertex3fvSUN(byte *commandbuf)
 {
 
 	glTexCoord2fColor4ubVertex3fvSUN((const GLfloat *)popBuf(), (const GLubyte *)popBuf(), (const GLfloat *)popBuf());
@@ -10781,7 +10781,7 @@ void EXEC_glTexCoord2fColor4ubVertex3fvSUN(byte *commandbuf)
 
 
 //1018
-void EXEC_glTexCoord2fColor3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fColor3fVertex3fSUN(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10797,7 +10797,7 @@ void EXEC_glTexCoord2fColor3fVertex3fSUN(byte *commandbuf)
 
 
 //1019
-void EXEC_glTexCoord2fColor3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fColor3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glTexCoord2fColor3fVertex3fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10805,7 +10805,7 @@ void EXEC_glTexCoord2fColor3fVertex3fvSUN(byte *commandbuf)
 
 
 //1020
-void EXEC_glTexCoord2fNormal3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fNormal3fVertex3fSUN(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10821,7 +10821,7 @@ void EXEC_glTexCoord2fNormal3fVertex3fSUN(byte *commandbuf)
 
 
 //1021
-void EXEC_glTexCoord2fNormal3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fNormal3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glTexCoord2fNormal3fVertex3fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10829,7 +10829,7 @@ void EXEC_glTexCoord2fNormal3fVertex3fvSUN(byte *commandbuf)
 
 
 //1022
-void EXEC_glTexCoord2fColor4fNormal3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fColor4fNormal3fVertex3fSUN(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10849,7 +10849,7 @@ void EXEC_glTexCoord2fColor4fNormal3fVertex3fSUN(byte *commandbuf)
 
 
 //1023
-void EXEC_glTexCoord2fColor4fNormal3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glTexCoord2fColor4fNormal3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glTexCoord2fColor4fNormal3fVertex3fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10857,7 +10857,7 @@ void EXEC_glTexCoord2fColor4fNormal3fVertex3fvSUN(byte *commandbuf)
 
 
 //1024
-void EXEC_glTexCoord4fColor4fNormal3fVertex4fSUN(byte *commandbuf)
+static void EXEC_glTexCoord4fColor4fNormal3fVertex4fSUN(byte *commandbuf)
 {
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *t = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10880,7 +10880,7 @@ void EXEC_glTexCoord4fColor4fNormal3fVertex4fSUN(byte *commandbuf)
 
 
 //1025
-void EXEC_glTexCoord4fColor4fNormal3fVertex4fvSUN(byte *commandbuf)
+static void EXEC_glTexCoord4fColor4fNormal3fVertex4fvSUN(byte *commandbuf)
 {
 
 	glTexCoord4fColor4fNormal3fVertex4fvSUN((const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10888,7 +10888,7 @@ void EXEC_glTexCoord4fColor4fNormal3fVertex4fvSUN(byte *commandbuf)
 
 
 //1026
-void EXEC_glReplacementCodeuiVertex3fSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiVertex3fSUN(byte *commandbuf)
 {
 	GLuint *rc = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10900,7 +10900,7 @@ void EXEC_glReplacementCodeuiVertex3fSUN(byte *commandbuf)
 
 
 //1027
-void EXEC_glReplacementCodeuiVertex3fvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiVertex3fvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuiVertex3fvSUN((const GLuint *)popBuf(), (const GLfloat *)popBuf());
@@ -10908,7 +10908,7 @@ void EXEC_glReplacementCodeuiVertex3fvSUN(byte *commandbuf)
 
 
 //1028
-void EXEC_glReplacementCodeuiColor4ubVertex3fSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiColor4ubVertex3fSUN(byte *commandbuf)
 {
 	GLuint *rc = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLubyte *r = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -10924,7 +10924,7 @@ void EXEC_glReplacementCodeuiColor4ubVertex3fSUN(byte *commandbuf)
 
 
 //1029
-void EXEC_glReplacementCodeuiColor4ubVertex3fvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiColor4ubVertex3fvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuiColor4ubVertex3fvSUN((const GLuint *)popBuf(), (const GLubyte *)popBuf(), (const GLfloat *)popBuf());
@@ -10932,7 +10932,7 @@ void EXEC_glReplacementCodeuiColor4ubVertex3fvSUN(byte *commandbuf)
 
 
 //1030
-void EXEC_glReplacementCodeuiColor3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiColor3fVertex3fSUN(byte *commandbuf)
 {
 	GLuint *rc = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLfloat *r = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10947,7 +10947,7 @@ void EXEC_glReplacementCodeuiColor3fVertex3fSUN(byte *commandbuf)
 
 
 //1031
-void EXEC_glReplacementCodeuiColor3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiColor3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuiColor3fVertex3fvSUN((const GLuint *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10955,7 +10955,7 @@ void EXEC_glReplacementCodeuiColor3fVertex3fvSUN(byte *commandbuf)
 
 
 //1032
-void EXEC_glReplacementCodeuiNormal3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiNormal3fVertex3fSUN(byte *commandbuf)
 {
 	GLuint *rc = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLfloat *nx = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -10970,7 +10970,7 @@ void EXEC_glReplacementCodeuiNormal3fVertex3fSUN(byte *commandbuf)
 
 
 //1033
-void EXEC_glReplacementCodeuiNormal3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiNormal3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuiNormal3fVertex3fvSUN((const GLuint *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -10978,7 +10978,7 @@ void EXEC_glReplacementCodeuiNormal3fVertex3fvSUN(byte *commandbuf)
 
 
 //1034
-void EXEC_glReplacementCodeuiColor4fNormal3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiColor4fNormal3fVertex3fSUN(byte *commandbuf)
 {
 	GLuint *rc = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLfloat *r = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -10997,7 +10997,7 @@ void EXEC_glReplacementCodeuiColor4fNormal3fVertex3fSUN(byte *commandbuf)
 
 
 //1035
-void EXEC_glReplacementCodeuiColor4fNormal3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiColor4fNormal3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuiColor4fNormal3fVertex3fvSUN((const GLuint *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -11005,7 +11005,7 @@ void EXEC_glReplacementCodeuiColor4fNormal3fVertex3fvSUN(byte *commandbuf)
 
 
 //1036
-void EXEC_glReplacementCodeuiTexCoord2fVertex3fSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiTexCoord2fVertex3fSUN(byte *commandbuf)
 {
 	GLuint *rc = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -11019,7 +11019,7 @@ void EXEC_glReplacementCodeuiTexCoord2fVertex3fSUN(byte *commandbuf)
 
 
 //1037
-void EXEC_glReplacementCodeuiTexCoord2fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiTexCoord2fVertex3fvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuiTexCoord2fVertex3fvSUN((const GLuint *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -11027,7 +11027,7 @@ void EXEC_glReplacementCodeuiTexCoord2fVertex3fvSUN(byte *commandbuf)
 
 
 //1038
-void EXEC_glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN(byte *commandbuf)
 {
 	GLuint *rc = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -11044,7 +11044,7 @@ void EXEC_glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN(byte *commandbuf)
 
 
 //1039
-void EXEC_glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN((const GLuint *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -11052,7 +11052,7 @@ void EXEC_glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN(byte *commandbuf)
 
 
 //1040
-void EXEC_glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN(byte *commandbuf)
 {
 	GLuint *rc = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLfloat *s = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -11073,7 +11073,7 @@ void EXEC_glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN(byte *commandb
 
 
 //1041
-void EXEC_glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN(byte *commandbuf)
+static void EXEC_glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN(byte *commandbuf)
 {
 
 	glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN((const GLuint *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf(), (const GLfloat *)popBuf());
@@ -11081,7 +11081,7 @@ void EXEC_glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN(byte *command
 
 
 //1042
-void EXEC_glBlendFuncSeparateEXT(byte *commandbuf)
+static void EXEC_glBlendFuncSeparateEXT(byte *commandbuf)
 {
 	GLenum *sfactorRGB = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *dfactorRGB = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -11093,7 +11093,7 @@ void EXEC_glBlendFuncSeparateEXT(byte *commandbuf)
 
 
 //1043
-void EXEC_glVertexWeightfEXT(byte *commandbuf)
+static void EXEC_glVertexWeightfEXT(byte *commandbuf)
 {
 	GLfloat *weight = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 
@@ -11102,7 +11102,7 @@ void EXEC_glVertexWeightfEXT(byte *commandbuf)
 
 
 //1044
-void EXEC_glVertexWeightfvEXT(byte *commandbuf)
+static void EXEC_glVertexWeightfvEXT(byte *commandbuf)
 {
 
 	glVertexWeightfvEXT((GLfloat *)popBuf());
@@ -11110,7 +11110,7 @@ void EXEC_glVertexWeightfvEXT(byte *commandbuf)
 
 
 //1045
-void EXEC_glVertexWeightPointerEXT(byte *commandbuf)
+static void EXEC_glVertexWeightPointerEXT(byte *commandbuf)
 {
 	GLsizei *size = (GLsizei*)commandbuf;    commandbuf += sizeof(GLsizei);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -11121,7 +11121,7 @@ void EXEC_glVertexWeightPointerEXT(byte *commandbuf)
 
 
 //1046
-void EXEC_glFlushVertexArrayRangeNV(byte *commandbuf)
+static void EXEC_glFlushVertexArrayRangeNV(byte *commandbuf)
 {
 
 	glFlushVertexArrayRangeNV();
@@ -11129,7 +11129,7 @@ void EXEC_glFlushVertexArrayRangeNV(byte *commandbuf)
 
 
 //1047
-void EXEC_glVertexArrayRangeNV(byte *commandbuf)
+static void EXEC_glVertexArrayRangeNV(byte *commandbuf)
 {
 	GLsizei *length = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
 
@@ -11138,7 +11138,7 @@ void EXEC_glVertexArrayRangeNV(byte *commandbuf)
 
 
 //1048
-void EXEC_glCombinerParameterfvNV(byte *commandbuf)
+static void EXEC_glCombinerParameterfvNV(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -11147,7 +11147,7 @@ void EXEC_glCombinerParameterfvNV(byte *commandbuf)
 
 
 //1049
-void EXEC_glCombinerParameterfNV(byte *commandbuf)
+static void EXEC_glCombinerParameterfNV(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -11157,7 +11157,7 @@ void EXEC_glCombinerParameterfNV(byte *commandbuf)
 
 
 //1050
-void EXEC_glCombinerParameterivNV(byte *commandbuf)
+static void EXEC_glCombinerParameterivNV(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -11166,7 +11166,7 @@ void EXEC_glCombinerParameterivNV(byte *commandbuf)
 
 
 //1051
-void EXEC_glCombinerParameteriNV(byte *commandbuf)
+static void EXEC_glCombinerParameteriNV(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -11176,7 +11176,7 @@ void EXEC_glCombinerParameteriNV(byte *commandbuf)
 
 
 //1052
-void EXEC_glCombinerInputNV(byte *commandbuf)
+static void EXEC_glCombinerInputNV(byte *commandbuf)
 {
 	GLenum *stage = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *portion = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -11190,7 +11190,7 @@ void EXEC_glCombinerInputNV(byte *commandbuf)
 
 
 //1053
-void EXEC_glCombinerOutputNV(byte *commandbuf)
+static void EXEC_glCombinerOutputNV(byte *commandbuf)
 {
 	GLenum *stage = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *portion = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -11208,7 +11208,7 @@ void EXEC_glCombinerOutputNV(byte *commandbuf)
 
 
 //1054
-void EXEC_glFinalCombinerInputNV(byte *commandbuf)
+static void EXEC_glFinalCombinerInputNV(byte *commandbuf)
 {
 	GLenum *variable = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *input = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11220,7 +11220,7 @@ void EXEC_glFinalCombinerInputNV(byte *commandbuf)
 
 
 //1055
-void EXEC_glGetCombinerInputParameterfvNV(byte *commandbuf)
+static void EXEC_glGetCombinerInputParameterfvNV(byte *commandbuf)
 {
 	GLenum *stage = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *portion = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -11232,7 +11232,7 @@ void EXEC_glGetCombinerInputParameterfvNV(byte *commandbuf)
 
 
 //1056
-void EXEC_glGetCombinerInputParameterivNV(byte *commandbuf)
+static void EXEC_glGetCombinerInputParameterivNV(byte *commandbuf)
 {
 	GLenum *stage = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *portion = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -11244,7 +11244,7 @@ void EXEC_glGetCombinerInputParameterivNV(byte *commandbuf)
 
 
 //1057
-void EXEC_glGetCombinerOutputParameterfvNV(byte *commandbuf)
+static void EXEC_glGetCombinerOutputParameterfvNV(byte *commandbuf)
 {
 	GLenum *stage = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *portion = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -11255,7 +11255,7 @@ void EXEC_glGetCombinerOutputParameterfvNV(byte *commandbuf)
 
 
 //1058
-void EXEC_glGetCombinerOutputParameterivNV(byte *commandbuf)
+static void EXEC_glGetCombinerOutputParameterivNV(byte *commandbuf)
 {
 	GLenum *stage = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *portion = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -11266,7 +11266,7 @@ void EXEC_glGetCombinerOutputParameterivNV(byte *commandbuf)
 
 
 //1059
-void EXEC_glGetFinalCombinerInputParameterfvNV(byte *commandbuf)
+static void EXEC_glGetFinalCombinerInputParameterfvNV(byte *commandbuf)
 {
 	GLenum *variable = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11276,7 +11276,7 @@ void EXEC_glGetFinalCombinerInputParameterfvNV(byte *commandbuf)
 
 
 //1060
-void EXEC_glGetFinalCombinerInputParameterivNV(byte *commandbuf)
+static void EXEC_glGetFinalCombinerInputParameterivNV(byte *commandbuf)
 {
 	GLenum *variable = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11286,7 +11286,7 @@ void EXEC_glGetFinalCombinerInputParameterivNV(byte *commandbuf)
 
 
 //1061
-void EXEC_glResizeBuffersMESA(byte *commandbuf)
+static void EXEC_glResizeBuffersMESA(byte *commandbuf)
 {
 
 	glResizeBuffersMESA();
@@ -11294,7 +11294,7 @@ void EXEC_glResizeBuffersMESA(byte *commandbuf)
 
 
 //1062
-void EXEC_glWindowPos2dMESA(byte *commandbuf)
+static void EXEC_glWindowPos2dMESA(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -11304,7 +11304,7 @@ void EXEC_glWindowPos2dMESA(byte *commandbuf)
 
 
 //1063
-void EXEC_glWindowPos2dvMESA(byte *commandbuf)
+static void EXEC_glWindowPos2dvMESA(byte *commandbuf)
 {
 
 	glWindowPos2dvMESA((const GLdouble *)popBuf());
@@ -11312,7 +11312,7 @@ void EXEC_glWindowPos2dvMESA(byte *commandbuf)
 
 
 //1064
-void EXEC_glWindowPos2fMESA(byte *commandbuf)
+static void EXEC_glWindowPos2fMESA(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -11322,7 +11322,7 @@ void EXEC_glWindowPos2fMESA(byte *commandbuf)
 
 
 //1065
-void EXEC_glWindowPos2fvMESA(byte *commandbuf)
+static void EXEC_glWindowPos2fvMESA(byte *commandbuf)
 {
 
 	glWindowPos2fvMESA((const GLfloat *)popBuf());
@@ -11330,7 +11330,7 @@ void EXEC_glWindowPos2fvMESA(byte *commandbuf)
 
 
 //1066
-void EXEC_glWindowPos2iMESA(byte *commandbuf)
+static void EXEC_glWindowPos2iMESA(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -11340,7 +11340,7 @@ void EXEC_glWindowPos2iMESA(byte *commandbuf)
 
 
 //1067
-void EXEC_glWindowPos2ivMESA(byte *commandbuf)
+static void EXEC_glWindowPos2ivMESA(byte *commandbuf)
 {
 
 	glWindowPos2ivMESA((const GLint *)popBuf());
@@ -11348,7 +11348,7 @@ void EXEC_glWindowPos2ivMESA(byte *commandbuf)
 
 
 //1068
-void EXEC_glWindowPos2sMESA(byte *commandbuf)
+static void EXEC_glWindowPos2sMESA(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -11358,7 +11358,7 @@ void EXEC_glWindowPos2sMESA(byte *commandbuf)
 
 
 //1069
-void EXEC_glWindowPos2svMESA(byte *commandbuf)
+static void EXEC_glWindowPos2svMESA(byte *commandbuf)
 {
 
 	glWindowPos2svMESA((const GLshort *)popBuf());
@@ -11366,7 +11366,7 @@ void EXEC_glWindowPos2svMESA(byte *commandbuf)
 
 
 //1070
-void EXEC_glWindowPos3dMESA(byte *commandbuf)
+static void EXEC_glWindowPos3dMESA(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -11377,7 +11377,7 @@ void EXEC_glWindowPos3dMESA(byte *commandbuf)
 
 
 //1071
-void EXEC_glWindowPos3dvMESA(byte *commandbuf)
+static void EXEC_glWindowPos3dvMESA(byte *commandbuf)
 {
 
 	glWindowPos3dvMESA((const GLdouble *)popBuf());
@@ -11385,7 +11385,7 @@ void EXEC_glWindowPos3dvMESA(byte *commandbuf)
 
 
 //1072
-void EXEC_glWindowPos3fMESA(byte *commandbuf)
+static void EXEC_glWindowPos3fMESA(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -11396,7 +11396,7 @@ void EXEC_glWindowPos3fMESA(byte *commandbuf)
 
 
 //1073
-void EXEC_glWindowPos3fvMESA(byte *commandbuf)
+static void EXEC_glWindowPos3fvMESA(byte *commandbuf)
 {
 
 	glWindowPos3fvMESA((const GLfloat *)popBuf());
@@ -11404,7 +11404,7 @@ void EXEC_glWindowPos3fvMESA(byte *commandbuf)
 
 
 //1074
-void EXEC_glWindowPos3iMESA(byte *commandbuf)
+static void EXEC_glWindowPos3iMESA(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -11415,7 +11415,7 @@ void EXEC_glWindowPos3iMESA(byte *commandbuf)
 
 
 //1075
-void EXEC_glWindowPos3ivMESA(byte *commandbuf)
+static void EXEC_glWindowPos3ivMESA(byte *commandbuf)
 {
 
 	glWindowPos3ivMESA((const GLint *)popBuf());
@@ -11423,7 +11423,7 @@ void EXEC_glWindowPos3ivMESA(byte *commandbuf)
 
 
 //1076
-void EXEC_glWindowPos3sMESA(byte *commandbuf)
+static void EXEC_glWindowPos3sMESA(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -11434,7 +11434,7 @@ void EXEC_glWindowPos3sMESA(byte *commandbuf)
 
 
 //1077
-void EXEC_glWindowPos3svMESA(byte *commandbuf)
+static void EXEC_glWindowPos3svMESA(byte *commandbuf)
 {
 
 	glWindowPos3svMESA((const GLshort *)popBuf());
@@ -11442,7 +11442,7 @@ void EXEC_glWindowPos3svMESA(byte *commandbuf)
 
 
 //1078
-void EXEC_glWindowPos4dMESA(byte *commandbuf)
+static void EXEC_glWindowPos4dMESA(byte *commandbuf)
 {
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *y = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -11454,7 +11454,7 @@ void EXEC_glWindowPos4dMESA(byte *commandbuf)
 
 
 //1079
-void EXEC_glWindowPos4dvMESA(byte *commandbuf)
+static void EXEC_glWindowPos4dvMESA(byte *commandbuf)
 {
 
 	glWindowPos4dvMESA((const GLdouble *)popBuf());
@@ -11462,7 +11462,7 @@ void EXEC_glWindowPos4dvMESA(byte *commandbuf)
 
 
 //1080
-void EXEC_glWindowPos4fMESA(byte *commandbuf)
+static void EXEC_glWindowPos4fMESA(byte *commandbuf)
 {
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -11474,7 +11474,7 @@ void EXEC_glWindowPos4fMESA(byte *commandbuf)
 
 
 //1081
-void EXEC_glWindowPos4fvMESA(byte *commandbuf)
+static void EXEC_glWindowPos4fvMESA(byte *commandbuf)
 {
 
 	glWindowPos4fvMESA((const GLfloat *)popBuf());
@@ -11482,7 +11482,7 @@ void EXEC_glWindowPos4fvMESA(byte *commandbuf)
 
 
 //1082
-void EXEC_glWindowPos4iMESA(byte *commandbuf)
+static void EXEC_glWindowPos4iMESA(byte *commandbuf)
 {
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -11494,7 +11494,7 @@ void EXEC_glWindowPos4iMESA(byte *commandbuf)
 
 
 //1083
-void EXEC_glWindowPos4ivMESA(byte *commandbuf)
+static void EXEC_glWindowPos4ivMESA(byte *commandbuf)
 {
 
 	glWindowPos4ivMESA((const GLint *)popBuf());
@@ -11502,7 +11502,7 @@ void EXEC_glWindowPos4ivMESA(byte *commandbuf)
 
 
 //1084
-void EXEC_glWindowPos4sMESA(byte *commandbuf)
+static void EXEC_glWindowPos4sMESA(byte *commandbuf)
 {
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
 	GLshort *y = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -11514,7 +11514,7 @@ void EXEC_glWindowPos4sMESA(byte *commandbuf)
 
 
 //1085
-void EXEC_glWindowPos4svMESA(byte *commandbuf)
+static void EXEC_glWindowPos4svMESA(byte *commandbuf)
 {
 
 	glWindowPos4svMESA((const GLshort *)popBuf());
@@ -11522,7 +11522,7 @@ void EXEC_glWindowPos4svMESA(byte *commandbuf)
 
 
 //1086
-void EXEC_glMultiModeDrawArraysIBM(byte *commandbuf)
+static void EXEC_glMultiModeDrawArraysIBM(byte *commandbuf)
 {
 	GLsizei *primcount = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	GLint *modestride = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -11532,7 +11532,7 @@ void EXEC_glMultiModeDrawArraysIBM(byte *commandbuf)
 
 
 //1087
-void EXEC_glMultiModeDrawElementsIBM(byte *commandbuf)
+static void EXEC_glMultiModeDrawElementsIBM(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *primcount = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -11543,7 +11543,7 @@ void EXEC_glMultiModeDrawElementsIBM(byte *commandbuf)
 
 
 //1088
-void EXEC_glColorPointerListIBM(byte *commandbuf)
+static void EXEC_glColorPointerListIBM(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -11555,7 +11555,7 @@ void EXEC_glColorPointerListIBM(byte *commandbuf)
 
 
 //1089
-void EXEC_glSecondaryColorPointerListIBM(byte *commandbuf)
+static void EXEC_glSecondaryColorPointerListIBM(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -11567,7 +11567,7 @@ void EXEC_glSecondaryColorPointerListIBM(byte *commandbuf)
 
 
 //1090
-void EXEC_glEdgeFlagPointerListIBM(byte *commandbuf)
+static void EXEC_glEdgeFlagPointerListIBM(byte *commandbuf)
 {
 	GLint *stride = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
 	GLint *ptrstride = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -11577,7 +11577,7 @@ void EXEC_glEdgeFlagPointerListIBM(byte *commandbuf)
 
 
 //1091
-void EXEC_glFogCoordPointerListIBM(byte *commandbuf)
+static void EXEC_glFogCoordPointerListIBM(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *stride = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -11588,7 +11588,7 @@ void EXEC_glFogCoordPointerListIBM(byte *commandbuf)
 
 
 //1092
-void EXEC_glIndexPointerListIBM(byte *commandbuf)
+static void EXEC_glIndexPointerListIBM(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *stride = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -11599,7 +11599,7 @@ void EXEC_glIndexPointerListIBM(byte *commandbuf)
 
 
 //1093
-void EXEC_glNormalPointerListIBM(byte *commandbuf)
+static void EXEC_glNormalPointerListIBM(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *stride = (GLint*)commandbuf;  commandbuf += sizeof(GLint);
@@ -11610,7 +11610,7 @@ void EXEC_glNormalPointerListIBM(byte *commandbuf)
 
 
 //1094
-void EXEC_glTexCoordPointerListIBM(byte *commandbuf)
+static void EXEC_glTexCoordPointerListIBM(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -11622,7 +11622,7 @@ void EXEC_glTexCoordPointerListIBM(byte *commandbuf)
 
 
 //1095
-void EXEC_glVertexPointerListIBM(byte *commandbuf)
+static void EXEC_glVertexPointerListIBM(byte *commandbuf)
 {
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -11634,7 +11634,7 @@ void EXEC_glVertexPointerListIBM(byte *commandbuf)
 
 
 //1096
-void EXEC_glTbufferMask3DFX(byte *commandbuf)
+static void EXEC_glTbufferMask3DFX(byte *commandbuf)
 {
 	GLuint *mask = (GLuint*)commandbuf;  commandbuf += sizeof(GLuint);
 
@@ -11643,7 +11643,7 @@ void EXEC_glTbufferMask3DFX(byte *commandbuf)
 
 
 //1097
-void EXEC_glSampleMaskEXT(byte *commandbuf)
+static void EXEC_glSampleMaskEXT(byte *commandbuf)
 {
 	GLclampf *value = (GLclampf*)commandbuf;     commandbuf += sizeof(GLclampf);
 	GLboolean *invert = (GLboolean*)commandbuf;  commandbuf += sizeof(GLboolean);
@@ -11653,7 +11653,7 @@ void EXEC_glSampleMaskEXT(byte *commandbuf)
 
 
 //1098
-void EXEC_glSamplePatternEXT(byte *commandbuf)
+static void EXEC_glSamplePatternEXT(byte *commandbuf)
 {
 	GLenum *pattern = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
@@ -11662,7 +11662,7 @@ void EXEC_glSamplePatternEXT(byte *commandbuf)
 
 
 //1099
-void EXEC_glTextureColorMaskSGIS(byte *commandbuf)
+static void EXEC_glTextureColorMaskSGIS(byte *commandbuf)
 {
 	GLboolean *red = (GLboolean*)commandbuf;     commandbuf += sizeof(GLboolean);
 	GLboolean *green = (GLboolean*)commandbuf;   commandbuf += sizeof(GLboolean);
@@ -11674,7 +11674,7 @@ void EXEC_glTextureColorMaskSGIS(byte *commandbuf)
 
 
 //1100
-void EXEC_glDeleteFencesNV(byte *commandbuf)
+static void EXEC_glDeleteFencesNV(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -11683,7 +11683,7 @@ void EXEC_glDeleteFencesNV(byte *commandbuf)
 
 
 //1101
-void EXEC_glGenFencesNV(byte *commandbuf)
+static void EXEC_glGenFencesNV(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -11692,7 +11692,7 @@ void EXEC_glGenFencesNV(byte *commandbuf)
 
 
 //1102
-void EXEC_glIsFenceNV(byte *commandbuf)
+static void EXEC_glIsFenceNV(byte *commandbuf)
 {
 	GLuint *fence = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -11701,7 +11701,7 @@ void EXEC_glIsFenceNV(byte *commandbuf)
 
 
 //1103
-void EXEC_glTestFenceNV(byte *commandbuf)
+static void EXEC_glTestFenceNV(byte *commandbuf)
 {
 	GLuint *fence = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -11710,7 +11710,7 @@ void EXEC_glTestFenceNV(byte *commandbuf)
 
 
 //1104
-void EXEC_glGetFenceivNV(byte *commandbuf)
+static void EXEC_glGetFenceivNV(byte *commandbuf)
 {
 	GLuint *fence = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11720,7 +11720,7 @@ void EXEC_glGetFenceivNV(byte *commandbuf)
 
 
 //1105
-void EXEC_glFinishFenceNV(byte *commandbuf)
+static void EXEC_glFinishFenceNV(byte *commandbuf)
 {
 	GLuint *fence = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -11729,7 +11729,7 @@ void EXEC_glFinishFenceNV(byte *commandbuf)
 
 
 //1106
-void EXEC_glSetFenceNV(byte *commandbuf)
+static void EXEC_glSetFenceNV(byte *commandbuf)
 {
 	GLuint *fence = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *condition = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11739,7 +11739,7 @@ void EXEC_glSetFenceNV(byte *commandbuf)
 
 
 //1107
-void EXEC_glMapControlPointsNV(byte *commandbuf)
+static void EXEC_glMapControlPointsNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -11755,7 +11755,7 @@ void EXEC_glMapControlPointsNV(byte *commandbuf)
 
 
 //1108
-void EXEC_glMapParameterivNV(byte *commandbuf)
+static void EXEC_glMapParameterivNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11765,7 +11765,7 @@ void EXEC_glMapParameterivNV(byte *commandbuf)
 
 
 //1109
-void EXEC_glMapParameterfvNV(byte *commandbuf)
+static void EXEC_glMapParameterfvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11775,7 +11775,7 @@ void EXEC_glMapParameterfvNV(byte *commandbuf)
 
 
 //1110
-void EXEC_glGetMapControlPointsNV(byte *commandbuf)
+static void EXEC_glGetMapControlPointsNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -11789,7 +11789,7 @@ void EXEC_glGetMapControlPointsNV(byte *commandbuf)
 
 
 //1111
-void EXEC_glGetMapParameterivNV(byte *commandbuf)
+static void EXEC_glGetMapParameterivNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11799,7 +11799,7 @@ void EXEC_glGetMapParameterivNV(byte *commandbuf)
 
 
 //1112
-void EXEC_glGetMapParameterfvNV(byte *commandbuf)
+static void EXEC_glGetMapParameterfvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11809,7 +11809,7 @@ void EXEC_glGetMapParameterfvNV(byte *commandbuf)
 
 
 //1113
-void EXEC_glGetMapAttribParameterivNV(byte *commandbuf)
+static void EXEC_glGetMapAttribParameterivNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -11820,7 +11820,7 @@ void EXEC_glGetMapAttribParameterivNV(byte *commandbuf)
 
 
 //1114
-void EXEC_glGetMapAttribParameterfvNV(byte *commandbuf)
+static void EXEC_glGetMapAttribParameterfvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -11831,7 +11831,7 @@ void EXEC_glGetMapAttribParameterfvNV(byte *commandbuf)
 
 
 //1115
-void EXEC_glEvalMapsNV(byte *commandbuf)
+static void EXEC_glEvalMapsNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -11841,7 +11841,7 @@ void EXEC_glEvalMapsNV(byte *commandbuf)
 
 
 //1116
-void EXEC_glCombinerStageParameterfvNV(byte *commandbuf)
+static void EXEC_glCombinerStageParameterfvNV(byte *commandbuf)
 {
 	GLenum *stage = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11851,7 +11851,7 @@ void EXEC_glCombinerStageParameterfvNV(byte *commandbuf)
 
 
 //1117
-void EXEC_glGetCombinerStageParameterfvNV(byte *commandbuf)
+static void EXEC_glGetCombinerStageParameterfvNV(byte *commandbuf)
 {
 	GLenum *stage = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11861,7 +11861,7 @@ void EXEC_glGetCombinerStageParameterfvNV(byte *commandbuf)
 
 
 //1118
-void EXEC_glAreProgramsResidentNV(byte *commandbuf)
+static void EXEC_glAreProgramsResidentNV(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -11870,7 +11870,7 @@ void EXEC_glAreProgramsResidentNV(byte *commandbuf)
 
 
 //1119
-void EXEC_glBindProgramNV(byte *commandbuf)
+static void EXEC_glBindProgramNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -11880,7 +11880,7 @@ void EXEC_glBindProgramNV(byte *commandbuf)
 
 
 //1120
-void EXEC_glDeleteProgramsNV(byte *commandbuf)
+static void EXEC_glDeleteProgramsNV(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -11889,7 +11889,7 @@ void EXEC_glDeleteProgramsNV(byte *commandbuf)
 
 
 //1121
-void EXEC_glExecuteProgramNV(byte *commandbuf)
+static void EXEC_glExecuteProgramNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -11899,7 +11899,7 @@ void EXEC_glExecuteProgramNV(byte *commandbuf)
 
 
 //1122
-void EXEC_glGenProgramsNV(byte *commandbuf)
+static void EXEC_glGenProgramsNV(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -11908,7 +11908,7 @@ void EXEC_glGenProgramsNV(byte *commandbuf)
 
 
 //1123
-void EXEC_glGetProgramParameterdvNV(byte *commandbuf)
+static void EXEC_glGetProgramParameterdvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -11919,7 +11919,7 @@ void EXEC_glGetProgramParameterdvNV(byte *commandbuf)
 
 
 //1124
-void EXEC_glGetProgramParameterfvNV(byte *commandbuf)
+static void EXEC_glGetProgramParameterfvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -11930,7 +11930,7 @@ void EXEC_glGetProgramParameterfvNV(byte *commandbuf)
 
 
 //1125
-void EXEC_glGetProgramivNV(byte *commandbuf)
+static void EXEC_glGetProgramivNV(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11940,7 +11940,7 @@ void EXEC_glGetProgramivNV(byte *commandbuf)
 
 
 //1126
-void EXEC_glGetProgramStringNV(byte *commandbuf)
+static void EXEC_glGetProgramStringNV(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11950,7 +11950,7 @@ void EXEC_glGetProgramStringNV(byte *commandbuf)
 
 
 //1127
-void EXEC_glGetTrackMatrixivNV(byte *commandbuf)
+static void EXEC_glGetTrackMatrixivNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *address = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -11961,7 +11961,7 @@ void EXEC_glGetTrackMatrixivNV(byte *commandbuf)
 
 
 //1128
-void EXEC_glGetVertexAttribdvNV(byte *commandbuf)
+static void EXEC_glGetVertexAttribdvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11971,7 +11971,7 @@ void EXEC_glGetVertexAttribdvNV(byte *commandbuf)
 
 
 //1129
-void EXEC_glGetVertexAttribfvNV(byte *commandbuf)
+static void EXEC_glGetVertexAttribfvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11981,7 +11981,7 @@ void EXEC_glGetVertexAttribfvNV(byte *commandbuf)
 
 
 //1130
-void EXEC_glGetVertexAttribivNV(byte *commandbuf)
+static void EXEC_glGetVertexAttribivNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -11991,7 +11991,7 @@ void EXEC_glGetVertexAttribivNV(byte *commandbuf)
 
 
 //1131
-void EXEC_glGetVertexAttribPointervNV(byte *commandbuf)
+static void EXEC_glGetVertexAttribPointervNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -12001,7 +12001,7 @@ void EXEC_glGetVertexAttribPointervNV(byte *commandbuf)
 
 
 //1132
-void EXEC_glIsProgramNV(byte *commandbuf)
+static void EXEC_glIsProgramNV(byte *commandbuf)
 {
 	GLuint *program = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -12010,7 +12010,7 @@ void EXEC_glIsProgramNV(byte *commandbuf)
 
 
 //1133
-void EXEC_glLoadProgramNV(byte *commandbuf)
+static void EXEC_glLoadProgramNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -12021,7 +12021,7 @@ void EXEC_glLoadProgramNV(byte *commandbuf)
 
 
 //1134
-void EXEC_glProgramParameter4dNV(byte *commandbuf)
+static void EXEC_glProgramParameter4dNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12035,7 +12035,7 @@ void EXEC_glProgramParameter4dNV(byte *commandbuf)
 
 
 //1135
-void EXEC_glProgramParameter4dvNV(byte *commandbuf)
+static void EXEC_glProgramParameter4dvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12045,7 +12045,7 @@ void EXEC_glProgramParameter4dvNV(byte *commandbuf)
 
 
 //1136
-void EXEC_glProgramParameter4fNV(byte *commandbuf)
+static void EXEC_glProgramParameter4fNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12059,7 +12059,7 @@ void EXEC_glProgramParameter4fNV(byte *commandbuf)
 
 
 //1137
-void EXEC_glProgramParameter4fvNV(byte *commandbuf)
+static void EXEC_glProgramParameter4fvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12069,7 +12069,7 @@ void EXEC_glProgramParameter4fvNV(byte *commandbuf)
 
 
 //1138
-void EXEC_glProgramParameters4dvNV(byte *commandbuf)
+static void EXEC_glProgramParameters4dvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12080,7 +12080,7 @@ void EXEC_glProgramParameters4dvNV(byte *commandbuf)
 
 
 //1139
-void EXEC_glProgramParameters4fvNV(byte *commandbuf)
+static void EXEC_glProgramParameters4fvNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12091,7 +12091,7 @@ void EXEC_glProgramParameters4fvNV(byte *commandbuf)
 
 
 //1140
-void EXEC_glRequestResidentProgramsNV(byte *commandbuf)
+static void EXEC_glRequestResidentProgramsNV(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -12100,7 +12100,7 @@ void EXEC_glRequestResidentProgramsNV(byte *commandbuf)
 
 
 //1141
-void EXEC_glTrackMatrixNV(byte *commandbuf)
+static void EXEC_glTrackMatrixNV(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *address = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -12112,7 +12112,7 @@ void EXEC_glTrackMatrixNV(byte *commandbuf)
 
 
 //1142
-void EXEC_glVertexAttribPointerNV(byte *commandbuf)
+static void EXEC_glVertexAttribPointerNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
@@ -12124,7 +12124,7 @@ void EXEC_glVertexAttribPointerNV(byte *commandbuf)
 
 
 //1143
-void EXEC_glVertexAttrib1sNV(byte *commandbuf)
+static void EXEC_glVertexAttrib1sNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -12134,7 +12134,7 @@ void EXEC_glVertexAttrib1sNV(byte *commandbuf)
 
 
 //1144
-void EXEC_glVertexAttrib1svNV(byte *commandbuf)
+static void EXEC_glVertexAttrib1svNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12143,7 +12143,7 @@ void EXEC_glVertexAttrib1svNV(byte *commandbuf)
 
 
 //1145
-void EXEC_glVertexAttrib2sNV(byte *commandbuf)
+static void EXEC_glVertexAttrib2sNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -12154,7 +12154,7 @@ void EXEC_glVertexAttrib2sNV(byte *commandbuf)
 
 
 //1146
-void EXEC_glVertexAttrib2svNV(byte *commandbuf)
+static void EXEC_glVertexAttrib2svNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12163,7 +12163,7 @@ void EXEC_glVertexAttrib2svNV(byte *commandbuf)
 
 
 //1147
-void EXEC_glVertexAttrib3sNV(byte *commandbuf)
+static void EXEC_glVertexAttrib3sNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -12175,7 +12175,7 @@ void EXEC_glVertexAttrib3sNV(byte *commandbuf)
 
 
 //1148
-void EXEC_glVertexAttrib3svNV(byte *commandbuf)
+static void EXEC_glVertexAttrib3svNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12184,7 +12184,7 @@ void EXEC_glVertexAttrib3svNV(byte *commandbuf)
 
 
 //1149
-void EXEC_glVertexAttrib4sNV(byte *commandbuf)
+static void EXEC_glVertexAttrib4sNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLshort *x = (GLshort*)commandbuf;   commandbuf += sizeof(GLshort);
@@ -12197,7 +12197,7 @@ void EXEC_glVertexAttrib4sNV(byte *commandbuf)
 
 
 //1150
-void EXEC_glVertexAttrib4svNV(byte *commandbuf)
+static void EXEC_glVertexAttrib4svNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12206,7 +12206,7 @@ void EXEC_glVertexAttrib4svNV(byte *commandbuf)
 
 
 //1151
-void EXEC_glVertexAttrib1fNV(byte *commandbuf)
+static void EXEC_glVertexAttrib1fNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -12216,7 +12216,7 @@ void EXEC_glVertexAttrib1fNV(byte *commandbuf)
 
 
 //1152
-void EXEC_glVertexAttrib1fvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib1fvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12225,7 +12225,7 @@ void EXEC_glVertexAttrib1fvNV(byte *commandbuf)
 
 
 //1153
-void EXEC_glVertexAttrib2fNV(byte *commandbuf)
+static void EXEC_glVertexAttrib2fNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -12236,7 +12236,7 @@ void EXEC_glVertexAttrib2fNV(byte *commandbuf)
 
 
 //1154
-void EXEC_glVertexAttrib2fvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib2fvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12245,7 +12245,7 @@ void EXEC_glVertexAttrib2fvNV(byte *commandbuf)
 
 
 //1155
-void EXEC_glVertexAttrib3fNV(byte *commandbuf)
+static void EXEC_glVertexAttrib3fNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -12257,7 +12257,7 @@ void EXEC_glVertexAttrib3fNV(byte *commandbuf)
 
 
 //1156
-void EXEC_glVertexAttrib3fvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib3fvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12266,7 +12266,7 @@ void EXEC_glVertexAttrib3fvNV(byte *commandbuf)
 
 
 //1157
-void EXEC_glVertexAttrib4fNV(byte *commandbuf)
+static void EXEC_glVertexAttrib4fNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -12279,7 +12279,7 @@ void EXEC_glVertexAttrib4fNV(byte *commandbuf)
 
 
 //1158
-void EXEC_glVertexAttrib4fvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib4fvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12288,7 +12288,7 @@ void EXEC_glVertexAttrib4fvNV(byte *commandbuf)
 
 
 //1159
-void EXEC_glVertexAttrib1dNV(byte *commandbuf)
+static void EXEC_glVertexAttrib1dNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -12298,7 +12298,7 @@ void EXEC_glVertexAttrib1dNV(byte *commandbuf)
 
 
 //1160
-void EXEC_glVertexAttrib1dvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib1dvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12307,7 +12307,7 @@ void EXEC_glVertexAttrib1dvNV(byte *commandbuf)
 
 
 //1161
-void EXEC_glVertexAttrib2dNV(byte *commandbuf)
+static void EXEC_glVertexAttrib2dNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -12318,7 +12318,7 @@ void EXEC_glVertexAttrib2dNV(byte *commandbuf)
 
 
 //1162
-void EXEC_glVertexAttrib2dvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib2dvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12327,7 +12327,7 @@ void EXEC_glVertexAttrib2dvNV(byte *commandbuf)
 
 
 //1163
-void EXEC_glVertexAttrib3dNV(byte *commandbuf)
+static void EXEC_glVertexAttrib3dNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -12339,7 +12339,7 @@ void EXEC_glVertexAttrib3dNV(byte *commandbuf)
 
 
 //1164
-void EXEC_glVertexAttrib3dvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib3dvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12348,7 +12348,7 @@ void EXEC_glVertexAttrib3dvNV(byte *commandbuf)
 
 
 //1165
-void EXEC_glVertexAttrib4dNV(byte *commandbuf)
+static void EXEC_glVertexAttrib4dNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLdouble *x = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
@@ -12361,7 +12361,7 @@ void EXEC_glVertexAttrib4dNV(byte *commandbuf)
 
 
 //1166
-void EXEC_glVertexAttrib4dvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib4dvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12370,7 +12370,7 @@ void EXEC_glVertexAttrib4dvNV(byte *commandbuf)
 
 
 //1167
-void EXEC_glVertexAttrib4ubNV(byte *commandbuf)
+static void EXEC_glVertexAttrib4ubNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLubyte *x = (GLubyte*)commandbuf;   commandbuf += sizeof(GLubyte);
@@ -12383,7 +12383,7 @@ void EXEC_glVertexAttrib4ubNV(byte *commandbuf)
 
 
 //1168
-void EXEC_glVertexAttrib4ubvNV(byte *commandbuf)
+static void EXEC_glVertexAttrib4ubvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12392,7 +12392,7 @@ void EXEC_glVertexAttrib4ubvNV(byte *commandbuf)
 
 
 //1169
-void EXEC_glVertexAttribs1svNV(byte *commandbuf)
+static void EXEC_glVertexAttribs1svNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12402,7 +12402,7 @@ void EXEC_glVertexAttribs1svNV(byte *commandbuf)
 
 
 //1170
-void EXEC_glVertexAttribs2svNV(byte *commandbuf)
+static void EXEC_glVertexAttribs2svNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12412,7 +12412,7 @@ void EXEC_glVertexAttribs2svNV(byte *commandbuf)
 
 
 //1171
-void EXEC_glVertexAttribs3svNV(byte *commandbuf)
+static void EXEC_glVertexAttribs3svNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12422,7 +12422,7 @@ void EXEC_glVertexAttribs3svNV(byte *commandbuf)
 
 
 //1172
-void EXEC_glVertexAttribs4svNV(byte *commandbuf)
+static void EXEC_glVertexAttribs4svNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12432,7 +12432,7 @@ void EXEC_glVertexAttribs4svNV(byte *commandbuf)
 
 
 //1173
-void EXEC_glVertexAttribs1fvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs1fvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12442,7 +12442,7 @@ void EXEC_glVertexAttribs1fvNV(byte *commandbuf)
 
 
 //1174
-void EXEC_glVertexAttribs2fvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs2fvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12452,7 +12452,7 @@ void EXEC_glVertexAttribs2fvNV(byte *commandbuf)
 
 
 //1175
-void EXEC_glVertexAttribs3fvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs3fvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12462,7 +12462,7 @@ void EXEC_glVertexAttribs3fvNV(byte *commandbuf)
 
 
 //1176
-void EXEC_glVertexAttribs4fvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs4fvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12472,7 +12472,7 @@ void EXEC_glVertexAttribs4fvNV(byte *commandbuf)
 
 
 //1177
-void EXEC_glVertexAttribs1dvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs1dvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12482,7 +12482,7 @@ void EXEC_glVertexAttribs1dvNV(byte *commandbuf)
 
 
 //1178
-void EXEC_glVertexAttribs2dvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs2dvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12492,7 +12492,7 @@ void EXEC_glVertexAttribs2dvNV(byte *commandbuf)
 
 
 //1179
-void EXEC_glVertexAttribs3dvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs3dvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12502,7 +12502,7 @@ void EXEC_glVertexAttribs3dvNV(byte *commandbuf)
 
 
 //1180
-void EXEC_glVertexAttribs4dvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs4dvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12512,7 +12512,7 @@ void EXEC_glVertexAttribs4dvNV(byte *commandbuf)
 
 
 //1181
-void EXEC_glVertexAttribs4ubvNV(byte *commandbuf)
+static void EXEC_glVertexAttribs4ubvNV(byte *commandbuf)
 {
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
@@ -12522,7 +12522,7 @@ void EXEC_glVertexAttribs4ubvNV(byte *commandbuf)
 
 
 //1182
-void EXEC_glGenFragmentShadersATI(byte *commandbuf)
+static void EXEC_glGenFragmentShadersATI(byte *commandbuf)
 {
 	GLuint *range = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
 
@@ -12531,7 +12531,7 @@ void EXEC_glGenFragmentShadersATI(byte *commandbuf)
 
 
 //1183
-void EXEC_glBindFragmentShaderATI(byte *commandbuf)
+static void EXEC_glBindFragmentShaderATI(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -12540,7 +12540,7 @@ void EXEC_glBindFragmentShaderATI(byte *commandbuf)
 
 
 //1184
-void EXEC_glDeleteFragmentShaderATI(byte *commandbuf)
+static void EXEC_glDeleteFragmentShaderATI(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 
@@ -12549,7 +12549,7 @@ void EXEC_glDeleteFragmentShaderATI(byte *commandbuf)
 
 
 //1185
-void EXEC_glBeginFragmentShaderATI(byte *commandbuf)
+static void EXEC_glBeginFragmentShaderATI(byte *commandbuf)
 {
 
 	glBeginFragmentShaderATI();
@@ -12557,7 +12557,7 @@ void EXEC_glBeginFragmentShaderATI(byte *commandbuf)
 
 
 //1186
-void EXEC_glEndFragmentShaderATI(byte *commandbuf)
+static void EXEC_glEndFragmentShaderATI(byte *commandbuf)
 {
 
 	glEndFragmentShaderATI();
@@ -12565,7 +12565,7 @@ void EXEC_glEndFragmentShaderATI(byte *commandbuf)
 
 
 //1187
-void EXEC_glPassTexCoordATI(byte *commandbuf)
+static void EXEC_glPassTexCoordATI(byte *commandbuf)
 {
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *coord = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12576,7 +12576,7 @@ void EXEC_glPassTexCoordATI(byte *commandbuf)
 
 
 //1188
-void EXEC_glSampleMapATI(byte *commandbuf)
+static void EXEC_glSampleMapATI(byte *commandbuf)
 {
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 	GLuint *interp = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
@@ -12587,7 +12587,7 @@ void EXEC_glSampleMapATI(byte *commandbuf)
 
 
 //1189
-void EXEC_glColorFragmentOp1ATI(byte *commandbuf)
+static void EXEC_glColorFragmentOp1ATI(byte *commandbuf)
 {
 	GLenum *op = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -12602,7 +12602,7 @@ void EXEC_glColorFragmentOp1ATI(byte *commandbuf)
 
 
 //1190
-void EXEC_glColorFragmentOp2ATI(byte *commandbuf)
+static void EXEC_glColorFragmentOp2ATI(byte *commandbuf)
 {
 	GLenum *op = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -12620,7 +12620,7 @@ void EXEC_glColorFragmentOp2ATI(byte *commandbuf)
 
 
 //1191
-void EXEC_glColorFragmentOp3ATI(byte *commandbuf)
+static void EXEC_glColorFragmentOp3ATI(byte *commandbuf)
 {
 	GLenum *op = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -12641,7 +12641,7 @@ void EXEC_glColorFragmentOp3ATI(byte *commandbuf)
 
 
 //1192
-void EXEC_glAlphaFragmentOp1ATI(byte *commandbuf)
+static void EXEC_glAlphaFragmentOp1ATI(byte *commandbuf)
 {
 	GLenum *op = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -12655,7 +12655,7 @@ void EXEC_glAlphaFragmentOp1ATI(byte *commandbuf)
 
 
 //1193
-void EXEC_glAlphaFragmentOp2ATI(byte *commandbuf)
+static void EXEC_glAlphaFragmentOp2ATI(byte *commandbuf)
 {
 	GLenum *op = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -12672,7 +12672,7 @@ void EXEC_glAlphaFragmentOp2ATI(byte *commandbuf)
 
 
 //1194
-void EXEC_glAlphaFragmentOp3ATI(byte *commandbuf)
+static void EXEC_glAlphaFragmentOp3ATI(byte *commandbuf)
 {
 	GLenum *op = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
@@ -12692,7 +12692,7 @@ void EXEC_glAlphaFragmentOp3ATI(byte *commandbuf)
 
 
 //1195
-void EXEC_glSetFragmentShaderConstantATI(byte *commandbuf)
+static void EXEC_glSetFragmentShaderConstantATI(byte *commandbuf)
 {
 	GLuint *dst = (GLuint*)commandbuf;   commandbuf += sizeof(GLuint);
 
@@ -12701,7 +12701,7 @@ void EXEC_glSetFragmentShaderConstantATI(byte *commandbuf)
 
 
 //1196
-void EXEC_glDrawMeshArraysSUN(byte *commandbuf)
+static void EXEC_glDrawMeshArraysSUN(byte *commandbuf)
 {
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *first = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -12713,7 +12713,7 @@ void EXEC_glDrawMeshArraysSUN(byte *commandbuf)
 
 
 //1197
-void EXEC_glPointParameteriNV(byte *commandbuf)
+static void EXEC_glPointParameteriNV(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLint *param = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -12723,7 +12723,7 @@ void EXEC_glPointParameteriNV(byte *commandbuf)
 
 
 //1198
-void EXEC_glPointParameterivNV(byte *commandbuf)
+static void EXEC_glPointParameterivNV(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -12732,7 +12732,7 @@ void EXEC_glPointParameterivNV(byte *commandbuf)
 
 
 //1199
-void EXEC_glActiveStencilFaceEXT(byte *commandbuf)
+static void EXEC_glActiveStencilFaceEXT(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -12741,7 +12741,7 @@ void EXEC_glActiveStencilFaceEXT(byte *commandbuf)
 
 
 //1200
-void EXEC_glDrawBuffersATI(byte *commandbuf)
+static void EXEC_glDrawBuffersATI(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 
@@ -12750,7 +12750,7 @@ void EXEC_glDrawBuffersATI(byte *commandbuf)
 
 
 //1201
-void EXEC_glProgramNamedParameter4fNV(byte *commandbuf)
+static void EXEC_glProgramNamedParameter4fNV(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *len = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -12764,7 +12764,7 @@ void EXEC_glProgramNamedParameter4fNV(byte *commandbuf)
 
 
 //1202
-void EXEC_glProgramNamedParameter4dNV(byte *commandbuf)
+static void EXEC_glProgramNamedParameter4dNV(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *len = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -12778,7 +12778,7 @@ void EXEC_glProgramNamedParameter4dNV(byte *commandbuf)
 
 
 //1203
-void EXEC_glProgramNamedParameter4fvNV(byte *commandbuf)
+static void EXEC_glProgramNamedParameter4fvNV(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *len = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -12788,7 +12788,7 @@ void EXEC_glProgramNamedParameter4fvNV(byte *commandbuf)
 
 
 //1204
-void EXEC_glProgramNamedParameter4dvNV(byte *commandbuf)
+static void EXEC_glProgramNamedParameter4dvNV(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *len = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -12798,7 +12798,7 @@ void EXEC_glProgramNamedParameter4dvNV(byte *commandbuf)
 
 
 //1205
-void EXEC_glGetProgramNamedParameterfvNV(byte *commandbuf)
+static void EXEC_glGetProgramNamedParameterfvNV(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *len = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -12808,7 +12808,7 @@ void EXEC_glGetProgramNamedParameterfvNV(byte *commandbuf)
 
 
 //1206
-void EXEC_glGetProgramNamedParameterdvNV(byte *commandbuf)
+static void EXEC_glGetProgramNamedParameterdvNV(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLsizei *len = (GLsizei*)commandbuf;     commandbuf += sizeof(GLsizei);
@@ -12818,7 +12818,7 @@ void EXEC_glGetProgramNamedParameterdvNV(byte *commandbuf)
 
 
 //1207
-void EXEC_glDepthBoundsEXT(byte *commandbuf)
+static void EXEC_glDepthBoundsEXT(byte *commandbuf)
 {
 	GLclampd *zmin = (GLclampd*)commandbuf;  commandbuf += sizeof(GLclampd);
 	GLclampd *zmax = (GLclampd*)commandbuf;  commandbuf += sizeof(GLclampd);
@@ -12828,7 +12828,7 @@ void EXEC_glDepthBoundsEXT(byte *commandbuf)
 
 
 //1208
-void EXEC_glBlendEquationSeparateEXT(byte *commandbuf)
+static void EXEC_glBlendEquationSeparateEXT(byte *commandbuf)
 {
 	GLenum *modeRGB = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLenum *modeA = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -12838,7 +12838,7 @@ void EXEC_glBlendEquationSeparateEXT(byte *commandbuf)
 
 
 //1209
-void EXEC_glBlitFramebufferEXT(byte *commandbuf)
+static void EXEC_glBlitFramebufferEXT(byte *commandbuf)
 {
 	GLint *srcX0 = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *srcY0 = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
@@ -12856,7 +12856,7 @@ void EXEC_glBlitFramebufferEXT(byte *commandbuf)
 
 
 //1210
-void EXEC_glBlendEquationSeparateATI(byte *commandbuf)
+static void EXEC_glBlendEquationSeparateATI(byte *commandbuf)
 {
 	GLenum *modeRGB = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLenum *modeA = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -12866,7 +12866,7 @@ void EXEC_glBlendEquationSeparateATI(byte *commandbuf)
 
 
 //1211
-void EXEC_glStencilOpSeparateATI(byte *commandbuf)
+static void EXEC_glStencilOpSeparateATI(byte *commandbuf)
 {
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *sfail = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -12878,7 +12878,7 @@ void EXEC_glStencilOpSeparateATI(byte *commandbuf)
 
 
 //1212
-void EXEC_glStencilFuncSeparateATI(byte *commandbuf)
+static void EXEC_glStencilFuncSeparateATI(byte *commandbuf)
 {
 	GLenum *frontfunc = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *backfunc = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
@@ -12890,7 +12890,7 @@ void EXEC_glStencilFuncSeparateATI(byte *commandbuf)
 
 
 //1213
-void EXEC_glProgramEnvParameters4fvEXT(byte *commandbuf)
+static void EXEC_glProgramEnvParameters4fvEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12903,7 +12903,7 @@ void EXEC_glProgramEnvParameters4fvEXT(byte *commandbuf)
 
 
 //1214
-void EXEC_glProgramLocalParameters4fvEXT(byte *commandbuf)
+static void EXEC_glProgramLocalParameters4fvEXT(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLuint *index = (GLuint*)commandbuf;     commandbuf += sizeof(GLuint);
@@ -12916,7 +12916,7 @@ void EXEC_glProgramLocalParameters4fvEXT(byte *commandbuf)
 
 
 //1215
-void EXEC_glGetQueryObjecti64vEXT(byte *commandbuf)
+static void EXEC_glGetQueryObjecti64vEXT(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -12928,7 +12928,7 @@ void EXEC_glGetQueryObjecti64vEXT(byte *commandbuf)
 
 
 //1216
-void EXEC_glGetQueryObjectui64vEXT(byte *commandbuf)
+static void EXEC_glGetQueryObjectui64vEXT(byte *commandbuf)
 {
 	GLuint *id = (GLuint*)commandbuf;    commandbuf += sizeof(GLuint);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
@@ -12940,7 +12940,7 @@ void EXEC_glGetQueryObjectui64vEXT(byte *commandbuf)
 
 
 //1217
-void EXEC_glBlendFuncSeparateINGR(byte *commandbuf)
+static void EXEC_glBlendFuncSeparateINGR(byte *commandbuf)
 {
 	GLenum *sfactorRGB = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *dfactorRGB = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -12952,7 +12952,7 @@ void EXEC_glBlendFuncSeparateINGR(byte *commandbuf)
 
 
 //1218
-void EXEC_glCreateDebugObjectMESA(byte *commandbuf)
+static void EXEC_glCreateDebugObjectMESA(byte *commandbuf)
 {
 
 	//pushRet(glCreateDebugObjectMESA());
@@ -12960,7 +12960,7 @@ void EXEC_glCreateDebugObjectMESA(byte *commandbuf)
 
 
 //1219
-void EXEC_glClearDebugLogMESA(byte *commandbuf)
+static void EXEC_glClearDebugLogMESA(byte *commandbuf)
 {
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLenum *logType = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -12971,7 +12971,7 @@ void EXEC_glClearDebugLogMESA(byte *commandbuf)
 
 
 //1220
-void EXEC_glGetDebugLogMESA(byte *commandbuf)
+static void EXEC_glGetDebugLogMESA(byte *commandbuf)
 {
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLenum *logType = (GLenum*)commandbuf;      commandbuf += sizeof(GLenum);
@@ -12984,7 +12984,7 @@ void EXEC_glGetDebugLogMESA(byte *commandbuf)
 
 
 //1221
-void EXEC_glGetDebugLogLengthMESA(byte *commandbuf)
+static void EXEC_glGetDebugLogLengthMESA(byte *commandbuf)
 {
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLenum *logType = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
@@ -12995,7 +12995,7 @@ void EXEC_glGetDebugLogLengthMESA(byte *commandbuf)
 
 
 //1222
-void EXEC_glPointParameterfSGIS(byte *commandbuf)
+static void EXEC_glPointParameterfSGIS(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLfloat *param = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -13005,7 +13005,7 @@ void EXEC_glPointParameterfSGIS(byte *commandbuf)
 
 
 //1223
-void EXEC_glPointParameterfvSGIS(byte *commandbuf)
+static void EXEC_glPointParameterfvSGIS(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -13014,7 +13014,7 @@ void EXEC_glPointParameterfvSGIS(byte *commandbuf)
 
 
 //1224
-void EXEC_glIglooInterfaceSGIX(byte *commandbuf)
+static void EXEC_glIglooInterfaceSGIX(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -13023,7 +13023,7 @@ void EXEC_glIglooInterfaceSGIX(byte *commandbuf)
 
 
 //1225
-void EXEC_glDeformationMap3dSGIX(byte *commandbuf)
+static void EXEC_glDeformationMap3dSGIX(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLdouble *u1 = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -13044,7 +13044,7 @@ void EXEC_glDeformationMap3dSGIX(byte *commandbuf)
 
 
 //1226
-void EXEC_glDeformationMap3fSGIX(byte *commandbuf)
+static void EXEC_glDeformationMap3fSGIX(byte *commandbuf)
 {
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLfloat *u1 = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -13065,7 +13065,7 @@ void EXEC_glDeformationMap3fSGIX(byte *commandbuf)
 
 
 //1227
-void EXEC_glDeformSGIX(byte *commandbuf)
+static void EXEC_glDeformSGIX(byte *commandbuf)
 {
 	GLenum *mask = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -13074,7 +13074,7 @@ void EXEC_glDeformSGIX(byte *commandbuf)
 
 
 //1228
-void EXEC_glLoadIdentityDeformationMapSGIX(byte *commandbuf)
+static void EXEC_glLoadIdentityDeformationMapSGIX(byte *commandbuf)
 {
 	GLenum *mask = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
@@ -13087,7 +13087,7 @@ void EXEC_glLoadIdentityDeformationMapSGIX(byte *commandbuf)
 ********************************************************/
 
 //1501
-void EXEC_gluBeginCurve(byte *commandbuf)
+static void EXEC_gluBeginCurve(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBeginCurve!\n");
 	// (GLUnurbs* nurb)
@@ -13095,7 +13095,7 @@ void EXEC_gluBeginCurve(byte *commandbuf)
 
 
 //1502
-void EXEC_gluBeginPolygon(byte *commandbuf)
+static void EXEC_gluBeginPolygon(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBeginPolygon!\n");
 	//(GLUtesselator* tess)
@@ -13103,7 +13103,7 @@ void EXEC_gluBeginPolygon(byte *commandbuf)
 
 
 //1503
-void EXEC_gluBeginSurface(byte *commandbuf)
+static void EXEC_gluBeginSurface(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBeginSurface!\n");
 	// (GLUnurbs* nurb)
@@ -13111,7 +13111,7 @@ void EXEC_gluBeginSurface(byte *commandbuf)
 
 
 //1504
-void EXEC_gluBeginTrim(byte *commandbuf)
+static void EXEC_gluBeginTrim(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBeginTrim!\n");
 	// (GLUnurbs* nurb)
@@ -13119,7 +13119,7 @@ void EXEC_gluBeginTrim(byte *commandbuf)
 
 
 //1505
-void EXEC_gluBuild1DMipmapLevels(byte *commandbuf)
+static void EXEC_gluBuild1DMipmapLevels(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBuild1DMipmapLevels !\n");
 	// (GLenum target, GLint internalFormat, GLsizei width, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data)
@@ -13128,7 +13128,7 @@ void EXEC_gluBuild1DMipmapLevels(byte *commandbuf)
 
 
 //1506
-void EXEC_gluBuild1DMipmaps(byte *commandbuf)
+static void EXEC_gluBuild1DMipmaps(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBuild1DMipmaps!\n");
 	//(GLenum target, GLint internalFormat, GLsizei width, GLenum format, GLenum type, const void *data)
@@ -13137,7 +13137,7 @@ void EXEC_gluBuild1DMipmaps(byte *commandbuf)
 
 
 //1507
-void EXEC_gluBuild2DMipmapLevels(byte *commandbuf)
+static void EXEC_gluBuild2DMipmapLevels(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBuild2DMipmapLevels!\n");
 	//(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data)
@@ -13146,7 +13146,7 @@ void EXEC_gluBuild2DMipmapLevels(byte *commandbuf)
 
 
 //1508
-void EXEC_gluBuild2DMipmaps(byte *commandbuf)
+static void EXEC_gluBuild2DMipmaps(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBuild2DMipmaps!\n");
 	//(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
@@ -13155,7 +13155,7 @@ void EXEC_gluBuild2DMipmaps(byte *commandbuf)
 
 
 //1509
-void EXEC_gluBuild3DMipmapLevels(byte *commandbuf)
+static void EXEC_gluBuild3DMipmapLevels(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluBuild3DMipmapLevels!\n");
 	//(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void *data)
@@ -13164,7 +13164,7 @@ void EXEC_gluBuild3DMipmapLevels(byte *commandbuf)
 
 
 //1510
-void EXEC_gluBuild3DMipmaps(byte *commandbuf)
+static void EXEC_gluBuild3DMipmaps(byte *commandbuf)
 {
 	//(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *data)
 	LOG("Called unimplemted stub gluBuild3DMipmaps!\n");
@@ -13173,7 +13173,7 @@ void EXEC_gluBuild3DMipmaps(byte *commandbuf)
 
 
 //1511
-void EXEC_gluCheckExtension(byte *commandbuf)
+static void EXEC_gluCheckExtension(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluCheckExtension!\n");
 	//(const GLubyte *extName, const GLubyte *extString)
@@ -13182,7 +13182,7 @@ void EXEC_gluCheckExtension(byte *commandbuf)
 
 
 //1512
-void EXEC_gluCylinder(byte *commandbuf)
+static void EXEC_gluCylinder(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluCylinder!\n");
 	//(GLUquadric* quad, GLdouble base, GLdouble top, GLdouble height, GLint slices, GLint stacks)
@@ -13190,7 +13190,7 @@ void EXEC_gluCylinder(byte *commandbuf)
 
 
 //1513
-void EXEC_gluDeleteNurbsRenderer(byte *commandbuf)
+static void EXEC_gluDeleteNurbsRenderer(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluDeleteNurbsRenderer!\n");
 	//(GLUnurbs* nurb)
@@ -13198,7 +13198,7 @@ void EXEC_gluDeleteNurbsRenderer(byte *commandbuf)
 
 
 //1514
-void EXEC_gluDeleteQuadric(byte *commandbuf)
+static void EXEC_gluDeleteQuadric(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluDeleteQuadric!\n");
 	//(GLUquadric* quad)
@@ -13206,7 +13206,7 @@ void EXEC_gluDeleteQuadric(byte *commandbuf)
 
 
 //1515
-void EXEC_gluDeleteTess(byte *commandbuf)
+static void EXEC_gluDeleteTess(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluDeleteTess!\n");
 	//(GLUtesselator* tess)
@@ -13214,7 +13214,7 @@ void EXEC_gluDeleteTess(byte *commandbuf)
 
 
 //1516
-void EXEC_gluDisk(byte *commandbuf)
+static void EXEC_gluDisk(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluDisk!\n");
 	//(GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops)
@@ -13222,7 +13222,7 @@ void EXEC_gluDisk(byte *commandbuf)
 
 
 //1517
-void EXEC_gluEndCurve(byte *commandbuf)
+static void EXEC_gluEndCurve(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluEndCurve!\n");
 	//(GLUnurbs* nurb)
@@ -13230,7 +13230,7 @@ void EXEC_gluEndCurve(byte *commandbuf)
 
 
 //1518
-void EXEC_gluEndPolygon(byte *commandbuf)
+static void EXEC_gluEndPolygon(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluEndPolygon!\n");
 	//(GLUtesselator* tess)
@@ -13238,7 +13238,7 @@ void EXEC_gluEndPolygon(byte *commandbuf)
 
 
 //1519
-void EXEC_gluEndSurface(byte *commandbuf)
+static void EXEC_gluEndSurface(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluEndSurface!\n");
 	//(GLUnurbs* nurb)
@@ -13246,7 +13246,7 @@ void EXEC_gluEndSurface(byte *commandbuf)
 
 
 //1520
-void EXEC_gluEndTrim(byte *commandbuf)
+static void EXEC_gluEndTrim(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluEndTrim!\n");
 	//(GLUnurbs* nurb)
@@ -13254,7 +13254,7 @@ void EXEC_gluEndTrim(byte *commandbuf)
 
 
 //1521
-void EXEC_gluErrorString(byte *commandbuf)
+static void EXEC_gluErrorString(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluErrorString!\n");
 	//(GLenum error)
@@ -13263,7 +13263,7 @@ void EXEC_gluErrorString(byte *commandbuf)
 
 
 //1522
-void EXEC_gluGetNurbsProperty(byte *commandbuf)
+static void EXEC_gluGetNurbsProperty(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluGetNurbsProperty!\n");
 	//(GLUnurbs* nurb, GLenum property, GLfloat* data)
@@ -13271,7 +13271,7 @@ void EXEC_gluGetNurbsProperty(byte *commandbuf)
 
 
 //1523
-void EXEC_gluGetString(byte *commandbuf)
+static void EXEC_gluGetString(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluGetString!\n");
 	//(GLenum name)
@@ -13280,7 +13280,7 @@ void EXEC_gluGetString(byte *commandbuf)
 
 
 //1524
-void EXEC_gluGetTessProperty(byte *commandbuf)
+static void EXEC_gluGetTessProperty(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluGetTessProperty!\n");
 	//(GLUtesselator* tess, GLenum which, GLdouble* data)
@@ -13288,7 +13288,7 @@ void EXEC_gluGetTessProperty(byte *commandbuf)
 
 
 //1525
-void EXEC_gluLoadSamplingMatrices(byte *commandbuf)
+static void EXEC_gluLoadSamplingMatrices(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluLoadSamplingMatrices!\n");
 	//(GLUnurbs* nurb, const GLfloat *model, const GLfloat *perspective, const GLint *view)
@@ -13296,7 +13296,7 @@ void EXEC_gluLoadSamplingMatrices(byte *commandbuf)
 
 
 //1526
-void EXEC_gluLookAt(byte *commandbuf)
+static void EXEC_gluLookAt(byte *commandbuf)
 {
 	LOG("Called untested stub gluLookAt!\n");
    /* GLdouble *eyeX = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -13314,7 +13314,7 @@ void EXEC_gluLookAt(byte *commandbuf)
 
 
 //1527
-void EXEC_gluNewNurbsRenderer(byte *commandbuf)
+static void EXEC_gluNewNurbsRenderer(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNewNurbsRenderer!\n");
 	//returns GLUnurbs*
@@ -13322,7 +13322,7 @@ void EXEC_gluNewNurbsRenderer(byte *commandbuf)
 
 
 //1528
-void EXEC_gluNewQuadric(byte *commandbuf)
+static void EXEC_gluNewQuadric(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNewQuadric!\n");
 	//returns GLUquadric*
@@ -13330,7 +13330,7 @@ void EXEC_gluNewQuadric(byte *commandbuf)
 
 
 //1529
-void EXEC_gluNewTess(byte *commandbuf)
+static void EXEC_gluNewTess(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNewTess!\n");
 	//returns GLUtesselator*
@@ -13338,7 +13338,7 @@ void EXEC_gluNewTess(byte *commandbuf)
 
 
 //1530
-void EXEC_gluNextContour(byte *commandbuf)
+static void EXEC_gluNextContour(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNextContour!\n");
 	//(GLUtesselator* tess, GLenum type)
@@ -13346,7 +13346,7 @@ void EXEC_gluNextContour(byte *commandbuf)
 
 
 //1531
-void EXEC_gluNurbsCallback(byte *commandbuf)
+static void EXEC_gluNurbsCallback(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNurbsCallback!\n");
 	//(GLUnurbs* nurb, GLenum which, _GLUfuncptr CallBackFunc)
@@ -13354,7 +13354,7 @@ void EXEC_gluNurbsCallback(byte *commandbuf)
 
 
 //1532
-void EXEC_gluNurbsCallbackData(byte *commandbuf)
+static void EXEC_gluNurbsCallbackData(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNurbsCallbackData!\n");
 	//(GLUnurbs* nurb, GLvoid* userData)
@@ -13362,7 +13362,7 @@ void EXEC_gluNurbsCallbackData(byte *commandbuf)
 
 
 //1533
-void EXEC_gluNurbsCallbackDataEXT(byte *commandbuf)
+static void EXEC_gluNurbsCallbackDataEXT(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNurbsCallbackDataEXT!\n");
 	//(GLUnurbs* nurb, GLvoid* userData)
@@ -13370,7 +13370,7 @@ void EXEC_gluNurbsCallbackDataEXT(byte *commandbuf)
 
 
 //1534
-void EXEC_gluNurbsCurve(byte *commandbuf)
+static void EXEC_gluNurbsCurve(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNurbsCurve!\n");
 	//(GLUnurbs* nurb, GLint knotCount, GLfloat *knots, GLint stride, GLfloat *control, GLint order, GLenum type)
@@ -13378,7 +13378,7 @@ void EXEC_gluNurbsCurve(byte *commandbuf)
 
 
 //1535
-void EXEC_gluNurbsProperty(byte *commandbuf)
+static void EXEC_gluNurbsProperty(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNurbsProperty!\n");
 	//(GLUnurbs* nurb, GLenum property, GLfloat value)
@@ -13386,7 +13386,7 @@ void EXEC_gluNurbsProperty(byte *commandbuf)
 
 
 //1536
-void EXEC_gluNurbsSurface(byte *commandbuf)
+static void EXEC_gluNurbsSurface(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluNurbsSurface!\n");
 	//(GLUnurbs* nurb, GLint sKnotCount, GLfloat* sKnots, GLint tKnotCount, GLfloat* tKnots, GLint sStride, GLint tStride, GLfloat* control, GLint sOrder, GLint tOrder, GLenum type)
@@ -13394,7 +13394,7 @@ void EXEC_gluNurbsSurface(byte *commandbuf)
 
 
 //1537
-void EXEC_gluOrtho2D(byte *commandbuf)
+static void EXEC_gluOrtho2D(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluOrtho2D!\n");
 	//(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
@@ -13402,7 +13402,7 @@ void EXEC_gluOrtho2D(byte *commandbuf)
 
 
 //1538
-void EXEC_gluPartialDisk(byte *commandbuf)
+static void EXEC_gluPartialDisk(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluPartialDisk!\n");
 	//(GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops, GLdouble start, GLdouble sweep)
@@ -13410,7 +13410,7 @@ void EXEC_gluPartialDisk(byte *commandbuf)
 
 
 //1539
-void EXEC_gluPerspective(byte *commandbuf)
+static void EXEC_gluPerspective(byte *commandbuf)
 {
 	GLdouble *fovy = (GLdouble*)commandbuf;  commandbuf += sizeof(GLdouble);
 	GLdouble *aspect = (GLdouble*)commandbuf;    commandbuf += sizeof(GLdouble);
@@ -13421,7 +13421,7 @@ void EXEC_gluPerspective(byte *commandbuf)
 
 
 //1540
-void EXEC_gluPickMatrix(byte *commandbuf)
+static void EXEC_gluPickMatrix(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluPickMatrix!\n");
 	//(GLdouble x, GLdouble y, GLdouble delX, GLdouble delY, GLint *viewport)
@@ -13429,7 +13429,7 @@ void EXEC_gluPickMatrix(byte *commandbuf)
 
 
 //1541
-void EXEC_gluProject(byte *commandbuf)
+static void EXEC_gluProject(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluProject!\n");
 	//(GLdouble objX, GLdouble objY, GLdouble objZ, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble* winX, GLdouble* winY, GLdouble* winZ)
@@ -13438,7 +13438,7 @@ void EXEC_gluProject(byte *commandbuf)
 
 
 //1542
-void EXEC_gluPwlCurve(byte *commandbuf)
+static void EXEC_gluPwlCurve(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluPwlCurve!\n");
 	//(GLUnurbs* nurb, GLint count, GLfloat* data, GLint stride, GLenum type)
@@ -13446,7 +13446,7 @@ void EXEC_gluPwlCurve(byte *commandbuf)
 
 
 //1543
-void EXEC_gluQuadricCallback(byte *commandbuf)
+static void EXEC_gluQuadricCallback(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluQuadricCallback!\n");
 	//(GLUquadric* quad, GLenum which, _GLUfuncptr CallBackFunc)
@@ -13454,7 +13454,7 @@ void EXEC_gluQuadricCallback(byte *commandbuf)
 
 
 //1544
-void EXEC_gluQuadricDrawStyle(byte *commandbuf)
+static void EXEC_gluQuadricDrawStyle(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluQuadricDrawStyle!\n");
 	//(GLUquadric* quad, GLenum draw)
@@ -13462,7 +13462,7 @@ void EXEC_gluQuadricDrawStyle(byte *commandbuf)
 
 
 //1545
-void EXEC_gluQuadricNormals(byte *commandbuf)
+static void EXEC_gluQuadricNormals(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluQuadricNormals!\n");
 	//(GLUquadric* quad, GLenum normal)
@@ -13470,7 +13470,7 @@ void EXEC_gluQuadricNormals(byte *commandbuf)
 
 
 //1546
-void EXEC_gluQuadricOrientation(byte *commandbuf)
+static void EXEC_gluQuadricOrientation(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluQuadricOrientation!\n");
 	//(GLUquadric* quad, GLenum orientation)
@@ -13478,7 +13478,7 @@ void EXEC_gluQuadricOrientation(byte *commandbuf)
 
 
 //1547
-void EXEC_gluQuadricTexture(byte *commandbuf)
+static void EXEC_gluQuadricTexture(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluQuadricTexture!\n");
 	//(GLUquadric* quad, GLboolean texture)
@@ -13486,7 +13486,7 @@ void EXEC_gluQuadricTexture(byte *commandbuf)
 
 
 //1548
-void EXEC_glugluScaleImage(byte *commandbuf)
+static void EXEC_glugluScaleImage(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluScaleImage!\n");
 	//(GLenum format, GLsizei wIn, GLsizei hIn, GLenum typeIn, const void *dataIn, GLsizei wOut, GLsizei hOut, GLenum typeOut, GLvoid* dataOut)
@@ -13495,7 +13495,7 @@ void EXEC_glugluScaleImage(byte *commandbuf)
 
 
 //1549
-void EXEC_gluSphere(byte *commandbuf)
+static void EXEC_gluSphere(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluSphere!\n");
 	//(GLUquadric* quad, GLdouble radius, GLint slices, GLint stacks)
@@ -13503,7 +13503,7 @@ void EXEC_gluSphere(byte *commandbuf)
 
 
 //1550
-void EXEC_gluTessBeginContour(byte *commandbuf)
+static void EXEC_gluTessBeginContour(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluTessBeginContour!\n");
 	//(GLUtesselator* tess)
@@ -13511,7 +13511,7 @@ void EXEC_gluTessBeginContour(byte *commandbuf)
 
 
 //1551
-void EXEC_gluTessBeginPolygon(byte *commandbuf)
+static void EXEC_gluTessBeginPolygon(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluTessBeginPolygon!\n");
 	//(GLUtesselator* tess, GLvoid* data)
@@ -13519,7 +13519,7 @@ void EXEC_gluTessBeginPolygon(byte *commandbuf)
 
 
 //1552
-void EXEC_gluTessCallback(byte *commandbuf)
+static void EXEC_gluTessCallback(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluTessCallback!\n");
 	//(GLUtesselator* tess, GLenum which, _GLUfuncptr CallBackFunc)
@@ -13527,7 +13527,7 @@ void EXEC_gluTessCallback(byte *commandbuf)
 
 
 //1553
-void EXEC_gluTessEndContour(byte *commandbuf)
+static void EXEC_gluTessEndContour(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluTessEndContour!\n");
 	//(GLUtesselator* tess)
@@ -13535,7 +13535,7 @@ void EXEC_gluTessEndContour(byte *commandbuf)
 
 
 //1554
-void EXEC_gluTessEndPolygon(byte *commandbuf)
+static void EXEC_gluTessEndPolygon(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluTessEndPolygon!\n");
 	//(GLUtesselator* tess)
@@ -13543,7 +13543,7 @@ void EXEC_gluTessEndPolygon(byte *commandbuf)
 
 
 //1555
-void EXEC_gluTessNormal(byte *commandbuf)
+static void EXEC_gluTessNormal(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluTessNormal!\n");
 	//(GLUtesselator* tess, GLdouble valueX, GLdouble valueY, GLdouble valueZ)
@@ -13551,7 +13551,7 @@ void EXEC_gluTessNormal(byte *commandbuf)
 
 
 //1556
-void EXEC_gluTessProperty(byte *commandbuf)
+static void EXEC_gluTessProperty(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluTessProperty!\n");
 	//(GLUtesselator* tess, GLenum which, GLdouble data)
@@ -13559,7 +13559,7 @@ void EXEC_gluTessProperty(byte *commandbuf)
 
 
 //1557
-void EXEC_gluTessVertex(byte *commandbuf)
+static void EXEC_gluTessVertex(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluTessVertex!\n");
 	//(GLUtesselator* tess, GLdouble *location, GLvoid* data)
@@ -13567,7 +13567,7 @@ void EXEC_gluTessVertex(byte *commandbuf)
 
 
 //1558
-void EXEC_gluUnProject(byte *commandbuf)
+static void EXEC_gluUnProject(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluUnProject!\n");
 	//(GLdouble winX, GLdouble winY, GLdouble winZ, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble* objX, GLdouble* objY, GLdouble* objZ)
@@ -13576,7 +13576,7 @@ void EXEC_gluUnProject(byte *commandbuf)
 
 
 //1559
-void EXEC_gluUnProject4(byte *commandbuf)
+static void EXEC_gluUnProject4(byte *commandbuf)
 {
 	LOG("Called unimplemted stub gluUnProject4!\n");
 	//(GLdouble winX, GLdouble winY, GLdouble winZ, GLdouble clipW, const GLdouble *model, const GLdouble *proj, const GLint *view, GLdouble nearVal, GLdouble farVal, GLdouble* objX, GLdouble* objY, GLdouble* objZ, GLdouble* objW)
@@ -13589,7 +13589,7 @@ void EXEC_gluUnProject4(byte *commandbuf)
 ********************************************************/
 
 //1601
-void EXEC_glXChooseVisual(byte *commandbuf)
+static void EXEC_glXChooseVisual(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXChooseVisual!\n");
 	//( Display *dpy, int screen, int *attribList )
@@ -13598,7 +13598,7 @@ void EXEC_glXChooseVisual(byte *commandbuf)
 
 
 //1602
-void EXEC_glXCreateContext(byte *commandbuf)
+static void EXEC_glXCreateContext(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXCreateContext!\n");
 	//( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct )
@@ -13607,7 +13607,7 @@ void EXEC_glXCreateContext(byte *commandbuf)
 
 
 //1603
-void EXEC_glXDestroyContext(byte *commandbuf)
+static void EXEC_glXDestroyContext(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXDestroyContext!\n");
 	//( Display *dpy, GLXContext ctx )
@@ -13615,7 +13615,7 @@ void EXEC_glXDestroyContext(byte *commandbuf)
 
 
 //1604
-void EXEC_glXMakeCurrent(byte *commandbuf)
+static void EXEC_glXMakeCurrent(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXMakeCurrent!\n");
 	//( Display *dpy, GLXDrawable drawable, GLXContext ctx)
@@ -13624,7 +13624,7 @@ void EXEC_glXMakeCurrent(byte *commandbuf)
 
 
 //1605
-void EXEC_glXCopyContext(byte *commandbuf)
+static void EXEC_glXCopyContext(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXCopyContext!\n");
 	//( Display *dpy, GLXContext src, GLXContext dst, unsigned long mask )
@@ -13632,7 +13632,7 @@ void EXEC_glXCopyContext(byte *commandbuf)
 
 
 //1606
-void EXEC_glXSwapBuffers(byte *commandbuf)
+static void EXEC_glXSwapBuffers(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXSwapBuffers!\n");
 	//( Display *dpy, GLXDrawable drawable )
@@ -13640,7 +13640,7 @@ void EXEC_glXSwapBuffers(byte *commandbuf)
 
 
 //1607
-void EXEC_glXCreateGLXPixmap(byte *commandbuf)
+static void EXEC_glXCreateGLXPixmap(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXCreateGLXPixmap!\n");
 	//( Display *dpy, XVisualInfo *visual, Pixmap pixmap )
@@ -13649,7 +13649,7 @@ void EXEC_glXCreateGLXPixmap(byte *commandbuf)
 
 
 //1608
-void EXEC_glXDestroyGLXPixmap(byte *commandbuf)
+static void EXEC_glXDestroyGLXPixmap(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXDestroyGLXPixmap!\n");
 	//( Display *dpy, GLXPixmap pixmap )
@@ -13657,7 +13657,7 @@ void EXEC_glXDestroyGLXPixmap(byte *commandbuf)
 
 
 //1609
-void EXEC_glXQueryExtension(byte *commandbuf)
+static void EXEC_glXQueryExtension(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXQueryExtension!\n");
 	//( Display *dpy, int *errorb, int *event )
@@ -13666,7 +13666,7 @@ void EXEC_glXQueryExtension(byte *commandbuf)
 
 
 //1610
-void EXEC_glXQueryVersion(byte *commandbuf)
+static void EXEC_glXQueryVersion(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXQueryVersion!\n");
 	//( Display *dpy, int *maj, int *min )
@@ -13675,7 +13675,7 @@ void EXEC_glXQueryVersion(byte *commandbuf)
 
 
 //1611
-void EXEC_glXIsDirect(byte *commandbuf)
+static void EXEC_glXIsDirect(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXIsDirect!\n");
 	//( Display *dpy, GLXContext ctx )
@@ -13684,7 +13684,7 @@ void EXEC_glXIsDirect(byte *commandbuf)
 
 
 //1612
-void EXEC_glXGetConfig(byte *commandbuf)
+static void EXEC_glXGetConfig(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetConfig!\n");
 	//( Display *dpy, XVisualInfo *visual, int attrib, int *value )
@@ -13693,7 +13693,7 @@ void EXEC_glXGetConfig(byte *commandbuf)
 
 
 //1613
-void EXEC_glXGetCurrentContext(byte *commandbuf)
+static void EXEC_glXGetCurrentContext(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetCurrentContext!\n");
 	//returns GLXContext
@@ -13701,7 +13701,7 @@ void EXEC_glXGetCurrentContext(byte *commandbuf)
 
 
 //1614
-void EXEC_glXGetCurrentDrawable(byte *commandbuf)
+static void EXEC_glXGetCurrentDrawable(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetCurrentDrawable!\n");
 	//returns GLXDrawable
@@ -13709,21 +13709,21 @@ void EXEC_glXGetCurrentDrawable(byte *commandbuf)
 
 
 //1615
-void EXEC_glXWaitGL(byte *commandbuf)
+static void EXEC_glXWaitGL(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXWaitGL!\n");
 }
 
 
 //1616
-void EXEC_glXWaitX(byte *commandbuf)
+static void EXEC_glXWaitX(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXWaitX!\n");
 }
 
 
 //1617
-void EXEC_glXUseXFont(byte *commandbuf)
+static void EXEC_glXUseXFont(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXUseXFont!\n");
 	//( Font font, int first, int count, int list )
@@ -13732,7 +13732,7 @@ void EXEC_glXUseXFont(byte *commandbuf)
 
 //GLX 1.1 and later
 //1618
-void EXEC_glXQueryExtensionsString(byte *commandbuf)
+static void EXEC_glXQueryExtensionsString(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXQueryExtensionsString!\n");
 	//( Display *dpy, int screen )
@@ -13741,7 +13741,7 @@ void EXEC_glXQueryExtensionsString(byte *commandbuf)
 
 
 //1619
-void EXEC_glXQueryServerString(byte *commandbuf)
+static void EXEC_glXQueryServerString(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXQueryServerString!\n");
 	//( Display *dpy, int screen, int name )
@@ -13750,7 +13750,7 @@ void EXEC_glXQueryServerString(byte *commandbuf)
 
 
 //1620
-void EXEC_glXGetClientString(byte *commandbuf)
+static void EXEC_glXGetClientString(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetClientString!\n");
 	//( Display *dpy, int name )
@@ -13760,7 +13760,7 @@ void EXEC_glXGetClientString(byte *commandbuf)
 
 // GLX 1.2 and later
 //1621
-void EXEC_glXGetCurrentDisplay(byte *commandbuf)
+static void EXEC_glXGetCurrentDisplay(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetCurrentDisplay!\n");
 	//returns Display *
@@ -13769,7 +13769,7 @@ void EXEC_glXGetCurrentDisplay(byte *commandbuf)
 
 // GLX 1.3 and later
 //1622
-void EXEC_glXChooseFBConfig(byte *commandbuf)
+static void EXEC_glXChooseFBConfig(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXChooseFBConfig!\n");
 	//( Display *dpy, int screen, const int *attribList, int *nitems )
@@ -13778,7 +13778,7 @@ void EXEC_glXChooseFBConfig(byte *commandbuf)
 
 
 //1623
-void EXEC_glXGetFBConfigAttrib(byte *commandbuf)
+static void EXEC_glXGetFBConfigAttrib(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetFBConfigAttrib!\n");
 	//( Display *dpy, GLXFBConfig config, int attribute, int *value )
@@ -13787,7 +13787,7 @@ void EXEC_glXGetFBConfigAttrib(byte *commandbuf)
 
 
 //1624
-void EXEC_glXGetFBConfigs(byte *commandbuf)
+static void EXEC_glXGetFBConfigs(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetFBConfigs!\n");
 	//( Display *dpy, int screen, int *nelements )
@@ -13796,7 +13796,7 @@ void EXEC_glXGetFBConfigs(byte *commandbuf)
 
 
 //1625
-void EXEC_glXGetVisualFromFBConfig(byte *commandbuf)
+static void EXEC_glXGetVisualFromFBConfig(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetVisualFromFBConfig!\n");
 	//( Display *dpy, GLXFBConfig config )
@@ -13805,7 +13805,7 @@ void EXEC_glXGetVisualFromFBConfig(byte *commandbuf)
 
 
 //1626
-void EXEC_glXCreateWindow(byte *commandbuf)
+static void EXEC_glXCreateWindow(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXCreateWindow!\n");
 	//( Display *dpy, GLXFBConfig config, Window win, const int *attribList )
@@ -13814,7 +13814,7 @@ void EXEC_glXCreateWindow(byte *commandbuf)
 
 
 //1627
-void EXEC_glXDestroyWindow(byte *commandbuf)
+static void EXEC_glXDestroyWindow(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXDestroyWindow!\n");
 	//( Display *dpy, GLXWindow window )
@@ -13822,7 +13822,7 @@ void EXEC_glXDestroyWindow(byte *commandbuf)
 
 
 //1628
-void EXEC_glXCreatePixmap(byte *commandbuf)
+static void EXEC_glXCreatePixmap(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXCreatePixmap!\n");
 	//( Display *dpy, GLXFBConfig config, Pixmap pixmap, const int *attribList )
@@ -13831,7 +13831,7 @@ void EXEC_glXCreatePixmap(byte *commandbuf)
 
 
 //1629
-void EXEC_glXDestroyPixmap(byte *commandbuf)
+static void EXEC_glXDestroyPixmap(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXDestroyPixmap!\n");
 	//( Display *dpy, GLXPixmap pixmap )
@@ -13839,7 +13839,7 @@ void EXEC_glXDestroyPixmap(byte *commandbuf)
 
 
 //1630
-void EXEC_glXCreatePbuffer(byte *commandbuf)
+static void EXEC_glXCreatePbuffer(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXCreatePbuffer!\n");
 	//( Display *dpy, GLXFBConfig config, const int *attribList )
@@ -13848,7 +13848,7 @@ void EXEC_glXCreatePbuffer(byte *commandbuf)
 
 
 //1631
-void EXEC_glXDestroyPbuffer(byte *commandbuf)
+static void EXEC_glXDestroyPbuffer(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXDestroyPbuffer!\n");
 	//( Display *dpy, GLXPbuffer pbuf )
@@ -13856,7 +13856,7 @@ void EXEC_glXDestroyPbuffer(byte *commandbuf)
 
 
 //1632
-void EXEC_glXQueryDrawable(byte *commandbuf)
+static void EXEC_glXQueryDrawable(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXQueryDrawable!\n");
 	//( Display *dpy, GLXDrawable draw, int attribute, unsigned int *value )
@@ -13864,7 +13864,7 @@ void EXEC_glXQueryDrawable(byte *commandbuf)
 
 
 //1633
-void EXEC_glXCreateNewContext(byte *commandbuf)
+static void EXEC_glXCreateNewContext(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXCreateNewContext!\n");
 	//( Display *dpy, GLXFBConfig config, int renderType, GLXContext shareList, Bool direct )
@@ -13873,7 +13873,7 @@ void EXEC_glXCreateNewContext(byte *commandbuf)
 
 
 //1634
-void EXEC_glXMakeContextCurrent(byte *commandbuf)
+static void EXEC_glXMakeContextCurrent(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXMakeContextCurrent!\n");
 	//( Display *dpy, GLXDrawable draw, GLXDrawable read, GLXContext ctx )
@@ -13882,7 +13882,7 @@ void EXEC_glXMakeContextCurrent(byte *commandbuf)
 
 
 //1635
-void EXEC_glXGetCurrentReadDrawable(byte *commandbuf)
+static void EXEC_glXGetCurrentReadDrawable(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetCurrentReadDrawable!\n");
 	//returns GLXDrawable
@@ -13890,7 +13890,7 @@ void EXEC_glXGetCurrentReadDrawable(byte *commandbuf)
 
 
 //1636
-void EXEC_glXQueryContext(byte *commandbuf)
+static void EXEC_glXQueryContext(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXQueryContext!\n");
 	//( Display *dpy, GLXContext ctx, int attribute, int *value )
@@ -13899,7 +13899,7 @@ void EXEC_glXQueryContext(byte *commandbuf)
 
 
 //1637
-void EXEC_glXSelectEvent(byte *commandbuf)
+static void EXEC_glXSelectEvent(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXSelectEvent!\n");
 	//( Display *dpy, GLXDrawable drawable, unsigned long mask )
@@ -13907,7 +13907,7 @@ void EXEC_glXSelectEvent(byte *commandbuf)
 
 
 //1638
-void EXEC_glXGetSelectedEvent(byte *commandbuf)
+static void EXEC_glXGetSelectedEvent(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetSelectedEvent!\n");
 	//( Display *dpy, GLXDrawable drawable, unsigned long *mask )
@@ -13915,7 +13915,7 @@ void EXEC_glXGetSelectedEvent(byte *commandbuf)
 
 
 //1639
-void EXEC_glXGetProcAddressARB(byte *commandbuf)
+static void EXEC_glXGetProcAddressARB(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetProcAddressARB!\n");
 	//(const GLubyte *)
@@ -13924,7 +13924,7 @@ void EXEC_glXGetProcAddressARB(byte *commandbuf)
 
 
 //1640
-void EXEC_glXGetProcAddress(byte *commandbuf)
+static void EXEC_glXGetProcAddress(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetProcAddress!\n");
 	//(const GLubyte *procname)
@@ -13932,7 +13932,7 @@ void EXEC_glXGetProcAddress(byte *commandbuf)
 
 
 //1641
-void EXEC_glXAllocateMemoryNV(byte *commandbuf)
+static void EXEC_glXAllocateMemoryNV(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXAllocateMemoryNV!\n");
 	//(GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority)
@@ -13940,7 +13940,7 @@ void EXEC_glXAllocateMemoryNV(byte *commandbuf)
 
 
 //1642
-void EXEC_glXFreeMemoryNV(byte *commandbuf)
+static void EXEC_glXFreeMemoryNV(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXFreeMemoryNV!\n");
 	//(GLvoid *pointer)
@@ -13948,7 +13948,7 @@ void EXEC_glXFreeMemoryNV(byte *commandbuf)
 
 
 //1643
-void EXEC_glXAllocateMemoryMESA(byte *commandbuf)
+static void EXEC_glXAllocateMemoryMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXAllocateMemoryMESA!\n");
 	//(Display *dpy, int scrn, size_t size, float readfreq, float writefreq, float priority)
@@ -13956,7 +13956,7 @@ void EXEC_glXAllocateMemoryMESA(byte *commandbuf)
 
 
 //1644
-void EXEC_glXFreeMemoryMESA(byte *commandbuf)
+static void EXEC_glXFreeMemoryMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXFreeMemoryMESA!\n");
 	//(Display *dpy, int scrn, void *pointer)
@@ -13964,7 +13964,7 @@ void EXEC_glXFreeMemoryMESA(byte *commandbuf)
 
 
 //1645
-void EXEC_glXGetMemoryOffsetMESA(byte *commandbuf)
+static void EXEC_glXGetMemoryOffsetMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetMemoryOffsetMESA!\n");
 	//(Display *dpy, int scrn, const void *pointer)
@@ -13973,7 +13973,7 @@ void EXEC_glXGetMemoryOffsetMESA(byte *commandbuf)
 
 
 //1646
-void EXEC_glXBindTexImageARB(byte *commandbuf)
+static void EXEC_glXBindTexImageARB(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXBindTexImageARB!\n");
 	//(Display *dpy, GLXPbuffer pbuffer, int buffer)
@@ -13982,7 +13982,7 @@ void EXEC_glXBindTexImageARB(byte *commandbuf)
 
 
 //1647
-void EXEC_glXReleaseTexImageARB(byte *commandbuf)
+static void EXEC_glXReleaseTexImageARB(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXReleaseTexImageARB!\n");
 	//(Display *dpy, GLXPbuffer pbuffer, int buffer)
@@ -13991,7 +13991,7 @@ void EXEC_glXReleaseTexImageARB(byte *commandbuf)
 
 
 //1648
-void EXEC_glXDrawableAttribARB(byte *commandbuf)
+static void EXEC_glXDrawableAttribARB(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXDrawableAttribARB!\n");
 	//(Display *dpy, GLXDrawable draw, const int *attribList)
@@ -14000,7 +14000,7 @@ void EXEC_glXDrawableAttribARB(byte *commandbuf)
 
 
 //1649
-void EXEC_glXGetFrameUsageMESA(byte *commandbuf)
+static void EXEC_glXGetFrameUsageMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetFrameUsageMESA!\n");
 	//(Display *dpy, GLXDrawable drawable, float *usage)
@@ -14009,7 +14009,7 @@ void EXEC_glXGetFrameUsageMESA(byte *commandbuf)
 
 
 //1650
-void EXEC_glXBeginFrameTrackingMESA(byte *commandbuf)
+static void EXEC_glXBeginFrameTrackingMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXBeginFrameTrackingMESA!\n");
 	//(Display *dpy, GLXDrawable drawable)
@@ -14018,7 +14018,7 @@ void EXEC_glXBeginFrameTrackingMESA(byte *commandbuf)
 
 
 //1651
-void EXEC_glXEndFrameTrackingMESA(byte *commandbuf)
+static void EXEC_glXEndFrameTrackingMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXEndFrameTrackingMESA!\n");
 	//(Display *dpy, GLXDrawable drawable)
@@ -14027,7 +14027,7 @@ void EXEC_glXEndFrameTrackingMESA(byte *commandbuf)
 
 
 //1652
-void EXEC_glXQueryFrameTrackingMESA(byte *commandbuf)
+static void EXEC_glXQueryFrameTrackingMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXQueryFrameTrackingMESA!\n");
 	//(Display *dpy, GLXDrawable drawable, int64_t *swapCount, int64_t *missedFrames, float *lastMissedUsage)
@@ -14036,7 +14036,7 @@ void EXEC_glXQueryFrameTrackingMESA(byte *commandbuf)
 
 
 //1653
-void EXEC_glXSwapIntervalMESA(byte *commandbuf)
+static void EXEC_glXSwapIntervalMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXSwapIntervalMESA!\n");
 	//(unsigned int interval)
@@ -14045,7 +14045,7 @@ void EXEC_glXSwapIntervalMESA(byte *commandbuf)
 
 
 //1654
-void EXEC_glXGetSwapIntervalMESA(byte *commandbuf)
+static void EXEC_glXGetSwapIntervalMESA(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXGetSwapIntervalMESA!\n");
 	//returns int
@@ -14053,7 +14053,7 @@ void EXEC_glXGetSwapIntervalMESA(byte *commandbuf)
 
 
 //1655
-void EXEC_glXBindTexImageEXT(byte *commandbuf)
+static void EXEC_glXBindTexImageEXT(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXBindTexImageEXT!\n");
 	//(Display *dpy, GLXDrawable drawable, int buffer, const int *attrib_list)
@@ -14061,7 +14061,7 @@ void EXEC_glXBindTexImageEXT(byte *commandbuf)
 
 
 //1656
-void EXEC_glXReleaseTexImageEXT(byte *commandbuf)
+static void EXEC_glXReleaseTexImageEXT(byte *commandbuf)
 {
 	LOG("Called unimplemted stub glXReleaseTexImageEXT!\n");
 	//(Display *dpy, GLXDrawable drawable, int buffer)

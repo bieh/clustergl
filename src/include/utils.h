@@ -6,7 +6,23 @@
 #define MAX_INSTRUCTIONS 500000
 
 //Quick LOG hack that we can make a proper log system out of later
-#define LOG printf("[%16s:%4d]\t", __FILE__, __LINE__); printf
+#define LOG printf("[%20s:%4d]\t", __FILE__, __LINE__); printf
+
+template<typename T> T stringTo(const std::string& s) {
+  std::istringstream iss(s);
+  T x;
+  iss >> x;
+  return x;
+}
+
+template<typename T> std::string toString(const T& x) {
+  std::ostringstream oss;
+  oss << x;
+  return oss.str();
+}
+
+
+
 
 /**************************************
 	Network Buffer

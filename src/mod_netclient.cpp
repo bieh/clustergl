@@ -4,9 +4,6 @@
 
 #include "main.h"
 
-#include <zconf.h>
-#include <zlib.h>
-#include <netinet/tcp.h>
 
 const int SEND_BUFFER_SIZE = 268435456;
 
@@ -22,40 +19,44 @@ byte mSendBuf[SEND_BUFFER_SIZE];
 NetClientModule::NetClientModule()
 {    
 	//Make each socket
-	for(int i=0;i<gConfig->numOutputs;i++){
-		mSockets.push_back(socket(PF_INET, SOCK_STREAM, 0));
-	}
-
-	//set TCP options for each socket
-	int one = 1;
-	for(int i=0;i<(int)mSockets.size();i++){		
-		setsockopt(mSockets[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-		setsockopt(mSockets[i], SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-		if(mSockets[i] == 0){
-			LOG("Couldn't make socket!\n");
-			return;
-		}
-	}
+	for(int i=0;i<gConfig->numOutputs;i++){	
+		struct addrinfo hints, *res;
 	
-	//connect each socket to server
-	for(int i=0;i<(int)mSockets.size();i++) {
-		struct sockaddr_in mAddr; 
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+		
 		string addr = gConfig->outputAddresses[i];
 		int port = gConfig->outputPorts[i];
 		
-		memset(&mAddr, 0, sizeof(mAddr));
-		mAddr.sin_family = AF_INET;
-		mAddr.sin_addr.s_addr = inet_addr(addr.c_str());
-		mAddr.sin_port = htons(port);
-		//Establish connection
-		if (connect(mSockets[i],
-		            (struct sockaddr *) &mAddr,
-		            sizeof(mAddr)) < 0) {
-			LOG("Failed to connect with server '%s:%d'\n", addr.c_str(), port);
+		getaddrinfo(addr.c_str(), toString(port).c_str(), &hints, &res);
+		
+		int s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		
+		if(s == 0){
+			LOG("Couldn't make socket!\n");
+			return;
+		}
+				
+		//set TCP options 
+		int one = 1;
+
+		setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+		setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+				
+		struct sockaddr_in mAddr; 
+
+		int c = connect(s, res->ai_addr, res->ai_addrlen);
+
+	    if(c < 0) {
+			LOG("Failed to connect with server '%s:%d' - error %s\n", 
+					addr.c_str(), port, strerror( errno ));
 			mSockets[i] = 0;
 			exit(1);
 		}
 		LOG("Connected to remote pipeline on %s:%d\n", addr.c_str(), port);	
+	
+		mSockets.push_back(s);
 	}
 
 }

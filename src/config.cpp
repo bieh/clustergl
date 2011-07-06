@@ -29,7 +29,6 @@ Config::Config(string filename, string id){
 		CFG_SIMPLE_INT(		(char *)("totalHeight"), 	&offsetY),
 		CFG_SIMPLE_INT(		(char *)("fakeWindowX"), 	&fakeWindowX),
 		CFG_SIMPLE_INT(		(char *)("fakeWindowY"), 	&fakeWindowY),
-		CFG_SIMPLE_INT(		(char *)("port"), 			&serverPort),
 		CFG_SIMPLE_INT(		(char *)("syncRate"),		&syncRate),
 		CFG_SIMPLE_BOOL(	(char *)("enableStats"),	&enableStats),
 		CFG_STR_LIST((char *)"capturePipeline", (char *)"{}", CFGF_NONE),
@@ -43,6 +42,8 @@ Config::Config(string filename, string id){
 
 	cfg = cfg_init(opts, CFGF_NONE);
 	cfg_parse(cfg, filename.c_str());
+	
+	numOutputs = 0;
 	
 	int n = cfg_size(cfg, "output");
     
@@ -65,6 +66,7 @@ Config::Config(string filename, string id){
         sizeY = cfg_getint(o, "sizeY");
         offsetX = cfg_getint(o, "offsetX");
         offsetY = cfg_getint(o, "offsetY");
+        serverPort = port;
     }
 	
 	cfg_free(cfg);

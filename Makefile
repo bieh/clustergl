@@ -7,4 +7,6 @@ clean:
 	$(MAKE) clean -C runtime/tests
 		
 test:
-	cd runtime && ./cgl-render testing
+	cd runtime && \
+	gnome-terminal -e "./cgl-render testing" && \
+	gnome-terminal -e "./cgl-capture tests/lesson05/lesson05"

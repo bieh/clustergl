@@ -1,0 +1,5 @@
+#!/bin/bash
+LOCATION=$(cd ${0%/*} && echo $PWD/${0##*/})
+DIR=`dirname "$LOCATION"`
+
+LD_PRELOAD=$DIR/libcgl-capture.so $@

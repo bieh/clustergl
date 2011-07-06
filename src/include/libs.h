@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <fstream>
 #include <cctype>
+#include <sstream>
 
 using std::string;
 using std::vector;
@@ -51,6 +52,14 @@ using std::map;
 
 //libconfuse
 #include <confuse.h>
+
+#include <errno.h>
+
+#include <zconf.h>
+#include <zlib.h>
+
+#include <netinet/tcp.h>
+#include <stdlib.h>
 
 /*********************************************
 					OpenGL
