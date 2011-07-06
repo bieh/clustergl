@@ -1,3 +1,13 @@
+/*******************************************************************************
+	Compile-time configuration
+*******************************************************************************/
+
+#define CGL_REPEAT_INSTRUCTION 1498
+#define MAX_INSTRUCTIONS 500000
+
+//Quick LOG hack that we can make a proper log system out of later
+#define LOG printf
+
 /**************************************
 	Network Buffer
 **************************************/

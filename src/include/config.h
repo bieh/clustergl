@@ -1,58 +1,53 @@
 /*******************************************************************************
-	Compile-time configuration
-*******************************************************************************/
-
-#define CGL_REPEAT_INSTRUCTION 1498
-#define MAX_INSTRUCTIONS 500000
-
-//Quick LOG hack that we can make a proper log system out of later
-#define LOG printf
-
-/*******************************************************************************
 	Runtime configuration
 *******************************************************************************/
 class Config{
 public:
+    Config(string filename, string id);
+        
+/*******************************************************************************
+	Rendering output config
+*******************************************************************************/
+	
+	//The id of this node. We look for a config file section with this name
+	//id is set on the command line on startup
+	string id;
+
+	//Size of this renderer
     int sizeX;
     int sizeY;
+    
+    //The position of this renderer inside the total screen size
     int offsetX;
     int offsetY;
-    float scaleX;
-    float scaleY;
-    int fakeWindowX;
-    int fakeWindowY;
-    bool glFrustumUsage;
-    bool bezelCompensation;
-
-    /* connection */
-    //string addresses[5];
-    int port;
-    bool multicast;
-    char * multicastServer;
-
-    /* clusterGL configs */
-    int syncRate;
-    int compressingMethod;
-    bool usingSendCompression;
-    bool usingReplyCompression;
-    bool useRepeat;
-    
-    bool enableProfile;
-    bool enableStats;
-    
+                
+    //Size of the entire viewport
     int totalWidth;
     int totalHeight;
-    
+        
     int screenWidth;
     int screenGap;
     
+    int syncRate;
+    bool enableStats;
+    
+    float scaleX;
+    float scaleY;
+    
+/*******************************************************************************
+	Capture configuration
+*******************************************************************************/
+	int serverPort;
+	
+    //Size of the client window    
+    int fakeWindowX;
+    int fakeWindowY;
+	    
+    //Location of renderers. Automatically calculated
     int numRenderers;    
 	vector<string> rendererAddresses;
 	vector<int> rendererPorts;
 	
-	int serverPort;
-	    
-    Config(string filename);
 };
 
 /*

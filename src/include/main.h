@@ -28,18 +28,8 @@ class App
 	
 	// pointer to the current frame
     list<Instruction> *thisFrame;
-    
-    //Counters
-    uint32_t totalFrames;	
-    time_t totalTime, prevTime;
-    uint32_t startTime;
-    uint32_t endTime;
-	
+    	
 public:
-
-    //space to hold Instructions for current and previous frames
-	list<Instruction> oneFrame;
-	list<Instruction> twoFrame;
 
 	//called when we're invoked from the command line
 	int run(int argc, char **argv);

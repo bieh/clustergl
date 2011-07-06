@@ -3,40 +3,45 @@
 *******************************************************************************/
 #include "main.h"
 
-Config *gConfig = NULL;
+Config::Config(string filename, string id){
 
-Config::Config(string filename){
-    LOG("Loading configuration from '%s'\n", filename.c_str());
+    LOG("Loading configuration for '%s' from '%s'\n", 
+    	id.c_str(), filename.c_str());
+    	
+	//TODO: Get rid of these!
+	scaleX = 1.0f;
+	scaleY = 1.0f;
     
-    //load values in from config file
-	cfg_opt_t opts[] = {
-		CFG_SIMPLE_INT((char *)("sizeX"), &sizeX),
-		CFG_SIMPLE_INT((char *)("sizeY"), &sizeY),
-		CFG_SIMPLE_INT((char *)("offsetX"), &offsetX),
-		CFG_SIMPLE_INT((char *)("offsetY"), &offsetY),
-		CFG_SIMPLE_INT((char *)("fakeWindowX"), &fakeWindowX),
-		CFG_SIMPLE_INT((char *)("fakeWindowY"), &fakeWindowY),
-		CFG_SIMPLE_BOOL((char *)("bezelCompensation"), &bezelCompensation),
-		CFG_SIMPLE_BOOL((char *)("glFrustumUsage"), &glFrustumUsage),
-		CFG_SIMPLE_INT((char *)("port"), &port),
-		CFG_SIMPLE_BOOL((char *)("multicast"), &multicast),
-		CFG_SIMPLE_STR((char *)("multicastServer"), &multicastServer),
-		CFG_FLOAT((char *)("scaleX"), 1.0f, CFGF_NONE),
-		CFG_FLOAT((char *)("scaleY"), 1.0f, CFGF_NONE),
-		CFG_SIMPLE_INT((char *)("syncRate"), &syncRate),
-		CFG_SIMPLE_INT((char *)("compressingMethod"), &compressingMethod),
-		CFG_SIMPLE_BOOL((char *)("usingSendCompression"), &usingSendCompression),
-		CFG_SIMPLE_BOOL((char *)("usingReplyCompression"), &usingReplyCompression),
-		CFG_SIMPLE_BOOL((char *)("useCGLRepeat"), &useRepeat),
+    //Top level options
+	static cfg_opt_t opts[] = {
+		CFG_SIMPLE_INT(		(char *)("totalWidth"), 	&offsetX),
+		CFG_SIMPLE_INT(		(char *)("totalHeight"), 	&offsetY),
+		CFG_SIMPLE_INT(		(char *)("fakeWindowX"), 	&fakeWindowX),
+		CFG_SIMPLE_INT(		(char *)("fakeWindowY"), 	&fakeWindowY),
+		CFG_SIMPLE_INT(		(char *)("port"), 			&serverPort),
+		CFG_SIMPLE_INT(		(char *)("syncRate"),		&syncRate),
+		CFG_SIMPLE_BOOL(	(char *)("enableStats"),	&enableStats),
 		CFG_END()
 	};
+	
+	//Output options
+	static cfg_opt_t bookmark_opts[] = {
+        CFG_INT(	(char *)("sizeX"), 		0, CFGF_NONE),
+		CFG_INT(	(char *)("sizeY"), 		0, CFGF_NONE),
+		CFG_INT(	(char *)("offsetX"), 	0, CFGF_NONE),
+		CFG_INT(	(char *)("offsetY"), 	0, CFGF_NONE),
+		CFG_INT(	(char *)("port"), 		0, CFGF_NONE),
+		CFG_STR(	(char *)("hostname"), 	0, CFGF_NONE),
+        CFG_END()
+    };
+	
 	cfg_t *cfg;
 
 	cfg = cfg_init(opts, CFGF_NONE);
-	cfg_parse(cfg, "config.conf");
-
-	//process floats in the config file
-	scaleX = cfg_getfloat(cfg,(char *) "scaleX");
-	scaleY = cfg_getfloat(cfg,(char *) "scaleY");
+	cfg_parse(cfg, filename.c_str());
+	
+	int n = cfg_size(cfg, "output");
+    printf("%d configured outputs\n", n);
+	
 	cfg_free(cfg);
 }
