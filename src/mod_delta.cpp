@@ -1,3 +1,4 @@
+/*
 //Now send the instructions
 	int counter = 0;
 	for(std::list<Instruction>::iterator iter = list.begin(), 
@@ -143,3 +144,4 @@
 		free(skip);
 	}
 	sendBuffer();
+*/

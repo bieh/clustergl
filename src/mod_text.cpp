@@ -13,9 +13,6 @@ static TextFunc mFunctions[1700];
 
 TextModule::TextModule()
 {
-	netBytes = 0;
-	netBytes2 = 0;
-	frames = 0;
 	init();
 }
 

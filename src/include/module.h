@@ -86,8 +86,9 @@ class NetSrvModule : public Module
     int mSocket;
     BufferedFd *mClientSocket;
     
-    int myRead(byte *input, int nByte);
-    int myWrite(byte *input, int nByte);
+    int internalRead(byte *input, int nByte);
+    int internalWrite(byte *input, int nByte);
+    
     void recieveBuffer(void);
 	
 public:
@@ -136,7 +137,7 @@ public:
 
 	bool process(list<Instruction> &i);
 	bool sync();
-}
+};
 
 
 /*******************************************************************************

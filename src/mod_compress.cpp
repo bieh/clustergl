@@ -20,15 +20,13 @@
   3 = LZO1x, best for most applications
 */
 
-extern int compressingMethod;
-
 /*********************************************************
 	Module Stuff
 *********************************************************/
 
 NetCompressModule::NetCompressModule()
 {
-	if(compressingMethod == 2 || compressingMethod == 3) {
+	if(gConfig->compressingMethod == 2 || gConfig->compressingMethod == 3) {
 		if (lzo_init() != LZO_E_OK) {
 			printf("LZO init failed!\n");
 		}
@@ -61,27 +59,27 @@ bool NetCompressModule::sync()
 int NetCompressModule::myCompress(void *input, int nByte, void *output)
 {
 	uLongf CompBuffSize = 0;
-	if(compressingMethod == 1)
+	if(gConfig->compressingMethod == 1)
 		CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
 	else
 		CompBuffSize = (uLongf)(nByte + (nByte/1024 * 16 ) + 16);
 
 	unsigned char * workingMemory = NULL;
-	if(compressingMethod == 2)
+	if(gConfig->compressingMethod == 2)
 		workingMemory = (unsigned char*)malloc(LZO1B_MEM_COMPRESS);
-	else if(compressingMethod == 3)
+	else if(gConfig->compressingMethod == 3)
 		workingMemory = (unsigned char*)malloc(LZO1X_1_15_MEM_COMPRESS);
 	int ret = 0;
 	if(nByte > 4) {
 		int compressLevel = 1;
-		if(compressingMethod == 1)
+		if(gConfig->compressingMethod == 1)
 			ret = compress2((Bytef *) output, &CompBuffSize, (Bytef *) input, nByte, compressLevel);
-		else if(compressingMethod == 2)
+		else if(gConfig->compressingMethod == 2)
 			ret = lzo1b_compress((Bytef *) input, nByte, (Bytef *) output, &CompBuffSize, workingMemory, compressLevel);
-		else if(compressingMethod == 3)
+		else if(gConfig->compressingMethod == 3)
 			ret = lzo1x_1_15_compress((Bytef *) input, nByte, (Bytef *) output, &CompBuffSize, workingMemory);
 
-		if(compressingMethod == 1) {
+		if(gConfig->compressingMethod == 1) {
 			if(ret != Z_OK) {
 				if(ret == Z_MEM_ERROR)
 					LOG("ERROR compressing: memory error\n");
@@ -96,7 +94,7 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output)
 		memcpy(output, input, nByte);
 		CompBuffSize = nByte;
 	}
-	if(compressingMethod == 2 || compressingMethod == 3)
+	if(gConfig->compressingMethod == 2 || gConfig->compressingMethod == 3)
 		free(workingMemory);
 	return CompBuffSize;
 }
@@ -112,14 +110,14 @@ int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int s
 	uLongf newDest = destLen;
 	int ret = 0;
 	if(sourceLen > 4) {
-		if(compressingMethod == 1)
+		if(gConfig->compressingMethod == 1)
 			ret = uncompress((Bytef*) dest, (uLongf*) &newDest, (const Bytef*)source, newSource);
-		else if(compressingMethod == 2)
+		else if(gConfig->compressingMethod == 2)
 			ret = lzo1b_decompress((const Bytef*)source, newSource, (Bytef*) dest, &newDest, NULL);
-		else if(compressingMethod == 3)
+		else if(gConfig->compressingMethod == 3)
 			ret = lzo1x_decompress((const Bytef*)source, newSource, (Bytef*) dest, &newDest, NULL);
 
-		if(compressingMethod == 1) {
+		if(gConfig->compressingMethod == 1) {
 			if(ret != Z_OK) {
 				if(ret == Z_MEM_ERROR)
 					LOG("ERROR decompressing: memory error\n");

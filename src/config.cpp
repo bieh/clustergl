@@ -3,12 +3,13 @@
 *******************************************************************************/
 #include "main.h"
 
+Config *gConfig = NULL;
+
 Config::Config(string filename){
     LOG("Loading configuration from '%s'\n", filename.c_str());
     
     //load values in from config file
 	cfg_opt_t opts[] = {
-		CFG_SIMPLE_BOOL((char *)("symphony"), &symphony),
 		CFG_SIMPLE_INT((char *)("sizeX"), &sizeX),
 		CFG_SIMPLE_INT((char *)("sizeY"), &sizeY),
 		CFG_SIMPLE_INT((char *)("offsetX"), &offsetX),
@@ -38,5 +39,4 @@ Config::Config(string filename){
 	scaleX = cfg_getfloat(cfg,(char *) "scaleX");
 	scaleY = cfg_getfloat(cfg,(char *) "scaleY");
 	cfg_free(cfg);
-	
 }

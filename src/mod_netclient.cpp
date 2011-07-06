@@ -22,40 +22,42 @@ byte mSendBuf[SEND_BUFFER_SIZE];
 NetClientModule::NetClientModule()
 {    
 	//Make each socket
-	for(int i=0;i<gConfig->numRenderers;i++) {
-		mSocket.push_back(socket(PF_INET, SOCK_STREAM, 0));
+	for(int i=0;i<gConfig->numRenderers;i++){
+		mSockets.push_back(socket(PF_INET, SOCK_STREAM, 0));
 	}
 
 	//set TCP options for each socket
 	int one = 1;
 	for(int i=0;i<(int)mSockets.size();i++){		
-		setsockopt(mSocket[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-		setsockopt(mSocket[i], SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-		if(mSocket[i] == 0){
+		setsockopt(mSockets[i], IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+		setsockopt(mSockets[i], SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+		if(mSockets[i] == 0){
 			LOG("Couldn't make socket!\n");
 			return;
 		}
 	}
-
+	
 	//connect each socket to server
 	for(int i=0;i<(int)mSockets.size();i++) {
+		struct sockaddr_in mAddr; 
+		string addr = gConfig->rendererAddresses[i];
+		int port = gConfig->rendererPorts[i];
+		
 		memset(&mAddr, 0, sizeof(mAddr));
 		mAddr.sin_family = AF_INET;
-		mAddr.sin_addr.s_addr = inet_addr(addresses[i].c_str());
+		mAddr.sin_addr.s_addr = inet_addr(addr.c_str());
 		mAddr.sin_port = htons(port);
 		//Establish connection
-		if (connect(mSocket[i],
+		if (connect(mSockets[i],
 		            (struct sockaddr *) &mAddr,
 		            sizeof(mAddr)) < 0) {
-			LOG("Failed to connect with server '%s:%d'\n", addresses[i].c_str(), port);
-			mSocket[i] = 0;
+			LOG("Failed to connect with server '%s:%d'\n", addr.c_str(), port);
+			mSockets[i] = 0;
 			exit(1);
 		}
-		LOG("Connected to remote pipeline on %s:%d\n", addresses[i].c_str(), port);
-		}
+		LOG("Connected to remote pipeline on %s:%d\n", addr.c_str(), port);	
 	}
 
-    iByteCount = 0;
 }
 
 
@@ -69,15 +71,16 @@ bool NetClientModule::process(list<Instruction> &list)
 	//First send the total number
 	uint32_t num = list.size();
 		
-	if(!myWrite(&num, sizeof(uint32_t))) {
+	if(!internalWrite(&num, sizeof(uint32_t))) {
 		LOG("Connection problem!\n");
 		return false;
 	}
 
 	//Now send the instructions
 	int counter = 0;
-	for(std::list<Instruction>::iterator iter = list.begin(), 
-	    pIter = (*prevFrame).begin();iter != list.end(); iter++) {								
+	for(std::list<Instruction>::iterator iter = list.begin();
+		iter != list.end(); iter++) {
+		
 		Instruction *i = &(*iter);
 		
 		bool mustSend = false;
@@ -87,7 +90,7 @@ bool NetClientModule::process(list<Instruction> &list)
 				//If we expect a buffer back then we must send everything now
 				if(i->buffers[n].needReply) mustSend = true;
 			}
-		};
+		}
 
 		// now send the new instruction
 		if(internalWrite(i, sizeof(Instruction)) != sizeof(Instruction)) {
@@ -100,7 +103,6 @@ bool NetClientModule::process(list<Instruction> &list)
 			int l = i->buffers[n].len;
 
 			if(l > 0) {
-				netBytes += l * numConnections;
 				if(internalWrite(i->buffers[n].buffer, l) != l) {
 					LOG("Connection problem (didn't write buffer %d)!\n", l);
 					return false;
@@ -117,7 +119,6 @@ bool NetClientModule::process(list<Instruction> &list)
 				}
 			}
 		}
-		if (pIter != (*prevFrame).end()) pIter++;
 		counter++;
 	}
 	
@@ -141,9 +142,7 @@ bool NetClientModule::sync()
 
 
 int NetClientModule::internalWrite(void* buf, int nByte)
-{
-    iByteCount += sizeof(Instruction) * numConnections;
-    		
+{   		
 	if(bytesLeft - nByte > 0) {
 		memcpy(mSendBuf + iSendBufPos, buf, nByte);
 		iSendBufPos += nByte;

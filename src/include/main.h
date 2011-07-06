@@ -7,6 +7,7 @@
 	Internal headers
 *******************************************************************************/
 #include "libs.h"
+#include "config.h"
 #include "utils.h"
 #include "instruction.h"
 #include "module.h"
@@ -31,8 +32,8 @@ class App
     //Counters
     uint32_t totalFrames;	
     time_t totalTime, prevTime;
-    uint32_t startTime = 0;
-    uint32_t endTime = 0;
+    uint32_t startTime;
+    uint32_t endTime;
 	
 public:
 

@@ -24,9 +24,6 @@ byte *mArgs = NULL;
 *********************************************************/
 InsertModule::InsertModule()
 {
-	netBytes= 0;
-	netBytes2 = 0;
-	frames = 0;
 	init();
 }
 

@@ -17,7 +17,7 @@ static bool bHasInit = false;
 int App::run(int argc, char **argv)
 {
 	if (argc != 2) {
-		fprintf(stderr,"usage: %s <window id>\n");
+		fprintf(stderr,"usage: %s <window id>\n", argv[0]);
 		exit(0);
 	}
 	LOG("Window ID: %s\n", argv[1]);
@@ -28,7 +28,7 @@ int App::run(int argc, char **argv)
 	
 	init(false, argv[1]);
 
-	LOG("Loading modules for network server and renderer output on port: %d\n", port);
+	LOG("Loading modules for network server and renderer output\n");
 	
 	//Set up the module chain	
 	mModules.push_back(new NetSrvModule());
@@ -55,7 +55,7 @@ int App::run_shared()
 		return 1;
 	}
 	
-	init(true, -1);
+	init(true, NULL);
 		
 	LOG("Loading modules for application intercept\n");
 	
@@ -110,13 +110,14 @@ bool App::tick()
 	if(gConfig->enableStats){
 	    stats_begin();
 	}
-
+/*
 	//Make sure we have a real frame
 	if (!thisFrame) {
 		thisFrame = &oneFrame;
 		for(int i=0;i<(int)mModules.size();i++)
 			mModules[i]->prevFrame = &twoFrame;
 	}
+*/
 
 	//Go through each module and process the frame
 	for(int i=0;i<(int)mModules.size();i++) {
@@ -138,7 +139,7 @@ bool App::tick()
 			}
 		}
 	}
-
+/*
 	//Sync frames if necessary
 	if(gConfig->syncRate > 0) {
 		if (totalFrames % syncRate == 0 && totalFrames > 0) {
@@ -151,15 +152,17 @@ bool App::tick()
 			}
 		}
 	}
+*/
 
 	if(gConfig->enableStats){
 	    stats_end();
 	}
-	
+
+/*	
 	//Swap frames
 	for(int i=0;i<(int)mModules.size();i++){
 		mModules[i]->prevFrame = thisFrame;
-    }
+
         
 	if(thisFrame == &oneFrame){
 		thisFrame = &twoFrame;
@@ -172,8 +175,8 @@ bool App::tick()
 	iter != (*thisFrame).end(); iter++) {
 		iter->clear();
 	}
-	thisFrame->clear();
-	
+	thisFrame->clear();    
+*/	
 
 	return true;
 }
@@ -196,12 +199,7 @@ void App::stats_begin(){
 	
 	// First calculate FPS	
 	int FPS = 0;
-	
-	for(int i=0;i<(int)mModules.size();i++) {
-		Module *m = mModules[i];
-		FPS += m->frames;
-		m->frames = 0;
-	}
+		
 	if(FPS > 0) {
 	    LOG("ClusterGL2 Average FPS:\t\t\t%ld\n",
 		    FPS/(curTime - prevTime));
@@ -210,26 +208,19 @@ void App::stats_begin(){
 	// Now Calculate KBPS (Kbytes per second)
 	int bytes = 0;
 	int bytes_compressed = 0;
-	for(int i=0;i<(int)mModules.size();i++) {
-		Module *m = mModules[i];
-		
-		bytes += m->netBytes;
-		bytes_compressed += m->netBytesCompressed;
-		
-		m->netBytes = 0;
-		m->netBytesCompressed = 0;
-	}
+	/*
 	if(bytes > 0) {
 		LOG("ClusterGL2 Average KBPS:\t\t%lf\n",
 			(bytes/(curTime - prevTime))/1024.0);
 		LOG("ClusterGL2 Average compressed KBPS:\t%lf\n\n",
 			(bytes2/(curTime - prevTime))/1024.0);
 	}
+	*/
 	
 	time(&prevTime);
 	
 	if(gConfig->enableProfile){
-    	profile->output();
+    	//profile->output();
 	}
 
 }
@@ -242,16 +233,19 @@ void App::stats_end(){
     endTime = SDL_GetTicks();    
 	uint32_t diff = endTime - startTime;
 	int FPS = 0;
-	
+	/*
 	for(int i=0;i<(int)mModules.size();i++) {
         Module *m = mModules[i];
         FPS += m->frames;
         m->frames = 0;
     }
+    */
     
+    /*
     if(FPS > 0 && intercept) {
         LOG("ClusterGL2 FPS: %f\n", 1000.0/diff);
     }
+    */
 
 	startTime = SDL_GetTicks();
 }

@@ -52,8 +52,6 @@ Instruction *mCurrentInstruction = NULL;
 //current arguements 
 byte *mCurrentArgs = NULL;
 
-uint32_t *iFrames = NULL;
-
 /*********************************************************
 	Interception Module Stuff
 *********************************************************/
@@ -61,8 +59,6 @@ uint32_t *iFrames = NULL;
 AppModule::AppModule(string command){
 
 	//initialize values and structures
-	frames = 0;
-	iFrames = &frames;
 	rpTex.size = (GLint) NULL;
 	rpVert.size = (GLint) NULL;
 	rpCol.size = (GLint) NULL;
@@ -379,8 +375,8 @@ extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigne
 		printf("Couldn't find SDL_SetVideoMode: %s\n", dlerror());
 		exit(0);
 	}
-		//make a fake window
-		return (*_SDL_SetVideoMode)(fakeWindowX, fakeWindowY, bpp, videoFlags );
+	//make a fake window
+	return (*_SDL_SetVideoMode)(gConfig->fakeWindowX, gConfig->fakeWindowY, bpp, videoFlags );
 }
 
 extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
@@ -424,7 +420,7 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 	*/
 	
 	pushOp(1499); //Swap buffers
-	(*iFrames)++;
+
 	if(!theApp->tick()){
 		LOG("end swapping\n");
 		exit(1);

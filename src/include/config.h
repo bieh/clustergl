@@ -40,5 +40,24 @@ public:
     bool enableProfile;
     bool enableStats;
     
+    int totalWidth;
+    int totalHeight;
+    
+    int screenWidth;
+    int screenGap;
+    
+    int numRenderers;    
+	vector<string> rendererAddresses;
+	vector<int> rendererPorts;
+	
+	int serverPort;
+	    
     Config(string filename);
 };
+
+/*
+main.h:const float SYMPHONY_SCREEN_WIDTH = 1680.0;
+main.h:const float SYMPHONY_SCREEN_TOTAL_WIDTH = 8880.0;
+main.h:const float SYMPHONY_SCREEN_TOTAL_HEIGHT = 4560.0;
+main.h:const float SYMPHONY_SCREEN_GAP = 120.0;
+*/

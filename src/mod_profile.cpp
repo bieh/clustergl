@@ -14,9 +14,7 @@ ProfileModule::ProfileModule()
 {
 	LOG("ProfileModule!\n");
 	//reset BPS calculations
-	netBytes = 0;
-	netBytes2 = 0;
-	frames = 0;
+
 	//GL functions
 	strings[0] = "glNewList";
 	strings[1] = "glEndList";
