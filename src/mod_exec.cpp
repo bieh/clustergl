@@ -80,8 +80,8 @@ bool ExecModule::makeWindow()
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
 	//Autodetect res
-	int width = gConfig->fakeWindowX;
-	int height = gConfig->fakeWindowY;
+	int width = gConfig->sizeX;
+	int height = gConfig->sizeY;
 
 	//get a SDL surface
 	SDL_Surface *surface = SDL_SetVideoMode(width, height, 32, videoFlags );
@@ -104,11 +104,16 @@ bool ExecModule::makeWindow()
 		SDL_VERSION(&info.version);
 
 		if (SDL_GetWMInfo(&info) > 0 ) {
-		  if (info.subsystem == SDL_SYSWM_X11) {
-			XMoveWindow(info.info.x11.display, 
+			if (info.subsystem == SDL_SYSWM_X11) {
+				XMoveWindow(info.info.x11.display, 
 						info.info.x11.window, 
-						gConfig->offsetX, gConfig->offsetY);
-		  }
+						100 + gConfig->offsetX, 100 + gConfig->offsetY);
+			}else{
+				LOG("Can't move window (no X?)\n");
+			}
+			
+		}else{
+			LOG("Couldn't get WM info\n");
 		}
 
 	}
