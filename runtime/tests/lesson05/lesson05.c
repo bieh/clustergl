@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "SDL.h"
+#include <SDL/SDL.h>
 
 /* screen width, height, and bit depth */
 #define SCREEN_WIDTH  640
