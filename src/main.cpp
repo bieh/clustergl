@@ -93,25 +93,28 @@ bool App::tick()
 {
 	//LOG("tick()\n");
 	
-	thisFrame = new list<Instruction>();
+	list<Instruction> *thisFrame = new list<Instruction>();
 	
 	if(gConfig->enableStats){
 	    stats_begin();
 	}
-/*
-	//Make sure we have a real frame
-	if (!thisFrame) {
-		thisFrame = &oneFrame;
-		for(int i=0;i<(int)mModules.size();i++)
-			mModules[i]->prevFrame = &twoFrame;
-	}
-*/
 
 	//Go through each module and process the frame
 	for(int i=0;i<(int)mModules.size();i++) {
 		Module *m = mModules[i];
+		
+		m->setListResult(thisFrame);
+		
 		if( !m->process(*thisFrame) ) {
 			LOG("Failed to process frame (in %d), bailing out\n", i);
+			return false;
+		}
+		
+		//TODO: handle bytes and such
+		thisFrame = m->resultAsList();
+		
+		if(!thisFrame){
+			LOG("!thisFrame\n");
 			return false;
 		}
 	}
@@ -128,44 +131,11 @@ bool App::tick()
 		}
 	}
 */
-/*
-	//Sync frames if necessary
-	if(gConfig->syncRate > 0) {
-		if (totalFrames % syncRate == 0 && totalFrames > 0) {
-			for(int i=0;i<(int)mModules.size();i++) {
-				Module *m = mModules[i];
-				if( !m->sync() ) {
-					LOG("Failed to sync frame (in %d), bailing out\n", i);
-					return false;
-				}
-			}
-		}
-	}
-*/
 
 	if(gConfig->enableStats){
 	    stats_end();
 	}
 
-/*	
-	//Swap frames
-	for(int i=0;i<(int)mModules.size();i++){
-		mModules[i]->prevFrame = thisFrame;
-
-        
-	if(thisFrame == &oneFrame){
-		thisFrame = &twoFrame;
-	}else{
-		thisFrame = &oneFrame;
-	}
-
-	//clear previous frames
-	for(std::list<Instruction>::iterator iter = thisFrame->begin();
-	iter != (*thisFrame).end(); iter++) {
-		iter->clear();
-	}
-	thisFrame->clear();    
-*/	
 	delete thisFrame;
 
 	return true;

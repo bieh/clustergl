@@ -13,6 +13,9 @@ const int MOD_TYPE_BYTES = 2; //takes/emits a byte buffer
 *******************************************************************************/
 class Module
 {
+protected:
+	list<Instruction> *mListResult;
+	
 public:
 	Module(){}
 
@@ -21,12 +24,16 @@ public:
 	virtual bool process(byte *buf, int len){}
 	
 	//output
-	virtual list<Instruction> *resultAsList(){}
+	virtual list<Instruction> *resultAsList(){return mListResult;}
 	virtual byte *resultAsBytes(int *len){}
 	
 	//Config defaults
 	virtual int getInputFormat(){return MOD_TYPE_INSTR;}
 	virtual int getOutputFormat(){return MOD_TYPE_INSTR;}
+	
+	void setListResult(list<Instruction> *i){
+		mListResult = i;
+	}
 	
 	virtual void reply(Instruction *instr, int i){}
 	virtual bool sync()=0;
@@ -193,14 +200,31 @@ public:
 
 
 /*******************************************************************************
- Delta module. Takes instructions, emits instructions
+ Delta module. Remove duplicate instructions, replace with CGL_REPEAT's
 *******************************************************************************/
-class DeltaModule : public Module
+class DeltaEncodeModule : public Module
 {
 public:
     
     //input
-	bool process(byte *buf, int len);
+	bool process(list<Instruction> &i);
+	
+	//output
+	list<Instruction> *resultAsList();
+	
+	//Config defaults
+	int getInputFormat(){return MOD_TYPE_INSTR;}
+	int getOutputFormat(){return MOD_TYPE_INSTR;}
+	
+	bool sync(){}
+};
+
+class DeltaDecodeModule : public Module
+{
+public:
+    
+    //input
+	bool process(list<Instruction> &i);
 	
 	//output
 	list<Instruction> *resultAsList();

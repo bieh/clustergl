@@ -25,10 +25,7 @@ class App
 	void stats_end();
 	
 	bool bIsIntercept;
-	
-	// pointer to the current frame
-    list<Instruction> *thisFrame;
-    	
+	    	
 public:
 
 	//called when we're invoked from the command line

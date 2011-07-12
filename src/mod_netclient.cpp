@@ -51,7 +51,6 @@ NetClientModule::NetClientModule()
 	    if(c < 0) {
 			LOG("Failed to connect with server '%s:%d' - error %s\n", 
 					addr.c_str(), port, strerror( errno ));
-			mSockets[i] = 0;
 			exit(1);
 		}
 		LOG("Connected to remote pipeline on %s:%d\n", addr.c_str(), port);	

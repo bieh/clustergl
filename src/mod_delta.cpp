@@ -1,3 +1,41 @@
+/*******************************************************************************
+ Delta/Framediff module
+*******************************************************************************/
+
+#include "main.h"
+
+
+/*******************************************************************************
+ Encode stage
+*******************************************************************************/
+bool DeltaEncodeModule::process(list<Instruction> &i){
+	LOG("encode\n");
+}
+
+//output
+list<Instruction> *DeltaEncodeModule::resultAsList(){
+
+}
+
+
+
+
+
+
+/*******************************************************************************
+ Decode stage
+*******************************************************************************/
+bool DeltaDecodeModule::process(list<Instruction> &i){
+	LOG("decode\n");
+}
+
+//output
+list<Instruction> *DeltaDecodeModule::resultAsList(){
+
+}
+
+
+
 /*
 //Now send the instructions
 	int counter = 0;
