@@ -14,24 +14,24 @@ const int MOD_TYPE_BYTES = 2; //takes/emits a byte buffer
 class Module
 {
 protected:
-	list<Instruction> *mListResult;
+	vector<Instruction *> *mListResult;
 	
 public:
 	Module(){}
 
     //input
-	virtual bool process(list<Instruction> &i){}
+	virtual bool process(vector<Instruction *> *i){}
 	virtual bool process(byte *buf, int len){}
 	
 	//output
-	virtual list<Instruction> *resultAsList(){return mListResult;}
+	virtual vector<Instruction *> *resultAsList(){return mListResult;}
 	virtual byte *resultAsBytes(int *len){}
 	
 	//Config defaults
 	virtual int getInputFormat(){return MOD_TYPE_INSTR;}
 	virtual int getOutputFormat(){return MOD_TYPE_INSTR;}
 	
-	void setListResult(list<Instruction> *i){
+	void setListResult(vector<Instruction *> *i){
 		mListResult = i;
 	}
 	
@@ -50,7 +50,7 @@ public:
 	AppModule(string command);
 
 	bool init(string command);
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	bool sync();
 };
 
@@ -63,7 +63,7 @@ class TextModule : public Module
 public:
 	TextModule();
 	bool init();
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	bool sync();
 };
 
@@ -80,7 +80,7 @@ public:
 	ExecModule();
 
 	bool init();
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	bool sync();
 };
 
@@ -101,7 +101,7 @@ class NetSrvModule : public Module
 public:
 	NetSrvModule();
 
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	void reply(Instruction *instr, int i);
 	bool sync();
 
@@ -125,7 +125,7 @@ class NetClientModule : public Module
 public:
 	NetClientModule();
 
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	bool sync();
 		
 	//Config defaults
@@ -142,7 +142,7 @@ class MulticastNetClientModule : public Module
 public:
 	MulticastNetClientModule();
 
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	bool sync();
 };
 
@@ -159,7 +159,7 @@ class NetCompressModule : public Module
 public:
 	NetCompressModule();
 
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	void reply(Instruction *instr, int i);
 	bool sync();
 
@@ -175,7 +175,7 @@ public:
 	InsertModule();
 
 	bool init();
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	void reply(Instruction *instr, int i);
 	bool sync();
 };
@@ -189,7 +189,7 @@ class ProfileModule : public Module
 public:
 	ProfileModule();
 
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	void reply(Instruction *instr, int i);
 	bool sync();
 	void resetCounts();
@@ -204,13 +204,15 @@ public:
 *******************************************************************************/
 class DeltaEncodeModule : public Module
 {
+	vector<Instruction *> *lastFrame;
 public:
+	DeltaEncodeModule();
     
     //input
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	
 	//output
-	list<Instruction> *resultAsList();
+	vector<Instruction *> *resultAsList();
 	
 	//Config defaults
 	int getInputFormat(){return MOD_TYPE_INSTR;}
@@ -220,14 +222,15 @@ public:
 };
 
 class DeltaDecodeModule : public Module
-{
+{	
+	vector<Instruction> lastFrame;
 public:
     
     //input
-	bool process(list<Instruction> &i);
+	bool process(vector<Instruction *> *i);
 	
 	//output
-	list<Instruction> *resultAsList();
+	vector<Instruction *> *resultAsList();
 	
 	//Config defaults
 	int getInputFormat(){return MOD_TYPE_INSTR;}

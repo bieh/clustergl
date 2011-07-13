@@ -21,13 +21,13 @@ TextModule::TextModule()
 	Text Module Process Instructions
 *********************************************************/
 
-bool TextModule::process(list<Instruction> &list)
+bool TextModule::process(vector<Instruction *> *list)
 {
 
-	LOG("*** Start of frame: %d instructions\n", list.size());
+	LOG("*** Start of frame: %d instructions\n", list->size());
 	int counter = 0;
-	for(std::list<Instruction>::iterator iter = list.begin();
-	iter != list.end(); iter++) {
+	for(int i=0;i<(int)list->size();i++){
+		Instruction *iter = (*list)[i];
 		counter++;
 		if(iter->id < 1500)
 			mFunctions[iter->id](iter->args);

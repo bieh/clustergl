@@ -35,22 +35,22 @@ bool InsertModule::init()
 }
 
 
-bool InsertModule::process(list<Instruction> &list)
+bool InsertModule::process(vector<Instruction *> *list)
 {
-	Instruction lastInstruction = list.back();
+	Instruction *lastInstruction = list->back();
 								 //i.e. swap buffers
-	if(lastInstruction.id == 1499) {
+	if(lastInstruction->id == 1499) {
 
 		//remove swap buffers
-		list.pop_back();
+		list->pop_back();
 
 		//add our instructions
 		for(int i=0;i<instCount;i++) {
-			list.push_back(mInst[i]);
+			list->push_back(&mInst[i]);
 		}
 
 		//add swap buffers
-		list.push_back(lastInstruction);
+		list->push_back(lastInstruction);
 	}
 
 	return true;

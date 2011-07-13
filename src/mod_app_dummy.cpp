@@ -17,7 +17,7 @@ bool AppModule::init(string command)
 }
 
 
-bool AppModule::process(list<Instruction> &list)
+bool AppModule::process(vector<Instruction *> *list)
 {
 
 	LOG("Dummy AppModule can't do stuff\n");

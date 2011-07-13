@@ -8,13 +8,36 @@
 /*******************************************************************************
  Encode stage
 *******************************************************************************/
-bool DeltaEncodeModule::process(list<Instruction> &i){
+DeltaEncodeModule::DeltaEncodeModule(){
+	lastFrame = NULL;
+}
+
+bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	LOG("encode\n");
+	
+	if(!lastFrame){
+		//this must be the first frame
+		mListResult = list;
+		lastFrame = list;
+		LOG("Initial frame\n");
+		return true;
+	}
+	
+	vector<Instruction *> *result = new vector<Instruction *>();
+		
+	for(int n=0;n<(int)list->size();n++){		
+		Instruction *instr = (*list)[n];
+		result->push_back(instr);
+	}
+	
+	mListResult = result;		
+		
+	return true;
 }
 
 //output
-list<Instruction> *DeltaEncodeModule::resultAsList(){
-
+vector<Instruction *> *DeltaEncodeModule::resultAsList(){
+	return mListResult;
 }
 
 
@@ -25,12 +48,13 @@ list<Instruction> *DeltaEncodeModule::resultAsList(){
 /*******************************************************************************
  Decode stage
 *******************************************************************************/
-bool DeltaDecodeModule::process(list<Instruction> &i){
+bool DeltaDecodeModule::process(vector<Instruction *> *i){
 	LOG("decode\n");
+	return true;
 }
 
 //output
-list<Instruction> *DeltaDecodeModule::resultAsList(){
+vector<Instruction *> *DeltaDecodeModule::resultAsList(){
 
 }
 

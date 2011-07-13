@@ -61,7 +61,7 @@ int App::run_shared()
 			
 	//Set up the module chain
 	mModules.push_back(new AppModule(""));
-	//mModules.push_back(new TextModule()); 	
+	//mModules.push_back(new DeltaEncodeModule()); 	
 	mModules.push_back(new NetClientModule());
 
 	//Return control to the parent process.
@@ -93,7 +93,7 @@ bool App::tick()
 {
 	//LOG("tick()\n");
 	
-	list<Instruction> *thisFrame = new list<Instruction>();
+	vector<Instruction *> *thisFrame = new vector<Instruction *>();
 	
 	if(gConfig->enableStats){
 	    stats_begin();
@@ -105,7 +105,7 @@ bool App::tick()
 		
 		m->setListResult(thisFrame);
 		
-		if( !m->process(*thisFrame) ) {
+		if( !m->process(thisFrame) ) {
 			LOG("Failed to process frame (in %d), bailing out\n", i);
 			return false;
 		}
@@ -134,6 +134,16 @@ bool App::tick()
 
 	if(gConfig->enableStats){
 	    stats_end();
+	}
+	
+	for(int i=0;i<(int)thisFrame->size();i++){
+		Instruction *iter = (*thisFrame)[i];
+		
+		for(int b=0;b<3;b++){
+			if(iter->buffers[b].len && iter->buffers[b].needClear){
+				free(iter->buffers[b].buffer);
+			}	
+		}
 	}
 
 	delete thisFrame;

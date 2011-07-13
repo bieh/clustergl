@@ -65,11 +65,11 @@ NetClientModule::NetClientModule()
 /*******************************************************************************
 	Send each instruction
 *******************************************************************************/
-bool NetClientModule::process(list<Instruction> &list)
+bool NetClientModule::process(vector<Instruction *> *list)
 {
 	
 	//First send the total number
-	uint32_t num = list.size();
+	uint32_t num = list->size();
 		
 	if(!internalWrite(&num, sizeof(uint32_t))) {
 		LOG("Connection problem!\n");
@@ -78,10 +78,9 @@ bool NetClientModule::process(list<Instruction> &list)
 
 	//Now send the instructions
 	int counter = 0;
-	for(std::list<Instruction>::iterator iter = list.begin();
-		iter != list.end(); iter++) {
+	for(int n=0;n<(int)list->size();n++){
 		
-		Instruction *i = &(*iter);
+		Instruction *i = (*list)[n];
 		
 		bool mustSend = false;
 
@@ -158,8 +157,12 @@ void NetClientModule::sendBuffer()
 {
 	//LOG("NetClientModule::sendBuffer(%d)\n", iSendBufPos);
 	for(int i=0;i<(int)mSockets.size();i++){
-		write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
-		write(mSockets[i], mSendBuf, iSendBufPos);
+		int a = write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
+		int b = write(mSockets[i], mSendBuf, iSendBufPos);
+		
+		if(a != (int)sizeof(iSendBufPos) && b != iSendBufPos){
+			LOG("Failure to send: %d\n", i, iSendBufPos);
+		}
 	}
 	iSendBufPos = 0;
 }

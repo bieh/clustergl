@@ -36,7 +36,7 @@ NetCompressModule::NetCompressModule()
 }
 
 
-bool NetCompressModule::process(list<Instruction> &i)
+bool NetCompressModule::process(vector<Instruction *> *i)
 {
 	LOG("NetCompressModule::process: Shouldn't happen!\n");
 }

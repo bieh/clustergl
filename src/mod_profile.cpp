@@ -1371,11 +1371,11 @@ ProfileModule::ProfileModule()
 }
 
 
-bool ProfileModule::process(list<Instruction> &list)
+bool ProfileModule::process(vector<Instruction *> *list)
 {
 
-	for(std::list<Instruction>::iterator iter = list.begin();
-	iter != list.end(); iter++) {
+	for(int i=0;i<(int)list->size();i++){
+		Instruction *iter = (*list)[i];
 		instructionCounts[iter->id]++;
 		for(int n=0;n<3;n++) {
 			instructionBufferSizes[iter->id] += iter->buffers[n].len;

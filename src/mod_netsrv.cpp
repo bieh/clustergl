@@ -9,8 +9,10 @@ const int recieveBufferSize = 268435456;
 uint32_t iRecieveBufPos = 0;
 uint32_t bytesRemaining = 0;;
 
-//big buffer
+//big buffers
 static byte mRecieveBuf[recieveBufferSize];
+static Instruction mInstructions[MAX_INSTRUCTIONS];
+static int iInstructionCount = 0;
 
 /*********************************************************
 	Net Server Module
@@ -67,11 +69,13 @@ NetSrvModule::NetSrvModule()
 	Net Server Process Instructions
 *********************************************************/
 
-bool NetSrvModule::process(list<Instruction> &list)
+bool NetSrvModule::process(vector<Instruction *> *list)
 {
 	//Read instructions off the network and insert them into the list
 	//First read the uint32 that tells us how many instructions we will have
 	uint32_t num = 0;
+	
+	iInstructionCount = 0;
 
 	int len = internalRead((byte *)&num, sizeof(uint32_t));
 	if(len != sizeof(uint32_t) ) {
@@ -80,9 +84,9 @@ bool NetSrvModule::process(list<Instruction> &list)
 	}
 
 	for(uint32_t x=0;x<num;x++) {
-		Instruction i;
+		Instruction *i = &mInstructions[iInstructionCount++];
 
-		int r = internalRead((byte *)&i, sizeof(Instruction));
+		int r = internalRead((byte *)i, sizeof(Instruction));
 		if(r != sizeof(Instruction)) {
 			LOG("Read error (%d)\n", r);
 			return false;
@@ -90,18 +94,18 @@ bool NetSrvModule::process(list<Instruction> &list)
 
 		//Now see if we're expecting any buffers
 		for(int n=0;n<3;n++) {
-			int l = i.buffers[n].len;
+			int l = i->buffers[n].len;
 
 			if(l > 0) {
-				i.buffers[n].buffer = (byte *) malloc(l);
-				i.buffers[n].needClear = true;
-				internalRead(i.buffers[n].buffer, l);
+				i->buffers[n].buffer = (byte *) malloc(l);
+				i->buffers[n].needClear = true;
+				internalRead(i->buffers[n].buffer, l);
 			}
 		}		
 	
-		list.push_back(i);		
+		list->push_back(i);		
 	}
-
+	
 	return true;
 }
 

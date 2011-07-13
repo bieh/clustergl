@@ -71,9 +71,9 @@ bool AppModule::init(string command){
 	return true;
 }
 
-bool AppModule::process(list<Instruction> &list){
+bool AppModule::process(vector<Instruction *> *list){
 	for(int i=0;i<iInstructionCount;i++){
-		list.push_back(mInstructions[i]);
+		list->push_back(&mInstructions[i]);
 	}
 	
 	iInstructionCount = 0;

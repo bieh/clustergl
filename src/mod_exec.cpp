@@ -21,11 +21,11 @@ static ExecFunc mFunctions[1700];
 static Instruction *mCurrentInstruction = NULL;
 GLenum currentMode = GL_MODELVIEW;
 
-void handleLoadMatrix(std::list<Instruction>::iterator &iter);
-void handlePerspective(std::list<Instruction>::iterator &iter);
-void handleOrtho(std::list<Instruction>::iterator &iter);
-void handleScissor(std::list<Instruction>::iterator &iter);
-void handleViewport(std::list<Instruction>::iterator &iter);
+void handleLoadMatrix(Instruction *iter);
+void handlePerspective(Instruction *iter);
+void handleOrtho(Instruction *iter);
+void handleScissor(Instruction *iter);
+void handleViewport(Instruction *iter);
 
 int displayNumber = 0;
 int currentBuffer = 0;
@@ -130,18 +130,18 @@ bool ExecModule::makeWindow()
 /*******************************************************************************
 	Instruction dispatch
 *******************************************************************************/
-bool ExecModule::process(list<Instruction> &list)
+bool ExecModule::process(vector<Instruction *> *list)
 {
 
-	for(std::list<Instruction>::iterator iter = list.begin();
-		iter != list.end(); iter++) {
+	for(int n=0;n<(int)list->size();n++){		
+		Instruction *iter = (*list)[n];
 		
 		if(iter->id >= 1700 || !mFunctions[iter->id]) {
 			LOG("Unimplemented method %d, bailing out\n", iter->id);
 			return false;
 		}
 
-		mCurrentInstruction = &(*iter);
+		mCurrentInstruction = iter;
 		
 		//We override some methods here for view adjustment
 		//TODO: Clean this up some more
@@ -172,7 +172,7 @@ bool ExecModule::process(list<Instruction> &list)
 /*******************************************************************************
 	Special functions we handle seperately
 *******************************************************************************/
-void handleViewport(std::list<Instruction>::iterator &iter){
+void handleViewport(Instruction *iter){
 /*
 	if(!glFrustumUsage){
 		//no nothing, will be handled later (in gluPerpespective or glLoadMatrix)
@@ -201,7 +201,7 @@ void handleViewport(std::list<Instruction>::iterator &iter){
 	LOG("handleViewport(%d,%d,%d,%d)\n",x,y,w,h);
 }
 
-void handleScissor(std::list<Instruction>::iterator &iter){
+void handleScissor(Instruction *iter){
 	//read original values from the instruction
 	GLint x = *((GLint*)iter->args);
 	GLint y = *((GLint*)(iter->args+ sizeof(GLint)));
@@ -215,7 +215,7 @@ void handleScissor(std::list<Instruction>::iterator &iter){
 	LOG("handleScissor\n");
 }
 
-void handleOrtho(std::list<Instruction>::iterator &iter){
+void handleOrtho(Instruction *iter){
 	
 	//read original values from the instruction
 	GLdouble left = *((GLdouble*)iter->args);
@@ -279,7 +279,7 @@ void handleOrtho(std::list<Instruction>::iterator &iter){
 	LOG("handleOrtho\n");
 }
 
-void handlePerspective(std::list<Instruction>::iterator &iter){
+void handlePerspective(Instruction *iter){
 
 	if(!glFrustumUsage) {
 		gluPerspective(45.0,8880.0/4560.0, 0.9f, 100.0f);
@@ -345,7 +345,7 @@ void handlePerspective(std::list<Instruction>::iterator &iter){
 	LOG("handlePerspective\n");
 }
 
-void handleLoadMatrix(std::list<Instruction>::iterator &iter){
+void handleLoadMatrix(Instruction *iter){
 	GLfloat * m = (GLfloat *)iter->buffers[0].buffer;
 	GLfloat * mSaved = (GLfloat *) malloc(sizeof(GLfloat) * 16);
 	//copy matrix, otherwise CGLRepeat buffers doesn't work
