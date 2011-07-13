@@ -143,7 +143,7 @@ bool ExecModule::process(vector<Instruction *> *list)
 
 		mCurrentInstruction = iter;
 		
-		LOG_INSTRUCTION(mCurrentInstruction);
+		//LOG_INSTRUCTION(mCurrentInstruction);
 		
 		//We override some methods here for view adjustment
 		//TODO: Clean this up some more

@@ -15,7 +15,10 @@ DeltaEncodeModule::DeltaEncodeModule(){
 Instruction *DeltaEncodeModule::makeSkip(uint32_t n){
 	Instruction *skip = new Instruction();
 	skip->id = CGL_REPEAT_INSTRUCTION;
-	memcpy(skip->args, &n, sizeof(uint32_t));			
+	memcpy(skip->args, &n, sizeof(uint32_t));	
+	
+	//LOG("Skip %d\n", n);
+			
 	return skip;
 }
 
@@ -57,6 +60,8 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	if(sameCount){
 		result->push_back(makeSkip(sameCount));
 	}
+	
+	//LOG("Encode: Out %d, in %d\n", result->size(), list->size());
 		
 	lastFrame = *list;
 	delete list;
@@ -79,11 +84,15 @@ vector<Instruction *> *DeltaEncodeModule::resultAsList(){
 /*******************************************************************************
  Decode stage
 *******************************************************************************/
+DeltaDecodeModule::DeltaDecodeModule(){
+	lastFrame.clear();
+}
+
 bool DeltaDecodeModule::process(vector<Instruction *> *list){
 			
 	vector<Instruction *> *result = new vector<Instruction *>();
 		
-	int sameCount = 0;
+	int instrCount = 0;
 	
 			
 	for(int n=0;n<(int)list->size();n++){		
@@ -93,19 +102,25 @@ bool DeltaDecodeModule::process(vector<Instruction *> *list){
 		if((int)lastFrame.size() > n){
 				
 			if(instr->id == CGL_REPEAT_INSTRUCTION){
-				uint32_t *num = (uint32_t *)instr->args;
-				
+			
+				uint32_t *num = (uint32_t *)instr->args;								
 				for(int i=0;i<(int)*num;i++){
-					Instruction *last = lastFrame[n + i];
-					result->push_back(last->copy());					
+					Instruction *last = lastFrame[instrCount];
+					result->push_back(last->copy());	
+					instrCount++;				
 				}
 			}else{
 				result->push_back(instr);
+				instrCount++;
 			}
 		}else{
 			result->push_back(instr);
+			instrCount++;
 		}
 	}
+	
+	
+	
 	//copy into lastFrame
 	//This is probably the slowest bit, but we don't have any other option, we
 	//need a copy of the frame
@@ -129,15 +144,7 @@ bool DeltaDecodeModule::process(vector<Instruction *> *list){
 	}
 	
 	delete list;
-	
-	
-	LOG("Starting\n");
-	for(int n=0;n<(int)lastFrame.size();n++){		
-		Instruction *instr = lastFrame[n];
-		LOG_INSTRUCTION(instr);
-	}
-	LOG("Done!\n\n");
-		
+			
 
 	mListResult = result;
 	

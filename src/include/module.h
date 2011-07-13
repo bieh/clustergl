@@ -227,6 +227,7 @@ class DeltaDecodeModule : public Module
 {	
 	vector<Instruction *> lastFrame;
 public:
+	DeltaDecodeModule();
     
     //input
 	bool process(vector<Instruction *> *i);
