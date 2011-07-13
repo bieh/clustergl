@@ -61,7 +61,7 @@ int App::run_shared()
 			
 	//Set up the module chain
 	mModules.push_back(new AppModule(""));
-	//mModules.push_back(new DeltaEncodeModule()); 	
+	mModules.push_back(new DeltaEncodeModule()); 	
 	mModules.push_back(new NetClientModule());
 
 	//Return control to the parent process.
@@ -138,12 +138,7 @@ bool App::tick()
 	
 	for(int i=0;i<(int)thisFrame->size();i++){
 		Instruction *iter = (*thisFrame)[i];
-		
-		for(int b=0;b<3;b++){
-			if(iter->buffers[b].len && iter->buffers[b].needClear){
-				free(iter->buffers[b].buffer);
-			}	
-		}
+		iter->clear();
 	}
 
 	delete thisFrame;

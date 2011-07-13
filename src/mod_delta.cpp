@@ -25,10 +25,27 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	
 	vector<Instruction *> *result = new vector<Instruction *>();
 		
+	int sameCount = 0;
+		
 	for(int n=0;n<(int)list->size();n++){		
 		Instruction *instr = (*list)[n];
+		
+		if(lastFrame->size() < n){		
+			Instruction *last = (*lastFrame)[n];
+			if(instr->compare(last)){
+				sameCount++;
+			}else{
+				LOG("%d same\n", sameCount);
+				sameCount = 0;
+			}
+		}
+		
 		result->push_back(instr);
+		
 	}
+	
+	delete lastFrame;
+	lastFrame = list;
 	
 	mListResult = result;		
 		
