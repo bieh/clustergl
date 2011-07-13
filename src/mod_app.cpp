@@ -41,14 +41,24 @@ storedPointer rpInter;
 *********************************************************/
 
 //list of instructions that are getting generated
-Instruction mInstructions[MAX_INSTRUCTIONS];
+//We alternate between these each frame so Instruction* pointers remain valid
+//between frames (so mod_delta can compare the old frame, primarily)
+Instruction mInstructionsOne[MAX_INSTRUCTIONS];
+Instruction mInstructionsTwo[MAX_INSTRUCTIONS];
+
+//The current target
+Instruction *mInstructions = mInstructionsOne;
+
 //the number of instructions so far
 int iInstructionCount = 0;
+
 //the buffer we are currently using 
 //(there are a possible 3 buffers per message)
 int iCurrentBuffer = 0;
+
 //current instruction
 Instruction *mCurrentInstruction = NULL;
+
 //current arguements 
 byte *mCurrentArgs = NULL;
 
@@ -78,6 +88,12 @@ bool AppModule::process(vector<Instruction *> *list){
 	
 	iInstructionCount = 0;
 	
+	if(mInstructions == mInstructionsOne){
+		mInstructions = mInstructionsTwo;
+	}else{
+		mInstructions = mInstructionsOne;
+	}
+	
 	return true;
 }
 
@@ -106,6 +122,7 @@ void pushOp(uint16_t opID){
 	
 	mCurrentInstruction->id = opID;
 	mCurrentArgs = mCurrentInstruction->args;
+	mCurrentInstruction->arglen = 0;
 	
 	for(int i=0;i<3;i++){
 		mCurrentInstruction->buffers[i].buffer = NULL;
@@ -136,8 +153,7 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 		len = saved;
 	}
 
-	//hrm. How many times can we use the word 'buffer' in one line?
-	//4 apparantly
+	//Set up the instruction buffer
 	InstructionBuffer *buf = &mCurrentInstruction->buffers[iCurrentBuffer];
 	buf->buffer = copy;
 	buf->len = len;
@@ -161,6 +177,7 @@ void waitForReturn(){
 	void pushParam(type data){ \
 		memcpy((void *)mCurrentArgs, (const void *)&data, sizeof(type)); \
 		mCurrentArgs += sizeof(type); \
+		mCurrentInstruction->arglen += sizeof(type); \
 	}
 
 PUSHPARAM(GLfloat);

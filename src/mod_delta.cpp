@@ -9,19 +9,21 @@
  Encode stage
 *******************************************************************************/
 DeltaEncodeModule::DeltaEncodeModule(){
-	lastFrame = NULL;
+
 }
 
 bool DeltaEncodeModule::process(vector<Instruction *> *list){
-	LOG("encode\n");
+	//LOG("encode %d / %d\n", lastFrame.size(), list->size());
 	
-	if(!lastFrame){
+	if(lastFrame.size() == 0){
 		//this must be the first frame
 		mListResult = list;
-		lastFrame = list;
+		lastFrame = *list;
 		LOG("Initial frame\n");
 		return true;
 	}
+	
+	LOG("Delta Start\n");
 	
 	vector<Instruction *> *result = new vector<Instruction *>();
 		
@@ -30,22 +32,41 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	for(int n=0;n<(int)list->size();n++){		
 		Instruction *instr = (*list)[n];
 		
-		if(lastFrame->size() < n){		
-			Instruction *last = (*lastFrame)[n];
+		if((int)lastFrame.size() > n){		
+			Instruction *last = lastFrame[n];
+			
 			if(instr->compare(last)){
 				sameCount++;
+				
+				//LOG_INSTRUCTION(instr);
+				//LOG_INSTRUCTION(last);
+				//LOG("SAME\n\n");
+				
 			}else{
+			
+				//LOG_INSTRUCTION(instr);
+				//LOG_INSTRUCTION(last);
+				//LOG("DIFFERENT\n");				
 				LOG("%d same\n", sameCount);
 				sameCount = 0;
 			}
+		}else{
+			//LOG("CompareOverflow: %d/%d\n", n, lastFrame.size());
 		}
 		
 		result->push_back(instr);
 		
+		
+		
 	}
 	
-	delete lastFrame;
-	lastFrame = list;
+	if(sameCount){
+		LOG("%d same (end)\n", sameCount);
+	}
+	
+	LOG("Delta end\n");
+	
+	lastFrame = *list;
 	
 	mListResult = result;		
 		

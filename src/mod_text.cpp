@@ -9,13 +9,33 @@ typedef void (*TextFunc)(byte *buf);
 	Text Module Globals
 *********************************************************/
 
+static bool hasSetup = false;
+static void setupPointers();
+
 static TextFunc mFunctions[1700];
+
+void LOG_INSTRUCTION(Instruction *iter){
+
+	if(!iter){
+		LOG("(null instruction)\n");
+		return;
+	}
+	
+	if(!hasSetup){
+		setupPointers();
+	}
+	
+	if(iter->id < 1500){
+		mFunctions[iter->id](iter->args);
+	}else{
+		LOG("(Invalid instruction %d)\n", iter->id);
+	}
+}
 
 TextModule::TextModule()
 {
 	init();
 }
-
 
 /*********************************************************
 	Text Module Process Instructions
@@ -12155,12 +12175,21 @@ static void EXEC_glLoadIdentityDeformationMapSGIX(byte *commandbuf)
 	LOG("glLoadIdentityDeformationMapSGIX(mask=%0.1f)\n", (float)*mask);
 }
 
-
 bool TextModule::init()
 {
 
 	LOG("Loading TextModule\n");
 
+	if(!hasSetup){
+		setupPointers();
+	}
+
+	LOG("Loaded!\n");
+
+	return true;
+}
+
+void setupPointers(){
 	mFunctions[0] = EXEC_glNewList;
 	mFunctions[1] = EXEC_glEndList;
 	mFunctions[2] = EXEC_glCallList;
@@ -13392,8 +13421,6 @@ bool TextModule::init()
 	mFunctions[1228] = EXEC_glLoadIdentityDeformationMapSGIX;
 
 	mFunctions[1499] = EXEC_CGLSwapBuffers;
-
-	LOG("Loaded!\n");
-
-	return true;
+	
+	hasSetup = true;
 }

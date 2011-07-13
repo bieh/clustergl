@@ -204,7 +204,7 @@ public:
 *******************************************************************************/
 class DeltaEncodeModule : public Module
 {
-	vector<Instruction *> *lastFrame;
+	vector<Instruction *> lastFrame;
 public:
 	DeltaEncodeModule();
     

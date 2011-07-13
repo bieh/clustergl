@@ -42,3 +42,6 @@ public:
 
 //Global config instance
 extern Config *gConfig;
+
+//mod_text
+void LOG_INSTRUCTION(Instruction *instr);
