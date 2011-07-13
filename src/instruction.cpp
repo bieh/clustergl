@@ -17,6 +17,12 @@ Instruction::Instruction() {
 	memset(args, 0, MAX_ARG_LEN);
 }
 
+Instruction *Instruction::copy(){
+	Instruction *r = new Instruction();
+	memcpy(r, this, sizeof(Instruction));
+	return r;
+}
+
 void Instruction::clear() {
 	//printf("Deleted\n");
 

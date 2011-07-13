@@ -29,7 +29,7 @@ int App::run(int argc, char **argv)
 	
 	//Set up the module chain	
 	mModules.push_back(new NetSrvModule());
-	//mModules.push_back(new InsertModule());
+	mModules.push_back(new DeltaDecodeModule()); 	
 	mModules.push_back(new ExecModule());
 
 	while( tick() ){ 

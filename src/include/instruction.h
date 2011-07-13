@@ -20,6 +20,7 @@ public:
 	Instruction();
 	void clear();	
 	bool compare(Instruction *other);
+	Instruction *copy();
 	
 	uint16_t id;
 	byte args[MAX_ARG_LEN];

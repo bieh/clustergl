@@ -119,6 +119,8 @@ int initGL( GLvoid )
 /* Here goes our drawing code */
 int drawGLScene( GLvoid )
 {
+	SDL_Delay((1.0f / 5.0f) * 1024);
+
     /* rotational vars for the triangle and quad, respectively */
     static GLfloat rtri, rquad;
     /* These are to calculate our fps */

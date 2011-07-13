@@ -12,6 +12,13 @@ DeltaEncodeModule::DeltaEncodeModule(){
 
 }
 
+Instruction *DeltaEncodeModule::makeSkip(uint32_t n){
+	Instruction *skip = new Instruction();
+	skip->id = CGL_REPEAT_INSTRUCTION;
+	memcpy(skip->args, &n, sizeof(uint32_t));			
+	return skip;
+}
+
 bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	//LOG("encode %d / %d\n", lastFrame.size(), list->size());
 	
@@ -19,12 +26,9 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 		//this must be the first frame
 		mListResult = list;
 		lastFrame = *list;
-		LOG("Initial frame\n");
 		return true;
 	}
-	
-	LOG("Delta Start\n");
-	
+		
 	vector<Instruction *> *result = new vector<Instruction *>();
 		
 	int sameCount = 0;
@@ -36,38 +40,27 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 			Instruction *last = lastFrame[n];
 			
 			if(instr->compare(last)){
-				sameCount++;
-				
-				//LOG_INSTRUCTION(instr);
-				//LOG_INSTRUCTION(last);
-				//LOG("SAME\n\n");
-				
+				sameCount++;				
 			}else{
 			
-				//LOG_INSTRUCTION(instr);
-				//LOG_INSTRUCTION(last);
-				//LOG("DIFFERENT\n");				
-				LOG("%d same\n", sameCount);
+				if(sameCount)
+					result->push_back(makeSkip(sameCount));
+					
+				result->push_back(instr);	
 				sameCount = 0;
 			}
 		}else{
-			//LOG("CompareOverflow: %d/%d\n", n, lastFrame.size());
+			result->push_back(instr);	
 		}
-		
-		result->push_back(instr);
-		
-		
-		
 	}
 	
 	if(sameCount){
-		LOG("%d same (end)\n", sameCount);
+		result->push_back(makeSkip(sameCount));
 	}
-	
-	LOG("Delta end\n");
-	
+		
 	lastFrame = *list;
-	
+	delete list;
+		
 	mListResult = result;		
 		
 	return true;
@@ -86,14 +79,74 @@ vector<Instruction *> *DeltaEncodeModule::resultAsList(){
 /*******************************************************************************
  Decode stage
 *******************************************************************************/
-bool DeltaDecodeModule::process(vector<Instruction *> *i){
-	LOG("decode\n");
-	return true;
+bool DeltaDecodeModule::process(vector<Instruction *> *list){
+			
+	vector<Instruction *> *result = new vector<Instruction *>();
+		
+	int sameCount = 0;
+	
+			
+	for(int n=0;n<(int)list->size();n++){		
+		Instruction *instr = (*list)[n];
+		
+		
+		if((int)lastFrame.size() > n){
+				
+			if(instr->id == CGL_REPEAT_INSTRUCTION){
+				uint32_t *num = (uint32_t *)instr->args;
+				
+				for(int i=0;i<(int)*num;i++){
+					Instruction *last = lastFrame[n + i];
+					result->push_back(last->copy());					
+				}
+			}else{
+				result->push_back(instr);
+			}
+		}else{
+			result->push_back(instr);
+		}
+	}
+	//copy into lastFrame
+	//This is probably the slowest bit, but we don't have any other option, we
+	//need a copy of the frame
+	for(int n=0;n<(int)lastFrame.size();n++){
+		lastFrame[n]->clear();
+		delete lastFrame[n];
+	}	
+	
+	lastFrame.clear();
+	for(int n=0;n<(int)result->size();n++){
+		Instruction *src = (*result)[n];
+		Instruction *dst = src->copy();
+						
+		lastFrame.push_back(dst);
+		
+		//reset the buffers so they don't get cleared later
+		for(int i=0;i<3;i++){
+			src->buffers[i].needClear = false;
+		}
+		//LOG_INSTRUCTION(dst);
+	}
+	
+	delete list;
+	
+	
+	LOG("Starting\n");
+	for(int n=0;n<(int)lastFrame.size();n++){		
+		Instruction *instr = lastFrame[n];
+		LOG_INSTRUCTION(instr);
+	}
+	LOG("Done!\n\n");
+		
+
+	mListResult = result;
+	
+	return true;			
 }
 
 //output
 vector<Instruction *> *DeltaDecodeModule::resultAsList(){
-
+	return mListResult;
 }
 
 

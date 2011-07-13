@@ -205,6 +205,8 @@ public:
 class DeltaEncodeModule : public Module
 {
 	vector<Instruction *> lastFrame;
+	
+	Instruction *makeSkip(uint32_t n);
 public:
 	DeltaEncodeModule();
     
@@ -223,7 +225,7 @@ public:
 
 class DeltaDecodeModule : public Module
 {	
-	vector<Instruction> lastFrame;
+	vector<Instruction *> lastFrame;
 public:
     
     //input

@@ -66,12 +66,18 @@ bool TextModule::sync()
 
 
 /*********************************************************
-	Text Module SDL Methods
+	Text Module CGL Methods
 *********************************************************/
 
 static void EXEC_CGLSwapBuffers(byte *commandbuf)
 {
-	LOG("SDL_GL_SwapBuffers()\n");
+	LOG("CGL_SwapBuffers()\n");
+}
+
+static void EXEC_CGLRepeat(byte *commandbuf)
+{
+	uint32_t *i = (uint32_t*)commandbuf;  commandbuf += sizeof(GLuint);
+	LOG("CGL_Repeat(%d)\n", *i);
 }
 
 
@@ -13420,6 +13426,7 @@ void setupPointers(){
 	mFunctions[1227] = EXEC_glDeformSGIX;
 	mFunctions[1228] = EXEC_glLoadIdentityDeformationMapSGIX;
 
+	mFunctions[1498] = EXEC_CGLRepeat;
 	mFunctions[1499] = EXEC_CGLSwapBuffers;
 	
 	hasSetup = true;
