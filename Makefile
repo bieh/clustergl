@@ -10,7 +10,7 @@ test:
 	cd runtime && \
 	gnome-terminal -e " gdb -ex run -quiet --args ./cgl-render left" && \
 	sleep 1 && \
-	gnome-terminal -e "./cgl-capture tests/lesson05/lesson05"
+	gnome-terminal -e "./cgl-capture tests/texture/texture"
 	
 debugrender:
 	cd runtime && \

@@ -79,8 +79,14 @@ void App::init(bool shared, const char *id)
 	printf("**********************************************\n");	
 
     bIsIntercept = shared;
+    
+    char *configFile = "cgl.conf";
+    
+    if(getenv("CGL_CONFIG_FILE")){
+    	configFile = getenv("CGL_CONFIG_FILE");
+    }
 
-	gConfig = new Config("cgl.conf", string(id ? id : "null"));
+	gConfig = new Config(configFile, string(id ? id : "null"));
 
 	bHasInit = true;
 }
@@ -92,7 +98,7 @@ void App::init(bool shared, const char *id)
 bool App::tick()
 {
 	//LOG("tick()\n");
-	
+		
 	vector<Instruction *> *thisFrame = new vector<Instruction *>();
 	
 	if(gConfig->enableStats){
@@ -118,19 +124,21 @@ bool App::tick()
 			return false;
 		}
 	}
-/*
+
 	//return appropriate frames
-	for(std::list<Instruction>::iterator iter = thisFrame->begin();
-	    iter != (*thisFrame).end(); iter++) {
+	for(int n=0;n<(int)thisFrame->size();n++){
+		Instruction *iter = (*thisFrame)[n];
 		for(int i=0;i<3;i++) {
-			//A bit dodgy. This is how we determine if it was created on this
-			//end of the network
-			if(iter->buffers[i].needReply && iter->buffers[i].needClear) {
-				mModules[0]->reply(&(*iter), i);
+			//If we need a reply, send it
+			//But only do so if /we/ created the instruction
+			if(iter->buffers[i].needReply /*&& iter->buffers[i].needClear*/) {
+				LOG("need a reply\n");
+				LOG_INSTRUCTION(iter);
+				mModules[0]->reply(iter, i);
 			}
 		}
 	}
-*/
+
 
 	if(gConfig->enableStats){
 	    stats_end();

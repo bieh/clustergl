@@ -163,7 +163,11 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 }
 
 void waitForReturn(){
-	//LOG("Waiting for a return\n");
+	
+	
+	LOG("Waiting for a return on: \n");
+	LOG_INSTRUCTION(mCurrentInstruction);
+	
 	//This is annoying. We need to force a frame end here so that the other end
 	//of the pipeline can get back to us with whatever it is they're going to
 	//do with the return buffer or value

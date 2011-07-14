@@ -42,7 +42,11 @@ Config::Config(string filename, string id){
 	cfg_t *cfg;
 
 	cfg = cfg_init(opts, CFGF_NONE);
-	cfg_parse(cfg, filename.c_str());
+	
+	if(cfg_parse(cfg, filename.c_str()) == CFG_PARSE_ERROR){
+		LOG("Couldn't parse config file\n");
+		exit(1);
+	}
 	
 	numOutputs = 0;
 	

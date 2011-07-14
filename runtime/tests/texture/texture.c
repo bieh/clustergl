@@ -54,7 +54,7 @@ int LoadGLTextures( )
     /* Status indicator */
     int Status = FALSE;
 
-
+	printf("loading the texture\n");
 
     /* Load The Bitmap, Check For Errors, If Bitmap's Not Found Quit */
     if ( ( TextureImage[0] = SDL_LoadBMP( "data/texture.bmp" ) ) )
@@ -65,6 +65,8 @@ int LoadGLTextures( )
 
 	    /* Create The Texture */
 		glGenTextures( 1, &texture[0] );
+		
+		printf("Got texture id %d\n", texture[0]);
 
 	    /* Typical Texture Generation Using Data From The Bitmap */
 	    glBindTexture( GL_TEXTURE_2D, texture[0] );
@@ -77,6 +79,8 @@ int LoadGLTextures( )
 	    /* Linear Filtering */
 	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+        }else{
+        	printf("couldn't load texture\n");
         }
 
     /* Free up any memory we may have used */
@@ -177,19 +181,8 @@ int initGL( GLvoid )
 /* Here goes our drawing code */
 int drawGLScene( GLvoid )
 {
-	    /* Typical Texture Generation Using Data From The Bitmap */
-	    glBindTexture( GL_TEXTURE_2D, texture[0] );
-	   
- /* Generate The Texture */
-	    glTexImage2D( GL_TEXTURE_2D, 0, 3, TextureImage[0]->w,
-			  TextureImage[0]->h, 0, GL_BGR,
-			  GL_UNSIGNED_BYTE, TextureImage[0]->pixels );
 
-	    /* Linear Filtering */
-	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-    /* These are to calculate our fps */
+	    /* These are to calculate our fps */
     static GLint T0     = 0;
     static GLint Frames = 0;
 
