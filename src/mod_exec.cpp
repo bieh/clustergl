@@ -142,6 +142,7 @@ bool ExecModule::process(vector<Instruction *> *list)
 		}
 
 		mCurrentInstruction = iter;
+		currentBuffer = 0;
 		
 		//LOG_INSTRUCTION(mCurrentInstruction);
 		
@@ -388,6 +389,12 @@ byte *popBuf()
 {
 	currentBuffer++;
 	return mCurrentInstruction->buffers[currentBuffer-1].buffer;
+}
+
+byte *popBuf(int *len){
+	*len = currentBuffer;
+	currentBuffer++;
+	return mCurrentInstruction->buffers[currentBuffer-1].buffer;	
 }
 
 
@@ -2206,8 +2213,11 @@ static void EXEC_glTexImage2D(byte *commandbuf)
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLboolean *null = (GLboolean*)commandbuf;  commandbuf += sizeof(GLboolean);
+	
+	byte *pixels = popBuf();
+		
 	//if(*null) {
-		glTexImage2D(*target, *level, *internalformat, *width, *height, *border, *format, *type, (const GLvoid *)popBuf());
+		glTexImage2D(*target, *level, *internalformat, *width, *height, *border, *format, *type, (const GLvoid *)pixels);
 	//}
 	//else {
 	//	LOG("183 no pixels!\n");

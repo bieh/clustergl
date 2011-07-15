@@ -82,6 +82,8 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 		LOG("Read error\n");
 		return false;
 	}
+	
+	//LOG("Reading %d instructions\n", num);
 
 	for(uint32_t x=0;x<num;x++) {
 		Instruction *i = &mInstructions[iInstructionCount++];
@@ -96,15 +98,19 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 		for(int n=0;n<3;n++) {
 			int l = i->buffers[n].len;
 
-			if(l > 0) {
+			if(l > 0) {				
 				i->buffers[n].buffer = (byte *) malloc(l);
 				i->buffers[n].needClear = true;
-				internalRead(i->buffers[n].buffer, l);
+				internalRead(i->buffers[n].buffer, l);				
 			}
 		}		
 	
-		list->push_back(i);		
+		list->push_back(i);	
+		
+		//LOG_INSTRUCTION(i);	
 	}
+	
+	//LOG("Done\n\n");
 	
 	return true;
 }

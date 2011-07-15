@@ -93,6 +93,7 @@ bool NetClientModule::process(vector<Instruction *> *list)
 			int l = i->buffers[n].len;
 
 			if(l > 0) {
+				
 				if(internalWrite(i->buffers[n].buffer, l) != l) {
 					LOG("Connection problem (didn't write buffer %d)!\n", l);
 					return false;
@@ -118,10 +119,10 @@ bool NetClientModule::process(vector<Instruction *> *list)
 }
 
 
-/*********************************************************
-	Net Client Sync
-*********************************************************/
 
+/*******************************************************************************
+ Sync
+*******************************************************************************/
 bool NetClientModule::sync()
 {
     LOG("NetClientModule::sync() requested, but not implemented\n");
@@ -131,6 +132,10 @@ bool NetClientModule::sync()
 
 
 
+
+/*******************************************************************************
+ Write to the network
+*******************************************************************************/
 int NetClientModule::internalWrite(void* buf, int nByte)
 {   		
 	if(bytesLeft - nByte > 0) {
@@ -146,6 +151,10 @@ int NetClientModule::internalWrite(void* buf, int nByte)
 
 void NetClientModule::sendBuffer()
 {
+	if(iSendBufPos == 0){
+		return;
+	}
+	
 	//LOG("NetClientModule::sendBuffer(%d)\n", iSendBufPos);
 	for(int i=0;i<(int)mSockets.size();i++){
 		int a = write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
@@ -159,12 +168,16 @@ void NetClientModule::sendBuffer()
 }
 
 
-/*********************************************************
-	Net Client Run Decompression
-*********************************************************/
 
+/*******************************************************************************
+ Read from the network
+*******************************************************************************/
 int NetClientModule::internalRead(void *buf, size_t count)
 {
-	//Read from each client.
-	LOG("NetClientModule::internalRead() requested, but not implemented\n");
+	int n = 0;
+	//Read from each renderer
+	for(int i=0;i<(int)mSockets.size();i++){
+		n = read(mSockets[i], buf, count);		
+	}
+	return n;
 }

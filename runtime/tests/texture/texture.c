@@ -62,6 +62,8 @@ int LoadGLTextures( )
 
 	    /* Set the status to true */
 	    Status = TRUE;
+	    
+	    glEnable(GL_TEXTURE_2D);
 
 	    /* Create The Texture */
 		glGenTextures( 1, &texture[0] );
@@ -70,11 +72,15 @@ int LoadGLTextures( )
 
 	    /* Typical Texture Generation Using Data From The Bitmap */
 	    glBindTexture( GL_TEXTURE_2D, texture[0] );
+	    
+	    printf("about to teximage2d %d\n", texture[0]);
 
 	    /* Generate The Texture */
 	    glTexImage2D( GL_TEXTURE_2D, 0, 3, TextureImage[0]->w,
 			  TextureImage[0]->h, 0, GL_BGR,
 			  GL_UNSIGNED_BYTE, TextureImage[0]->pixels );
+			  
+	  	printf("done teximage %d\n", texture[0]);
 
 	    /* Linear Filtering */
 	    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -181,6 +187,7 @@ int initGL( GLvoid )
 /* Here goes our drawing code */
 int drawGLScene( GLvoid )
 {
+	SDL_Delay(1.0f / 60.0f * 1024);
 
 	    /* These are to calculate our fps */
     static GLint T0     = 0;
