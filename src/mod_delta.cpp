@@ -23,7 +23,6 @@ Instruction *DeltaEncodeModule::makeSkip(uint32_t n){
 }
 
 bool DeltaEncodeModule::process(vector<Instruction *> *list){
-	//LOG("encode %d / %d\n", lastFrame.size(), list->size());
 	
 	if(lastFrame.size() == 0){
 		//this must be the first frame
@@ -42,7 +41,7 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 		if((int)lastFrame.size() > n){		
 			Instruction *last = lastFrame[n];
 			
-			if(instr->compare(last)){
+			if(!instr->needReply() && instr->compare(last)){
 				sameCount++;				
 			}else{
 			
@@ -60,9 +59,7 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	if(sameCount){
 		result->push_back(makeSkip(sameCount));
 	}
-	
-	//LOG("Encode: Out %d, in %d\n", result->size(), list->size());
-		
+			
 	lastFrame = *list;
 	delete list;
 		
@@ -140,7 +137,6 @@ bool DeltaDecodeModule::process(vector<Instruction *> *list){
 		for(int i=0;i<3;i++){
 			src->buffers[i].needClear = false;
 		}
-		//LOG_INSTRUCTION(dst);
 	}
 	
 	delete list;

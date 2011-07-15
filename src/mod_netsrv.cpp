@@ -100,8 +100,10 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 
 			if(l > 0) {				
 				i->buffers[n].buffer = (byte *) malloc(l);
-				i->buffers[n].needClear = true;
-				internalRead(i->buffers[n].buffer, l);				
+				i->buffers[n].needClear = true;				
+				i->buffers[n].needRemoteReply = i->buffers[n].needReply;
+				
+				internalRead(i->buffers[n].buffer, l);						
 			}
 		}		
 	

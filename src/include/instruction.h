@@ -12,6 +12,7 @@ public:
 	uint32_t len;
 	bool needClear;
 	bool needReply;
+	bool needRemoteReply;
 };
 
 class Instruction
@@ -21,6 +22,7 @@ public:
 	void clear();	
 	bool compare(Instruction *other);
 	Instruction *copy();
+	bool needReply();
 	
 	uint16_t id;
 	byte args[MAX_ARG_LEN];

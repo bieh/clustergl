@@ -12,6 +12,7 @@ Instruction::Instruction() {
 		buffers[i].len = 0;
 		buffers[i].needClear = false;
 		buffers[i].needReply = false;
+		buffers[i].needRemoteReply = false;
 	}
 			
 	memset(args, 0, MAX_ARG_LEN);
@@ -36,6 +37,15 @@ void Instruction::clear() {
 		}
 	}
 	
+}
+
+bool Instruction::needReply(){	
+	for(int i=0;i<3;i++) {
+		if(buffers[i].buffer && buffers[i].needReply){
+			return true;
+		}
+	}
+	return false;
 }
 	
 bool Instruction::compare(Instruction *other){

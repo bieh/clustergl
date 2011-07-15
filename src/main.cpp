@@ -29,7 +29,7 @@ int App::run(int argc, char **argv)
 	
 	//Set up the module chain	
 	mModules.push_back(new NetSrvModule());
-	//mModules.push_back(new DeltaDecodeModule()); 	
+	mModules.push_back(new DeltaDecodeModule()); 	
 	mModules.push_back(new ExecModule());
 
 	while( tick() ){ 
@@ -61,7 +61,7 @@ int App::run_shared()
 			
 	//Set up the module chain
 	mModules.push_back(new AppModule(""));
-	//mModules.push_back(new DeltaEncodeModule()); 	
+	mModules.push_back(new DeltaEncodeModule()); 	
 	mModules.push_back(new NetClientModule());
 
 	//Return control to the parent process.
@@ -131,9 +131,9 @@ bool App::tick()
 		for(int i=0;i<3;i++) {
 			//If we need a reply, send it
 			//But only do so if /we/ created the instruction
-			if(iter->buffers[i].needReply && iter->buffers[i].needClear) {
-				//LOG("need a reply %d\n", i);
-				//LOG_INSTRUCTION(iter);
+			if(iter->buffers[i].needReply && iter->buffers[i].needRemoteReply) {
+				LOG("need a reply %d\n", i);
+				LOG_INSTRUCTION(iter);
 				mModules[0]->reply(iter, i);
 				
 				iter->buffers[i].needReply = false;
