@@ -67,6 +67,9 @@ int LoadGLTextures( )
 
 	    /* Create The Texture */
 		glGenTextures( 1, &texture[0] );
+		glGenTextures( 1, &texture[0] );
+		glGenTextures( 1, &texture[0] );
+		glGenTextures( 1, &texture[0] );
 		
 		printf("Got texture id %d\n", texture[0]);
 

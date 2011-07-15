@@ -10,5 +10,5 @@ RUNTIME_DIR=`dirname "$LOCATION"`
 
 export CGL_CONFIG_FILE="$DIR/cgl.conf"
 
-#cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so `basename $@`
-cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so gdb -ex run -quiet --args `basename $@`
+cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so ./`basename $@`
+#cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so gdb -ex run -quiet --args ./`basename $@`

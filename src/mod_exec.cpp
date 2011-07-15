@@ -201,7 +201,7 @@ void handleViewport(Instruction *iter){
 	//	glViewport((-offsetX*screenWidth)/magic,0, gConfig->totalWidth, 4560*3.0/4.0);
 	//}
 	
-	LOG("handleViewport(%d,%d,%d,%d)\n",x,y,w,h);
+	//LOG("handleViewport(%d,%d,%d,%d)\n",x,y,w,h);
 }
 
 void handleScissor(Instruction *iter){
@@ -392,7 +392,7 @@ byte *popBuf()
 }
 
 byte *popBuf(int *len){
-	*len = currentBuffer;
+	*len = mCurrentInstruction->buffers[currentBuffer].len;
 	currentBuffer++;
 	return mCurrentInstruction->buffers[currentBuffer-1].buffer;	
 }
@@ -3514,9 +3514,16 @@ static void EXEC_glDrawElements(byte *commandbuf)
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
-	const GLvoid * buf = (const GLvoid *)popBuf();
+	
+	int l = 0;
+	
+	const GLvoid * buf = (const GLvoid *)popBuf(&l);
+	
+	LOG("About to glDrawElements(%d, %d)\n", l, *count);
 
 	glDrawElements(*mode, *count, *type, buf);
+	
+	LOG("Done!\n");
 }
 
 

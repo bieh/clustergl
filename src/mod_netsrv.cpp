@@ -93,10 +93,14 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 			LOG("Read error (%d)\n", r);
 			return false;
 		}
+		
+		//LOG_INSTRUCTION(i);	
 
 		//Now see if we're expecting any buffers
 		for(int n=0;n<3;n++) {
 			int l = i->buffers[n].len;
+			
+			//LOG("%d - %d\n", n, l);	
 
 			if(l > 0) {				
 				i->buffers[n].buffer = (byte *) malloc(l);
@@ -109,7 +113,9 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 	
 		list->push_back(i);	
 		
-		//LOG_INSTRUCTION(i);	
+		//LOG_INSTRUCTION(i);
+		
+		//LOG("  \n");	
 	}
 	
 	//LOG("Done\n\n");

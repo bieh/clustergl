@@ -1991,7 +1991,7 @@ extern "C" void glStencilMask(GLuint mask){
 //210
 extern "C" void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha){
 	//disabled for openarena, as it screws things up (unsure why)
-	LOG("********210*********\n");	
+	//LOG("********210*********\n");	
 	/*pushOp(210);
 	pushParam(red);
 	pushParam(green);
@@ -2844,6 +2844,7 @@ extern "C" void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GL
 	pushParam(mode);
 	pushParam(count);
 	pushParam(type);
+	
 	pushBuf(indices, count * getTypeSize(type));
 }
 
