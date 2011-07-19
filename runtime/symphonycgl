@@ -2,23 +2,18 @@
 
 SCRIPTNAME=runcgl
 
-DIR=$(dirname $0)
-if [ ! -x ${DIR}/${SCRIPTNAME} ]; then
-	DIR=$(dirname $(which ${SCRIPTNAME}))
-fi
-
-if [ ! -x ${DIR}/${SCRIPTNAME} ]; then
-	echo Cant locate \"${DIR}/${SCRIPTNAME}\", giving up >&2
-	exit 1
-fi
+LOCATION=$(cd ${0%/*} && echo $PWD/${0##*/})
+DIR=`dirname "$LOCATION"`
 
 echo Using clusterGL from ${DIR}...
 for i in `seq 1 5`; do
-	ssh dn$i "cd ${DIR} && DISPLAY=:0 ./GL $i > /dev/null" &
+	ssh dn$i "cd ${DIR} && DISPLAY=:0 ./cgl-render dn$i > dn$i.log" &
+	echo "Launched dn$i"
 done
 sleep 2
-DISPLAY=:0 LD_PRELOAD="${DIR}/libGL.so.1" $@
+echo "Launching capture"
+DISPLAY=:0 LD_PRELOAD="${DIR}/libcgl-capture.so" $@
 
-for i in `seq 1 5`; do
-	ssh dn$i "killall -9 GL"
-done
+#for i in `seq 1 5`; do
+#	ssh dn$i "killall -9 cgl-render"
+#done
