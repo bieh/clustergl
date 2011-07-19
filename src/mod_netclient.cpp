@@ -177,7 +177,11 @@ int NetClientModule::internalRead(void *buf, size_t count)
 	int n = 0;
 	//Read from each renderer
 	for(int i=0;i<(int)mSockets.size();i++){
-		n = read(mSockets[i], buf, count);		
+		n = 0;
+		byte *d = (byte *)buf;
+		while(n < count){
+		    n += read(mSockets[i], d + n, count);		  
+		}		
 	}
 	return n;
 }
