@@ -75,6 +75,8 @@ public:
 class ExecModule : public Module
 {
     bool makeWindow();
+    
+    bool handleViewMode(Instruction *i);
 
 public:
 	ExecModule();

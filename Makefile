@@ -8,9 +8,11 @@ clean:
 		
 test:
 	cd runtime && \
-	gnome-terminal -e " gdb -ex run -quiet --args ./cgl-render left" && \
+	gnome-terminal -e "./cgl-render left" && \
+	gnome-terminal -e "./cgl-render center" && \
+	gnome-terminal -e "./cgl-render right" && \
 	sleep 1 && \
-	gnome-terminal -e "./cgl-capture tests/texture/texture"
+	gnome-terminal -e "./cgl-capture tests/row/row"
 	
 debugrender:
 	cd runtime && \

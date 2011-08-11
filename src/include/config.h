@@ -20,6 +20,9 @@ public:
     //The position of this renderer inside the total screen size
     int offsetX;
     int offsetY;
+    
+    //for VIEWMODE_CURVE
+    int angle;
                 
     //Size of the entire viewport
     int totalWidth;
@@ -37,6 +40,9 @@ public:
     int clientPort;
     
     bool enableWindowPositioning;
+    
+    int viewMode;
+    string viewModeString;
     
 /*******************************************************************************
 	Capture configuration
@@ -60,3 +66,6 @@ main.h:const float SYMPHONY_SCREEN_TOTAL_WIDTH = 8880.0;
 main.h:const float SYMPHONY_SCREEN_TOTAL_HEIGHT = 4560.0;
 main.h:const float SYMPHONY_SCREEN_GAP = 120.0;
 */
+
+const int VIEWMODE_VIEWPORT = 1;
+const int VIEWMODE_CURVE = 2;
