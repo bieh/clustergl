@@ -49,6 +49,8 @@ public:
 *******************************************************************************/
 	int serverPort;
 	
+	string interceptMode;
+	
     //Size of the client window    
     int fakeWindowX;
     int fakeWindowY;

@@ -463,10 +463,12 @@ static int (*_glXMakeCurrent)( Display*, GLXDrawable, GLXContext) = NULL;
 void *handle = NULL;
 
 Bool bHasMinimized = false;
+bool bHasInit = false;
 
-/*
+
 extern "C" int SDL_Init(unsigned int flags) {
-	//LOG("SDL_Init\n");
+	
+	LOG("SDL_Init (%d, %d)\n", theApp != NULL, bHasInit);
 	if (_SDL_Init == NULL) {
 		_SDL_Init = (int (*)(unsigned int)) dlsym(RTLD_NEXT, "SDL_Init");
 	}
@@ -477,16 +479,36 @@ extern "C" int SDL_Init(unsigned int flags) {
 	}
 	
 	int r = (*_SDL_Init)(flags);
-	
+				
 	//Set up our internals
-	if(!theApp){
+	if(!theApp && !bHasInit){
+		bHasInit = true;
 		theApp = new App();
-		theApp->run_shared();
+		if(!theApp->run_shared("sdl")){
+			delete theApp;
+		}
 	}
+	
 	//LOG("SDL_Init finished\n");
 	return r;
 }
-*/
+
+extern "C" void SDL_GL_SwapBuffers( ) {
+	
+	//if(!bHasMinimized){
+	// if (SDL_WM_IconifyWindow()==0)
+	//	LOG("Could not minimize Window\n");
+	//  bHasMinimized = true;
+	//}
+	
+	
+	pushOp(1499); //Swap buffers
+
+	if(!theApp->tick()){
+		exit(1);
+	}
+}
+
 
 /*
 extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigned int videoFlags) {
@@ -573,11 +595,14 @@ extern "C" int glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ct
 	if(!bIsIntercept){
 		return temp;
 	}
-	
+			
 	//Set up our internals
-	if(!theApp){
+	if(!theApp && !bHasInit){
+		bHasInit = true;
 		theApp = new App();
-		theApp->run_shared();
+		if(!theApp->run_shared("xorg")){
+			delete theApp;
+		}
 	}
 	
 	return temp;
@@ -586,7 +611,7 @@ extern "C" int glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ct
 
 extern "C" Display *XOpenDisplay(const char *display_name){
 
-	LOG("SDL_Init\n");
+	LOG("XOpenDisplay (%d, %d)\n", theApp != NULL, bHasInit);
 	if (_XOpenDisplay == NULL) {
 		_XOpenDisplay = (Display *(*)(const char *)) dlsym(RTLD_NEXT, "XOpenDisplay");
 	}
@@ -599,12 +624,16 @@ extern "C" Display *XOpenDisplay(const char *display_name){
 	Display *r = (*_XOpenDisplay)(display_name);
 		
 	//Set up our internals
-	if(!theApp){
+	if(!theApp && !bHasInit){
+		bHasInit = true;
 		theApp = new App();
-		theApp->run_shared();
+		if(!theApp->run_shared("xorg")){
+			delete theApp;
+		}
 	}
 	return r;
 }
+
 
 extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 
@@ -626,7 +655,7 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 			
 	pushOp(1499); //Swap buffers
 	
-	if(!theApp->tick()){
+	if(theApp && !theApp->tick()){
 		exit(1);
 	}	
 }
@@ -1970,7 +1999,7 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
 	int len = getFormatSize(format) *  width * height;// * getTypeSize(type);
 	
 	
-	LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, getFormatSize(format));
+	//LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, getFormatSize(format));
 	
 	pushBuf(pixels, len);
 //	}
@@ -2570,7 +2599,7 @@ extern "C" void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenu
 
 //258
 extern "C" void glGetBooleanv(GLenum pname, GLboolean * params){
-	LOG("Called untested stub GetBooleanv!\n");
+//	LOG("Called untested stub GetBooleanv!\n");
 	pushOp(258);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLboolean) * 4, true);
@@ -2589,7 +2618,11 @@ extern "C" void glGetClipPlane(GLenum plane, GLdouble * equation){
 
 //260
 extern "C" void glGetDoublev(GLenum pname, GLdouble * params){
-	LOG("Called unimplemted stub GetDoublev!\n");
+//	LOG("Called unimplemted stub GetDoublev!\n");
+	pushOp(260);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLdouble) * 4, true);
+	waitForReturn();
 }
 
 #endif

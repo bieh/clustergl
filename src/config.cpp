@@ -39,6 +39,7 @@ Config::Config(string filename, string id){
 		CFG_STR_LIST((char *)"capturePipeline", (char *)"{}", CFGF_NONE),
 		CFG_STR_LIST((char *)"outputPipeline", (char *)"{}", CFGF_NONE),
 		CFG_SEC(			(char *)"output", 	output_opts, CFGF_MULTI | CFGF_TITLE),
+		CFG_STR(	(char *)("interceptMode"), 0, CFGF_NONE),
 		CFG_END()
 	};
 	
@@ -51,6 +52,8 @@ Config::Config(string filename, string id){
 		LOG("Couldn't parse config file\n");
 		exit(1);
 	}
+	
+	interceptMode = string(cfg_getstr(cfg, "interceptMode"));
 	
 	numOutputs = 0;
 	

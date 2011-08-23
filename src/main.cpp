@@ -44,15 +44,25 @@ int App::run(int argc, char **argv)
 /*******************************************************************************
 	Entry if invoked as capture (shared library)
 *******************************************************************************/
-int App::run_shared()
+bool App::run_shared(string src)
 {
 	//This is needed to ensure that multiple calls to SDL_Init() don't cause
 	//us to do the wrong thing.
 	if(bHasInit) {
-		return 1;
+		return false;
 	}
 	
+	//Load the config file
 	init(true, "capture");
+	
+	//Make sure we're launching from the correct source. This means that mixing
+	//SDL and Xorg works properly when we're fork()'ing. ie: OpenArena
+	if(src != gConfig->interceptMode){
+		LOG("Ignored spurious launch (possibly fork()?): %s vs %s\n", 
+			src.c_str(), gConfig->interceptMode.c_str());
+		LOG("If this is intended, change 'interceptMode' to '%s' in the config file\n", src.c_str());
+		return false;
+	}
 	
 	for(int i=0;i<gConfig->numOutputs;i++){
 		LOG("Found output: %s:%d\n", 
@@ -66,8 +76,7 @@ int App::run_shared()
 	mModules.push_back(new NetClientModule());
 
 	//Return control to the parent process.
-
-	return 0;
+	return true;
 }
 
 /*******************************************************************************

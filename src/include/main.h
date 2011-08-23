@@ -30,7 +30,8 @@ public:
 	int run(int argc, char **argv);
 
 	//called when we're invoked from LD_PRELOAD
-	int run_shared();
+	//Will return false if we're not configured to run off this source
+	bool run_shared(string src);
 
 	bool tick();
 
