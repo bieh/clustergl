@@ -444,17 +444,26 @@ void sendPointers(int length) {
 	SDL Intercepts
 ********************************************************/
 
+//SDL functors
 static int (*_SDL_Init)(unsigned int flags) = NULL;
 static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
 static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
 static int (*_SDL_GL_LoadLibrary)(const char *) = NULL;
 static SDL_Rect ** (*_SDL_ListModes)(SDL_PixelFormat *format, Uint32 flags) = NULL;
 
+//X functors
+#include <X11/Xlib.h>
+
+static Display *(*_XOpenDisplay)(const char *) = NULL;
+static void (*_glXSwapBuffers) ( Display*, GLXDrawable) = NULL;
+static int (*_glXMakeCurrent)( Display*, GLXDrawable, GLXContext) = NULL;
+
 //handle to point to our own library
 void *handle = NULL;
 
 Bool bHasMinimized = false;
 
+/*
 extern "C" int SDL_Init(unsigned int flags) {
 	//LOG("SDL_Init\n");
 	if (_SDL_Init == NULL) {
@@ -476,7 +485,9 @@ extern "C" int SDL_Init(unsigned int flags) {
 	//LOG("SDL_Init finished\n");
 	return r;
 }
+*/
 
+/*
 extern "C" SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, unsigned int videoFlags) {
 	if (_SDL_SetVideoMode == NULL) {
 		_SDL_SetVideoMode = (SDL_Surface* (*)(int,int,int,unsigned int)) dlsym(RTLD_NEXT, "SDL_SetVideoMode");
@@ -493,6 +504,7 @@ extern "C" SDL_Rect **  SDL_ListModes(SDL_PixelFormat *format, Uint32 flags) {
 	// -1 means any mode is supported (easier than adding symphony values to list)
 	return (SDL_Rect **) -1;
 }
+*/
 
 /*
 extern "C" int SDL_GL_LoadLibrary(const char *path) {
@@ -500,6 +512,8 @@ extern "C" int SDL_GL_LoadLibrary(const char *path) {
 	return -1;
 }*/
 
+
+/*
 extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
 	LOG("*SDL_GL_GetProcAddress finding: %s!\n", proc);
       if(!handle) {
@@ -521,13 +535,13 @@ extern "C" void *SDL_GL_GetProcAddress(const char* proc) {
 }
 
 extern "C" void SDL_GL_SwapBuffers( ) {
-	/*
-	if(!bHasMinimized){
-	 if (SDL_WM_IconifyWindow()==0)
-		LOG("Could not minimize Window\n");
-	  bHasMinimized = true;
-	}
-	*/
+	
+	//if(!bHasMinimized){
+	// if (SDL_WM_IconifyWindow()==0)
+	//	LOG("Could not minimize Window\n");
+	//  bHasMinimized = true;
+	//}
+	
 	
 	pushOp(1499); //Swap buffers
 
@@ -535,19 +549,39 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 		exit(1);
 	}
 }
+*/
 
 /********************************************************
 	X Exports
 ********************************************************/
-#include <X11/Xlib.h>
 
-static Display *(*_XOpenDisplay)(const char *) = NULL;
-static void (*_glXSwapBuffers) ( Display*, GLXDrawable) = NULL;
+//1604
+extern "C" int glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ctx)
+{
+	if (_glXMakeCurrent == NULL) {
+		_glXMakeCurrent = (int (*)( Display*, GLXDrawable, GLXContext)) dlsym(RTLD_NEXT, "glXMakeCurrent");
+	}
+	
+	if(!_glXMakeCurrent) {
+		printf("Couldn't find glXMakeCurrent: %s\n", dlerror());
+		exit(0);
+	}
+	
+	int temp = (*_glXMakeCurrent) (dpy, drawable, ctx);
+	
+	//Set up our internals
+	if(!theApp){
+		theApp = new App();
+		theApp->run_shared();
+	}
+	
+	return temp;
+}
 
 
-/*
 extern "C" Display *XOpenDisplay(const char *display_name){
-	//LOG("SDL_Init\n");
+
+	LOG("SDL_Init\n");
 	if (_XOpenDisplay == NULL) {
 		_XOpenDisplay = (Display *(*)(const char *)) dlsym(RTLD_NEXT, "XOpenDisplay");
 	}
@@ -585,7 +619,7 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 		exit(1);
 	}
 }
-*/
+
 
 
 /********************************************************
