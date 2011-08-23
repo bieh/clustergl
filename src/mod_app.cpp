@@ -264,14 +264,86 @@ int getLightParamSize(GLenum type) {
 
 int getFormatSize(GLenum format) {
 
+	LOG("getFormatSize(%d)\n", format);
+	
+	//passed in the number of bytes
+	if(format == 1 || format == 2 || format == 3 || format == 4){
+		return format;
+	}
+
+/*
 	int bpp = 1;
 	    
 	if(format == GL_BGR || format == GL_RGB) 
 		bpp = 3;
 	else if(format == GL_RGBA || format == GL_BGRA) 
 		bpp = 4;
+	else
+		LOG("DEFAULTED getFormatSize\n");
+*/
+	switch(format)
+	{
+	case GL_ALPHA: return sizeof(GLfloat);
+	//case GL_ALPHA4: return 0;
+	case GL_ALPHA8: return 1;
+//	case GL_ALPHA12: return 0;
+	case GL_ALPHA16: return 2;
+	case GL_COMPRESSED_ALPHA: return 1;
+	case GL_COMPRESSED_LUMINANCE: return 1;
+	case GL_COMPRESSED_LUMINANCE_ALPHA: return 1;
+	case GL_COMPRESSED_INTENSITY: return 1;
+	case GL_COMPRESSED_RGB: return 3;
+	case GL_COMPRESSED_RGBA: return 4;
+	case GL_DEPTH_COMPONENT: return sizeof(GLfloat);
+	case GL_DEPTH_COMPONENT16: return 2;
+//	case GL_DEPTH_COMPONENT24: return 0;
+	case GL_DEPTH_COMPONENT32: return 4;
+	case GL_LUMINANCE: return 1;
+//	case GL_LUMINANCE4: return 0;
+	case GL_LUMINANCE8: return 1;
+//	case GL_LUMINANCE12: return 0;
+	case GL_LUMINANCE16: return 2;
+	case GL_LUMINANCE_ALPHA: return sizeof(GLfloat);
+	case GL_LUMINANCE4_ALPHA4: return 1;
+	case GL_LUMINANCE6_ALPHA2: return 1;
+	case GL_LUMINANCE8_ALPHA8: return 2;
+	case GL_LUMINANCE12_ALPHA4: return 2;
+//	case GL_LUMINANCE12_ALPHA12: return 0;
+	case GL_LUMINANCE16_ALPHA16: return 4;
+	case GL_INTENSITY: return sizeof(GLfloat);
+//	case GL_INTENSITY4: return 0;
+	case GL_INTENSITY8: return 1;
+//	case GL_INTENSITY12: return 0;
+	case GL_INTENSITY16: return 2;
+	case GL_R3_G3_B2: return 1;
+	case GL_RGB: return 3;
+//	case GL_RGB4: return 0;
+//	case GL_RGB5: return 0;
+	case GL_RGB8: return 3;
+//	case GL_RGB10: return 0;
+//	case GL_RGB12: return 0;
+	case GL_RGB16: return 6;
+	case GL_RGBA: return 4;
+	case GL_RGBA2: return 1;
+	case GL_RGBA4: return 2;
+//	case GL_RGB5_A1: return 0;
+	case GL_RGBA8: return 4;
+//	case GL_RGB10_A2: return 0;
+	case GL_RGBA12: return 6;
+	case GL_RGBA16: return 8;
+	case GL_SLUMINANCE: return sizeof(GLfloat);
+	case GL_SLUMINANCE8: return 1;
+	case GL_SLUMINANCE_ALPHA: return sizeof(GLfloat);
+	case GL_SLUMINANCE8_ALPHA8: return 2;
+	case GL_SRGB: return 4;
+	case GL_SRGB8: return 4;
+	case GL_SRGB_ALPHA: return 4;
+	case GL_SRGB8_ALPHA8: return 5;
 
-	return bpp;
+	default:LOG("DEFAULTED getFormatSize\n"); return 4;
+	}                
+
+	return 4;
 }
 
 /*********************************************************
@@ -473,6 +545,7 @@ static Display *(*_XOpenDisplay)(const char *) = NULL;
 static void (*_glXSwapBuffers) ( Display*, GLXDrawable) = NULL;
 
 
+/*
 extern "C" Display *XOpenDisplay(const char *display_name){
 	//LOG("SDL_Init\n");
 	if (_XOpenDisplay == NULL) {
@@ -512,6 +585,7 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 		exit(1);
 	}
 }
+*/
 
 
 /********************************************************
@@ -1848,10 +1922,10 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
     //if(pixels) {
 	pushParam(true);
 	
-	int len = getFormatSize(format) *  width * height * getTypeSize(type);
+	int len = getFormatSize(format) *  width * height;// * getTypeSize(type);
 	
 	
-	//LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, hash((byte *)pixels, len));
+	LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, getFormatSize(format));
 	
 	pushBuf(pixels, len);
 //	}

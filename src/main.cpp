@@ -97,7 +97,7 @@ void App::init(bool shared, const char *id)
 *******************************************************************************/
 bool App::tick()
 {
-	//LOG("tick()\n");
+	LOG("tick()\n");
 		
 	vector<Instruction *> *thisFrame = new vector<Instruction *>();
 	
@@ -153,7 +153,7 @@ bool App::tick()
 
 	delete thisFrame;
 	
-	//LOG("tick() done\n");
+	LOG("tick() done\n");
 
 	return true;
 }

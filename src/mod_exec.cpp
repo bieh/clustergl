@@ -152,7 +152,7 @@ bool ExecModule::process(vector<Instruction *> *list)
 		mCurrentInstruction = iter;
 		currentBuffer = 0;
 		
-		//LOG_INSTRUCTION(mCurrentInstruction);
+		LOG_INSTRUCTION(mCurrentInstruction);
 		
 		if(handleViewMode(iter)){
 			continue;
@@ -2009,7 +2009,7 @@ static void EXEC_glTexImage2D(byte *commandbuf)
 	int l =0;
 	byte *pixels = popBuf(&l);
 	
-	//LOG("glTexImage2D: %d/%d, %d %d\n", *width, *height, l, hash(pixels, l));
+	LOG("glTexImage2D: %d/%d, %d %d\n", *width, *height, l, hash(pixels, l));
 		
 	//if(*null) {
 		glTexImage2D(*target, *level, *internalformat, *width, *height, *border, *format, *type, (const GLvoid *)pixels);
