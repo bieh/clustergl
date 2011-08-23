@@ -74,6 +74,8 @@ AppModule::AppModule(string command){
 	rpCol.size = (GLint) NULL;
 	rpInter.size = (GLint) NULL;
 	
+	LOG("INIT AppModule\n");
+	
 	init(command);
 }
 
@@ -276,6 +278,15 @@ int getFormatSize(GLenum format) {
 	Send Pointers Given Size
 *********************************************************/
 
+static int hash(byte *data, int len){
+	int r = 0;
+	
+	for(int i=0;i<len;i++){
+		r += data[i];
+	}
+	return r;
+}
+
 void sendPointers(int length) {
 	
 	//TODO: fill in other pointer values, or 
@@ -284,37 +295,46 @@ void sendPointers(int length) {
 	//texture pointer
 	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
 	{
+		int size = getTypeSize(rpTex.type) * rpTex.size * (length + rpTex.stride);
 		pushOp(320);
 		pushParam(rpTex.size);
 		pushParam(rpTex.type);
 		pushParam(rpTex.stride);
 		pushParam(false);
-		pushBuf(rpTex.pointer, (getTypeSize(rpTex.type) * rpTex.size * (length + rpTex.stride)));
+		pushBuf(rpTex.pointer, size);
 		rpTex.sent = true;
+		
+		//LOG("Sending glTexCoordPointer() data %d, %d, %d\n", rpTex.size, size, hash((byte *)rpTex.pointer, size));
 	}
 
 	//vertex pointer
 	if(!rpVert.sent && rpVert.size)	//check if sent already, and not null
 	{
+		int size = getTypeSize(rpVert.type)  * rpVert.size * (length + rpVert.stride);
 		pushOp(321);
 		pushParam(rpVert.size);
 		pushParam(rpVert.type);
 		pushParam(rpVert.stride);
 		pushParam(false);
-		pushBuf(rpVert.pointer, (getTypeSize(rpVert.type)  * rpVert.size * (length + rpVert.stride)));
+		pushBuf(rpVert.pointer, size);
 		rpVert.sent = true;
+		
+		//LOG("Sending glVertexPointer() data %d, %d, %d\n", rpVert.size, size, hash((byte *)rpVert.pointer, size));
 	}
 	
 	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
 	{
+		int size = getTypeSize(rpCol.type) * rpCol.size * (length + rpCol.stride);
 		//colour pointer
 		pushOp(308);
 		pushParam(rpCol.size);
 		pushParam(rpCol.type);
 		pushParam(rpCol.stride);
 		pushParam(false);
-		pushBuf(rpCol.pointer, (getTypeSize(rpCol.type) * rpCol.size * (length + rpCol.stride)));
+		pushBuf(rpCol.pointer, size);
 		rpCol.sent = true;
+		
+		//LOG("Sending glColorPointer() data %d %d, %d\n", rpCol.size, size, hash((byte *)rpCol.pointer, size));
 	}
 
 	if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
@@ -352,16 +372,12 @@ void sendPointers(int length) {
 	SDL Intercepts
 ********************************************************/
 
-//Pointer to SDL_INIT
 static int (*_SDL_Init)(unsigned int flags) = NULL;
-//Pointer to SDL_SetVideoMode
 static SDL_Surface* (*_SDL_SetVideoMode)(int, int, int, unsigned int) = NULL;
-//Pointer to SDL_GL_GetProcAddress
 static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
-//Pointer to SDL_LoadLibrary
 static int (*_SDL_GL_LoadLibrary)(const char *) = NULL;
-//Pointer to SDL_ListModes
 static SDL_Rect ** (*_SDL_ListModes)(SDL_PixelFormat *format, Uint32 flags) = NULL;
+
 //handle to point to our own library
 void *handle = NULL;
 
@@ -444,10 +460,59 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 	pushOp(1499); //Swap buffers
 
 	if(!theApp->tick()){
-		LOG("end swapping\n");
 		exit(1);
 	}
 }
+
+/********************************************************
+	X Exports
+********************************************************/
+#include <X11/Xlib.h>
+
+static Display *(*_XOpenDisplay)(const char *) = NULL;
+static void (*_glXSwapBuffers) ( Display*, GLXDrawable) = NULL;
+
+
+extern "C" Display *XOpenDisplay(const char *display_name){
+	//LOG("SDL_Init\n");
+	if (_XOpenDisplay == NULL) {
+		_XOpenDisplay = (Display *(*)(const char *)) dlsym(RTLD_NEXT, "XOpenDisplay");
+	}
+		
+	if(!_XOpenDisplay){
+		printf("Couldn't find XOpenDisplay(): %s\n", dlerror());
+		exit(0);
+	}
+	
+	Display *r = (*_XOpenDisplay)(display_name);
+	
+	//Set up our internals
+	if(!theApp){
+		theApp = new App();
+		theApp->run_shared();
+	}
+	return r;
+}
+
+extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
+	if (_glXSwapBuffers == NULL) {
+		_glXSwapBuffers = (void (*)(Display *, GLXDrawable)) dlsym(RTLD_NEXT, "glXSwapBuffers");
+	}
+	
+	if(!_glXSwapBuffers){
+		printf("Couldn't find glXSwapBuffers(): %s\n", dlerror());
+		exit(0);
+	}
+	
+	(*_glXSwapBuffers)(dpy, drawable);
+			
+	pushOp(1499); //Swap buffers
+
+	if(!theApp->tick()){
+		exit(1);
+	}
+}
+
 
 /********************************************************
 	Interception Exports
@@ -1782,7 +1847,13 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
     
     //if(pixels) {
 	pushParam(true);
-	pushBuf(pixels, getFormatSize(format) *  width * height * getTypeSize(type));
+	
+	int len = getFormatSize(format) *  width * height * getTypeSize(type);
+	
+	
+	//LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, hash((byte *)pixels, len));
+	
+	pushBuf(pixels, len);
 //	}
  //   else {
 //	pushParam(false);
@@ -2821,7 +2892,7 @@ extern "C" void glColorPointer(GLint size, GLenum type, GLsizei stride, const GL
 //309
 extern "C" void glDisableClientState(GLenum array){
 	pushOp(309);
-	pushParam(array);
+	pushParam(array);		
 }
 
 //310
@@ -2845,7 +2916,11 @@ extern "C" void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GL
 	pushParam(count);
 	pushParam(type);
 	
-	pushBuf(indices, count * getTypeSize(type));
+	int len = count * getTypeSize(type);
+	
+//	LOG("glDrawElements %d %d %d\n", count, len, hash((byte *)indices, len));
+	
+	pushBuf(indices, len);
 }
 
 //312
@@ -2856,7 +2931,7 @@ extern "C" void glEdgeFlagPointer(GLsizei stride, const GLvoid * pointer){
 //313
 extern "C" void glEnableClientState(GLenum array){
 	pushOp(313);
-	pushParam(array);
+	pushParam(array);	
 }
 
 //314

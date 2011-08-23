@@ -12,6 +12,11 @@
 
 typedef void (*ExecFunc)(byte *buf);
 
+/*
+[        mod_text.cpp: 3188]	glTexCoordPointer()
+[        mod_text.cpp: 3197]	glVertexPointer()
+[        mod_text.cpp: 3098]	glColorPointer(size=4, type=5121.0, stride=0.0)
+*/
 
 /*******************************************************************************
 	Globals
@@ -21,6 +26,14 @@ static ExecFunc mFunctions[1700];
 static Instruction *mCurrentInstruction = NULL;
 GLenum currentMode = GL_MODELVIEW;
 
+static int hash(byte *data, int len){
+	int r = 0;
+	
+	for(int i=0;i<len;i++){
+		r += data[i];
+	}
+	return r;
+}
 
 int displayNumber = 0;
 int currentBuffer = 0;
@@ -1993,7 +2006,10 @@ static void EXEC_glTexImage2D(byte *commandbuf)
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLboolean *null = (GLboolean*)commandbuf;  commandbuf += sizeof(GLboolean);
 	
-	byte *pixels = popBuf();
+	int l =0;
+	byte *pixels = popBuf(&l);
+	
+	//LOG("glTexImage2D: %d/%d, %d %d\n", *width, *height, l, hash(pixels, l));
 		
 	//if(*null) {
 		glTexImage2D(*target, *level, *internalformat, *width, *height, *border, *format, *type, (const GLvoid *)pixels);
@@ -2002,6 +2018,7 @@ static void EXEC_glTexImage2D(byte *commandbuf)
 	//	LOG("183 no pixels!\n");
 	//	glTexImage2D(*target, *level, *internalformat, *width, *height, *border, *format, *type, NULL);
 	//}
+	
 }
 
 
@@ -3261,8 +3278,10 @@ static void EXEC_glColorPointer(byte *commandbuf)
 	if(*null)
 		glColorPointer(*size, *type, *stride, (char *) NULL);
 	else {
-		const GLvoid * buf =  (const GLvoid *)popBuf();
+		int i = 0;
+		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
 		glColorPointer(*size, *type, *stride, buf);
+		//LOG("glColorPointer size: %d, %d, %d\n", *size, i, hash((byte *)buf, i));
 	}
 }
 
@@ -3297,12 +3316,12 @@ static void EXEC_glDrawElements(byte *commandbuf)
 	int l = 0;
 	
 	const GLvoid * buf = (const GLvoid *)popBuf(&l);
+		
+	LOG("About to glDrawElements(%d, %d, %d)\n", l, *count, hash((byte *)buf, l));
 	
-	//LOG("About to glDrawElements(%d, %d)\n", l, *count);
-
 	glDrawElements(*mode, *count, *type, buf);
 	
-	//LOG("Done!\n");
+	LOG("Done!\n");
 }
 
 
@@ -3396,8 +3415,10 @@ static void EXEC_glTexCoordPointer(byte *commandbuf)
 	if(*null)
 		glTexCoordPointer(*size, *type, *stride, (char *) NULL);
 	else {
-		const GLvoid * buf =  (const GLvoid *)popBuf();
+		int i = 0;
+		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
 		glTexCoordPointer(*size, *type, *stride, buf);
+		LOG("glTexCoordPointer size: %d, %d, %d\n", *size, i, hash((byte *)buf, i));
 	}
 }
 
@@ -3413,8 +3434,10 @@ static void EXEC_glVertexPointer(byte *commandbuf)
 	if(*null)
 		glVertexPointer(*size, *type, *stride, (char *) NULL);
 	else {
-		const GLvoid * buf =  (const GLvoid *)popBuf();
+		int i = 0;
+		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
 		glVertexPointer(*size, *type, *stride, buf);
+		LOG("glVertexPointer size: %d, %d, %d\n", *size, i, hash((byte *)buf, i));
 	}
 }
 

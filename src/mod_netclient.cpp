@@ -5,7 +5,7 @@
 #include "main.h"
 
 
-const int SEND_BUFFER_SIZE = 268435456;
+const int SEND_BUFFER_SIZE = 268435456;//1294276
 
 uint32_t iSendBufPos = 0;
 uint32_t bytesLeft = SEND_BUFFER_SIZE;
@@ -165,6 +165,7 @@ void NetClientModule::sendBuffer()
 		}
 	}
 	iSendBufPos = 0;
+	bytesLeft = SEND_BUFFER_SIZE;
 }
 
 
