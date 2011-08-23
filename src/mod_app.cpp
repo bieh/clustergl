@@ -253,6 +253,7 @@ int getLightParamSize(GLenum type) {
 	case GL_LIGHT_MODEL_COLOR_CONTROL:	return 1;
 	case GL_LIGHT_MODEL_LOCAL_VIEWER:	return 1;
 	case GL_LIGHT_MODEL_TWO_SIDE:		return 1;
+	case GL_AMBIENT_AND_DIFFUSE:		return 4;
 
 	case GL_EMISSION:			return 4;
 	case GL_SHININESS:			return 1;
@@ -264,7 +265,7 @@ int getLightParamSize(GLenum type) {
 
 int getFormatSize(GLenum format) {
 
-	LOG("getFormatSize(%d)\n", format);
+	//LOG("getFormatSize(%d)\n", format);
 	
 	//passed in the number of bytes
 	if(format == 1 || format == 2 || format == 3 || format == 4){
@@ -569,6 +570,10 @@ extern "C" int glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ct
 	
 	int temp = (*_glXMakeCurrent) (dpy, drawable, ctx);
 	
+	if(!bIsIntercept){
+		return temp;
+	}
+	
 	//Set up our internals
 	if(!theApp){
 		theApp = new App();
@@ -592,7 +597,7 @@ extern "C" Display *XOpenDisplay(const char *display_name){
 	}
 	
 	Display *r = (*_XOpenDisplay)(display_name);
-	
+		
 	//Set up our internals
 	if(!theApp){
 		theApp = new App();
@@ -602,6 +607,8 @@ extern "C" Display *XOpenDisplay(const char *display_name){
 }
 
 extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
+
+
 	if (_glXSwapBuffers == NULL) {
 		_glXSwapBuffers = (void (*)(Display *, GLXDrawable)) dlsym(RTLD_NEXT, "glXSwapBuffers");
 	}
@@ -612,12 +619,16 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 	}
 	
 	(*_glXSwapBuffers)(dpy, drawable);
+		
+	if(!bIsIntercept){
+		return;
+	}
 			
 	pushOp(1499); //Swap buffers
-
+	
 	if(!theApp->tick()){
 		exit(1);
-	}
+	}	
 }
 
 
@@ -1833,7 +1844,7 @@ extern "C" void glMaterialf(GLenum face, GLenum pname, GLfloat param){
 
 //170
 extern "C" void glMaterialfv(GLenum face, GLenum pname, const GLfloat * params){
-	LOG("Called untested stub Materialfv!\n");
+	//LOG("Called untested stub Materialfv!\n");
 	pushOp(170);
 	pushParam(face);
 	pushParam(pname);
@@ -2212,13 +2223,13 @@ extern "C" void glEnable(GLenum cap){
 //216
 extern "C" void glFinish(){
 	pushOp(216);
-	waitForReturn();
+//	waitForReturn();
 }
 
 //217
 extern "C" void glFlush(){
 	pushOp(217);
-	waitForReturn();
+//	waitForReturn();
 }
 
 //218
@@ -2562,7 +2573,8 @@ extern "C" void glGetBooleanv(GLenum pname, GLboolean * params){
 	LOG("Called untested stub GetBooleanv!\n");
 	pushOp(258);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLboolean) * sizeof(params));
+	pushBuf(params, sizeof(GLboolean) * 4, true);
+	waitForReturn();
 }
 
 //259

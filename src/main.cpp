@@ -8,6 +8,7 @@
 	Globals
 *******************************************************************************/
 static bool bHasInit = false;
+bool bIsIntercept = false;
 
 Config *gConfig = NULL;
 

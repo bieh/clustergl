@@ -23,9 +23,7 @@ class App
 	
 	void stats_begin();
 	void stats_end();
-	
-	bool bIsIntercept;
-	    	
+		    	
 public:
 
 	//called when we're invoked from the command line
@@ -39,6 +37,8 @@ public:
 	void debug();
 
 };
+
+extern bool bIsIntercept;
 
 //Global config instance
 extern Config *gConfig;

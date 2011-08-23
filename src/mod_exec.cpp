@@ -1864,7 +1864,10 @@ static void EXEC_glMaterialfv(byte *commandbuf)
 	GLenum *face = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
-	glMaterialfv(*face, *pname, (const GLfloat *)popBuf());
+	int i =0;
+	glMaterialfv(*face, *pname, (const GLfloat *)popBuf(&i));
+	
+	LOG("glMaterialfv: %d\n", i);
 }
 
 
