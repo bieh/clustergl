@@ -82,6 +82,16 @@ bool NetClientModule::process(vector<Instruction *> *list)
 		
 		Instruction *i = (*list)[n];
 		
+		//Check for NULL buffers and reset length if necessary
+		for(int n=0;n<3;n++) {
+			int l = i->buffers[n].len;
+
+			if(l > 0 && !i->buffers[n].buffer) {
+				i->buffers[n].len = 0;
+			}
+		}			
+		
+		
 		// now send the new instruction
 		if(internalWrite(i, sizeof(Instruction)) != sizeof(Instruction)) {
 			LOG("Connection problem (didn't send instruction)!\n");

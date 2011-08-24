@@ -8,9 +8,10 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
+
 #define  NOHACK true
 //#define  GLXFULL true
-#define  GLUFULL true
+//#define  GLUFULL true
 
 extern App *theApp;
 
@@ -147,7 +148,7 @@ void pushBuf(const void *buffer, int len, Bool needReply = false){
 	//If we don't need a reply, this buffer cannot be relied upon (probably on
 	//the stack), so we need to copy it
 	//If we *do* need a reply, we're going to block, so it's OK not to copy
-	if(!needReply){
+	if(!needReply && buffer){
 		copy = (byte *) malloc(len);
 		if(!buffer) {
 			//if the buffer is null, don't memcpy
@@ -196,156 +197,12 @@ PUSHPARAM(GLbyte);
 //PUSHPARAM(GLboolean);
 PUSHPARAM(GLdouble);
 
-/*********************************************************
-	Size of Symbolic Constants Functions
-*********************************************************/
-//many methods specify what type is used in its array
-//which must be found to calculate the size of the buffer
-
-int getTypeSize(GLenum type) {
-
-	switch (type) 
-	{
-	case GL_BYTE: 			    return sizeof(GLbyte);
-	case GL_UNSIGNED_BYTE:  	    return sizeof(GLubyte);
-	case GL_SHORT: 			    return sizeof(GLshort);
-	case GL_UNSIGNED_SHORT: 	    return sizeof(GLushort);
-	case GL_INT: 			    return sizeof(GLint);
-	case GL_UNSIGNED_INT: 		    return sizeof(GLuint);
-	case GL_FLOAT: 			    return sizeof(GLfloat);
-	case GL_DOUBLE:			    return sizeof(GLdouble);
-
-	case GL_BITMAP: 		    return sizeof(GLubyte);
-	case GL_UNSIGNED_BYTE_3_3_2:  	    return sizeof(GLubyte);	//3bits + 3bits + 2bits
-	case GL_UNSIGNED_BYTE_2_3_3_REV:    return sizeof(GLubyte);	//etc
-	case GL_UNSIGNED_SHORT_5_6_5: 	    return sizeof(GLushort);
-	case GL_UNSIGNED_SHORT_5_6_5_REV:   return sizeof(GLushort);
-	case GL_UNSIGNED_SHORT_4_4_4_4:     return sizeof(GLushort);
-	case GL_UNSIGNED_SHORT_4_4_4_4_REV: return sizeof(GLushort);
-	case GL_UNSIGNED_SHORT_5_5_5_1:	    return sizeof(GLushort);
-	case GL_UNSIGNED_SHORT_1_5_5_5_REV: return sizeof(GLushort);
-	case GL_UNSIGNED_INT_8_8_8_8: 	    return sizeof(GLuint);
-	case GL_UNSIGNED_INT_8_8_8_8_REV:   return sizeof(GLuint);
-	case GL_UNSIGNED_INT_10_10_10_2:    return sizeof(GLuint);
-	case GL_UNSIGNED_INT_2_10_10_10_REV:return sizeof(GLuint);
-
-	default: LOG("DEFAULTED getTypeSize!\n"); return 4;
-	}
-}
-
-int getLightParamSize(GLenum type) {
-
-	//TODO: fill in missing types
-	switch (type) 
-	{
-	case GL_AMBIENT: 			return 4;
-	case GL_DIFFUSE:  			return 4;
-	case GL_SPECULAR: 			return 4;
-	case GL_POSITION: 			return 4;
-	case GL_SPOT_DIRECTION: 		return 3;
-	case GL_SPOT_EXPONENT: 			return 1;
-	case GL_SPOT_CUTOFF: 			return 1;
-	case GL_CONSTANT_ATTENUATION:		return 1;
-	case GL_LINEAR_ATTENUATION:		return 1;
-	case GL_QUADRATIC_ATTENUATION:		return 1;
-
-	case GL_LIGHT_MODEL_AMBIENT:		return 4;
-	case GL_LIGHT_MODEL_COLOR_CONTROL:	return 1;
-	case GL_LIGHT_MODEL_LOCAL_VIEWER:	return 1;
-	case GL_LIGHT_MODEL_TWO_SIDE:		return 1;
-	case GL_AMBIENT_AND_DIFFUSE:		return 4;
-
-	case GL_EMISSION:			return 4;
-	case GL_SHININESS:			return 1;
-	case GL_COLOR_INDEXES:			return 3;
-
-	default:LOG("DEFAULTED getLightParamSize!\n"); return 4;
-	}
-}
-
-int getFormatSize(GLenum format) {
-
-	//LOG("getFormatSize(%d)\n", format);
-	
-	//passed in the number of bytes
-	if(format == 1 || format == 2 || format == 3 || format == 4){
-		return format;
-	}
-
-/*
-	int bpp = 1;
-	    
-	if(format == GL_BGR || format == GL_RGB) 
-		bpp = 3;
-	else if(format == GL_RGBA || format == GL_BGRA) 
-		bpp = 4;
-	else
-		LOG("DEFAULTED getFormatSize\n");
-*/
-	switch(format)
-	{
-	case GL_ALPHA: return sizeof(GLfloat);
-	//case GL_ALPHA4: return 0;
-	case GL_ALPHA8: return 1;
-//	case GL_ALPHA12: return 0;
-	case GL_ALPHA16: return 2;
-	case GL_COMPRESSED_ALPHA: return 1;
-	case GL_COMPRESSED_LUMINANCE: return 1;
-	case GL_COMPRESSED_LUMINANCE_ALPHA: return 1;
-	case GL_COMPRESSED_INTENSITY: return 1;
-	case GL_COMPRESSED_RGB: return 3;
-	case GL_COMPRESSED_RGBA: return 4;
-	case GL_DEPTH_COMPONENT: return sizeof(GLfloat);
-	case GL_DEPTH_COMPONENT16: return 2;
-//	case GL_DEPTH_COMPONENT24: return 0;
-	case GL_DEPTH_COMPONENT32: return 4;
-	case GL_LUMINANCE: return 1;
-//	case GL_LUMINANCE4: return 0;
-	case GL_LUMINANCE8: return 1;
-//	case GL_LUMINANCE12: return 0;
-	case GL_LUMINANCE16: return 2;
-	case GL_LUMINANCE_ALPHA: return sizeof(GLfloat);
-	case GL_LUMINANCE4_ALPHA4: return 1;
-	case GL_LUMINANCE6_ALPHA2: return 1;
-	case GL_LUMINANCE8_ALPHA8: return 2;
-	case GL_LUMINANCE12_ALPHA4: return 2;
-//	case GL_LUMINANCE12_ALPHA12: return 0;
-	case GL_LUMINANCE16_ALPHA16: return 4;
-	case GL_INTENSITY: return sizeof(GLfloat);
-//	case GL_INTENSITY4: return 0;
-	case GL_INTENSITY8: return 1;
-//	case GL_INTENSITY12: return 0;
-	case GL_INTENSITY16: return 2;
-	case GL_R3_G3_B2: return 1;
-	case GL_RGB: return 3;
-//	case GL_RGB4: return 0;
-//	case GL_RGB5: return 0;
-	case GL_RGB8: return 3;
-//	case GL_RGB10: return 0;
-//	case GL_RGB12: return 0;
-	case GL_RGB16: return 6;
-	case GL_RGBA: return 4;
-	case GL_RGBA2: return 1;
-	case GL_RGBA4: return 2;
-//	case GL_RGB5_A1: return 0;
-	case GL_RGBA8: return 4;
-//	case GL_RGB10_A2: return 0;
-	case GL_RGBA12: return 6;
-	case GL_RGBA16: return 8;
-	case GL_SLUMINANCE: return sizeof(GLfloat);
-	case GL_SLUMINANCE8: return 1;
-	case GL_SLUMINANCE_ALPHA: return sizeof(GLfloat);
-	case GL_SLUMINANCE8_ALPHA8: return 2;
-	case GL_SRGB: return 4;
-	case GL_SRGB8: return 4;
-	case GL_SRGB_ALPHA: return 4;
-	case GL_SRGB8_ALPHA8: return 5;
-
-	default:LOG("DEFAULTED getFormatSize\n"); return 4;
-	}                
-
-	return 4;
-}
+//size.cpp
+extern int getTypeSize(GLenum type);
+extern int getLightParamSize(GLenum type);
+extern int getFormatSize(GLenum format);
+extern int getGetSize(GLenum type);
+extern int getTextureParamSize(GLenum type);
 
 /*********************************************************
 	Send Pointers Given Size
@@ -1996,10 +1853,10 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
     //if(pixels) {
 	pushParam(true);
 	
-	int len = getFormatSize(format) *  width * height;// * getTypeSize(type);
+	int len = getFormatSize(format) * getTypeSize(type) * width * height;// * getTypeSize(type);
 	
 	
-	//LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, getFormatSize(format));
+	LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, getFormatSize(format));
 	
 	pushBuf(pixels, len);
 //	}
@@ -2602,7 +2459,7 @@ extern "C" void glGetBooleanv(GLenum pname, GLboolean * params){
 //	LOG("Called untested stub GetBooleanv!\n");
 	pushOp(258);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLboolean) * 4, true);
+	pushBuf(params, sizeof(GLboolean) * getGetSize(pname), true);
 	waitForReturn();
 }
 
@@ -2618,10 +2475,10 @@ extern "C" void glGetClipPlane(GLenum plane, GLdouble * equation){
 
 //260
 extern "C" void glGetDoublev(GLenum pname, GLdouble * params){
-//	LOG("Called unimplemted stub GetDoublev!\n");
+	LOG("Called unimplemted stub GetDoublev!\n");
 	pushOp(260);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLdouble) * 4, true);
+	pushBuf(params, sizeof(GLdouble) * getGetSize(pname), true);
 	waitForReturn();
 }
 
@@ -2655,18 +2512,23 @@ extern "C" GLenum glGetError(){
 }
 
 //#ifdef NOHACK
-#ifdef abc
+//#ifdef abc
 //262
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
-	LOG("Called unimplemted stub GetFloatv!\n");
+//	LOG("Called untested stub glGetFloatv!\n");
+	pushOp(262);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLfloat) *  getGetSize(pname), true);	
+	waitForReturn();
 }
-#endif
+//#endif
+
 //263
 extern "C" void glGetIntegerv(GLenum pname, GLint * params){
-	LOG("Called untested stub GetIntegerv!\n");
+//	LOG("Called untested stub GetIntegerv!\n");
 	pushOp(263);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLint) *4, true);	//4 max num of params returned
+	pushBuf(params, sizeof(GLint) *  getGetSize(pname), true);
 	waitForReturn();
 }
 
@@ -2839,7 +2701,14 @@ extern "C" void glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pnam
 
 //285
 extern "C" void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint * params){
-	LOG("Called unimplemted stub GetTexLevelParameteriv!\n");
+	LOG("Called testing stub GetTexLevelParameteriv!\n");
+	
+	pushOp(285);
+	pushParam(target);
+	pushParam(level);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint) * getTextureParamSize(pname), true);
+	waitForReturn();
 }
 
 #endif
