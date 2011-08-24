@@ -30,7 +30,7 @@ int App::run(int argc, char **argv)
 	
 	//Set up the module chain	
 	mModules.push_back(new NetSrvModule());
-	//mModules.push_back(new DeltaDecodeModule()); 	
+	mModules.push_back(new DeltaDecodeModule()); 	
 	mModules.push_back(new ExecModule());
 
 	while( tick() ){ 
@@ -72,7 +72,7 @@ bool App::run_shared(string src)
 			
 	//Set up the module chain
 	mModules.push_back(new AppModule(""));
-	//mModules.push_back(new DeltaEncodeModule()); 	
+	mModules.push_back(new DeltaEncodeModule()); 	
 	mModules.push_back(new NetClientModule());
 
 	//Return control to the parent process.
