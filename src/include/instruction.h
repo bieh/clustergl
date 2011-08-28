@@ -25,8 +25,10 @@ public:
 	bool needReply();
 	
 	uint16_t id;
-	byte args[MAX_ARG_LEN];
 	byte arglen;
 
 	InstructionBuffer buffers[3];
+
+	//Must be the last thing...
+	byte args[MAX_ARG_LEN];
 };

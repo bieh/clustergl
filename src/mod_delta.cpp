@@ -34,6 +34,7 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	vector<Instruction *> *result = new vector<Instruction *>();
 		
 	int sameCount = 0;
+	int totalSkip = 0;
 		
 	for(int n=0;n<(int)list->size();n++){		
 		Instruction *instr = (*list)[n];
@@ -42,7 +43,8 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 			Instruction *last = lastFrame[n];
 			
 			if(!instr->needReply() && instr->compare(last)){
-				sameCount++;				
+				sameCount++;	
+				totalSkip++;			
 			}else{
 			
 				if(sameCount)
@@ -63,7 +65,9 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	lastFrame = *list;
 	delete list;
 		
-	mListResult = result;		
+	mListResult = result;
+	
+	//LOG("Delta: %d from %d\n", list->size() - totalSkip, list->size());		
 		
 	return true;
 }

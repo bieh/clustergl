@@ -87,10 +87,18 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 
 	for(uint32_t x=0;x<num;x++) {
 		Instruction *i = &mInstructions[iInstructionCount++];
+		
+		//first the length byte
+		byte l;
+		int r = internalRead((byte *)&l, 1);
+		if(r != 1){
+			LOG("Read error 1 (%d)\n", r);
+			return false;
+		}
 
-		int r = internalRead((byte *)i, sizeof(Instruction));
-		if(r != sizeof(Instruction)) {
-			LOG("Read error (%d)\n", r);
+		r = internalRead((byte *)i, l);
+		if(r != l) {
+			LOG("Read error 2 (%d, %d)\n", r, l);
 			return false;
 		}
 		
