@@ -48,16 +48,33 @@ Config::Config(string filename, string id){
 
 	cfg = cfg_init(opts, CFGF_NONE);
 	
-	if(cfg_parse(cfg, filename.c_str()) == CFG_PARSE_ERROR){
+	int parse_result = cfg_parse(cfg, filename.c_str());
+	
+	if(parse_result == CFG_FILE_ERROR){
+		LOG("Error with the file (does it exist?)\n");
+		exit(1);
+	}
+	
+	if(parse_result == CFG_PARSE_ERROR){
 		LOG("Couldn't parse config file\n");
 		exit(1);
 	}
 	
-	interceptMode = string(cfg_getstr(cfg, "interceptMode"));
+	if(!cfg_getstr(cfg, "interceptMode")){
+		LOG("No interceptMode specified, assuming \"x11\"\n");
+		interceptMode = "x11";
+	}else{	
+		interceptMode = string(cfg_getstr(cfg, "interceptMode"));
+	}
 	
 	numOutputs = 0;
 	
 	int n = cfg_size(cfg, "output");
+	
+	if(n == 0){
+		LOG("No outputs specified, aborting\n");
+		exit(1);
+	}
     
     for(int i=0;i<n;i++){
         cfg_t *o = cfg_getnsec(cfg, "output", i);

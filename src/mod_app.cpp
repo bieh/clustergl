@@ -276,19 +276,19 @@ void sendPointers(int length) {
 		switch (rpInter.type) 
 		{
 			case GL_V2F:			size = sizeof(GLfloat) * 2; break;
-		        case GL_V3F:			size = sizeof(GLfloat) * 3; break;
-		        case GL_C4UB_V2F:		size = sizeof(GLfloat) * 2 + sizeof(GLubyte) * 4; break;
-		        case GL_C4UB_V3F:		size = sizeof(GLfloat) * 3 + sizeof(GLubyte) * 4; break;
-		        case GL_C3F_V3F:		size = sizeof(GLfloat) * 6; break;
-		        case GL_N3F_V3F:		size = sizeof(GLfloat) * 6; break;
-		        case GL_C4F_N3F_V3F:		size = sizeof(GLfloat) * 10; break;
-		        case GL_T2F_V3F:		size = sizeof(GLfloat) * 5; break;
-		        case GL_T4F_V4F:		size = sizeof(GLfloat) * 8; break;
-		        case GL_T2F_C4UB_V3F:		size = sizeof(GLfloat) * 5 + sizeof(GLubyte) * 4; break;
-		        case GL_T2F_C3F_V3F:		size = sizeof(GLfloat) * 8; break;
-		        case GL_T2F_N3F_V3F:		size = sizeof(GLfloat) * 8; break;
-		        case GL_T2F_C4F_N3F_V3F:	size = sizeof(GLfloat) * 12; break;
-		        case GL_T4F_C4F_N3F_V4F:	size = sizeof(GLfloat) * 15; break;
+	        case GL_V3F:			size = sizeof(GLfloat) * 3; break;
+	        case GL_C4UB_V2F:		size = sizeof(GLfloat) * 2 + sizeof(GLubyte) * 4; break;
+	        case GL_C4UB_V3F:		size = sizeof(GLfloat) * 3 + sizeof(GLubyte) * 4; break;
+	        case GL_C3F_V3F:		size = sizeof(GLfloat) * 6; break;
+	        case GL_N3F_V3F:		size = sizeof(GLfloat) * 6; break;
+	        case GL_C4F_N3F_V3F:	size = sizeof(GLfloat) * 10; break;
+	        case GL_T2F_V3F:		size = sizeof(GLfloat) * 5; break;
+	        case GL_T4F_V4F:		size = sizeof(GLfloat) * 8; break;
+	        case GL_T2F_C4UB_V3F:	size = sizeof(GLfloat) * 5 + sizeof(GLubyte) * 4; break;
+	        case GL_T2F_C3F_V3F:	size = sizeof(GLfloat) * 8; break;
+	        case GL_T2F_N3F_V3F:	size = sizeof(GLfloat) * 8; break;
+	        case GL_T2F_C4F_N3F_V3F:size = sizeof(GLfloat) * 12; break;
+	        case GL_T4F_C4F_N3F_V4F:size = sizeof(GLfloat) * 15; break;
 			default:LOG("DEFAULTED glInterleavedArrays lookup %d should be %d!\n", rpInter.type, GL_T2F_C4UB_V3F); size = sizeof(GLfloat) * 15;
 		}
 		pushOp(317);
