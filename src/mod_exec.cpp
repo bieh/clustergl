@@ -297,8 +297,12 @@ static void EXEC_glDeleteLists(byte *commandbuf)
 static void EXEC_glGenLists(byte *commandbuf)
 {
 	GLsizei *range = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
-
-	pushRet(glGenLists(*range));
+	
+	GLint r = glGenLists(*range);
+	
+	LOG("glGenLists(%d) -> %d\n", *range, r);
+	
+	pushRet(r);
 }
 
 
@@ -3393,8 +3397,13 @@ static void EXEC_glNormalPointer(byte *commandbuf)
 {
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
-
-	glNormalPointer(*type, *stride, (const GLvoid *)popBuf());
+	GLboolean *null = (GLboolean*)commandbuf;    commandbuf += sizeof(GLsizei);
+	
+	if(*null){
+		glNormalPointer(*type, *stride, (const GLvoid *)NULL);	
+	}else{
+		glNormalPointer(*type, *stride, (const GLvoid *)popBuf());
+	}
 }
 
 

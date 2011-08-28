@@ -36,6 +36,7 @@ storedPointer rpTex;
 storedPointer rpVert;
 storedPointer rpCol;
 storedPointer rpInter;
+storedPointer rpNormals;
 
 /*********************************************************
 	Interception Globals
@@ -74,6 +75,7 @@ AppModule::AppModule(string command){
 	rpVert.size = (GLint) NULL;
 	rpCol.size = (GLint) NULL;
 	rpInter.size = (GLint) NULL;
+	rpNormals.size = (GLint) NULL;
 	
 	LOG("INIT AppModule\n");
 	
@@ -225,7 +227,7 @@ void sendPointers(int length) {
 	//texture pointer
 	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpTex.type) * rpTex.size * (length + rpTex.stride);
+		int size = getTypeSize(rpTex.type) * rpTex.size * length * rpTex.stride;
 		pushOp(320);
 		pushParam(rpTex.size);
 		pushParam(rpTex.type);
@@ -240,7 +242,7 @@ void sendPointers(int length) {
 	//vertex pointer
 	if(!rpVert.sent && rpVert.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpVert.type)  * rpVert.size * (length + rpVert.stride);
+		int size = getTypeSize(rpVert.type)  * rpVert.size * length * rpVert.stride;
 		pushOp(321);
 		pushParam(rpVert.size);
 		pushParam(rpVert.type);
@@ -254,7 +256,7 @@ void sendPointers(int length) {
 	
 	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpCol.type) * rpCol.size * (length + rpCol.stride);
+		int size = getTypeSize(rpCol.type) * rpCol.size * length * rpCol.stride;
 		//colour pointer
 		pushOp(308);
 		pushParam(rpCol.size);
@@ -295,6 +297,17 @@ void sendPointers(int length) {
 		pushParam(false);
 		pushBuf(rpInter.pointer, ((size + rpInter.stride) * length)); //drawing quads?
 		rpInter.sent = true;
+	}
+	
+	if(!rpNormals.sent && rpNormals.size){
+		int size = getTypeSize(rpNormals.type) * rpNormals.size * length * rpNormals.stride;
+		//colour pointer
+		pushOp(318);
+		pushParam(rpNormals.type);
+		pushParam(rpNormals.stride);
+		pushParam(false);
+		pushBuf(rpNormals.pointer, size);
+		rpNormals.sent = true;
 	}
 }
 
@@ -557,11 +570,13 @@ extern "C" void glDeleteLists(GLuint list, GLsizei range){
 
 //5
 extern "C" GLuint glGenLists(GLsizei range){
+	//LOG("glGenLists %d\n", range);
 	pushOp(5);
 	pushParam(range);
 	GLuint ret;
 	pushBuf(&ret, sizeof(GLuint), true);
 	waitForReturn();
+	LOG("glGenLists(%d) RETURNING %d\n", range, ret);
 	return ret;
 }
 
@@ -1686,7 +1701,7 @@ extern "C" void glLightModelf(GLenum pname, GLfloat param){
 
 //164
 extern "C" void glLightModelfv(GLenum pname, const GLfloat * params){
-	LOG("Called untested stub LightModelfv!\n");
+//	LOG("Called untested stub LightModelfv!\n");
 	pushOp(164);
 	pushParam(pname);
 	pushBuf(params, sizeof(const GLfloat) * getLightParamSize(pname));
@@ -1856,7 +1871,7 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
 	int len = getFormatSize(format) * getTypeSize(type) * width * height;// * getTypeSize(type);
 	
 	
-	LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, getFormatSize(format));
+	//LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, getFormatSize(format));
 	
 	pushBuf(pixels, len);
 //	}
@@ -2456,7 +2471,7 @@ extern "C" void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenu
 
 //258
 extern "C" void glGetBooleanv(GLenum pname, GLboolean * params){
-//	LOG("Called untested stub GetBooleanv!\n");
+	//LOG("Called untested stub GetBooleanv!\n");
 	pushOp(258);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLboolean) * getGetSize(pname), true);
@@ -2471,18 +2486,18 @@ extern "C" void glGetClipPlane(GLenum plane, GLdouble * equation){
 	waitForReturn();
 }
 
-#ifdef NOHACK
+//#ifdef NOHACK
 
 //260
 extern "C" void glGetDoublev(GLenum pname, GLdouble * params){
-	LOG("Called unimplemted stub GetDoublev!\n");
+	//LOG("Called untested stub GetDoublev!\n");
 	pushOp(260);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLdouble) * getGetSize(pname), true);
 	waitForReturn();
 }
 
-#endif
+//#endif
 
 //261
 extern "C" GLenum glGetError(){
@@ -2515,7 +2530,7 @@ extern "C" GLenum glGetError(){
 //#ifdef abc
 //262
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
-//	LOG("Called untested stub glGetFloatv!\n");
+	//LOG("Called untested stub glGetFloatv!\n");
 	pushOp(262);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLfloat) *  getGetSize(pname), true);	
@@ -2525,7 +2540,8 @@ extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 
 //263
 extern "C" void glGetIntegerv(GLenum pname, GLint * params){
-//	LOG("Called untested stub GetIntegerv!\n");
+	//LOG("Called untested stub GetIntegerv!\n");
+	//LOG("GetIntegerV(%d)\n", pname);
 	pushOp(263);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLint) *  getGetSize(pname), true);
@@ -2981,12 +2997,11 @@ extern "C" void glIndexubv(const GLubyte * c){
 //317
 extern "C" void glInterleavedArrays(GLenum format, GLsizei stride, const GLvoid * pointer){
 	if(!pointer) {
-	pushOp(317);
-	pushParam(format);
-	pushParam(stride);
-	pushParam(!pointer);
-	}
-	else {
+		pushOp(317);
+		pushParam(format);
+		pushParam(stride);
+		pushParam(!pointer);
+	}else{
 		rpInter.type = format;
 		rpInter.stride = stride;
 		rpInter.pointer = pointer;
@@ -2997,7 +3012,18 @@ extern "C" void glInterleavedArrays(GLenum format, GLsizei stride, const GLvoid 
 
 //318
 extern "C" void glNormalPointer(GLenum type, GLsizei stride, const GLvoid * pointer){
-	LOG("Called unimplemted stub NormalPointer!\n");
+	if(!pointer) {
+		pushOp(318);
+		pushParam(type);
+		pushParam(stride);
+		pushParam(!pointer);
+	}else{
+		rpNormals.type = type;
+		rpNormals.stride = stride;
+		rpNormals.pointer = pointer;
+		rpNormals.size = 1;
+		rpNormals.sent = false;
+	}
 }
 
 //319
@@ -3010,14 +3036,13 @@ extern "C" void glPolygonOffset(GLfloat factor, GLfloat units){
 //320
 extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
 	if(!pointer) {
-	pushOp(320);
-	pushParam(size);
-	pushParam(type);
-	pushParam(stride);
-	pushParam(!pointer);
-	pushParam(true);
-	}
-	else {
+		pushOp(320);
+		pushParam(size);
+		pushParam(type);
+		pushParam(stride);
+		pushParam(!pointer);
+		pushParam(true);
+	}else{
 		rpTex.size = size;
 		rpTex.type = type;
 		rpTex.stride = stride;
@@ -3029,14 +3054,13 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 //321
 extern "C" void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
 	if(!pointer) {
-	pushOp(321);
-	pushParam(size);
-	pushParam(type);
-	pushParam(stride);
-	pushParam(!pointer);
-	pushParam(true);
-	}
-	else {
+		pushOp(321);
+		pushParam(size);
+		pushParam(type);
+		pushParam(stride);
+		pushParam(!pointer);
+		pushParam(true);
+	}else{
 		rpVert.size = size;
 		rpVert.type = type;
 		rpVert.stride = stride;
@@ -5378,7 +5402,6 @@ extern "C" void glMultiTexCoord2dvARB(GLenum target, const GLdouble * v){
 
 //386
 extern "C" void glMultiTexCoord2fARB(GLenum target, GLfloat s, GLfloat t){
-	LOG("386 called!\n");
 	pushOp(386);
 	pushParam(target);
 	pushParam(s);

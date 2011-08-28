@@ -6,7 +6,7 @@
 #define MAX_INSTRUCTIONS 500000
 
 //Quick LOG hack that we can make a proper log system out of later
-#define LOG printf("[%20s:%5d]\t", __FILE__, __LINE__); printf
+#define LOG printf("[\e[32m%20s:%5d\e[m]\t", __FILE__, __LINE__); printf
 
 template<typename T> T stringTo(const std::string& s) {
   std::istringstream iss(s);
