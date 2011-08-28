@@ -15,6 +15,9 @@
 
 extern App *theApp;
 
+#define MAX(a,b)         ((a < b) ?  (b) : (a))
+#define MIN(a,b)  ((((a)-(b))&0x80000000) >> 31)? (a) : (b)
+
 /*********************************************************
 	Pointer Structures
 *********************************************************/
@@ -227,7 +230,7 @@ void sendPointers(int length) {
 	//texture pointer
 	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpTex.type) * rpTex.size * length * rpTex.stride;
+		int size = getTypeSize(rpTex.type) * (rpTex.size * length + (rpTex.stride * length));
 		pushOp(320);
 		pushParam(rpTex.size);
 		pushParam(rpTex.type);
@@ -242,7 +245,7 @@ void sendPointers(int length) {
 	//vertex pointer
 	if(!rpVert.sent && rpVert.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpVert.type)  * rpVert.size * length * rpVert.stride;
+		int size = getTypeSize(rpVert.type)  * (rpVert.size * length + (rpVert.stride * length));
 		pushOp(321);
 		pushParam(rpVert.size);
 		pushParam(rpVert.type);
@@ -256,7 +259,7 @@ void sendPointers(int length) {
 	
 	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpCol.type) * rpCol.size * length * rpCol.stride;
+		int size = getTypeSize(rpCol.type) * (rpCol.size * length + (rpCol.stride * length));
 		//colour pointer
 		pushOp(308);
 		pushParam(rpCol.size);
@@ -281,14 +284,14 @@ void sendPointers(int length) {
 	        case GL_C4UB_V3F:		size = sizeof(GLfloat) * 3 + sizeof(GLubyte) * 4; break;
 	        case GL_C3F_V3F:		size = sizeof(GLfloat) * 6; break;
 	        case GL_N3F_V3F:		size = sizeof(GLfloat) * 6; break;
-	        case GL_C4F_N3F_V3F:	size = sizeof(GLfloat) * 10; break;
+	        case GL_C4F_N3F_V3F:		size = sizeof(GLfloat) * 10; break;
 	        case GL_T2F_V3F:		size = sizeof(GLfloat) * 5; break;
 	        case GL_T4F_V4F:		size = sizeof(GLfloat) * 8; break;
-	        case GL_T2F_C4UB_V3F:	size = sizeof(GLfloat) * 5 + sizeof(GLubyte) * 4; break;
-	        case GL_T2F_C3F_V3F:	size = sizeof(GLfloat) * 8; break;
-	        case GL_T2F_N3F_V3F:	size = sizeof(GLfloat) * 8; break;
-	        case GL_T2F_C4F_N3F_V3F:size = sizeof(GLfloat) * 12; break;
-	        case GL_T4F_C4F_N3F_V4F:size = sizeof(GLfloat) * 15; break;
+	        case GL_T2F_C4UB_V3F:		size = sizeof(GLfloat) * 5 + sizeof(GLubyte) * 4; break;
+	        case GL_T2F_C3F_V3F:		size = sizeof(GLfloat) * 8; break;
+	        case GL_T2F_N3F_V3F:		size = sizeof(GLfloat) * 8; break;
+	        case GL_T2F_C4F_N3F_V3F:	size = sizeof(GLfloat) * 12; break;
+	        case GL_T4F_C4F_N3F_V4F:	size = sizeof(GLfloat) * 15; break;
 			default:LOG("DEFAULTED glInterleavedArrays lookup %d should be %d!\n", rpInter.type, GL_T2F_C4UB_V3F); size = sizeof(GLfloat) * 15;
 		}
 		pushOp(317);
@@ -300,7 +303,7 @@ void sendPointers(int length) {
 	}
 	
 	if(!rpNormals.sent && rpNormals.size){
-		int size = getTypeSize(rpNormals.type) * rpNormals.size * length * rpNormals.stride;
+		int size = getTypeSize(rpNormals.type) * (rpNormals.size * length + (rpNormals.stride * length));
 		//colour pointer
 		pushOp(318);
 		pushParam(rpNormals.type);
