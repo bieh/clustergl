@@ -579,7 +579,7 @@ extern "C" GLuint glGenLists(GLsizei range){
 	GLuint ret;
 	pushBuf(&ret, sizeof(GLuint), true);
 	waitForReturn();
-	LOG("glGenLists(%d) RETURNING %d\n", range, ret);
+	//LOG("glGenLists(%d) RETURNING %d\n", range, ret);
 	return ret;
 }
 

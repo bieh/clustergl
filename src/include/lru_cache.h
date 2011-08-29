@@ -227,7 +227,7 @@ template< class Key, class Data, class Sizefn = Countfn< Data > > class LRUCache
 				liter = _list.end();
 				--liter;
 				
-				LOG("Removed %d\n", liter->first);
+				//LOG("Removed %d\n", liter->first);
 				
 				free(liter->second);
 				

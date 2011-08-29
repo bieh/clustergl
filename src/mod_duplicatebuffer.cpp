@@ -10,7 +10,8 @@
 #define get16bits(d) (*((const uint16_t *) (d)))
 #endif
 
-#define MAX_LRU 65536
+#define MAX_LRU 8192
+#define MIN_BUF_SIZE 128
 
 uint32_t hash(byte *data, int len);
 
@@ -30,7 +31,8 @@ bool DuplicateBufferEncodeModule::process(vector<Instruction *> *list){
 		for(int i=0;i<3;i++){
 			InstructionBuffer *buf = &instr->buffers[i];
 			
-			if(!buf->buffer || buf->needReply){
+			if(!buf->buffer || buf->needReply || buf->len < MIN_BUF_SIZE){
+				buf->hash = 0;
 				continue;
 			}
 			
@@ -108,7 +110,7 @@ bool DuplicateBufferDecodeModule::process(vector<Instruction *> *list){
 				
 				//No data, but we have a hash. Pull the data from the LRU
 				if(!mLRU->exists(buf->hash)){
-					//LOG("ERROR: decode side didn't have hash %d in LRU\n", buf->hash);
+					LOG("ERROR: decode side didn't have hash %d in LRU\n", buf->hash);
 					return false;
 				}
 			
@@ -138,6 +140,11 @@ vector<Instruction *> *DuplicateBufferDecodeModule::resultAsList(){
 
 //http://www.azillionmonkeys.com/qed/hash.html
 uint32_t hash(byte *data, int len){
+
+	//if(len > 64){
+	//	len = 64; //hack! only do the first bytes. 
+		//Makes it rather a lot faster...if you don't mind inaccuracies
+	//}
 
 	uint32_t hash = len, tmp;
 	int rem;

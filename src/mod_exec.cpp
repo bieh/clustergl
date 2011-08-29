@@ -300,7 +300,7 @@ static void EXEC_glGenLists(byte *commandbuf)
 	
 	GLint r = glGenLists(*range);
 	
-	LOG("glGenLists(%d) -> %d\n", *range, r);
+	//LOG("glGenLists(%d) -> %d\n", *range, r);
 	
 	pushRet(r);
 }
