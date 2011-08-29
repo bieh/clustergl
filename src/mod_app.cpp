@@ -64,8 +64,38 @@ int iCurrentBuffer = 0;
 //current instruction
 Instruction *mCurrentInstruction = NULL;
 
-//current arguements 
+//current arguments 
 byte *mCurrentArgs = NULL;
+
+/*********************************************************
+	Local cache. Used for things like glGetFloatv()
+*********************************************************/
+map<GLenum, byte *> mLocalCache;
+
+byte *checkLocalCache(GLenum p){
+	if(mLocalCache.find(p) != mLocalCache.end()){
+		return mLocalCache[p];
+	}
+	return NULL;
+}	
+
+void addLocalCache(GLenum p, byte *buf, int len){
+	byte *b = (byte *)malloc(len);
+	memcpy(b, buf, len);
+	mLocalCache[p] = b;
+}
+
+//Called at every swapBuffer(), as things are probably no longer valid then
+void clearLocalCache(){
+	for (map<GLenum, byte *>::iterator i = mLocalCache.begin(); 
+			i != mLocalCache.end(); i++){
+		free(i->second);
+	}			
+	mLocalCache.clear();
+}
+
+
+
 
 /*********************************************************
 	Interception Module Stuff
@@ -376,6 +406,8 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 	
 	
 	pushOp(1499); //Swap buffers
+	
+	clearLocalCache();
 
 	if(!theApp->tick()){
 		exit(1);
@@ -527,6 +559,8 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 	}
 			
 	pushOp(1499); //Swap buffers
+	
+	clearLocalCache();
 	
 	if(theApp && !theApp->tick()){
 		exit(1);
@@ -2538,15 +2572,27 @@ extern "C" GLenum glGetError(){
 //#ifdef NOHACK
 //#ifdef abc
 //262
+
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 	//LOG("Called untested stub glGetFloatv!\n");
 	
-	LOG("glGetFloatv(%s)\n", getGLParamName(pname));
+	int size = sizeof(GLfloat) * getGetSize(pname);
+	
+	byte *b = checkLocalCache(pname);
+	if(b){
+		memcpy(params, b, size);
+		//LOG("FROM CACHE: glGetFloatv(%s)\n", getGLParamName(pname));
+		return;
+	}
+	
+	//LOG("glGetFloatv(%s)\n", getGLParamName(pname));
 	
 	pushOp(262);
 	pushParam(pname);
-	pushBuf(params, sizeof(GLfloat) *  getGetSize(pname), true);	
+	pushBuf(params, size, true);	
 	waitForReturn();
+	
+	addLocalCache(pname, (byte *)params, size);
 }
 //#endif
 
@@ -11165,12 +11211,13 @@ LOG("Called unimplemted stub glXCopyContext!\n");
 //1606
 extern "C" void glXSwapBuffers( Display *dpy, GLXDrawable drawable )
 {
-pushOp(1499); //Swap buffers
-(*iFrames)++;
-if(!theApp->tick()) {
-LOG("end swapping\n");
-exit(1);
-}
+	pushOp(1499); //Swap buffers
+	clearLocalCache();
+	(*iFrames)++;
+	if(!theApp->tick()) {
+	LOG("end swapping\n");
+	exit(1);
+	}
 }
 
 

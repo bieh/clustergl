@@ -243,7 +243,7 @@ static void EXEC_CGLSwapBuffers(byte *commandbuf)
 	//LOG("Swap!\n");
 	SDL_GL_SwapBuffers();
 	
-	Stats::increment("Rendering FPS");
+	Stats::increment("Rendered frames");
 }
 
 

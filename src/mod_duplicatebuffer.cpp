@@ -143,10 +143,10 @@ vector<Instruction *> *DuplicateBufferDecodeModule::resultAsList(){
 
 //http://www.azillionmonkeys.com/qed/hash.html
 uint32_t hash(byte *data, int len){
-
+	
+	//Makes it rather a lot faster...if you don't mind inaccuracies
 	//if(len > 64){
-	//	len = 64; //hack! only do the first bytes. 
-		//Makes it rather a lot faster...if you don't mind inaccuracies
+	//	len = 64; 		
 	//}
 
 	uint32_t hash = len, tmp;

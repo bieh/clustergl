@@ -139,7 +139,8 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 	
 	//LOG("Done\n\n");
 	
-	Stats::count("mod_netsrv read", totalRead);
+	Stats::count("mod_netsrv read bytes", totalRead);
+	Stats::increment("mod_netsrv read bytes", totalRead);
 	
 	totalRead = 0;
 		

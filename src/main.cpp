@@ -149,6 +149,8 @@ bool App::tick()
 				mModules[0]->reply(iter, i);
 				
 				iter->buffers[i].needReply = false;
+				
+				Stats::increment("Pipeline stalls due to replies");
 			}
 		}
 	}

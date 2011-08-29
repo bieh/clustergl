@@ -22,7 +22,7 @@ class Stats{
 	static void output();
 public:
 	static void count(string key, int count);
-	static void increment(string key);
+	static void increment(string key, int count=1);
 	static void update();
 };
 
