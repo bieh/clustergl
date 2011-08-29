@@ -11,6 +11,7 @@
 #include "config.h"
 #include "utils.h"
 #include "instruction.h"
+#include "lru_cache.h"
 #include "module.h"
 
 /*******************************************************************************

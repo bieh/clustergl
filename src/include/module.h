@@ -243,3 +243,48 @@ public:
 	
 	bool sync(){}
 };
+
+
+
+/*******************************************************************************
+ DuplicateBuffer module. Keeps a LRU of buffers+hash.
+*******************************************************************************/
+typedef LRUCache<uint32_t,byte *> lru_cache;	
+
+class DuplicateBufferEncodeModule : public Module
+{
+	lru_cache *mLRU;
+public:
+	DuplicateBufferEncodeModule();
+    
+    //input
+	bool process(vector<Instruction *> *i);
+	
+	//output
+	vector<Instruction *> *resultAsList();
+	
+	//Config defaults
+	int getInputFormat(){return MOD_TYPE_INSTR;}
+	int getOutputFormat(){return MOD_TYPE_INSTR;}
+	
+	bool sync(){}
+};
+
+class DuplicateBufferDecodeModule : public Module
+{	
+	lru_cache *mLRU;
+public:
+	DuplicateBufferDecodeModule();
+    
+    //input
+	bool process(vector<Instruction *> *i);
+	
+	//output
+	vector<Instruction *> *resultAsList();
+	
+	//Config defaults
+	int getInputFormat(){return MOD_TYPE_INSTR;}
+	int getOutputFormat(){return MOD_TYPE_INSTR;}
+	
+	bool sync(){}
+};

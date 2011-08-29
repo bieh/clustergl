@@ -91,6 +91,7 @@ bool NetClientModule::process(vector<Instruction *> *list)
 			}
 		}			
 		
+		/*
 		byte len = (sizeof(Instruction) - MAX_ARG_LEN) + i->arglen;
 		
 		// now send the new instruction
@@ -101,6 +102,12 @@ bool NetClientModule::process(vector<Instruction *> *list)
 		
 		//now the struct itself	
 		if(internalWrite(i, len) != len) {
+			LOG("Connection problem (didn't send instruction)!\n");
+			return false;
+		}
+		*/
+		//now the struct itself	
+		if(internalWrite(i, sizeof(Instruction)) != sizeof(Instruction)) {
 			LOG("Connection problem (didn't send instruction)!\n");
 			return false;
 		}

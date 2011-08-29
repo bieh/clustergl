@@ -13,6 +13,7 @@ Instruction::Instruction() {
 		buffers[i].needClear = false;
 		buffers[i].needReply = false;
 		buffers[i].needRemoteReply = false;
+		buffers[i].hash = 0;
 	}
 			
 	memset(args, 0, MAX_ARG_LEN);
@@ -20,12 +21,13 @@ Instruction::Instruction() {
 
 Instruction *Instruction::copy(){
 	Instruction *r = new Instruction();
-	memcpy(r, this, sizeof(Instruction));
+	memcpy(r, this, (sizeof(Instruction) - MAX_ARG_LEN) + arglen);
 	return r;
 }
 
 void Instruction::clear() {
 	//printf("Deleted\n");
+	arglen = 0;
 
 	for(int i=0;i<3;i++) {
 		if(buffers[i].buffer && buffers[i].needClear) {
@@ -34,6 +36,7 @@ void Instruction::clear() {
 			free(buffers[i].buffer);
 			buffers[i].buffer = NULL;
 			buffers[i].len = 0;
+			buffers[i].hash = 0;
 		}
 	}
 	

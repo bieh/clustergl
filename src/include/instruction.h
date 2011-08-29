@@ -13,6 +13,8 @@ public:
 	bool needClear;
 	bool needReply;
 	bool needRemoteReply;
+	uint32_t hash;
+	uint32_t hashlen;
 };
 
 class Instruction
