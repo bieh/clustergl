@@ -252,6 +252,10 @@ static int hash(byte *data, int len){
 	return r;
 }
 
+int plen(GLenum type, int size, int stride, int length){
+	return ((getTypeSize(type) * size) + stride) * length;
+}
+
 void sendPointers(int length) {
 	
 	//TODO: fill in other pointer values, or 
@@ -260,7 +264,7 @@ void sendPointers(int length) {
 	//texture pointer
 	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpTex.type) * (rpTex.size * length + (rpTex.stride * length));
+		int size = plen(rpTex.type, rpTex.size, rpTex.stride, length);
 		pushOp(320);
 		pushParam(rpTex.size);
 		pushParam(rpTex.type);
@@ -269,13 +273,13 @@ void sendPointers(int length) {
 		pushBuf(rpTex.pointer, size);
 		rpTex.sent = true;
 		
-		//LOG("Sending glTexCoordPointer() data %d, %d, %d\n", rpTex.size, size, hash((byte *)rpTex.pointer, size));
+		//LOG("Sending glTexCoordPointer() data %d\n", size);
 	}
 
 	//vertex pointer
 	if(!rpVert.sent && rpVert.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpVert.type)  * (rpVert.size * length + (rpVert.stride * length));
+		int size = plen(rpVert.type, rpVert.size, rpVert.stride, length);
 		pushOp(321);
 		pushParam(rpVert.size);
 		pushParam(rpVert.type);
@@ -284,12 +288,14 @@ void sendPointers(int length) {
 		pushBuf(rpVert.pointer, size);
 		rpVert.sent = true;
 		
-		//LOG("Sending glVertexPointer() data %d, %d, %d\n", rpVert.size, size, hash((byte *)rpVert.pointer, size));
+		//LOG("Sending glVertexPointer() data %d, %d, %d, %d = %d\n", 
+		//		rpVert.size, getTypeSize(rpVert.type), rpVert.stride, 
+		//		length, size);
 	}
 	
 	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
 	{
-		int size = getTypeSize(rpCol.type) * (rpCol.size * length + (rpCol.stride * length));
+		int size = plen(rpCol.type, rpCol.size, rpCol.stride, length);
 		//colour pointer
 		pushOp(308);
 		pushParam(rpCol.size);
@@ -299,7 +305,7 @@ void sendPointers(int length) {
 		pushBuf(rpCol.pointer, size);
 		rpCol.sent = true;
 		
-		//LOG("Sending glColorPointer() data %d %d, %d\n", rpCol.size, size, hash((byte *)rpCol.pointer, size));
+		//LOG("Sending glColorPointer() data %d %d\n", rpCol.size, size);
 	}
 
 	if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
@@ -333,7 +339,7 @@ void sendPointers(int length) {
 	}
 	
 	if(!rpNormals.sent && rpNormals.size){
-		int size = getTypeSize(rpNormals.type) * (rpNormals.size * length + (rpNormals.stride * length));
+		int size = plen(rpNormals.type, rpNormals.size, rpNormals.stride, length);
 		//colour pointer
 		pushOp(318);
 		pushParam(rpNormals.type);

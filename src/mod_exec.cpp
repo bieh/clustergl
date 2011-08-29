@@ -105,27 +105,7 @@ bool ExecModule::makeWindow()
 	string title = "ClusterGL Output - " + gConfig->id;
 
 	SDL_WM_SetCaption(title.c_str(), NULL);
-	
-	if(gConfig->enableWindowPositioning){
 		
-		SDL_SysWMinfo info;
-		SDL_VERSION(&info.version);
-
-		if (SDL_GetWMInfo(&info) > 0 ) {
-			if (info.subsystem == SDL_SYSWM_X11) {
-				XMoveWindow(info.info.x11.display, 
-						info.info.x11.window, 
-						100 + gConfig->offsetX, 100 + gConfig->offsetY);
-			}else{
-				LOG("Can't move window (no X?)\n");
-			}
-			
-		}else{
-			LOG("Couldn't get WM info\n");
-		}
-
-	}
-	
 	if (GLEW_OK != glewInit()) {
 		LOG("GLEW failed to start up for some reason\n");
 		return false;
@@ -3294,6 +3274,7 @@ static void EXEC_glColorPointer(byte *commandbuf)
 		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
 		glColorPointer(*size, *type, *stride, buf);
 		//LOG("glColorPointer size: %d, %d, %d\n", *size, i, hash((byte *)buf, i));
+		//LOG("glColorPointer size: %d, bytes: %d\n", *size, i);
 	}
 }
 
@@ -3435,7 +3416,7 @@ static void EXEC_glTexCoordPointer(byte *commandbuf)
 		int i = 0;
 		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
 		glTexCoordPointer(*size, *type, *stride, buf);
-		//LOG("glTexCoordPointer size: %d, %d, %d\n", *size, i, hash((byte *)buf, i));
+		//LOG("glTexCoordPointer size: %d, bytes: %d\n", *size, i);
 	}
 }
 
@@ -3454,7 +3435,7 @@ static void EXEC_glVertexPointer(byte *commandbuf)
 		int i = 0;
 		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
 		glVertexPointer(*size, *type, *stride, buf);
-		//LOG("glVertexPointer size: %d, %d, %d\n", *size, i, hash((byte *)buf, i));
+		//LOG("glVertexPointer size: %d, bytes: %d\n", *size, i);
 	}
 }
 
