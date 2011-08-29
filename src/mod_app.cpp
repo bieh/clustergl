@@ -1911,8 +1911,8 @@ extern "C" void glTexImage2D(GLenum target, GLint level, GLint internalformat, G
     //if(pixels) {
 	pushParam(true);
 	
-	int len = getFormatSize(format) * getTypeSize(type) * width * height;// * getTypeSize(type);
-	
+	//int len = getFormatSize(format) * getTypeSize(type) * width * height;// * getTypeSize(type);
+	int len = getFormatSize(format) * width * height;
 	
 	//LOG("glTexImage2D: %d/%d, %d %d\n", width, height, len, getFormatSize(format));
 	
@@ -2718,7 +2718,7 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 
 //275
 extern "C" const GLubyte * glGetString(GLenum name){
-	LOG("Called untested stub glGetString!\n");
+	//LOG("Called untested stub glGetString!\n");
 	pushOp(275);
 	pushParam(name);
 
@@ -2781,7 +2781,7 @@ extern "C" void glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pnam
 
 //285
 extern "C" void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint * params){
-	LOG("Called testing stub GetTexLevelParameteriv!\n");
+	//LOG("Called testing stub GetTexLevelParameteriv!\n");
 	
 	pushOp(285);
 	pushParam(target);

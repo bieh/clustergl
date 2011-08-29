@@ -146,7 +146,7 @@ uint32_t hash(byte *data, int len){
 	
 	//Makes it rather a lot faster...if you don't mind inaccuracies
 	//if(len > 64){
-	//	len = 64; 		
+	//	return hash(data, 32) + hash(data, len-32);
 	//}
 
 	uint32_t hash = len, tmp;
