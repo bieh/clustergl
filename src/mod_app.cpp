@@ -4674,12 +4674,25 @@ extern "C" void glGetAttachedShaders(GLuint program, GLsizei maxCount, GLsizei *
 
 //502
 extern "C" GLint glGetAttribLocation(GLuint program, const GLchar * name){
-	LOG("Called unimplemted stub GetAttribLocation!\n");
+	LOG("Called testing stub GetAttribLocation!\n");
+	pushOp(502);
+	pushParam(program);
+	pushBuf(name, strlen(name) + 1);
+	GLuint ret;
+	pushBuf(&ret, sizeof(GLuint), true);
+	waitForReturn();
+
+	return ret;
 }
 
 //503
 extern "C" void glGetProgramiv(GLuint program, GLenum pname, GLint * params){
-	LOG("Called unimplemted stub GetProgramiv!\n");
+	LOG("Called testing stub GetProgramiv!\n");
+	pushOp(503);
+	pushParam(program);
+	pushParam(pname);
+	pushBuf(params, sizeof(GLint), true);
+	waitForReturn();
 }
 
 //504
@@ -5007,7 +5020,7 @@ extern "C" void glUniformMatrix2fv(GLint location, GLsizei count, GLboolean tran
 	pushParam(location);
 	pushParam(count);
 	pushParam(transpose);
-	pushBuf(value, sizeof(GLint) * count * 2);
+	pushBuf(value, sizeof(GLfloat) * count * 2);
 }
 
 //537
@@ -5017,7 +5030,7 @@ extern "C" void glUniformMatrix3fv(GLint location, GLsizei count, GLboolean tran
 	pushParam(location);
 	pushParam(count);
 	pushParam(transpose);
-	pushBuf(value, sizeof(GLint) * count * 3);
+	pushBuf(value, sizeof(GLfloat) * count * 3);
 }
 
 //538
@@ -5027,7 +5040,7 @@ extern "C" void glUniformMatrix4fv(GLint location, GLsizei count, GLboolean tran
 	pushParam(location);
 	pushParam(count);
 	pushParam(transpose);
-	pushBuf(value, sizeof(GLint) * count * 4);
+	pushBuf(value, sizeof(GLfloat) * count * 4);
 }
 
 //539
