@@ -4,62 +4,29 @@
 
 #include "main.h"
 
+const int SEND_BUFFER_SIZE = (1024 * 1024 * 32);
+
+//big buffer to store compressed stuff in
+static byte mCompressBuf[SEND_BUFFER_SIZE];
+
 #include <zconf.h>
 #include <zlib.h>
 #include <lzo/lzo1b.h>
 #include <lzo/lzo1x.h>
 
-int compressingMethod = 3;
-
-/********************************************************
-	Main Globals (Loaded from config file)
-********************************************************/
-
-/* 
-  Compression methods:
-  1 = ZLib, best compression, but much slower
-  2 = LZO1b, best for large blocks, with redundant data
-  3 = LZO1x, best for most applications
-*/
-
-/*********************************************************
-	Module Stuff
-*********************************************************/
-
-NetCompressModule::NetCompressModule()
-{
-	if(compressingMethod == 2 || compressingMethod == 3) {
-		if (lzo_init() != LZO_E_OK) {
-			printf("LZO init failed!\n");
-		}
-	}
+byte *Compression::getBuf(){
+	return mCompressBuf;
 }
-
-
-bool NetCompressModule::process(vector<Instruction *> *i)
-{
-	LOG("NetCompressModule::process: Shouldn't happen!\n");
-}
-
-
-void NetCompressModule::reply(Instruction *instr, int i)
-{
-	LOG("NetCompressModule::reply: Shouldn't happen!\n");
-}
-
-
-bool NetCompressModule::sync()
-{
-	LOG("NetCompressModule::sync: Shouldn't happen!\n");
-}
-
 
 /*********************************************************
 	Compress Method
 *********************************************************/
 
-int NetCompressModule::myCompress(void *input, int nByte, void *output)
+int Compression::compress(void *input, int nByte)
 {
+	void *output = getBuf();
+	int compressingMethod = gConfig->networkCompression;
+	
 	uLongf CompBuffSize = 0;
 	if(compressingMethod == 1)
 		CompBuffSize = (uLongf)(nByte + (nByte * 0.1) + 12);
@@ -106,9 +73,11 @@ int NetCompressModule::myCompress(void *input, int nByte, void *output)
 /*********************************************************
 	Decompress Method
 *********************************************************/
-
-int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int sourceLen)
+int Compression::decompress(void *dest, int destLen, int sourceLen)
 {
+	void *source = getBuf();
+	int compressingMethod = gConfig->networkCompression;
+	
 	uLongf newSource = sourceLen;
 	uLongf newDest = destLen;
 	int ret = 0;
@@ -135,5 +104,5 @@ int NetCompressModule::myDecompress(void *dest, int destLen, void *source, int s
 	else {
 		memcpy(dest, source, sourceLen);
 	}
-	return ret;
+	return (int)newDest;
 }

@@ -8,6 +8,8 @@
 const int MOD_TYPE_INSTR = 1; //takes/emits a list of instructions
 const int MOD_TYPE_BYTES = 2; //takes/emits a byte buffer
 
+
+
 /*******************************************************************************
 	The main module interface
 *******************************************************************************/
@@ -149,25 +151,6 @@ public:
 };
 
 
-/*******************************************************************************
- Network compress module. This compresses each instruction/buffer to send over 
- the network. 
-*******************************************************************************/
-class NetCompressModule : public Module
-{
-	int myCompress(void *input, int nByte, void *output);
-	int myDecompress(void *dest, int destLen, void *source, int sourceLen);
-	
-public:
-	NetCompressModule();
-
-	bool process(vector<Instruction *> *i);
-	void reply(Instruction *instr, int i);
-	bool sync();
-
-};
-
-
 
 /*******************************************************************************
  Insertion module. Insert instructions into a frame at runtime
@@ -288,4 +271,16 @@ public:
 	int getOutputFormat(){return MOD_TYPE_INSTR;}
 	
 	bool sync(){}
+};
+
+
+
+/*******************************************************************************
+	Data compression global. Not really a global, but it used to be
+*******************************************************************************/
+class Compression{
+public:
+	static int decompress(void *dest, int destLen, int sourceLen);
+	static int compress(void *input, int nByte);
+	static byte *getBuf();
 };

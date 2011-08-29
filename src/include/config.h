@@ -38,11 +38,11 @@ public:
     float scaleY;
     
     int clientPort;
-    
-    bool enableWindowPositioning;
-    
+        
     int viewMode;
     string viewModeString;
+    
+    int networkCompression;
     
 /*******************************************************************************
 	Capture configuration

@@ -2718,7 +2718,7 @@ extern "C" void glGetPolygonStipple(GLubyte * mask){
 
 //275
 extern "C" const GLubyte * glGetString(GLenum name){
-	//LOG("Called untested stub glGetString!\n");
+	LOG("Called untested stub glGetString!\n");
 	pushOp(275);
 	pushParam(name);
 

@@ -202,14 +202,23 @@ void NetSrvModule::recieveBuffer(void)
 	//first read the original number of bytes coming
 	mClientSocket->read((byte *)&bytesRemaining, sizeof(uint32_t));
 	
+	//LOG("Reading %d\n", bytesRemaining);
+	totalRead += bytesRemaining;
+	
 	//then read the buffer
-	mClientSocket->read(mRecieveBuf, bytesRemaining);
+	if(gConfig->networkCompression){
+		int n = mClientSocket->read(Compression::getBuf(), bytesRemaining);
+		bytesRemaining = Compression::decompress(mRecieveBuf, recieveBufferSize, n);
+	}else{
+		mClientSocket->read(mRecieveBuf, bytesRemaining);
+	}
 	iRecieveBufPos = 0;
 	
 	//LOG("bytesRemaining = %d\n", bytesRemaining);
 	
 	totalRead += sizeof(uint32_t);
-	totalRead += bytesRemaining;
+	
+	//LOG("read ok\n");
 }
 
 
@@ -219,6 +228,8 @@ void NetSrvModule::recieveBuffer(void)
 
 int NetSrvModule::internalWrite(byte *input, int nByte)
 {
+	//LOG("internalWrite %d\n", nByte);
 	int ret = mClientSocket->write(input, nByte);
+	//LOG("done!\n");
 	return ret;
 }

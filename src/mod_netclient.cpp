@@ -184,18 +184,29 @@ void NetClientModule::sendBuffer()
 		return;
 	}
 	
+	byte *mCompressedBuf = NULL;
+	
+	if(gConfig->networkCompression){		
+		mCompressedBuf = Compression::getBuf();
+		iSendBufPos = Compression::compress(mSendBuf, iSendBufPos);
+	}
+	
 	//LOG("NetClientModule::sendBuffer(%d)\n", iSendBufPos);
 	for(int i=0;i<(int)mSockets.size();i++){
 		int a = write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
-		int b = write(mSockets[i], mSendBuf, iSendBufPos);
-		
-		if(a != (int)sizeof(iSendBufPos) && b != iSendBufPos){
-			LOG("Failure to send: %d\n", i, iSendBufPos);
+		int b = 0;	
+		if(!gConfig->networkCompression){		
+			b = write(mSockets[i], mSendBuf, iSendBufPos);			
+		}else{
+			b = write(mSockets[i], mCompressedBuf, iSendBufPos);
 		}
-		
+		if(a != sizeof(iSendBufPos) && b != iSendBufPos){
+			LOG("Failure to send: %d/%d\n", i, iSendBufPos);
+		}		
 		totalSent += a;
 		totalSent += b;
 	}
+	//LOG("sent ok\n");
 	iSendBufPos = 0;
 	bytesLeft = SEND_BUFFER_SIZE;
 	
@@ -208,6 +219,7 @@ void NetClientModule::sendBuffer()
 *******************************************************************************/
 int NetClientModule::internalRead(void *buf, size_t count)
 {
+	//LOG("About to read %d\n", count);
 	int n = 0;
 	//Read from each renderer
 	for(int i=0;i<(int)mSockets.size();i++){
@@ -215,7 +227,9 @@ int NetClientModule::internalRead(void *buf, size_t count)
 		byte *d = (byte *)buf;
 		while(n < count){
 		    n += read(mSockets[i], d + n, count);		  
+		    //LOG("%d\n", n);
 		}		
 	}
+	//LOG("done\n");
 	return n;
 }
