@@ -14,6 +14,18 @@
 #include "lru_cache.h"
 #include "module.h"
 
+
+/*******************************************************************************
+	Statistics collector
+*******************************************************************************/
+class Stats{
+	static void output();
+public:
+	static void count(string key, int count);
+	static void increment(string key);
+	static void update();
+};
+
 /*******************************************************************************
 	Main application object
 *******************************************************************************/
@@ -48,3 +60,6 @@ extern Config *gConfig;
 
 //mod_text
 void LOG_INSTRUCTION(Instruction *instr);
+
+//automatically generated, consts.cpp
+const char *getGLParamName(unsigned int param);

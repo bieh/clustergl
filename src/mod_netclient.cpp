@@ -13,6 +13,8 @@ uint32_t bytesLeft = SEND_BUFFER_SIZE;
 //big buffer to store instructions before sending
 byte mSendBuf[SEND_BUFFER_SIZE];
 
+int totalSent;
+
 /*******************************************************************************
 	Network client module connect / setup
 *******************************************************************************/
@@ -138,6 +140,9 @@ bool NetClientModule::process(vector<Instruction *> *list)
 	}
 	
 	sendBuffer(); //send anything that's outstanding
+	
+	Stats::count("mod_netclient write", totalSent);
+	totalSent = 0;
 
 	return true;
 }
@@ -187,9 +192,13 @@ void NetClientModule::sendBuffer()
 		if(a != (int)sizeof(iSendBufPos) && b != iSendBufPos){
 			LOG("Failure to send: %d\n", i, iSendBufPos);
 		}
+		
+		totalSent += a;
+		totalSent += b;
 	}
 	iSendBufPos = 0;
 	bytesLeft = SEND_BUFFER_SIZE;
+	
 }
 
 

@@ -160,6 +160,9 @@ bool ExecModule::process(vector<Instruction *> *list)
 			mFunctions[iter->id](iter->args);
 		}
 	}
+	
+	Stats::count("mod_exec instruction count", list->size());
+	
 	return true;
 }
 
@@ -239,6 +242,8 @@ static void EXEC_CGLSwapBuffers(byte *commandbuf)
 {
 	//LOG("Swap!\n");
 	SDL_GL_SwapBuffers();
+	
+	Stats::increment("Rendering FPS");
 }
 
 

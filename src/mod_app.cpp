@@ -2503,6 +2503,7 @@ extern "C" void glGetDoublev(GLenum pname, GLdouble * params){
 //#endif
 
 //261
+/*
 extern "C" GLenum glGetError(){
 	pushOp(261);
 
@@ -2528,12 +2529,20 @@ extern "C" GLenum glGetError(){
 	//	sleep(30);
 	return ret;
 }
+*/
+
+extern "C" GLenum glGetError(){
+	return GL_NO_ERROR;
+}
 
 //#ifdef NOHACK
 //#ifdef abc
 //262
 extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 	//LOG("Called untested stub glGetFloatv!\n");
+	
+	LOG("glGetFloatv(%s)\n", getGLParamName(pname));
+	
 	pushOp(262);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLfloat) *  getGetSize(pname), true);	

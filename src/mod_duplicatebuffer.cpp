@@ -125,6 +125,9 @@ bool DuplicateBufferDecodeModule::process(vector<Instruction *> *list){
 	}
 	
 	//LOG("Hit: %d, Miss: %d\n", hitCount, missCount);
+	
+	Stats::count("mod_duplicatebuffer hits", hitCount);
+	Stats::count("mod_duplicatebuffer misses", missCount);
 
 	mListResult = list;
 		

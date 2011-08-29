@@ -7,7 +7,9 @@
 const int recieveBufferSize = 268435456;
 //const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
 uint32_t iRecieveBufPos = 0;
-uint32_t bytesRemaining = 0;;
+uint32_t bytesRemaining = 0;
+
+int totalRead = 0;
 
 //big buffers
 static byte mRecieveBuf[recieveBufferSize];
@@ -137,6 +139,10 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 	
 	//LOG("Done\n\n");
 	
+	Stats::count("mod_netsrv read", totalRead);
+	
+	totalRead = 0;
+		
 	return true;
 }
 
@@ -200,6 +206,9 @@ void NetSrvModule::recieveBuffer(void)
 	iRecieveBufPos = 0;
 	
 	//LOG("bytesRemaining = %d\n", bytesRemaining);
+	
+	totalRead += sizeof(uint32_t);
+	totalRead += bytesRemaining;
 }
 
 
