@@ -68,6 +68,7 @@ bool DeltaEncodeModule::process(vector<Instruction *> *list){
 	mListResult = result;
 	
 	//LOG("Delta: %d from %d\n", list->size() - totalSkip, list->size());		
+	Stats::count("Delta replace", totalSkip);
 		
 	return true;
 }
