@@ -60,6 +60,8 @@ public:
 	vector<string> outputAddresses;
 	vector<int> outputPorts;
 	
+	string capturePidFile;
+	
 };
 
 /*

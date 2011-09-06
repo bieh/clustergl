@@ -5040,7 +5040,7 @@ extern "C" void glUniformMatrix4fv(GLint location, GLsizei count, GLboolean tran
 	pushParam(location);
 	pushParam(count);
 	pushParam(transpose);
-	pushBuf(value, sizeof(GLfloat) * count * 4);
+	pushBuf(value, sizeof(GLfloat) * count);
 }
 
 //539
@@ -11561,3 +11561,10 @@ LOG("Called unimplemted stub glXReleaseTexImageEXT!\n");
 }
 
 #endif
+
+
+
+extern "C" GLenum glCheckFramebufferStatus(){
+	LOG("glCheckFramebufferStatus hack\n");
+	return  GL_FRAMEBUFFER_COMPLETE; //hack!
+}

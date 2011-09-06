@@ -40,6 +40,7 @@ Config::Config(string filename, string id){
 		CFG_STR_LIST((char *)"outputPipeline", (char *)"{}", CFGF_NONE),
 		CFG_SEC(			(char *)"output", 	output_opts, CFGF_MULTI | CFGF_TITLE),
 		CFG_STR(	(char *)("interceptMode"), 0, CFGF_NONE),
+		CFG_STR(	(char *)("capturePidFile"), 0, CFGF_NONE),
 		CFG_END()
 	};
 	
@@ -65,6 +66,12 @@ Config::Config(string filename, string id){
 		interceptMode = "x11";
 	}else{	
 		interceptMode = string(cfg_getstr(cfg, "interceptMode"));
+	}
+	
+	if(!cfg_getstr(cfg, "capturePidFile")){
+		capturePidFile = "";
+	}else{	
+		capturePidFile = string(cfg_getstr(cfg, "capturePidFile"));
 	}
 	
 	numOutputs = 0;

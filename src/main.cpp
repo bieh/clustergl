@@ -70,6 +70,16 @@ bool App::run_shared(string src)
 				gConfig->outputAddresses[i].c_str(), 
 				gConfig->outputPorts[i]);
 	}
+	
+	//Write our pid out
+	if(gConfig->capturePidFile != ""){
+		FILE *f = fopen(gConfig->capturePidFile.c_str(), "w");
+		char pid[64];
+		sprintf(pid, "%d", getpid());
+		fwrite(pid, strlen(pid), 1, f);
+		fclose(f);
+	}
+	
 			
 	//Set up the module chain
 	mModules.push_back(new AppModule(""));
