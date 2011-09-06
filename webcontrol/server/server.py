@@ -35,6 +35,16 @@ def on_list_apps(args):
 	return ret
 	
 ################################################################################ 
+# Details of one app
+################################################################################
+def on_app_details(args):	
+	for name,app in app_modules.iteritems():
+		if args["name"] == app.name():
+			a = {"name":app.name(), "descr":app.descr(), "options":app.options()}
+			return a
+	return {}
+	
+################################################################################ 
 # Run CGL with a selected configuration
 ################################################################################
 def on_run(args):	
@@ -75,7 +85,8 @@ dispatcher_lookup = {
 						"list_apps" : on_list_apps,
 						"run": on_run,
 						"status": on_status,
-						"stop": on_stop
+						"stop": on_stop,
+						"app_details" : on_app_details,
 					}
 
 def on_request(args):
