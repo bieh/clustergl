@@ -2,14 +2,6 @@
 	ClusterGL - module.h
 *******************************************************************************/
 
-//Modules can operate on either instructions or byte bufs. Most of them should
-//work on the instruction level, but things like compression or network read
-//operate on bytes
-const int MOD_TYPE_INSTR = 1; //takes/emits a list of instructions
-const int MOD_TYPE_BYTES = 2; //takes/emits a byte buffer
-
-
-
 /*******************************************************************************
 	The main module interface
 *******************************************************************************/
@@ -27,11 +19,6 @@ public:
 	
 	//output
 	virtual vector<Instruction *> *resultAsList(){return mListResult;}
-	virtual byte *resultAsBytes(int *len){}
-	
-	//Config defaults
-	virtual int getInputFormat(){return MOD_TYPE_INSTR;}
-	virtual int getOutputFormat(){return MOD_TYPE_INSTR;}
 	
 	void setListResult(vector<Instruction *> *i){
 		mListResult = i;
@@ -130,27 +117,48 @@ public:
 	NetClientModule();
 
 	bool process(vector<Instruction *> *i);
-	bool sync();
-		
-	//Config defaults
-	int getInputFormat(){return MOD_TYPE_INSTR;}
-	int getOutputFormat(){return MOD_TYPE_INSTR;}
-
+	bool sync();		
 };
+
 
 /*******************************************************************************
-  Network client module. Like NCM, but multicasty!
+ Network server and client modules that uses OpenPGM for multicast
 *******************************************************************************/
-class MulticastNetClientModule : public Module
+class MulticastSrvModule : public Module
 {
+    int mSocket;
+    BufferedFd *mClientSocket;
+    
+    int internalRead(byte *input, int nByte);
+    int internalWrite(byte *input, int nByte);
+    
+    void recieveBuffer(void);
+	
 public:
-	MulticastNetClientModule();
+	MulticastSrvModule();
 
 	bool process(vector<Instruction *> *i);
+	void reply(Instruction *instr, int i);
 	bool sync();
+
 };
 
+class MulticastClientModule : public Module
+{
+    vector<int> mSockets;
+    int numConnections;
+    
+    int internalWrite(void* buf, int nByte);
+	int internalRead(void *buf, size_t count);
+	
+	void sendBuffer();
+	
+public:
+	MulticastClientModule();
 
+	bool process(vector<Instruction *> *i);
+	bool sync();		
+};
 
 /*******************************************************************************
  Insertion module. Insert instructions into a frame at runtime
@@ -202,10 +210,6 @@ public:
 	//output
 	vector<Instruction *> *resultAsList();
 	
-	//Config defaults
-	int getInputFormat(){return MOD_TYPE_INSTR;}
-	int getOutputFormat(){return MOD_TYPE_INSTR;}
-	
 	bool sync(){}
 };
 
@@ -220,11 +224,7 @@ public:
 	
 	//output
 	vector<Instruction *> *resultAsList();
-	
-	//Config defaults
-	int getInputFormat(){return MOD_TYPE_INSTR;}
-	int getOutputFormat(){return MOD_TYPE_INSTR;}
-	
+		
 	bool sync(){}
 };
 
@@ -247,10 +247,6 @@ public:
 	//output
 	vector<Instruction *> *resultAsList();
 	
-	//Config defaults
-	int getInputFormat(){return MOD_TYPE_INSTR;}
-	int getOutputFormat(){return MOD_TYPE_INSTR;}
-	
 	bool sync(){}
 };
 
@@ -265,10 +261,6 @@ public:
 	
 	//output
 	vector<Instruction *> *resultAsList();
-	
-	//Config defaults
-	int getInputFormat(){return MOD_TYPE_INSTR;}
-	int getOutputFormat(){return MOD_TYPE_INSTR;}
 	
 	bool sync(){}
 };

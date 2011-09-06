@@ -132,7 +132,7 @@ bool ExecModule::process(vector<Instruction *> *list)
 		mCurrentInstruction = iter;
 		currentBuffer = 0;
 		
-		LOG_INSTRUCTION(mCurrentInstruction);
+		//LOG_INSTRUCTION(mCurrentInstruction);
 		
 		if(handleViewMode(iter)){
 			continue;
