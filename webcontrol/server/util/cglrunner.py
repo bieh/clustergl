@@ -4,7 +4,6 @@
 
 import config, os, time, sys
 
-#Because this is a persistant process, we can keep track of the PID
 running_pid = 0
 
 
@@ -18,7 +17,7 @@ def run(args):
 	global running_pid
 	
 	if pid != 0:
-		running_pid = pid + 2 #HACK!
+		running_pid = pid
 			
 		#Parent process. Return a result to the waiting web client
 		return status(args)
