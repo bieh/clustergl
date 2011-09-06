@@ -26,7 +26,7 @@ function api_get($url){
 	$data = file_get_contents($url);
 		
 	if($data === FALSE){
-		die("(Could not contact webcontrol API (<a href='".$fullurl."'>request</a>)");
+		die("(Could not contact webcontrol API (<a href='".$url."'>request</a>)");
 	}	
 	
 	return json_decode($data);
