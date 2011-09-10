@@ -10,6 +10,11 @@
 #define get16bits(d) (*((const uint16_t *) (d)))
 #endif
 
+#if !defined (get16bits)
+#define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
+                       +(uint32_t)(((const uint8_t *)(d))[0]) )
+#endif
+
 #define MAX_LRU 8192
 #define MIN_BUF_SIZE 128
 

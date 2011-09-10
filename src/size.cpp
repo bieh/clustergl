@@ -393,7 +393,7 @@ int getGetSize(GLenum type){
 	case GL_VIEWPORT: return 4;
 	case GL_ZOOM_X: return 1;
 	case GL_ZOOM_Y: return 1;
-	case GL_CONTEXT_PROFILE_MASK: return 1;
+//	case GL_CONTEXT_PROFILE_MASK: return 1;
 	case GL_NUM_EXTENSIONS: return 1;
 	default: LOG("DEFAULTED getGetSize (0x%x, %s)!\n", type, getGLParamName(type)); return 1;
 	}

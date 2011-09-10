@@ -2,7 +2,8 @@
 ################################################################################
 # Simple HTTP server
 ################################################################################
-import string, cgi, time, simplejson
+import string, cgi, time
+import json as simplejson
 from os import curdir, sep
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 #import pri

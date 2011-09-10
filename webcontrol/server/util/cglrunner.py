@@ -31,7 +31,7 @@ def run(args):
 		cmdline = "ssh \"" + hostname + "\" \"" +\
 			"killall cglrender -9 2> /dev/null; DISPLAY=:0 CGL_CONFIG_FILE='" +\
 			config.CGL_CONFIG_FILE + "' '" +\
-			config.CGL_LOCATION + "/runtime/cgl-render' center\" > /dev/null" # + hostname	
+			config.CGL_LOCATION + "/runtime/cgl-render' " + hostname + "\" > /dev/null" 
 		if pid != 0:
 			continue
 		os.system(cmdline)

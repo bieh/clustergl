@@ -66,8 +66,19 @@ extern "C" void *dlsym(void *handle, const char *name){
 		return (void *)glXGetProcAddress;
 	}
     
-    if(!o_dlsym)
+    if(!o_dlsym){
 	    o_dlsym = (void*(*)(void *handle, const char *name)) dlvsym(RTLD_NEXT,"dlsym", "GLIBC_2.0");
+
+		if(!o_dlsym){
+			o_dlsym = (void*(*)(void *handle, const char *name)) dlvsym(RTLD_NEXT,"dlsym", "GLIBC_2.10");
+		}
+
+		if(!o_dlsym){
+			printf("FAILED TO FIND DLSYM()\n");
+		}else{
+			printf("found dlsym\n");
+		}
+	}
 	    
     return (*o_dlsym)( handle,name );
 }
