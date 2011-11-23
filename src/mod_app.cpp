@@ -35,7 +35,11 @@ struct storedPointer {
     const GLvoid *pointer;
 };
 
-storedPointer rpTex;
+#define GL_MAX_TEXTURES 8 //TODO: look this up somewhere...
+
+int iCurrentActiveTextureUnit = 0;
+
+storedPointer rpTex[GL_MAX_TEXTURES]; //[8], usually
 storedPointer rpVert;
 storedPointer rpCol;
 storedPointer rpInter;
@@ -104,7 +108,9 @@ void clearLocalCache(){
 AppModule::AppModule(string command){
 
 	//initialize values and structures
-	rpTex.size = (GLint) NULL;
+	for(int i=0;i<GL_MAX_TEXTURES;i++){
+		rpTex[i].size = (GLint) NULL;
+	}
 	rpVert.size = (GLint) NULL;
 	rpCol.size = (GLint) NULL;
 	rpInter.size = (GLint) NULL;
@@ -125,6 +131,7 @@ bool AppModule::process(vector<Instruction *> *list){
 
 	for(int i=0;i<iInstructionCount;i++){
 		list->push_back(&mInstructions[i]);
+		//LOG_INSTRUCTION(&mInstructions[i]);
 	}
 	
 	iInstructionCount = 0;
@@ -172,6 +179,13 @@ void pushOp(uint16_t opID){
 }
 
 void pushBuf(const void *buffer, int len, Bool needReply = false){
+
+
+	if(len <= 0){
+		LOG("WARNING: buffer size %d (<0 is bad, mkay?)\n", len);
+		len = 1;
+	}
+
 	int saved = len;
 	if(iCurrentBuffer >= 3){
 		LOG("Out of buffer space!\n");
@@ -243,6 +257,8 @@ extern int getTextureParamSize(GLenum type);
 	Send Pointers Given Size
 *********************************************************/
 
+bool enablePointerDebug = false;
+
 static int hash(byte *data, int len){
 	int r = 0;
 	
@@ -262,23 +278,37 @@ void sendPointers(int length) {
 	//create a better, more elegant solution
 	
 	//texture pointer
-	if(!rpTex.sent && rpTex.size)	//check if sent already, and not null
-	{
-		int size = plen(rpTex.type, rpTex.size, rpTex.stride, length);
-		pushOp(320);
-		pushParam(rpTex.size);
-		pushParam(rpTex.type);
-		pushParam(rpTex.stride);
-		pushParam(false);
-		pushBuf(rpTex.pointer, size);
-		rpTex.sent = true;
+	for(int i=0;i<GL_MAX_TEXTURES;i++){
+		if(!rpTex[i].sent && rpTex[i].size){
+			int size = plen(rpTex[i].type, rpTex[i].size, rpTex[i].stride, length);
+			
+			//We have to operate on the correct texture unit
+			//This makes stuff like multitexturing work properly with VBOs
+			//TODO This will cause an extra glClientActiveTexture() call
+			//which probably isn't an issue, but...
+			//
+			//glClientActiveTexture()
+			pushOp(375);
+			pushParam(GL_TEXTURE0 + i); //pretty sure this is okay, carmack does it
+			
+			//glTexCoordPointer()
+			pushOp(320);
+			pushParam(rpTex[i].size);
+			pushParam(rpTex[i].type);
+			pushParam(rpTex[i].stride);
+			pushParam(false);
+			pushBuf(rpTex[i].pointer, size);
+			rpTex[i].sent = true;
+			rpTex[i].pointer = NULL;
 		
-		//LOG("Sending glTexCoordPointer() data %d\n", size);
+			if(enablePointerDebug){
+				LOG("Sending glTexCoordPointer() data %d for texture %d\n", size, i);
+			}
+		}
 	}
 
 	//vertex pointer
-	if(!rpVert.sent && rpVert.size)	//check if sent already, and not null
-	{
+	if(!rpVert.sent && rpVert.size){
 		int size = plen(rpVert.type, rpVert.size, rpVert.stride, length);
 		pushOp(321);
 		pushParam(rpVert.size);
@@ -287,14 +317,16 @@ void sendPointers(int length) {
 		pushParam(false);
 		pushBuf(rpVert.pointer, size);
 		rpVert.sent = true;
+		rpVert.pointer = NULL;	
 		
-		//LOG("Sending glVertexPointer() data %d, %d, %d, %d = %d\n", 
-		//		rpVert.size, getTypeSize(rpVert.type), rpVert.stride, 
-		//		length, size);
+		if(enablePointerDebug){
+			LOG("Sending glVertexPointer() data %d, %d, %d, %d = %d\n", 
+				rpVert.size, getTypeSize(rpVert.type), rpVert.stride, 
+				length, size);
+		}
 	}
 	
-	if(!rpCol.sent && rpCol.size)	//check if sent already, and not null
-	{
+	if(!rpCol.sent && rpCol.size){
 		int size = plen(rpCol.type, rpCol.size, rpCol.stride, length);
 		//colour pointer
 		pushOp(308);
@@ -304,8 +336,11 @@ void sendPointers(int length) {
 		pushParam(false);
 		pushBuf(rpCol.pointer, size);
 		rpCol.sent = true;
+		rpCol.pointer = NULL;		
 		
-		//LOG("Sending glColorPointer() data %d %d\n", rpCol.size, size);
+		if(enablePointerDebug){
+			LOG("Sending glColorPointer() data %d %d\n", length, size);
+		}
 	}
 
 	if(!rpInter.sent && rpInter.size)	//check if sent already, and not null
@@ -598,10 +633,21 @@ extern "C" void glCallList(GLuint list){
 
 //3
 extern "C" void glCallLists(GLsizei n, GLenum type, const GLvoid * lists){
+
+	if(n <= 0){
+		return;
+	}
+
+	//LOG("glCallLists(%d, %d)\n", n, type);
+	
 	pushOp(3);
 	pushParam(n);
 	pushParam(type);
-	pushBuf(lists, sizeof(const GLuint) * n);
+	
+	int bufsize = getTypeSize(type) * n;
+	
+			
+	pushBuf(lists, bufsize);
 }
 
 //4
@@ -2514,7 +2560,9 @@ extern "C" void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenu
 
 //258
 extern "C" void glGetBooleanv(GLenum pname, GLboolean * params){
-	//LOG("Called untested stub GetBooleanv!\n");
+	
+	LOG("Called untested stub GetBooleanv!\n");
+	
 	pushOp(258);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLboolean) * getGetSize(pname), true);
@@ -2533,7 +2581,8 @@ extern "C" void glGetClipPlane(GLenum plane, GLdouble * equation){
 
 //260
 extern "C" void glGetDoublev(GLenum pname, GLdouble * params){
-	//LOG("Called untested stub GetDoublev!\n");
+	LOG("Called untested stub GetDoublev!\n");
+	
 	pushOp(260);
 	pushParam(pname);
 	pushBuf(params, sizeof(GLdouble) * getGetSize(pname), true);
@@ -2583,22 +2632,23 @@ extern "C" void glGetFloatv(GLenum pname, GLfloat * params){
 	//LOG("Called untested stub glGetFloatv!\n");
 	
 	int size = sizeof(GLfloat) * getGetSize(pname);
-	
+	/*
 	byte *b = checkLocalCache(pname);
 	if(b){
 		memcpy(params, b, size);
-		//LOG("FROM CACHE: glGetFloatv(%s)\n", getGLParamName(pname));
+		LOG("FROM CACHE: glGetFloatv(%s)\n", getGLParamName(pname));
 		return;
 	}
+	*/
 	
-	//LOG("glGetFloatv(%s)\n", getGLParamName(pname));
+	//LOG("glGetFloatv(%s, %d)\n", getGLParamName(pname), pname);
 	
 	pushOp(262);
 	pushParam(pname);
 	pushBuf(params, size, true);	
 	waitForReturn();
 	
-	addLocalCache(pname, (byte *)params, size);
+	//addLocalCache(pname, (byte *)params, size);
 }
 //#endif
 
@@ -2616,7 +2666,7 @@ extern "C" void glGetIntegerv(GLenum pname, GLint * params){
 
 //264
 extern "C" void glGetLightfv(GLenum light, GLenum pname, GLfloat * params){
-	LOG("Called untested stub GetLightfv!\n");
+	//LOG("Called untested stub GetLightfv!\n");
 	pushOp(264);
 	pushParam(light);
 	pushParam(pname);
@@ -2627,7 +2677,7 @@ extern "C" void glGetLightfv(GLenum light, GLenum pname, GLfloat * params){
 
 //265
 extern "C" void glGetLightiv(GLenum light, GLenum pname, GLint * params){
-	LOG("Called untested stub GetLightiv!\n");
+	//LOG("Called untested stub GetLightiv!\n");
 	pushOp(265);
 	pushParam(light);
 	pushParam(pname);
@@ -2974,15 +3024,17 @@ extern "C" void glBindTexture(GLenum target, GLuint texture){
 
 //308
 extern "C" void glColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
+
+	//LOG("glColorPointer(%d, %s, %d)\n", size, getGLParamName(type), stride);
+
 	if(!pointer) {
-	pushOp(308);
-	pushParam(size);
-	pushParam(type);
-	pushParam(stride);
-	pushParam(!pointer);
-	pushParam(true);
-	}
-	else {
+		pushOp(308);
+		pushParam(size);
+		pushParam(type);
+		pushParam(stride);
+		pushParam(!pointer);
+		pushParam(true);
+	}else{
 		rpCol.size = size;
 		rpCol.type = type;
 		rpCol.stride = stride;
@@ -2999,6 +3051,9 @@ extern "C" void glDisableClientState(GLenum array){
 
 //310
 extern "C" void glDrawArrays(GLenum mode, GLint first, GLsizei count){
+
+	//enablePointerDebug = true;
+	
 	//send the pointers
 	sendPointers(count + first);
 	//draw arrays
@@ -3099,6 +3154,11 @@ extern "C" void glPolygonOffset(GLfloat factor, GLfloat units){
 
 //320
 extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer){
+
+	//if(type == GL_SHORT){
+		//LOG("glTexCoordPointer(%d, %s, %d, 0x%x)\n", size, getGLParamName(type), stride, (int)pointer);
+	//}
+	
 	if(!pointer) {
 		pushOp(320);
 		pushParam(size);
@@ -3107,11 +3167,14 @@ extern "C" void glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const
 		pushParam(!pointer);
 		pushParam(true);
 	}else{
-		rpTex.size = size;
-		rpTex.type = type;
-		rpTex.stride = stride;
-		rpTex.pointer = pointer;
-		rpTex.sent = false;
+	
+		int i = iCurrentActiveTextureUnit;
+	
+		rpTex[i].size = size;
+		rpTex[i].type = type;
+		rpTex[i].stride = stride;
+		rpTex[i].pointer = pointer;
+		rpTex[i].sent = false;
 	}
 }
 
@@ -3656,12 +3719,16 @@ extern "C" void glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, G
 extern "C" void glActiveTexture(GLenum texture){
 	pushOp(374);
 	pushParam(texture);
+
+	iCurrentActiveTextureUnit = texture - GL_TEXTURE0;
 }
 
 //375
 extern "C" void glClientActiveTexture(GLenum texture){
 	pushOp(375);
 	pushParam(texture);
+	
+	iCurrentActiveTextureUnit = texture - GL_TEXTURE0;
 }
 
 //376

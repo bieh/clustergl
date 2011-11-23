@@ -263,6 +263,8 @@ static void EXEC_glCallLists(byte *commandbuf)
 {
 	GLsizei *n = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
+	
+	//LOG("glCallLists(%d, %d)\n", *n, *type);
 
 	glCallLists(*n, *type, (const GLvoid *)popBuf());
 }
@@ -3260,24 +3262,7 @@ static void EXEC_glBindTexture(byte *commandbuf)
 }
 
 
-//308
-static void EXEC_glColorPointer(byte *commandbuf)
-{
-	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
-	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
-	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
-	GLboolean *null = (GLboolean*)commandbuf;    commandbuf += sizeof(GLsizei);
-	if(*null)
-		glColorPointer(*size, *type, *stride, (char *) NULL);
-	else {
-		int i = 0;
-		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
-		glColorPointer(*size, *type, *stride, buf);
-		//LOG("glColorPointer size: %d, %d, %d\n", *size, i, hash((byte *)buf, i));
-		//LOG("glColorPointer size: %d, bytes: %d\n", *size, i);
-	}
-}
-
+//moved glcolorpointer to be with glVertexPointer etc
 
 //309
 static void EXEC_glDisableClientState(byte *commandbuf)
@@ -3294,8 +3279,12 @@ static void EXEC_glDrawArrays(byte *commandbuf)
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLint *first = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLsizei *count = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
-
+	
+	//LOG("Starting glDrawArrays(%d, %d, %d)\n", *mode, *first, *count);
+	
 	glDrawArrays(*mode, *first, *count);
+	
+	//LOG("ok\n");
 }
 
 
@@ -3403,6 +3392,33 @@ static void EXEC_glPolygonOffset(byte *commandbuf)
 }
 
 
+
+
+
+
+
+
+
+//308
+static void EXEC_glColorPointer(byte *commandbuf)
+{
+	GLint *size = (GLint*)commandbuf;    commandbuf += sizeof(GLint);
+	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
+	GLsizei *stride = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
+	GLboolean *null = (GLboolean*)commandbuf;    commandbuf += sizeof(GLsizei);
+	if(*null)
+		glColorPointer(*size, *type, *stride, (char *) NULL);
+	else {
+		int i = 0;
+		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
+		glColorPointer(*size, *type, *stride, buf);
+		//LOG("glColorPointer size: %d, %d, %d\n", *size, i, hash((byte *)buf, i));
+		//LOG("glColorPointer size: %d, bytes: %d\n", *size, i);
+		
+		//LOG("EXEC glColorPointer(%d, %s, %d) - %d\n", *size, getGLParamName(*type), *stride, i);
+	}
+}
+
 //320
 static void EXEC_glTexCoordPointer(byte *commandbuf)
 {
@@ -3417,6 +3433,9 @@ static void EXEC_glTexCoordPointer(byte *commandbuf)
 		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
 		glTexCoordPointer(*size, *type, *stride, buf);
 		//LOG("glTexCoordPointer size: %d, bytes: %d\n", *size, i);
+		
+		//LOG("EXEC glTexCoordPointer(%d, %s, %d) - %d\n", *size, getGLParamName(*type), *stride, i);
+		
 	}
 }
 
@@ -3436,8 +3455,20 @@ static void EXEC_glVertexPointer(byte *commandbuf)
 		const GLvoid * buf =  (const GLvoid *)popBuf(&i);
 		glVertexPointer(*size, *type, *stride, buf);
 		//LOG("glVertexPointer size: %d, bytes: %d\n", *size, i);
+		
+		//LOG("EXEC glVertexPointer(%d, %s, %d) - %d\n", *size, getGLParamName(*type), *stride, i);
 	}
 }
+
+
+
+
+
+
+
+
+
+
 
 
 //322

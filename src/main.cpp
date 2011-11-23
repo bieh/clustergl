@@ -172,6 +172,7 @@ bool App::tick()
 	
 	for(int i=0;i<(int)thisFrame->size();i++){
 		Instruction *iter = (*thisFrame)[i];
+		//LOG_INSTRUCTION(iter);
 		iter->clear();
 	}
 
