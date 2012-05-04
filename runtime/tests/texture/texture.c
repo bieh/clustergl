@@ -93,8 +93,7 @@ int LoadGLTextures( )
         }
 
     /* Free up any memory we may have used */
-    //if ( TextureImage[0] )
-//	    SDL_FreeSurface( TextureImage[0] );
+
 
     return Status;
 }
@@ -348,7 +347,7 @@ int main( int argc, char **argv )
     if ( videoInfo->blit_hw )
 	videoFlags |= SDL_HWACCEL;
 
-    /* Sets up OpenGL double buffering */
+    /* Sets up OpenGL double bufffering */
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
     /* get a SDL surface */
@@ -382,10 +381,6 @@ int main( int argc, char **argv )
 			     * If we lost focus or we are iconified, we
 			     * shouldn't draw the screen
 			     */
-			   // if ( event.active.gain == 0 )
-				//isActive = FALSE;
-			   // else
-				//isActive = TRUE;
 			    break;			    
 			case SDL_VIDEORESIZE:
 			    /* handle resize event */

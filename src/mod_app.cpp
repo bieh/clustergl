@@ -240,7 +240,11 @@ PUSHPARAM(GLint);
 PUSHPARAM(GLbyte);
 //PUSHPARAM(GLboolean);
 PUSHPARAM(GLdouble);
+
+//On Apple, this needs to be handled differently
+#ifdef __APPLE__
 PUSHPARAM(GLhandleARB);
+#endif
 
 //size.cpp
 extern int getTypeSize(GLenum type);

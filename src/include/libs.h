@@ -60,7 +60,6 @@ using std::map;
 	#ifdef __APPLE__
 		#include <SDL/SDL_opengl.h>
 	#else
-		#include <GL/glew.h>
 		#include <GL/gl.h>
 		#include <GL/glx.h>
 		#include <GL/glu.h>
