@@ -1,9 +1,9 @@
 /*******************************************************************************
-							libs.h
+	libs.h
 *******************************************************************************/
 
 /*********************************************
-					STL
+	STL
 **********************************************/
 #include <iostream>
 #include <string>
@@ -27,17 +27,12 @@ using std::stack;
 using std::map;
 
 /*********************************************
-					C stdlib
+	C stdlib
 **********************************************/
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#ifdef _WINDOWS
-#include <Winsock2.h>
-#include <time.h>
-#else
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -45,12 +40,9 @@ using std::map;
 #include <netdb.h>
 #include <unistd.h>
 #include <netinet/tcp.h>
-/* select Libs */
 #include <sys/types.h>
 #include <sys/time.h>
-#endif
 
-//libconfuse
 #include <confuse.h>
 
 #include <errno.h>
@@ -58,39 +50,34 @@ using std::map;
 #include <zconf.h>
 #include <zlib.h>
 
-#include <netinet/tcp.h>
-#include <stdlib.h>
 
 /*********************************************
-					OpenGL
+	OpenGL
 **********************************************/
 
+//Sometimes we don't want the GL headers interfering
 #ifndef NO_OPENGL_HEADERS
-
-#ifdef __APPLE__
-#include <SDL/SDL_opengl.h>
-#else
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+	#ifdef __APPLE__
+		#include <SDL/SDL_opengl.h>
+	#else
+		#include <GL/glew.h>
+		#include <GL/gl.h>
+		#include <GL/glx.h>
+		#include <GL/glu.h>
+	#endif
 #endif
 
-#endif
 
 /*********************************************
-				SDL*
+	SDL*
 **********************************************/
 #include <SDL/SDL.h>
-
-#ifdef _WINDOWS
-//#include <SDL_ttf.h>
-#include <SDL_net.h>
-#else
-//#include <SDL/SDL_ttf.h>
 #include <SDL/SDL_net.h>
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
 #include <SDL/SDL_syswm.h>
-#endif
 
 typedef unsigned char byte;
+
+#define MAX(a,b)         ((a < b) ?  (b) : (a))
+#define MIN(a,b)  ((((a)-(b))&0x80000000) >> 31)? (a) : (b)

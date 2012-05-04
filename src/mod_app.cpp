@@ -3,24 +3,15 @@
 *******************************************************************************/
 
 #include "main.h"
-#include <iostream>
 
-#ifdef __APPLE__
-	#include "/opt/local/include/SDL/SDL_opengl.h"
-#else
-	#include <GL/gl.h>
-	#include <GL/glx.h>
-	#include <GL/glu.h>
-#endif
 
-#define  NOHACK true
-//#define  GLXFULL true
-//#define  GLUFULL true
+//Some left-over bradenisms 
+#define NO_TEX_ENV
+//#define  GLXFULL
+//#define  GLUFULL
 
 extern App *theApp;
 
-#define MAX(a,b)         ((a < b) ?  (b) : (a))
-#define MIN(a,b)  ((((a)-(b))&0x80000000) >> 31)? (a) : (b)
 
 /*********************************************************
 	Pointer Structures
@@ -2795,7 +2786,7 @@ extern "C" const GLubyte * glGetString(GLenum name){
 //Hack! We let the native implementation handle this
 //TODO: implement these methods, so no hacks are required
 
-#ifdef NOHACK
+#ifdef NO_TEX_ENV
 
 //276
 extern "C" void glGetTexEnvfv(GLenum target, GLenum pname, GLfloat * params){
@@ -7168,6 +7159,7 @@ extern "C" void glGetActiveAttribARB(GLhandleARB program, GLuint index, GLsizei 
 //784
 extern "C" GLint glGetAttribLocationARB(GLhandleARB program, const GLcharARB * name){
 	LOG("Called unimplemted stub GetAttribLocationARB!\n");
+	return 0;
 }
 
 //785
@@ -7922,6 +7914,7 @@ extern "C" GLint glPollInstrumentsSGIX(GLint * marker_p){
 	LOG("Called untested stub PollInstrumentsSGIX!\n");
 	pushOp(867);
 	pushBuf(marker_p, sizeof(GLint) * sizeof(*marker_p));
+	return 0;
 }
 
 //868
@@ -8383,6 +8376,7 @@ extern "C" GLint glFinishAsyncSGIX(GLuint * markerp){
 	LOG("Called untested stub FinishAsyncSGIX!\n");
 	pushOp(925);
 	pushBuf(markerp, sizeof(GLuint) * sizeof(*markerp));
+	return 0;
 }
 
 //926
@@ -8390,6 +8384,7 @@ extern "C" GLint glPollAsyncSGIX(GLuint * markerp){
 	LOG("Called untested stub PollAsyncSGIX!\n");
 	pushOp(926);
 	pushBuf(markerp, sizeof(GLuint) * sizeof(*markerp));
+	return 0;
 }
 
 //927

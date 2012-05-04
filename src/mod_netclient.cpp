@@ -193,8 +193,8 @@ void NetClientModule::sendBuffer()
 	
 	//LOG("NetClientModule::sendBuffer(%d)\n", iSendBufPos);
 	for(int i=0;i<(int)mSockets.size();i++){
-		int a = write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
-		int b = 0;	
+		uint32_t a = write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
+		uint32_t b = 0;	
 		if(!gConfig->networkCompression){		
 			b = write(mSockets[i], mSendBuf, iSendBufPos);			
 		}else{
@@ -220,7 +220,7 @@ void NetClientModule::sendBuffer()
 int NetClientModule::internalRead(void *buf, size_t count)
 {
 	//LOG("About to read %d\n", count);
-	int n = 0;
+	uint32_t n = 0;
 	//Read from each renderer
 	for(int i=0;i<(int)mSockets.size();i++){
 		n = 0;

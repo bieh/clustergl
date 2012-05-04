@@ -41,7 +41,7 @@ TextModule::TextModule()
 bool TextModule::process(vector<Instruction *> *list)
 {
 
-	LOG("*** Start of frame: %d instructions\n", list->size());
+	LOG("*** Start of frame: %d instructions\n", (int)list->size());
 	int counter = 0;
 	for(int i=0;i<(int)list->size();i++){
 		Instruction *iter = (*list)[i];
