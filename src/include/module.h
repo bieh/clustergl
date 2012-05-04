@@ -14,8 +14,8 @@ public:
 	Module(){}
 
     //input
-	virtual bool process(vector<Instruction *> *i){}
-	virtual bool process(byte *buf, int len){}
+	virtual bool process(vector<Instruction *> *i){return i != NULL;}
+	virtual bool process(byte *buf, int len){return (buf != NULL && len);}
 	
 	//output
 	virtual vector<Instruction *> *resultAsList(){return mListResult;}
@@ -210,7 +210,7 @@ public:
 	//output
 	vector<Instruction *> *resultAsList();
 	
-	bool sync(){}
+	bool sync(){return true;}
 };
 
 class DeltaDecodeModule : public Module
@@ -225,7 +225,7 @@ public:
 	//output
 	vector<Instruction *> *resultAsList();
 		
-	bool sync(){}
+	bool sync(){return true;}
 };
 
 
@@ -247,7 +247,7 @@ public:
 	//output
 	vector<Instruction *> *resultAsList();
 	
-	bool sync(){}
+	bool sync(){return true;}
 };
 
 class DuplicateBufferDecodeModule : public Module
@@ -262,7 +262,7 @@ public:
 	//output
 	vector<Instruction *> *resultAsList();
 	
-	bool sync(){}
+	bool sync(){return true;}
 };
 
 

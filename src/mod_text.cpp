@@ -1,8 +1,5 @@
 #include "main.h"
 
-#include <GL/glew.h>
-#include <GL/gl.h>
-
 typedef void (*TextFunc)(byte *buf);
 
 /*********************************************************
@@ -7333,37 +7330,45 @@ static void EXEC_glGetQueryObjectuivARB(byte *commandbuf)
 //743
 static void EXEC_glDeleteObjectARB(byte *commandbuf)
 {
+#ifndef __APPLE__
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 
-	LOG("glDeleteObjectARB(obj=%0.1f)\n", (float)*obj);
+	LOG("glDeleteObjectARB(obj=%0.1f)\n", (int)*obj);
+#endif
 }
 
 
 //744
 static void EXEC_glGetHandleARB(byte *commandbuf)
 {
+#ifndef __APPLE__
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
 	LOG("glGetHandleARB(pname=%0.1f)\n", (float)*pname);
+#endif
 }
 
 
 //745
 static void EXEC_glDetachObjectARB(byte *commandbuf)
 {
+#ifndef __APPLE__
 	GLhandleARB *containerObj = (GLhandleARB*)commandbuf;    commandbuf += sizeof(GLhandleARB);
 	GLhandleARB *attachedObj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 
 	LOG("glDetachObjectARB(containerObj=%0.1f, attachedObj=%0.1f)\n", (float)*containerObj, (float)*attachedObj);
+#endif
 }
 
 
 //746
 static void EXEC_glCreateShaderObjectARB(byte *commandbuf)
 {
+#ifndef __APPLE__
 	GLenum *shaderType = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 
 	LOG("glCreateShaderObjectARB(shaderType=%0.1f)\n", (float)*shaderType);
+#endif
 }
 
 
@@ -7379,9 +7384,11 @@ static void EXEC_glShaderSourceARB(byte *commandbuf)
 //748
 static void EXEC_glCompileShaderARB(byte *commandbuf)
 {
+#ifndef __APPLE__
 	GLhandleARB *shader = (GLhandleARB*)commandbuf;  commandbuf += sizeof(GLhandleARB);
 
 	LOG("glCompileShaderARB(shader=%0.1f)\n", (float)*shader);
+#endif
 }
 
 
@@ -7396,10 +7403,12 @@ static void EXEC_glCreateProgramObjectARB(byte *commandbuf)
 //750
 static void EXEC_glAttachObjectARB(byte *commandbuf)
 {
+#ifndef __APPLE__
 	GLhandleARB *containerObj = (GLhandleARB*)commandbuf;    commandbuf += sizeof(GLhandleARB);
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 
 	LOG("glAttachObjectARB(containerObj=%0.1f, obj=%0.1f)\n", (float)*containerObj, (float)*obj);
+#endif
 }
 
 
@@ -7407,17 +7416,20 @@ static void EXEC_glAttachObjectARB(byte *commandbuf)
 static void EXEC_glLinkProgramARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
-
+#ifndef __APPLE__
 	LOG("glLinkProgramARB(program=%0.1f)\n", (float)*program);
+#endif
 }
+
 
 
 //752
 static void EXEC_glUseProgramObjectARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
-
+#ifndef __APPLE__
 	LOG("glUseProgramObjectARB(program=%0.1f)\n", (float)*program);
+#endif
 }
 
 
@@ -7425,8 +7437,9 @@ static void EXEC_glUseProgramObjectARB(byte *commandbuf)
 static void EXEC_glValidateProgramARB(byte *commandbuf)
 {
 	GLhandleARB *program = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
-
+#ifndef __APPLE__
 	LOG("glValidateProgramARB(program=%0.1f)\n", (float)*program);
+#endif
 }
 
 
@@ -12093,8 +12106,9 @@ static void EXEC_glClearDebugLogMESA(byte *commandbuf)
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLenum *logType = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLenum *shaderType = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
-
+#ifndef __APPLE__
 	LOG("glClearDebugLogMESA(obj=%0.1f, logType=%0.1f, shaderType=%0.1f)\n", (float)*obj, (float)*logType, (float)*shaderType);
+#endif
 }
 
 
@@ -12113,8 +12127,9 @@ static void EXEC_glGetDebugLogLengthMESA(byte *commandbuf)
 	GLhandleARB *obj = (GLhandleARB*)commandbuf;     commandbuf += sizeof(GLhandleARB);
 	GLenum *logType = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 	GLenum *shaderType = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
-
+#ifndef __APPLE__
 	LOG("glGetDebugLogLengthMESA(obj=%0.1f, logType=%0.1f, shaderType=%0.1f)\n", (float)*obj, (float)*logType, (float)*shaderType);
+#endif
 }
 
 

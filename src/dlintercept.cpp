@@ -9,6 +9,8 @@
 #include <dlfcn.h>
 #include <GL/glu.h>
 
+typedef unsigned char GLubyte;
+
 /*
 (notes on what this is and why, as it feels like something I'll forget)
 

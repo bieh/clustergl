@@ -12,9 +12,18 @@
  
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <SDL/SDL.h>
+
+#ifdef __APPLE__
+#include <SDL/SDL_opengl.h>
+#include <SDL/SDL_main.h>
+#else
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <SDL/SDL.h>
+#endif
+
 
 /* screen width, height, and bit depth */
 #define SCREEN_WIDTH  640
@@ -240,7 +249,8 @@ int drawGLScene( GLvoid )
     return( TRUE );
 }
 
-int main( int argc, char **argv )
+/*int main( int argc, char **argv )*/
+int main(int argc, char*argv[])
 {
     /* Flags to pass to SDL_SetVideoMode */
     int videoFlags;
@@ -260,6 +270,9 @@ int main( int argc, char **argv )
 		     SDL_GetError( ) );
 	    Quit( 1 );
 	}
+	
+	
+	SDL_WM_SetCaption("lesson05", "lesson05");
 
     /* Fetch the video info */
     videoInfo = SDL_GetVideoInfo( );

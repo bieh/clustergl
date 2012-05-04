@@ -1,7 +1,15 @@
 CC = gcc -Wall -ansi
+UNAME := $(shell uname -s)
+FILE=texture
 
-all:
-	$(CC) texture.c -o texture -lGL -lGLU `sdl-config --cflags --libs` --std=c99
-
+all: 
+ifeq ($(UNAME),Darwin)
+	gcc -g -I/opt/local/include -I/usr/X11R6/include -L/opt/local/lib -lSDLmain -lSDL -Wl,-framework,Cocoa -framework OpenGL $(FILE).c -o $(FILE)
+endif
+ifeq ($(UNAME),Linux)
+	$(CC) $(FILE).c -o $(FILE) -lGL -lGLU `sdl-config --cflags --libs`  -L/usr/X11/lib/ -lSDLmain
+endif
 clean:
-	@rm texture -f
+	@rm $(FILE) -f
+	
+

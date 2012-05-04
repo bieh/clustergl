@@ -4,10 +4,6 @@
 
 #include "main.h"
 
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h>
 
 
 extern int displayNumber; //this is the reason the fancier offsets don't work...
@@ -179,7 +175,11 @@ void handleOrtho(Instruction *iter){
 void handlePerspective(Instruction *iter){
 
 	if(!glFrustumUsage) {
+#ifdef __APPLE__
+		LOG("**** WANTED TO CALL gluPerspective\n");
+#else
 		gluPerspective(45.0,8880.0/4560.0, 0.9f, 100.0f);
+#endif
 		return;
 	}
 	

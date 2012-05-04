@@ -5,10 +5,6 @@
 #include "main.h"
 #include <iostream>
 
-#include <GL/gl.h>
-#include <GL/glx.h>
-#include <GL/glu.h>
-
 int getTextureParamSize(GLenum type){
 	switch(type)
 	{

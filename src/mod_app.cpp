@@ -5,9 +5,13 @@
 #include "main.h"
 #include <iostream>
 
-#include <GL/gl.h>
-#include <GL/glx.h>
-#include <GL/glu.h>
+#ifdef __APPLE__
+	#include "/opt/local/include/SDL/SDL_opengl.h"
+#else
+	#include <GL/gl.h>
+	#include <GL/glx.h>
+	#include <GL/glu.h>
+#endif
 
 #define  NOHACK true
 //#define  GLXFULL true
@@ -28,7 +32,7 @@ extern App *theApp;
 //known (usually when glDrawElements is called)
 
 struct storedPointer {
-    Bool sent;
+    bool sent;
     GLint size;
     GLenum type;
     GLsizei stride;
@@ -178,7 +182,7 @@ void pushOp(uint16_t opID){
 	}
 }
 
-void pushBuf(const void *buffer, int len, Bool needReply = false){
+void pushBuf(const void *buffer, int len, bool needReply = false){
 
 
 	if(len <= 0){
@@ -245,6 +249,7 @@ PUSHPARAM(GLint);
 PUSHPARAM(GLbyte);
 //PUSHPARAM(GLboolean);
 PUSHPARAM(GLdouble);
+PUSHPARAM(GLhandleARB);
 
 //size.cpp
 extern int getTypeSize(GLenum type);
@@ -396,6 +401,8 @@ static void * (*_SDL_GL_GetProcAddress)(const char* proc) = NULL;
 static int (*_SDL_GL_LoadLibrary)(const char *) = NULL;
 static SDL_Rect ** (*_SDL_ListModes)(SDL_PixelFormat *format, Uint32 flags) = NULL;
 
+#ifndef __APPLE__
+
 //X functors
 #include <X11/Xlib.h>
 
@@ -403,10 +410,12 @@ static Display *(*_XOpenDisplay)(const char *) = NULL;
 static void (*_glXSwapBuffers) ( Display*, GLXDrawable) = NULL;
 static int (*_glXMakeCurrent)( Display*, GLXDrawable, GLXContext) = NULL;
 
+#endif
+
 //handle to point to our own library
 void *handle = NULL;
 
-Bool bHasMinimized = false;
+bool bHasMinimized = false;
 bool bHasInit = false;
 
 
@@ -524,6 +533,8 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 	X Exports
 ********************************************************/
 
+#ifndef __APPLE__
+
 //1604
 extern "C" int glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ctx)
 {
@@ -607,6 +618,8 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 		exit(1);
 	}	
 }
+
+#endif
 
 
 
@@ -4153,7 +4166,11 @@ extern "C" void glFogCoordPointer(GLenum type, GLsizei stride, const GLvoid * po
 }
 
 //426
+#ifdef __APPLE__
+extern "C" void glMultiDrawArrays(GLenum mode, const GLint * first, const GLsizei * count, GLsizei primcount){
+#else
 extern "C" void glMultiDrawArrays(GLenum mode, GLint * first, GLsizei * count, GLsizei primcount){
+#endif
 	LOG("Called untested stub MultiDrawArrays!\n");
 	pushOp(426);
 	pushParam(mode);

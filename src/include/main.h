@@ -2,7 +2,13 @@
 	ClusterGL - main.h
 *******************************************************************************/
 
-#define ENABLE_DL_INTERCEPT
+//#define ENABLE_DL_INTERCEPT
+
+#ifdef __APPLE__
+#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+//#pragma clang diagnostic pop
+#endif
 
 /*******************************************************************************
 	Internal headers

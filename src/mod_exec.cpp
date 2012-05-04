@@ -3,12 +3,13 @@
 	a SDL window to render to
 *******************************************************************************/
 
+#define NO_OPENGL_HEADERS
+
 #include "main.h"
 
+#undef NO_OPENGL_HEADERS
+
 #include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h>
 
 typedef void (*ExecFunc)(byte *buf);
 
@@ -64,6 +65,13 @@ bool ExecModule::makeWindow()
 		LOG( "Video initialization failed: %s\n", SDL_GetError());
 		return false;
 	}
+	
+	
+	string title = "ClusterGL Output - " + gConfig->id;
+	
+	LOG("Set caption: %s\n", title.c_str());
+
+	SDL_WM_SetCaption(title.c_str(), title.c_str());
 
 	videoInfo = SDL_GetVideoInfo( );
 
@@ -100,11 +108,12 @@ bool ExecModule::makeWindow()
 	}
 
 	//Disable mouse pointer
-	SDL_ShowCursor(SDL_DISABLE);
+	//SDL_ShowCursor(SDL_DISABLE);
 
-	string title = "ClusterGL Output - " + gConfig->id;
-
-	SDL_WM_SetCaption(title.c_str(), NULL);
+	//Do this twice - above works for OSX, here for Linux
+	//Yeah, I know.
+	SDL_WM_SetCaption(title.c_str(), title.c_str());
+	
 		
 	if (GLEW_OK != glewInit()) {
 		LOG("GLEW failed to start up for some reason\n");
@@ -9056,8 +9065,11 @@ static void EXEC_glEdgeFlagPointerEXT(byte *commandbuf)
 static void EXEC_glGetPointervEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
-
+#ifdef __APPLE__
+	glGetPointerv(*pname,  (GLvoid **)popBuf());
+#else
 	glGetPointervEXT(*pname, (GLvoid **)popBuf());
+#endif
 }
 
 

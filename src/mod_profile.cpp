@@ -1,7 +1,5 @@
 #include "main.h"
 
-#include <GL/glew.h>
-#include <GL/gl.h>
 
 int instructionCounts[1700];
 int instructionBufferSizes[1700];

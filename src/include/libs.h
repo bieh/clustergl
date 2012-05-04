@@ -64,9 +64,18 @@ using std::map;
 /*********************************************
 					OpenGL
 **********************************************/
-//#include <GL/glew.h>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
+
+#ifndef NO_OPENGL_HEADERS
+
+#ifdef __APPLE__
+#include <SDL/SDL_opengl.h>
+#else
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
+
+#endif
 
 /*********************************************
 				SDL*
