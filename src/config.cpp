@@ -16,31 +16,31 @@ Config::Config(string filename, string id){
 	
 	//Output options
 	static cfg_opt_t output_opts[] = {
-		CFG_INT(	(char *)("sizeX"), 		0, CFGF_NONE),
-		CFG_INT(	(char *)("sizeY"), 		0, CFGF_NONE),
-		CFG_INT(	(char *)("offsetX"), 	0, CFGF_NONE),
-		CFG_INT(	(char *)("offsetY"), 	0, CFGF_NONE),
-		CFG_INT(	(char *)("port"), 		0, CFGF_NONE),
-		CFG_INT(	(char *)("angle"), 		0, CFGF_NONE),
-		CFG_STR(	(char *)("address"), 	0, CFGF_NONE),
-		CFG_STR(	(char *)("viewmode"),	0, CFGF_NONE),
+		CFG_INT(	 (char *)("sizeX"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("sizeY"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("offsetX"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("offsetY"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("port"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("angle"), 0, CFGF_NONE),
+		CFG_STR(	 (char *)("address"), 0, CFGF_NONE),
+		CFG_STR(	 (char *)("viewmode"), 0, CFGF_NONE),
 		CFG_END()
 	};
 	
 	//Top level options
 	static cfg_opt_t opts[] = {
-		CFG_SIMPLE_INT(		(char *)("totalWidth"), 			&totalWidth),
-		CFG_SIMPLE_INT(		(char *)("totalHeight"), 		&totalHeight),
-		CFG_SIMPLE_INT(		(char *)("fakeWindowX"), 		&fakeWindowX),
-		CFG_SIMPLE_INT(		(char *)("fakeWindowY"), 		&fakeWindowY),
-		CFG_SIMPLE_INT(		(char *)("syncRate"),			&syncRate),
-		CFG_SIMPLE_INT(		(char *)("networkCompression"),	&networkCompression),
-		CFG_SIMPLE_BOOL(		(char *)("enableStats"),			&enableStats),
-		CFG_STR_LIST(		(char *)"capturePipeline", (char *)"{}", CFGF_NONE),
-		CFG_STR_LIST(		(char *)"outputPipeline", (char *)"{}", CFGF_NONE),
-		CFG_SEC(				(char *)"output", 	output_opts, CFGF_MULTI | CFGF_TITLE),
-		CFG_STR(				(char *)("interceptMode"), 0, CFGF_NONE),
-		CFG_STR(				(char *)("capturePidFile"), 0, CFGF_NONE),
+		CFG_SIMPLE_INT(	(char *)("totalWidth"), 	&totalWidth),
+		CFG_SIMPLE_INT(	(char *)("totalHeight"), &totalHeight),
+		CFG_SIMPLE_INT(	(char *)("fakeWindowX"), &fakeWindowX),
+		CFG_SIMPLE_INT(	(char *)("fakeWindowY"), &fakeWindowY),
+		CFG_SIMPLE_INT(	(char *)("syncRate"), &syncRate),
+		CFG_SIMPLE_INT(	(char *)("networkCompression"), &networkCompression),
+		CFG_SIMPLE_BOOL(	(char *)("enableStats"),	 &enableStats),
+		CFG_STR_LIST( (char *)"capturePipeline", (char *)"{}", CFGF_NONE),
+		CFG_STR_LIST( (char *)"outputPipeline", (char *)"{}", CFGF_NONE),
+		CFG_SEC(	 (char *)"output", 	output_opts, CFGF_MULTI | CFGF_TITLE),
+		CFG_STR(	 (char *)("interceptMode"), 0, CFGF_NONE),
+		CFG_STR(	 (char *)("capturePidFile"), 0, CFGF_NONE),
 		CFG_END()
 	};
 	
