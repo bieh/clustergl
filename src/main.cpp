@@ -35,7 +35,7 @@ int App::run(int argc, char **argv)
 	mModules.push_back(new ExecModule());
 
 	while( tick() ){ 
-	    //run tick() until we decide to bail
+		//run tick() until we decide to bail
 	}
 	
 	return 0;
@@ -96,17 +96,17 @@ bool App::run_shared(string src)
 *******************************************************************************/
 void App::init(bool shared, const char *id)
 {
-    printf("**********************************************\n");
+	printf("**********************************************\n");
 	printf(" ClusterGL(%s - %s)\n", bIsIntercept ? "intercept" : "renderer", id);
 	printf("**********************************************\n");	
 
-    bIsIntercept = shared;
-    
-    char *configFile = (char *)"cgl.conf";
-    
-    if(getenv("CGL_CONFIG_FILE")){
-    	configFile = getenv("CGL_CONFIG_FILE");
-    }
+	bIsIntercept = shared;
+	
+	char *configFile = (char *)"cgl.conf";
+	
+	if(getenv("CGL_CONFIG_FILE")){
+		configFile = getenv("CGL_CONFIG_FILE");
+	}
 
 	gConfig = new Config(configFile, string(id ? id : "null"));
 
@@ -124,7 +124,7 @@ bool App::tick()
 	vector<Instruction *> *thisFrame = new vector<Instruction *>();
 	
 	if(gConfig->enableStats){
-	    stats_begin();
+		stats_begin();
 	}
 
 	//Go through each module and process the frame
@@ -167,7 +167,7 @@ bool App::tick()
 
 
 	if(gConfig->enableStats){
-	    stats_end();
+		stats_end();
 	}
 	
 	for(int i=0;i<(int)thisFrame->size();i++){

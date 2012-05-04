@@ -5,7 +5,7 @@
 
 Config::Config(string filename, string id){
 
-    LOG("Loading configuration for '%s' from '%s'\n", 
+	LOG("Loading configuration for '%s' from '%s'\n", 
 		id.c_str(), filename.c_str());
 	
 	//TODO: Get rid of these!
@@ -13,21 +13,21 @@ Config::Config(string filename, string id){
 	scaleY = 1.0f;
 	
 	this->id = id;
-    
+	
 	//Output options
 	static cfg_opt_t output_opts[] = {
 		CFG_INT(	(char *)("sizeX"), 		0, CFGF_NONE),
-			CFG_INT(	(char *)("sizeY"), 		0, CFGF_NONE),
-			CFG_INT(	(char *)("offsetX"), 	0, CFGF_NONE),
-			CFG_INT(	(char *)("offsetY"), 	0, CFGF_NONE),
-			CFG_INT(	(char *)("port"), 		0, CFGF_NONE),
-			CFG_INT(	(char *)("angle"), 		0, CFGF_NONE),
-			CFG_STR(	(char *)("address"), 	0, CFGF_NONE),
-			CFG_STR(	(char *)("viewmode"),	0, CFGF_NONE),
+		CFG_INT(	(char *)("sizeY"), 		0, CFGF_NONE),
+		CFG_INT(	(char *)("offsetX"), 	0, CFGF_NONE),
+		CFG_INT(	(char *)("offsetY"), 	0, CFGF_NONE),
+		CFG_INT(	(char *)("port"), 		0, CFGF_NONE),
+		CFG_INT(	(char *)("angle"), 		0, CFGF_NONE),
+		CFG_STR(	(char *)("address"), 	0, CFGF_NONE),
+		CFG_STR(	(char *)("viewmode"),	0, CFGF_NONE),
 		CFG_END()
-    };
-    
-    //Top level options
+	};
+	
+	//Top level options
 	static cfg_opt_t opts[] = {
 		CFG_SIMPLE_INT(		(char *)("totalWidth"), 			&totalWidth),
 		CFG_SIMPLE_INT(		(char *)("totalHeight"), 		&totalHeight),
@@ -81,8 +81,10 @@ Config::Config(string filename, string id){
 		LOG("No outputs specified, aborting\n");
 		exit(1);
 	}
-    
-    for(int i=0;i<n;i++){
+	
+	bool found_section = false;
+	
+	for(int i=0;i<n;i++){
 		cfg_t *o = cfg_getnsec(cfg, "output", i);
 	
 		numOutputs++;
@@ -96,6 +98,8 @@ Config::Config(string filename, string id){
 		if(id != cfg_title(o)){
 			continue;
 		}
+		
+		found_section = true;
 	
 		sizeX = cfg_getint(o, "sizeX");
 		sizeY = cfg_getint(o, "sizeY");
@@ -115,7 +119,12 @@ Config::Config(string filename, string id){
 		}	
 	
 		serverPort = port;
-    }
+	}
+	
+	if(!found_section && id != "capture"){
+		LOG("Couldn't find output '%s' in config file\n", id.c_str());
+		exit(1);
+	}
 	
 	cfg_free(cfg);
 	
