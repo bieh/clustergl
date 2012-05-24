@@ -9065,11 +9065,7 @@ static void EXEC_glEdgeFlagPointerEXT(byte *commandbuf)
 static void EXEC_glGetPointervEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
-#ifdef __APPLE__
 	glGetPointerv(*pname,  (GLvoid **)popBuf());
-#else
-	glGetPointervEXT(*pname, (GLvoid **)popBuf());
-#endif
 }
 
 
