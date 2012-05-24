@@ -21,7 +21,7 @@ DEPS := $(wildcard include/*.h)
 
 #Compiler flags. Note the Darwin-specific ones
 CXXFLAGS=-I/opt/local/include/ -Iinclude -O3 -Wextra -g -fPIC -fvisibility-inlines-hidden
-LDFLAGS=-lconfuse -llzo2 -lz `sdl-config --cflags --libs` -lSDL_net -lconfuse -lGLEW
+LDFLAGS=-lconfuse -llzo2 -lz `sdl-config --cflags --libs` -lSDL_net -lconfuse -lGLEW -lGLU
 DARWIN_LDFLAGS=-framework,Cocoa -framework OpenGL -lintl
 
 #Compile
