@@ -8,7 +8,9 @@ DIR=`dirname "$LOCATION"`
 LOCATION=$(cd ${1%/*} && echo $PWD/${1##*/})
 RUNTIME_DIR=`dirname "$LOCATION"`
 
+if [ \! $CGL_CONFIG_FILE ]; then 
 export CGL_CONFIG_FILE="$DIR/cgl.conf"
+fi
 
 cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so ./`basename $@`
 #cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so gdb -ex run -quiet --args ./`basename $@`
