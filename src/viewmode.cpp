@@ -80,8 +80,8 @@ void handleViewport(Instruction *iter){
 	GLsizei w = *((GLsizei*)(iter->args+ sizeof(GLint)*2));
 	GLsizei h = *((GLsizei*)(iter->args+ sizeof(GLint)*2+ sizeof(GLsizei)));
 	
-	glViewport(-gConfig->offsetX,-gConfig->offsetY, 
-				gConfig->totalWidth, gConfig->totalHeight);
+	glViewport(-gConfig->offsetX*gConfig->scaleX,-gConfig->offsetY*gConfig->scaleY, 
+				gConfig->totalWidth*gConfig->scaleX, gConfig->totalHeight*gConfig->scaleY);
 	//glViewport(x,y,w,h);
 	
 	

@@ -96,8 +96,8 @@ bool ExecModule::makeWindow()
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
 	//Autodetect res
-	int width = gConfig->sizeX;
-	int height = gConfig->sizeY;
+	int width = gConfig->sizeX*gConfig->scaleX;
+	int height = gConfig->sizeY*gConfig->scaleY;
 
 	//get a SDL surface
 	SDL_Surface *surface = SDL_SetVideoMode(width, height, 32, videoFlags );
