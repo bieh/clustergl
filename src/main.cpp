@@ -174,7 +174,13 @@ bool App::tick()
 		Instruction *iter = (*thisFrame)[i];
 		//LOG_INSTRUCTION(iter);
 		iter->clear();
+
+		// this has to be deleted on renderers only
+		// because they dynamically copy instructions in DeltaDecodeModule
+		if(!bIsIntercept)
+			delete iter;
 	}
+	thisFrame->clear();
 
 	delete thisFrame;
 	

@@ -108,15 +108,22 @@ bool DeltaDecodeModule::process(vector<Instruction *> *list){
 				uint32_t *num = (uint32_t *)instr->args;								
 				for(int i=0;i<(int)*num;i++){
 					Instruction *last = lastFrame[instrCount];
-					result->push_back(last->copy());	
-					instrCount++;				
+					// we have to copy here because otherwise lru-processing
+					// would fail if we just saved another reference to
+					// the same instruction ...
+					result->push_back(last->copy());
+					instrCount++;
 				}
 			}else{
-				result->push_back(instr);
+				// ... but then we _have_ to copy here as well
+				// (otherwise we would mess up dynamically created
+				// with static referenced objects in one list)
+				result->push_back(instr->copy());
 				instrCount++;
 			}
 		}else{
-			result->push_back(instr);
+			// ... and here (same reason)
+			result->push_back(instr->copy());
 			instrCount++;
 		}
 	}
@@ -144,6 +151,11 @@ bool DeltaDecodeModule::process(vector<Instruction *> *list){
 		}
 	}
 	
+	for(int n=0;n<(int)list->size();n++) {
+		Instruction *iter = (*list)[n];
+		iter->clear();
+	}
+
 	delete list;
 			
 
