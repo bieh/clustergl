@@ -22,6 +22,12 @@ Instruction::Instruction() {
 Instruction *Instruction::copy(){
 	Instruction *r = new Instruction();
 	memcpy(r, this, (sizeof(Instruction) - MAX_ARG_LEN) + arglen);
+	for(int i=0;i<3;i++) {
+		if(buffers[i].buffer) {
+			r->buffers[i].buffer = (byte*) malloc(buffers[i].len);
+			memcpy(r->buffers[i].buffer, buffers[i].buffer, buffers[i].len);
+		}
+	}
 	return r;
 }
 
