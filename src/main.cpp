@@ -171,13 +171,16 @@ bool App::tick()
 	}
 	
 	for(int i=0;i<(int)thisFrame->size();i++){
+		bool mustdelete = false;
 		Instruction *iter = (*thisFrame)[i];
+		if(iter->id==CGL_REPEAT_INSTRUCTION)
+			mustdelete = true;
 		//LOG_INSTRUCTION(iter);
 		iter->clear();
 
 		// this has to be deleted on renderers only
 		// because they dynamically copy instructions in DeltaDecodeModule
-		if(!bIsIntercept)
+		if(!bIsIntercept || mustdelete)
 			delete iter;
 	}
 	thisFrame->clear();
