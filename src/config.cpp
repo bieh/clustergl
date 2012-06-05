@@ -8,21 +8,21 @@ Config::Config(string filename, string id){
 	LOG("Loading configuration for '%s' from '%s'\n", 
 		id.c_str(), filename.c_str());
 	
-	//TODO: Get rid of these!
-	scaleX = 1.0f;
-	scaleY = 1.0f;
-	
 	this->id = id;
 	
 	//Output options
 	static cfg_opt_t output_opts[] = {
 		CFG_INT(	 (char *)("sizeX"), 0, CFGF_NONE),
 		CFG_INT(	 (char *)("sizeY"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("positionX"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("positionY"), 0, CFGF_NONE),
 		CFG_INT(	 (char *)("offsetX"), 0, CFGF_NONE),
 		CFG_INT(	 (char *)("offsetY"), 0, CFGF_NONE),
 		CFG_INT(	 (char *)("port"), 0, CFGF_NONE),
 		CFG_INT(	 (char *)("angle"), 0, CFGF_NONE),
 		CFG_STR(	 (char *)("address"), 0, CFGF_NONE),
+		CFG_FLOAT(	 (char *)("scaleX"), 1.0, CFGF_NONE),
+		CFG_FLOAT(	 (char *)("scaleY"), 1.0, CFGF_NONE),
 		CFG_STR(	 (char *)("viewmode"), 0, CFGF_NONE),
 		CFG_END()
 	};
@@ -103,9 +103,13 @@ Config::Config(string filename, string id){
 	
 		sizeX = cfg_getint(o, "sizeX");
 		sizeY = cfg_getint(o, "sizeY");
+		positionX = cfg_getint(o, "positionX");
+		positionY = cfg_getint(o, "positionY");
 		angle = cfg_getint(o, "angle");
 		offsetX = cfg_getint(o, "offsetX");
 		offsetY = cfg_getint(o, "offsetY");
+		scaleX = cfg_getfloat(o, "scaleX");
+		scaleY = cfg_getfloat(o, "scaleY");
 		viewModeString = string(cfg_getstr(o, "viewmode"));
 	
 		if(viewModeString == "viewport"){
