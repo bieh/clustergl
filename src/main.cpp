@@ -102,7 +102,7 @@ void App::init(bool shared, const char *id)
 
 	bIsIntercept = shared;
 	
-	char *configFile = (char *)"cgl.conf";
+	char *configFile = (char *)"/etc/cgl.conf";
 	
 	if(getenv("CGL_CONFIG_FILE")){
 		configFile = getenv("CGL_CONFIG_FILE");
