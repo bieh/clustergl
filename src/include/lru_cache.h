@@ -42,10 +42,11 @@
  *
  * @example lru_example.cpp
  */
+#include <cstddef>
+
 #include <map>
 #include <list>
 #include <vector>
-#include <cstddef>
 #ifdef _REENTRANT
 #include <boost/thread/mutex.hpp>
 /// If we are reentrant then use a BOOST scoped mutex where neccessary.
