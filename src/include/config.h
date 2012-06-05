@@ -17,6 +17,10 @@ public:
     int sizeX;
     int sizeY;
     
+	//Position on screen of this renderer
+    int positionX;
+    int positionY;
+    
     //The position of this renderer inside the total screen size
     int offsetX;
     int offsetY;

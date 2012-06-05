@@ -84,6 +84,11 @@ bool ExecModule::makeWindow()
 	int width = gConfig->sizeX*gConfig->scaleX;
 	int height = gConfig->sizeY*gConfig->scaleY;
 
+	//set window position
+	std::stringstream stream;
+	stream <<gConfig->positionX<<","<<gConfig->positionY;
+	setenv("SDL_VIDEO_WINDOW_POS", stream.str().c_str(), true);
+
 	//get a SDL surface
 	SDL_Surface *surface = SDL_SetVideoMode(width, height, 32, videoFlags );
 
