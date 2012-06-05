@@ -13,12 +13,6 @@
 
 typedef void (*ExecFunc)(byte *buf);
 
-/*
-[        mod_text.cpp: 3188]	glTexCoordPointer()
-[        mod_text.cpp: 3197]	glVertexPointer()
-[        mod_text.cpp: 3098]	glColorPointer(size=4, type=5121.0, stride=0.0)
-*/
-
 /*******************************************************************************
 	Globals
 *******************************************************************************/
@@ -26,15 +20,6 @@ typedef void (*ExecFunc)(byte *buf);
 static ExecFunc mFunctions[1700];
 static Instruction *mCurrentInstruction = NULL;
 GLenum currentMode = GL_MODELVIEW;
-
-static int hash(byte *data, int len){
-	int r = 0;
-	
-	for(int i=0;i<len;i++){
-		r += data[i];
-	}
-	return r;
-}
 
 int displayNumber = 0;
 int currentBuffer = 0;
@@ -9061,16 +9046,17 @@ static void EXEC_glEdgeFlagPointerEXT(byte *commandbuf)
 }
 
 
+
 //853
 static void EXEC_glGetPointervEXT(byte *commandbuf)
 {
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
-#ifdef __APPLE__
-	glGetPointerv(*pname,  (GLvoid **)popBuf());
-#else
-	glGetPointervEXT(*pname, (GLvoid **)popBuf());
-#endif
+	LOG("Warning: Called glGetPointervEXT, using glGetPointerv instead\n");
+	
+	glGetPointerv(*pname, (GLvoid **)popBuf());
 }
+
+
 
 
 //854

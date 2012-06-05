@@ -42,6 +42,8 @@
  *
  * @example lru_example.cpp
  */
+#include <cstddef>
+
 #include <map>
 #include <list>
 #include <vector>
