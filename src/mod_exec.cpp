@@ -81,8 +81,13 @@ bool ExecModule::makeWindow()
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
 	//Autodetect res
-	int width = gConfig->sizeX;
-	int height = gConfig->sizeY;
+	int width = gConfig->sizeX*gConfig->scaleX;
+	int height = gConfig->sizeY*gConfig->scaleY;
+
+	//set window position
+	std::stringstream stream;
+	stream <<gConfig->positionX<<","<<gConfig->positionY;
+	setenv("SDL_VIDEO_WINDOW_POS", stream.str().c_str(), true);
 
 	//get a SDL surface
 	SDL_Surface *surface = SDL_SetVideoMode(width, height, 32, videoFlags );
