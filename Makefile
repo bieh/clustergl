@@ -1,4 +1,5 @@
 all:
+	@export ARCH
 	$(MAKE) -C src
 	$(MAKE) -C runtime/tests
 

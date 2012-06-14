@@ -2,11 +2,12 @@
 CGL_RUNTIME="../../../runtime"
 REVISION=`git shortlog | grep -E '^[ ]+\w+' | wc -l`
 
-echo "Making amd64 .deb package for r$REVISION"
+echo "Making i386 .deb package for r$REVISION"
 
-cd ../../
+cd ../../../
+
 make clean
-make
+ARCH=-m32 make
 cd util/dist
 
 rm -rf files
@@ -24,11 +25,13 @@ CONTROL_FILE="clustergl-r$REVISION"
 echo "Package: clustergl" > $CONTROL_FILE
 echo "Version: 0.$REVISION" >> $CONTROL_FILE
 echo "Maintainer: Paul Hunkin <paul@bieh.net>" >> $CONTROL_FILE
-echo "Architecture: amd64" >> $CONTROL_FILE
+echo "Architecture: i386" >> $CONTROL_FILE
 echo "Files: cgl-render /usr/bin/" >> $CONTROL_FILE
 echo " cgl-capture /usr/bin/" >> $CONTROL_FILE
 echo " libcgl-capture.so /usr/lib/" >> $CONTROL_FILE
 echo " cgl.conf /etc/" >> $CONTROL_FILE
+
+
 
 
 equivs-build ./clustergl-r$REVISION > /dev/null
