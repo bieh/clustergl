@@ -23,16 +23,14 @@ cp -v $CGL_RUNTIME/cgl.conf .
 CONTROL_FILE="clustergl-r$REVISION"
 
 echo "Package: clustergl" > $CONTROL_FILE
-echo "Version: 0.$REVISION" >> $CONTROL_FILE
+echo "Version: $REVISION-git" >> $CONTROL_FILE
 echo "Maintainer: Paul Hunkin <paul@bieh.net>" >> $CONTROL_FILE
-echo "Architecture: i386" >> $CONTROL_FILE
-echo "Files: cgl-render /usr/bin/" >> $CONTROL_FILE
-echo " cgl-capture /usr/bin/" >> $CONTROL_FILE
-echo " libcgl-capture.so /usr/lib/" >> $CONTROL_FILE
-echo " cgl.conf /etc/" >> $CONTROL_FILE
-
-
-
+echo "Architecture: amd64" >> $CONTROL_FILE
+echo "Depends: libsdl1.2 libsdl-net1.2 libglew liblzo2 libconfuse libzip"
+echo "Files: cgl-render /usr/bin/cgl-render" >> $CONTROL_FILE
+echo " cgl-capture /usr/bin/cgl-capture" >> $CONTROL_FILE
+echo " libcgl-capture.so /usr/lib/libcgl-capture.so" >> $CONTROL_FILE
+echo " cgl.conf /etc/cgl.conf" >> $CONTROL_FILE
 
 equivs-build ./clustergl-r$REVISION > /dev/null
 
