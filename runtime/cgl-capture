@@ -1,16 +1,24 @@
 #!/bin/bash
 
-#Find the location of CGL
+#Find the location of the CGL library
+# - Could be in the same directory as this script (development)
+# - Could be in /usr/lib/ (deployment)
+
 LOCATION=$(cd ${0%/*} && echo $PWD/${0##*/})
 DIR=`dirname "$LOCATION"`
 
-#And the location of the binary we want to run
-LOCATION=$(cd ${1%/*} && echo $PWD/${1##*/})
-RUNTIME_DIR=`dirname "$LOCATION"`
-
-if [ \! $CGL_CONFIG_FILE ]; then 
-export CGL_CONFIG_FILE="$DIR/cgl.conf"
+if [ -f $DIR/libcgl-capture.so ] 
+then
+	LIB=$DIR/libcgl-capture.so
+elif [ -f /usr/lib/libcgl-capture.so ]
+then
+	LIB=/usr/lib/libcgl-capture.so
+else
+	echo "Couldn't find a libcgl-capture.so"
+	exit
 fi
 
-cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so ./`basename $@`
+echo "(cgl-capture: Using $LIB)"
+
+LD_PRELOAD=$LIB $@
 #cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so gdb -ex run -quiet --args ./`basename $@`
