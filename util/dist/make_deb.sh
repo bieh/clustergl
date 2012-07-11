@@ -11,7 +11,7 @@ cd ../../
 #Debian package
 sudo checkinstall -D -y\
 	--pkgname=clustergl\
-	--pkgversion=$REVISIONgit\
+	--pkgversion=$REVISION-git\
 	--pkgsource=src\
 	--pakdir=util/dist\
 	--maintainer=paul\@bieh.net\
