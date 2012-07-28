@@ -138,6 +138,12 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 	}
 	
 	//LOG("Done\n\n");
+
+	if(totalRead == 0){
+		//Other side has hung up
+		LOG("Connection dropped\n");
+		return false;
+	}
 	
 	Stats::count("mod_netsrv read bytes", totalRead);
 	Stats::increment("mod_netsrv read bytes", totalRead);
