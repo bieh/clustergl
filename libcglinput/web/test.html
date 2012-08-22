@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Virtual Keyboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Virtual Keyboard</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">WSAD</a></li>
+              <li><a href="arrows.html">Full keyboard</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+    	<div id="keyboard"></div>
+
+    </input>
+
+    </div> <!-- /container -->
+
+
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/jquery.js"></script>
+    <script src="js/libcglinput.js"></script>
+
+    <script type="text/javascript">
+
+    	define_key(119, "W", "40%", "20%");
+    	define_key(115, "S", "40%", "50%");
+    	define_key(97, "A", "15%", "50%");
+    	define_key(100, "D", "65%", "50%");
+
+    </script>
+
+    <footer style="position:absolute; bottom:0px; padding:10px">
+    	Made by <a href="http://paulh.co">paulh</a> for GSOC2012, intended to be used with <a href="http://clustergl.org">ClusterGL</a>
+    </footer>
+  </body>
+</html>
