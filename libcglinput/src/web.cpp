@@ -18,6 +18,10 @@ bool begin_web(){
 
 	ctx = mg_start(&callback, NULL, options);
 
+	if(!ctx){
+		return false;
+	}
+
 	LOG("Web server started on port 8080\n");
 	return true;
 }

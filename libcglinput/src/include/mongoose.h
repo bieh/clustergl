@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <stddef.h>
 
+#define NO_SSL
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
