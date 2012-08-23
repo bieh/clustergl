@@ -84,6 +84,8 @@ void *spacenav_thread(void *data){
 	for(int i=0;i<MAX_AXIS;i++){
 		states[i] = 0;
 	}
+	
+	int thresh = mConfig->thresh;
 
 	while(true){
 
@@ -98,24 +100,24 @@ void *spacenav_thread(void *data){
 			}
 
 			//Positive
-			if(val > THRESH && states[axis] == 0){
+			if(val > thresh && states[axis] == 0){
 				states[axis] = 1;
 				on_axis_down(axis, 0);
 			}
 
-			if(val < THRESH && states[axis] == 1){
+			if(val < thresh && states[axis] == 1){
 				states[axis] = 0;
 				on_axis_up(axis, 0);
 			}
 
 
 			//Negative
-			if(val < -THRESH && states[axis] == 0){
+			if(val < -thresh && states[axis] == 0){
 				states[axis] = -1;
 				on_axis_down(axis, 1);
 			}
 
-			if(val > -THRESH && states[axis] == -1){
+			if(val > -thresh && states[axis] == -1){
 				states[axis] = 0;
 				on_axis_up(axis, 1);
 			}
