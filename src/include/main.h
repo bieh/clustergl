@@ -19,6 +19,7 @@
 #include "instruction.h"
 #include "lru_cache.h"
 #include "module.h"
+#include "mongoose.h"
 
 
 /*******************************************************************************

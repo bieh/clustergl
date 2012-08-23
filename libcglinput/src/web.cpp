@@ -120,7 +120,10 @@ static void *callback(enum mg_event event, struct mg_connection *conn) {
 				content.c_str());
 		// Mark as processed
 		return (void *)"";
-	} else {
+	} else if(event == MG_EVENT_LOG) {
+		printf("Webserver: %s\n", request_info->log_message);
 		return NULL;
 	}
+
+	return NULL;
 }

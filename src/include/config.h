@@ -65,7 +65,14 @@ public:
 	vector<int> outputPorts;
 	
 	string capturePidFile;
-	
+
+
+/*******************************************************************************
+    Offset remote configuration
+*******************************************************************************/
+    bool remoteConfigServerEnabled;
+
+    void startRemoteConfigServer();
 };
 
 /*

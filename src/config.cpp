@@ -41,6 +41,8 @@ Config::Config(string filename, string id){
 		CFG_SEC(	 (char *)"output", 	output_opts, CFGF_MULTI | CFGF_TITLE),
 		CFG_STR(	 (char *)("interceptMode"), 0, CFGF_NONE),
 		CFG_STR(	 (char *)("capturePidFile"), 0, CFGF_NONE),
+		CFG_SIMPLE_BOOL(	(char *)("remoteConfigServerEnabled"),	 
+			&remoteConfigServerEnabled),
 		CFG_END()
 	};
 	
@@ -131,5 +133,173 @@ Config::Config(string filename, string id){
 	}
 	
 	cfg_free(cfg);
+
+	if(remoteConfigServerEnabled){
+		startRemoteConfigServer();
+	}
 	
+}
+
+/*******************************************************************************
+	Config over HTTP
+*******************************************************************************/
+static void *callback(enum mg_event event, struct mg_connection *conn);
+static struct mg_context *ctx;
+
+void Config::startRemoteConfigServer(){
+
+	const char *options[] = {"listening_ports", "8081", NULL};
+
+	ctx = mg_start(&callback, NULL, options);
+
+	LOG("Web configuration server started on port 8081\n");
+
+}
+
+
+
+/*******************************************************************************
+ Utility functions
+*******************************************************************************/
+string read_file(string filepath){
+	FILE *f = fopen(filepath.c_str(), "r");
+
+	if(!f){
+		return "";
+	}
+
+	const int len = 1024 * 100;
+	
+	char buf[len];
+	memset(buf, 0, len);
+	fread(buf, len, 1, f);
+	fclose(f);
+
+	return string(buf);
+}
+
+string variable_from_uri(string uri){
+	uri = uri.substr(1,uri.size()); //lose the front /
+	return uri;
+}
+
+
+int value_from_variable(string var){
+	int start = var.rfind("/")+1;
+	string substr = var.substr(start, var.size());
+
+	int result;
+	std::stringstream(substr) >> result;
+
+	return result;
+}
+
+bool handled = false;
+int config_result = 0;
+
+void handle_config_attrib(string attrib, string uri, int *ptr){
+	if(uri.find(attrib) == string::npos){
+		return;
+	}
+
+	handled = true;
+
+	string var = variable_from_uri(uri);
+
+	if(var.find("/") == string::npos){
+		config_result = *ptr;
+		LOG("GET %s = %d\n", var.c_str(), *ptr);
+		return;
+	}
+
+	int value = value_from_variable(var);
+	*ptr = value;
+	config_result = 1;
+
+	LOG("SET %s = %d\n", attrib.c_str(), value);
+}
+
+/*******************************************************************************
+ Web server high-level callback
+*******************************************************************************/
+string request(string url){
+	//LOG("WEB: %s\n", url.c_str());
+
+	handled = false;
+	config_result = 0;
+
+	handle_config_attrib("sizeX", url, &gConfig->sizeX);
+	handle_config_attrib("sizeY", url, &gConfig->sizeY);
+	handle_config_attrib("positionX", url, &gConfig->positionX);
+	handle_config_attrib("positionY", url, &gConfig->positionY);
+	handle_config_attrib("offsetX", url, &gConfig->offsetX);
+	handle_config_attrib("offsetY", url, &gConfig->offsetY);
+	handle_config_attrib("angle", url, &gConfig->angle);
+	handle_config_attrib("totalWidth", url, &gConfig->totalWidth);
+	handle_config_attrib("totalHeight", url, &gConfig->totalHeight);
+	handle_config_attrib("screenGap", url, &gConfig->screenGap);
+	//handle_config_attrib("scaleX", url, &gConfig->sizeX);
+	//handle_config_attrib("scaleY", url, &gConfig->sizeX);
+	handle_config_attrib("fakeWindowX", url, &gConfig->fakeWindowX);
+	handle_config_attrib("fakeWindowY", url, &gConfig->fakeWindowY);
+
+	if(handled){
+		std::stringstream out;
+		out << config_result;
+		return out.str() + "\n"; 
+	}
+
+	string html = read_file("web" + url); 
+
+	if(url == "/"){
+		html = read_file("web/index.html");
+	}
+
+	if(html.length() > 0){
+		return html;
+	}
+
+	LOG("WEB: 404 NOT FOUND %s\n", url.c_str());
+
+	//Give up!
+	return string("404 not found: ") + url + "\n";
+}
+
+string guess_content_type(string url){
+	if(url.find(".css") != string::npos){
+		return "text/css";
+	}
+
+	if(url.find(".js") != string::npos){
+		return "script/javascript";
+	}
+
+	return "text/html";
+}
+
+/*******************************************************************************
+ Web server low-level callback
+*******************************************************************************/
+static void *callback(enum mg_event event, struct mg_connection *conn) {
+	const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+	if (event == MG_NEW_REQUEST) {
+		string content = request(string(request_info->uri));
+		mg_printf(conn,
+				"HTTP/1.1 200 OK\r\n"
+				"Content-Type: %s\r\n"
+				"Content-Length: %d\r\n"   
+				"\r\n"
+				"%s",
+				guess_content_type(string(request_info->uri)).c_str(),
+				(int)content.length(), 
+				content.c_str());
+		// Mark as processed
+		return (void *)"";
+	} else if(event == MG_EVENT_LOG) {
+		printf("Webserver: %s\n", request_info->log_message);
+		return NULL;
+	}
+
+	return NULL;
 }
