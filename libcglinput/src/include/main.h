@@ -28,11 +28,15 @@ extern bool begin_spacenav();
 /*******************************************************************************
  Configuration
 *******************************************************************************/
+static const int MAX_AXIS = 10;
+
 class Config{
 public:
 	Config(string filename);
-	int spacenav_codes[6];
-	char *spacenav_device;
+	int axis_actions[MAX_AXIS][2];
+	string device;
+	int num_axis;
+	int thresh;
 };
 
 extern Config *mConfig;

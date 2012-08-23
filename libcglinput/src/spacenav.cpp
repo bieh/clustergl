@@ -22,7 +22,6 @@
 
 pthread_t thread;
 
-const int THRESH = 350;
 
 /*
 //write a single axis input_event
@@ -58,52 +57,67 @@ int read_axis(int fd, int *axis){
     }
 
     *axis = ev.code;
+
+    return ev.value;
 }
 
-void on_axis_down(int axis){
-	mInject->keydown(mConfig->spacenav_codes[axis]);
+void on_axis_down(int axis, int dir){
+	mInject->keydown(mConfig->axis_actions[axis][dir]);
 }
 
-void on_axis_up(int axis){
-	mInject->keyup(mConfig->spacenav_codes[axis]);
+void on_axis_up(int axis, int dir){
+	mInject->keyup(mConfig->axis_actions[axis][dir]);
 }
 
 void *spacenav_thread(void *data){
-	LOG("Spacenav: opening %s\n", mConfig->spacenav_device);
+	LOG("Input device: opening %s\n", mConfig->device.c_str());
 
-	int fd = open(mConfig->spacenav_device, O_RDONLY);
+	int fd = open(mConfig->device.c_str(), O_RDONLY);
 
 	if(fd <= 0){
-		LOG("No spacenav found, bailing out\n");
+		LOG("No device found, bailing out\n");
 		pthread_exit(NULL);
 	}
 
-	int states[10];
+	int states[MAX_AXIS];
 
-	for(int i=0;i<10;i++){
+	for(int i=0;i<MAX_AXIS;i++){
 		states[i] = 0;
 	}
 
 	while(true){
 
-		for(int i=0;i<6;i++){
+		for(int i=0;i<mConfig->num_axis;i++){
 			int axis = 0;
 			int val = read_axis(fd, &axis);
 
-			LOG("%d: %d", axis, val);
+			LOG("%d: %d\n", axis, val);
 
-			if(axis < 0){
+			if(axis < 0 || axis >= mConfig->num_axis){
 				continue;
 			}
 
+			//Positive
 			if(val > THRESH && states[axis] == 0){
 				states[axis] = 1;
-				on_axis_down(axis);
+				on_axis_down(axis, 0);
 			}
 
 			if(val < THRESH && states[axis] == 1){
 				states[axis] = 0;
-				on_axis_up(axis);
+				on_axis_up(axis, 0);
+			}
+
+
+			//Negative
+			if(val < -THRESH && states[axis] == 0){
+				states[axis] = -1;
+				on_axis_down(axis, 1);
+			}
+
+			if(val > -THRESH && states[axis] == -1){
+				states[axis] = 0;
+				on_axis_up(axis, 1);
 			}
 		}
 

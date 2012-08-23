@@ -4,24 +4,10 @@
 Config::Config(string filename){
 
 	LOG("Loading configuration from '%s'\n", filename.c_str());
-
-	spacenav_device = new char[128];
-	
-	//Top level options
-	static cfg_opt_t opts[] = {
-		CFG_SIMPLE_INT(	(char *)("spacenav_0"), &spacenav_codes[0]),
-		CFG_SIMPLE_INT(	(char *)("spacenav_1"), &spacenav_codes[1]),
-		CFG_SIMPLE_INT(	(char *)("spacenav_2"), &spacenav_codes[2]),
-		CFG_SIMPLE_INT(	(char *)("spacenav_3"), &spacenav_codes[3]),
-		CFG_SIMPLE_INT(	(char *)("spacenav_4"), &spacenav_codes[4]),
-		CFG_SIMPLE_INT(	(char *)("spacenav_5"), &spacenav_codes[5]),
-		CFG_SIMPLE_STR(	(char *)("spacenav_device"), &spacenav_device),
-		CFG_END()
-	};
 	
 	cfg_t *cfg;
 
-	cfg = cfg_init(opts, CFGF_NONE);
+	cfg = cfg_init(NULL, CFGF_NONE);
 	
 	int parse_result = cfg_parse(cfg, filename.c_str());
 	
@@ -34,6 +20,32 @@ Config::Config(string filename){
 		LOG("Couldn't parse config file\n");
 		exit(1);
 	}
+
+	device = string(cfg_getstr(cfg, "device"));
+	thresh = cfg_getint(cfg, "thresh");
+
+	int n = cfg_size(cfg, "axis");
+	num_axis = 0;
+	
+	for(int i=0;i<n;i++){
+		cfg_t *o = cfg_getnsec(cfg, "axis", i);
+	
+		num_axis++;
+
+		int id = cfg_getint(o, "id");
+		int pos = cfg_getint(o, "positive");
+		int neg = cfg_getint(o, "negative");
+	
+		if(id >= MAX_AXIS){
+			LOG("Axis id %d outside of range %d\n", id, MAX_AXIS);
+			continue;
+		}
+
+		axis_actions[id][0] = pos;
+		axis_actions[id][1] = neg;
+	}
+	
+
 	
 	cfg_free(cfg);
 	
