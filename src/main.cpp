@@ -180,8 +180,8 @@ bool App::tick()
 
 		// this has to be deleted on renderers only
 		// because they dynamically copy instructions in DeltaDecodeModule
-		//if(!bIsIntercept || mustdelete)
-		//	delete iter;
+		if(!bIsIntercept || mustdelete)
+			delete iter;
 	}
 	thisFrame->clear();
 
