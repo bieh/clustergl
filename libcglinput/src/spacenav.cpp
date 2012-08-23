@@ -4,9 +4,8 @@
 
 #include "main.h"
 
-
-#ifndef __LINUX__
-
+///We disable spacenav on non-linux, as we used linux-specific headers below
+#ifndef __linux__
 
  bool begin_spacenav(){
  	LOG("No spacenav on OSX yet!\n");
@@ -14,6 +13,8 @@
  }
 
 #else
+
+
 #include <pthread.h>
 #include <sys/ioctl.h>
 #include <error.h>
