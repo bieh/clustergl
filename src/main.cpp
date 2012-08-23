@@ -30,7 +30,7 @@ int App::run(int argc, char **argv)
 	
 	//Set up the module chain	
 	mModules.push_back(new NetSrvModule());
-	//mModules.push_back(new DeltaDecodeModule()); 	
+	mModules.push_back(new DeltaDecodeModule()); 	
 	//mModules.push_back(new DuplicateBufferDecodeModule());
 	mModules.push_back(new ExecModule());
 
@@ -83,7 +83,7 @@ bool App::run_shared(string src)
 			
 	//Set up the module chain
 	mModules.push_back(new AppModule(""));
-	//mModules.push_back(new DeltaEncodeModule());
+	mModules.push_back(new DeltaEncodeModule());
 	//mModules.push_back(new DuplicateBufferEncodeModule()); 	
 	mModules.push_back(new NetClientModule());
 
@@ -180,8 +180,8 @@ bool App::tick()
 
 		// this has to be deleted on renderers only
 		// because they dynamically copy instructions in DeltaDecodeModule
-		//if(!bIsIntercept || mustdelete)
-		//	delete iter;
+		if(!bIsIntercept || mustdelete)
+			delete iter;
 	}
 	thisFrame->clear();
 

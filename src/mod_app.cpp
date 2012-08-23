@@ -160,6 +160,7 @@ void pushOp(uint16_t opID){
 		exit(1);
 	}
 
+	LOG("Push %d\n", opID);
 
 	LOG_INSTRUCTION(mCurrentInstruction);
 
