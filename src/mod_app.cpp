@@ -161,7 +161,7 @@ void pushOp(uint16_t opID){
 	}
 
 
-	LOG_INSTRUCTION(mCurrentInstruction);
+	//LOG_INSTRUCTION(mCurrentInstruction);
 
 	mCurrentInstruction = &mInstructions[iInstructionCount++];
 	iCurrentBuffer = 0;
