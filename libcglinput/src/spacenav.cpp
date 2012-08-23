@@ -22,7 +22,7 @@
 
 pthread_t thread;
 
-const int THRESH = 10;
+const int THRESH = 350;
 
 /*
 //write a single axis input_event
