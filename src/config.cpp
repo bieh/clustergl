@@ -151,8 +151,12 @@ void Config::startRemoteConfigServer(){
 	const char *options[] = {"listening_ports", "8081", NULL};
 
 	ctx = mg_start(&callback, NULL, options);
-
-	LOG("Web configuration server started on port 8081\n");
+	
+	if(!ctx){
+		LOG("Failed to start webserver!\n");
+	}else{
+		LOG("Web configuration server started on port 8081\n");
+	}
 
 }
 
