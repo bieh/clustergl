@@ -6,8 +6,25 @@ Config::Config(string filename){
 	LOG("Loading configuration from '%s'\n", filename.c_str());
 	
 	cfg_t *cfg;
+	
+	//Output options
+	static cfg_opt_t axis_opts[] = {
+		CFG_INT(	 (char *)("id"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("positive"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("negative"), 0, CFGF_NONE),
+		CFG_END()
+	};
+	
+	//Top level options
+	static cfg_opt_t opts[] = {
+		CFG_SIMPLE_INT(	(char *)("thresh"), 	&thresh),
+		CFG_STR(	 (char *)("device"), 0, CFGF_NONE),
+		CFG_SEC(	 (char *)"axis", 	axis_opts, CFGF_MULTI | CFGF_TITLE),
+		CFG_END()
+	};
+	
 
-	cfg = cfg_init(NULL, CFGF_NONE);
+	cfg = cfg_init(opts, CFGF_NONE);
 	
 	int parse_result = cfg_parse(cfg, filename.c_str());
 	
