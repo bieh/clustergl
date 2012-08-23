@@ -3,8 +3,18 @@
 *******************************************************************************/
 
 #include "main.h"
-#include <pthread.h>
 
+
+#ifndef __LINUX__
+
+
+ bool begin_spacenav(){
+ 	LOG("No spacenav on OSX yet!\n");
+ 	return true;
+ }
+
+#else
+#include <pthread.h>
 #include <sys/ioctl.h>
 #include <error.h>
 #include <sys/types.h>
@@ -131,10 +141,10 @@ void *spacenav_thread(void *data){
  bool begin_spacenav(){
 
  	//Fire up a background thread to deal with this
-
-
 	pthread_create(&thread, NULL, spacenav_thread, NULL);
 
 
  	return true;
  }
+
+ #endif

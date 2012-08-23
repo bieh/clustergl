@@ -15,7 +15,7 @@ DEPS := $(wildcard include/*.h)
 #Compiler flags. Note the arch-specific ones
 CXXFLAGS=$(ARCH) -I/opt/local/include/ -Isrc/include -O3 -Wextra -g -fPIC -fvisibility-inlines-hidden 
 LDFLAGS=-lconfuse -lpthread
-DARWIN_LDFLAGS= -L/opt/local/lib -lSDL
+DARWIN_LDFLAGS= -lintl -L/opt/local/lib -lSDL
 LINUX_LDFLAGS=-lSDL
 
 #Compile
