@@ -74,12 +74,14 @@ int read_axis(int fd, int *axis){
 
 void on_axis_down(int axis, int dir){
 	if(mConfig->axis_actions[axis][dir]){
+		LOG("AXIS ACTIVE %d %s %d\n", axis, dir ? "up" : "down", mConfig->axis_actions[axis][dir]);
 		mInject->keydown(mConfig->axis_actions[axis][dir]);
 	}
 }
 
 void on_axis_up(int axis, int dir){
 	if(mConfig->axis_actions[axis][dir]){
+		LOG("AXIS INACTIVE %d %s %d\n", axis, dir ? "up" : "down", mConfig->axis_actions[axis][dir]);
 		mInject->keyup(mConfig->axis_actions[axis][dir]);
 	}
 }
@@ -108,7 +110,7 @@ void *spacenav_thread(void *data){
 			int axis = 0;
 			int val = read_axis(fd, &axis);
 
-			LOG("%d: %d\n", axis, val);
+			//LOG("%d: %d\n", axis, val);
 
 			if(axis < 0 || axis >= mConfig->num_axis){
 				continue;
@@ -138,7 +140,7 @@ void *spacenav_thread(void *data){
 			}
 		}
 
-		SDL_Delay(100);
+		SDL_Delay(10);
 	}
 
  }
