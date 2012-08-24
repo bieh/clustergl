@@ -104,7 +104,7 @@ void *spacenav_thread(void *data){
 
 	while(true){
 
-		for(int i=0;i<mConfig->num_axis;i++){
+		for(int i=0;i<MAX_AXIS;i++){
 			int axis = 0;
 			int val = read_axis(fd, &axis);
 

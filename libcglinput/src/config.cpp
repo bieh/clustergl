@@ -43,6 +43,11 @@ Config::Config(string filename){
 
 	int n = cfg_size(cfg, "axis");
 	num_axis = 0;
+
+	for(int i=0;i<MAX_AXIS;i++){
+		axis_actions[i][0] = 0;
+		axis_actions[i][1] = 0;
+	}
 	
 	for(int i=0;i<n;i++){
 		cfg_t *o = cfg_getnsec(cfg, "axis", i);
