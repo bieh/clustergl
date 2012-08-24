@@ -112,7 +112,7 @@ void *spacenav_thread(void *data){
 
 			//LOG("%d: %d\n", axis, val);
 
-			if(axis < 0 || axis >= mConfig->num_axis){
+			if(axis < 0 || axis >= MAX_AXIS){
 				continue;
 			}
 
