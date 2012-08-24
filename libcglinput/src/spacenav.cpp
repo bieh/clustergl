@@ -73,11 +73,15 @@ int read_axis(int fd, int *axis){
 }
 
 void on_axis_down(int axis, int dir){
-	mInject->keydown(mConfig->axis_actions[axis][dir]);
+	if(mConfig->axis_actions[axis][dir]){
+		mInject->keydown(mConfig->axis_actions[axis][dir]);
+	}
 }
 
 void on_axis_up(int axis, int dir){
-	mInject->keyup(mConfig->axis_actions[axis][dir]);
+	if(mConfig->axis_actions[axis][dir]){
+		mInject->keyup(mConfig->axis_actions[axis][dir]);
+	}
 }
 
 void *spacenav_thread(void *data){

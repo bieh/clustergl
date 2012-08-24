@@ -360,11 +360,23 @@ int main(int argc, char*argv[])
 			case SDL_KEYDOWN:
 			    /* handle key presses */
 			    handleKeyPress( &event.key.keysym );
-          keys[(int)event.key.keysym.sym] = 1;
+
+          int kid = (int)event.key.keysym.sym;
+
+          if(kid >= 0 && kid < 1024){
+            keys[kid] = 1;
+          }
           printf("*** KEY DOWN %d\n", event.key.keysym.sym);
 			    break;
       case SDL_KEYUP:
-          keys[(int)event.key.keysym.sym] = 0;
+
+
+          kid = (int)event.key.keysym.sym;
+        
+          if(kid >= 0 && kid < 1024){
+            keys[kid] = 0;
+          }
+
           printf("*** KEY UP %d\n", event.key.keysym.sym);
 
           break;
