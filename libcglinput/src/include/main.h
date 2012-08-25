@@ -57,4 +57,10 @@ public:
 	void keyup(int keycode);
 };
 
+class XInject : public IInject{
+public:
+	void keydown(int keycode);
+	void keyup(int keycode);
+};
+
 extern IInject *mInject;

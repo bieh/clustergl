@@ -25,7 +25,7 @@ extern "C" int SDL_Init(unsigned int flags) {
 	int r = (*_SDL_Init)(flags);
 				
 	//Set up our internals
-	if(!bHasInit){
+	if(!bHasInit && !mInject){
 		bHasInit = true;
 
 		mInject = new SDLInject();

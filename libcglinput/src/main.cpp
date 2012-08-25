@@ -12,8 +12,15 @@ Config *mConfig = NULL;
 *******************************************************************************/
 bool run(string method){
 	LOG("run(%s)\n", method.c_str());
+	
+	
+	char *configFile = (char *)"/etc/libcglinput.conf";
+	
+	if(getenv("CGLINPUT_CONFIG_FILE")){
+		configFile = getenv("CGLINPUT_CONFIG_FILE");
+	}
 
-	mConfig = new Config("libcglinput.cfg");
+	mConfig = new Config(configFile);
 
 	if(!mInject){
 		LOG("Injection method wasn't initialised!");

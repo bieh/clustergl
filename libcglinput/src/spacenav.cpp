@@ -87,12 +87,12 @@ void on_axis_up(int axis, int dir){
 }
 
 void *spacenav_thread(void *data){
-	LOG("Input device: opening %s\n", mConfig->device.c_str());
+	LOG("Input device: attemting to open %s\n", mConfig->device.c_str());
 
 	int fd = open(mConfig->device.c_str(), O_RDONLY);
 
 	if(fd <= 0){
-		LOG("No device found, bailing out\n");
+		LOG("No input device found\n");
 		pthread_exit(NULL);
 	}
 
