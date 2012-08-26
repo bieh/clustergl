@@ -66,6 +66,8 @@ int read_axis(int fd, int *axis){
     	*axis = -1;
     	return 0;
     }
+    
+    //printf("%d, %d, %d\n", ev.code, ev.type, ev.value);
 
     *axis = ev.code;
 
@@ -112,6 +114,10 @@ void *spacenav_thread(void *data){
 
 		if(axis < 0 || axis >= MAX_AXIS){
 			continue;
+		}
+		
+		if(val > 1024){
+			continue; //TODO: better solution!
 		}
 		
 		int thresh = mConfig->thresh[axis];
