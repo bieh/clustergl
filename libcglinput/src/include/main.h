@@ -28,7 +28,7 @@ extern bool begin_spacenav();
 /*******************************************************************************
  Configuration
 *******************************************************************************/
-static const int MAX_AXIS = 10;
+static const int MAX_AXIS = 512;
 
 class Config{
 public:
@@ -36,7 +36,7 @@ public:
 	int axis_actions[MAX_AXIS][2];
 	string device;
 	int num_axis;
-	int thresh;
+	int thresh[MAX_AXIS];
 };
 
 extern Config *mConfig;

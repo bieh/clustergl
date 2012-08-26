@@ -102,45 +102,45 @@ void *spacenav_thread(void *data){
 		states[i] = 0;
 	}
 	
-	int thresh = mConfig->thresh;
 
 	while(true){
 
-		for(int i=0;i<MAX_AXIS;i++){
-			int axis = 0;
-			int val = read_axis(fd, &axis);
+		int axis = 0;
+		int val = read_axis(fd, &axis);
 
-			//LOG("%d: %d\n", axis, val);
+		//LOG("%d: %d\n", axis, val);
 
-			if(axis < 0 || axis >= MAX_AXIS){
-				continue;
-			}
+		if(axis < 0 || axis >= MAX_AXIS){
+			continue;
+		}
+		
+		int thresh = mConfig->thresh[axis];
 
-			//Positive
-			if(val > thresh && states[axis] == 0){
-				states[axis] = 1;
-				on_axis_down(axis, 0);
-			}
-
-			if(val < thresh && states[axis] == 1){
-				states[axis] = 0;
-				on_axis_up(axis, 0);
-			}
-
-
-			//Negative
-			if(val < -thresh && states[axis] == 0){
-				states[axis] = -1;
-				on_axis_down(axis, 1);
-			}
-
-			if(val > -thresh && states[axis] == -1){
-				states[axis] = 0;
-				on_axis_up(axis, 1);
-			}
+		//Positive
+		if(val >= thresh && states[axis] == 0){
+			states[axis] = 1;
+			on_axis_down(axis, 0);
 		}
 
-		SDL_Delay(10);
+		if(val < thresh && states[axis] == 1){
+			states[axis] = 0;
+			on_axis_up(axis, 0);
+		}
+
+
+		//Negative
+		if(val <= -thresh && states[axis] == 0){
+			states[axis] = -1;
+			on_axis_down(axis, 1);
+		}
+
+		if(val > -thresh && states[axis] == -1){
+			states[axis] = 0;
+			on_axis_up(axis, 1);
+		}
+		
+		SDL_Delay(1);
+
 	}
 
  }
