@@ -14,6 +14,14 @@ Config::Config(string filename){
 		CFG_INT(	 (char *)("negative"), 0, CFGF_NONE),
 		CFG_END()
 	};
+
+
+	//Output options
+	static cfg_opt_t button_opts[] = {
+		CFG_INT(	 (char *)("id"), 0, CFGF_NONE),
+		CFG_INT(	 (char *)("keycode"), 0, CFGF_NONE),
+		CFG_END()
+	};
 	
 	//Top level options
 	static cfg_opt_t opts[] = {
@@ -22,6 +30,7 @@ Config::Config(string filename){
 		CFG_SEC(	 (char *)"axis", 	axis_opts, CFGF_MULTI | CFGF_TITLE),
 		CFG_END()
 	};
+
 	
 
 	cfg = cfg_init(opts, CFGF_NONE);
