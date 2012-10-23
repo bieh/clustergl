@@ -59,6 +59,10 @@ using std::map;
 #ifndef NO_OPENGL_HEADERS
 	#ifdef __APPLE__
 		#include <SDL/SDL_opengl.h>
+		#include <OpenGL/gltypes.h> // needed for GLuint64EXT and stuff
+		// a little ugly but won't compile on Mac without this
+		#define GL_FRAMEBUFFER_COMPLETE			0x8CD5
+		#define GL_NUM_EXTENSIONS				0x821D
 	#else
 		#include <GL/gl.h>
 		#include <GL/glx.h>

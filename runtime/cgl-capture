@@ -20,5 +20,14 @@ fi
 
 echo "(cgl-capture: Using $LIB)"
 
-LD_PRELOAD=$LIB $@
+unamestr=`uname`
+
+if [[ "$unamestr" == 'Linux' ]]; then
+	LD_PRELOAD=$LIB $@
+elif [[ "$unamestr" == 'Darwin' ]]; then
+	export DYLD_INSERT_LIBRARIES=$LIB
+	export DYLD_FORCE_FLAT_NAMESPACE=
+	$@
+fi
+
 #cd $RUNTIME_DIR && LD_PRELOAD=$DIR/libcgl-capture.so gdb -ex run -quiet --args ./`basename $@`
