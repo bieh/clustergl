@@ -139,7 +139,9 @@ int getGetSize(GLenum type){
 	case GL_FOG_INDEX: return 1;
 	case GL_FOG_MODE: return 1;
 	case GL_FOG_START: return 1;
+#ifdef GL_FRAMEBUFFER_BINDING
 	case GL_FRAMEBUFFER_BINDING: return 1;
+#endif
 	case GL_FRAGMENT_SHADER_DERIVATIVE_HINT: return 1;
 	case GL_FRONT_FACE: return 1;
 	case GL_GENERATE_MIPMAP_HINT: return 1;
@@ -212,7 +214,9 @@ int getGetSize(GLenum type){
 	case GL_MAX_CLIENT_ATTRIB_STACK_DEPTH: return 1;
 	case GL_MAX_ATTRIB_STACK_DEPTH: return 1;
 	case GL_MAX_CLIP_PLANES: return 1;
+#ifdef GL_MAX_COLOR_ATTACHMENTS
 	case GL_MAX_COLOR_ATTACHMENTS: return 1;
+#endif
 	case GL_MAX_COLOR_MATRIX_STACK_DEPTH: return 1;
 	case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: return 1;
 	case GL_MAX_CUBE_MAP_TEXTURE_SIZE: return 1;
@@ -227,7 +231,9 @@ int getGetSize(GLenum type){
 	case GL_MAX_NAME_STACK_DEPTH: return 1;
 	case GL_MAX_PIXEL_MAP_TABLE: return 1;
 	case GL_MAX_PROJECTION_STACK_DEPTH: return 1;
+#ifdef GL_MAX_SAMPLES
 	case GL_MAX_SAMPLES: return 1;
+#endif
 	case GL_MAX_TEXTURE_COORDS: return 1;
 	case GL_MAX_TEXTURE_IMAGE_UNITS: return 1;
 	case GL_MAX_TEXTURE_LOD_BIAS: return 1;
