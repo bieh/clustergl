@@ -19,6 +19,13 @@ Instruction::Instruction() {
 	memset(args, 0, MAX_ARG_LEN);
 }
 
+Instruction::~Instruction() {
+	for(int i=0; i<3; i++) {
+		if(buffers[i].buffer)
+			free(buffers[i].buffer);
+	}
+}
+
 Instruction *Instruction::copy(){
 	Instruction *r = new Instruction();
 	memcpy(r, this, (sizeof(Instruction) - MAX_ARG_LEN) + arglen);

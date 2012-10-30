@@ -21,10 +21,11 @@ debugrender:
 
 
 install:
-	@cp runtime/cgl-render /usr/bin/ -v
-	@cp runtime/cgl-capture /usr/bin/ -v
-	@cp runtime/libcgl-capture.so /usr/lib -v
-	@cp runtime/cgl.conf /etc/ -v
+	@cp -v runtime/cgl-render /usr/bin/
+	@cp -v runtime/cgl-capture /usr/bin/
+	@cp -v runtime/libcgl-capture.so /usr/lib
+	@cp -v runtime/cgl.conf /etc/
 
 uninstall:
-	@rm -fv /usr/bin/cgl-render /usr/bin/cgl-capture /usr/lib/libcgl-capture.so /etc/cgl.conf 
+	@rm -fv /usr/bin/cgl-render /usr/bin/cgl-capture /usr/lib/libcgl-capture.so /etc/cgl.conf
+
