@@ -144,11 +144,6 @@ bool DeltaDecodeModule::process(vector<Instruction *> *list){
 		Instruction *dst = src->copy();
 						
 		lastFrame.push_back(dst);
-		
-		//reset the buffers so they don't get cleared later
-		for(int i=0;i<3;i++){
-			src->buffers[i].needClear = false;
-		}
 	}
 	
 	for(int n=0;n<(int)list->size();n++) {

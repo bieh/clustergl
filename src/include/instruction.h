@@ -21,6 +21,7 @@ class Instruction
 {
 public:
 	Instruction();
+	~Instruction();
 	void clear();	
 	bool compare(Instruction *other);
 	Instruction *copy();
