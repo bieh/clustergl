@@ -14,6 +14,7 @@ Config::Config(string filename, string id){
 	static cfg_opt_t output_opts[] = {
 		CFG_INT(	 (char *)("sizeX"), 0, CFGF_NONE),
 		CFG_INT(	 (char *)("sizeY"), 0, CFGF_NONE),
+		CFG_BOOL(	 (char *)("fullscreen"), cfg_false, CFGF_NONE),
 		CFG_INT(	 (char *)("positionX"), 0, CFGF_NONE),
 		CFG_INT(	 (char *)("positionY"), 0, CFGF_NONE),
 		CFG_INT(	 (char *)("offsetX"), 0, CFGF_NONE),
@@ -105,6 +106,7 @@ Config::Config(string filename, string id){
 	
 		sizeX = cfg_getint(o, "sizeX");
 		sizeY = cfg_getint(o, "sizeY");
+		fullscreen = cfg_getbool(o, "fullscreen");
 		positionX = cfg_getint(o, "positionX");
 		positionY = cfg_getint(o, "positionY");
 		angle = cfg_getint(o, "angle");
