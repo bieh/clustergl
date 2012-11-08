@@ -66,7 +66,10 @@ bool ExecModule::makeWindow()
 	videoFlags  = SDL_OPENGL;
 	videoFlags |= SDL_GL_DOUBLEBUFFER;
 	videoFlags |= SDL_HWPALETTE;
-	//videoFlags |= SDL_NOFRAME; 
+	//videoFlags |= SDL_NOFRAME;
+
+	if(gConfig->fullscreen)
+		videoFlags |= SDL_FULLSCREEN;
 								 
 	if(videoInfo->hw_available ){
 		videoFlags |= SDL_HWSURFACE;
