@@ -12,9 +12,15 @@
  
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL/SDL.h>
+
+#ifdef __APPLE__
+#include <SDL/SDL_opengl.h>
+#include <SDL/SDL_main.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <SDL/SDL.h>
+#endif
 
 /* screen width, height, and bit depth */
 #define SCREEN_WIDTH  640
