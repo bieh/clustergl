@@ -1,7 +1,15 @@
 CC = gcc -Wall -ansi
+UNAME := $(shell uname -s)
+FILE=row
 
 all:
-	$(CC) row.c -o row -lGL -lGLU `sdl-config --cflags --libs` --std=c99
+all: 
+ifeq ($(UNAME),Darwin)
+	gcc -g -I/opt/local/include -I/usr/X11R6/include -L/opt/local/lib -lSDLmain -lSDL -Wl,-framework,Cocoa -framework OpenGL $(FILE).c -o $(FILE) --std=c99
+endif
+ifeq ($(UNAME),Linux)
+	$(CC) $(FILE).c -o $(FILE) -lGL -lGLU `sdl-config --cflags --libs` --std=c99
+endif
 
 clean:
-	@rm row -f
+	@rm $(FILE) -f
