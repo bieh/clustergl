@@ -131,6 +131,14 @@ Config::Config(string filename, string id){
 		LOG("Couldn't find output '%s' in config file\n", id.c_str());
 		exit(1);
 	}
+
+	for(unsigned int i = 0; i < cfg_size(cfg, "capturePipeline"); i++){
+		capturePipeline.push_back(string(cfg_getnstr(cfg, "capturePipeline", i)));
+        }
+	if (capturePipeline.empty()){
+		LOG("Something has to be defined in capturePipeline\n");
+		exit(1);
+	}
 	
 	cfg_free(cfg);
 

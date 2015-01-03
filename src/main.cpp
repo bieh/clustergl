@@ -82,10 +82,19 @@ bool App::run_shared(string src)
 	
 			
 	//Set up the module chain
-	mModules.push_back(new AppModule(""));
-	mModules.push_back(new DeltaEncodeModule());
-	//mModules.push_back(new DuplicateBufferEncodeModule()); 	
-	mModules.push_back(new NetClientModule());
+	for (vector<string>::iterator it = gConfig->capturePipeline.begin(); it != gConfig->capturePipeline.end(); ++it) {
+		Module* m;
+		if(*it == "app") m = new AppModule("");
+		else if(*it == "delta") m = new DeltaEncodeModule();
+        	else if(*it == "netclient") m = new NetClientModule();
+        	else if(*it == "text") m = new TextModule();
+        	else if(*it == "profile") m = new ProfileModule();
+        	else {
+			LOG("Unknown module: %s\n", it->c_str());
+			exit(1);
+		}
+		mModules.push_back(m);
+	}
 
 	//Return control to the parent process.
 	return true;

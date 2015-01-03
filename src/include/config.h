@@ -63,7 +63,10 @@ public:
     int numOutputs;    
 	vector<string> outputAddresses;
 	vector<int> outputPorts;
-	
+
+	vector<string> capturePipeline;
+	vector<string> outputPipeline;
+
 	string capturePidFile;
 
 
