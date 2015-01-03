@@ -242,6 +242,7 @@ PUSHPARAM(GLint);
 //PUSHPARAM(GLenum);
 //PUSHPARAM(GLsizei);
 PUSHPARAM(GLbyte);
+PUSHPARAM(GLubyte);
 //PUSHPARAM(GLboolean);
 PUSHPARAM(GLdouble);
 
